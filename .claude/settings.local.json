@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:gymstore.vn)",
+      "WebFetch(domain:www.wheystore.vn)",
+      "WebFetch(domain:www.mvpfitness.vn)"
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+Tên đề tài: Website Quản Lý Phòng Gym
+
+Backend: Python Flask API Restful
+Frontend: HTML5, CSS3, JavaScript, Bootstrap 5
+SQL: Sql Server
+mô hình MVC
+Kiến trúc Client - Server thông qua Web API.
+Hệ thống phân quyền
+
+Đề tài tập trung xây dựng hệ thống phần mềm quản trị phòng Gym theo mô hình B2B
+(Fitness SaaS) kết hợp công cụ theo dõi sức khỏe cá nhân cho hội viên, được phát triển
+theo kiến trúc Client-Server (RESTful API). Hệ thống bao gồm các nhóm chức năng
+cốt lõi sau:
+ Hệ thống phân quyền &amp; Quản trị (Admin/Manager): Quản lý hồ sơ hội
+viên, nhân sự (PT), gói tập, thiết bị, và theo dõi doanh thu theo thời gian thực,
+bán đồ tập gym.
+ Hệ thống Hội viên (Client/User): Theo dõi tiến độ tập luyện, lưu trữ và vẽ
+biểu đồ phân tích dữ liệu chuỗi thời gian (Time-series Data) các chỉ số cơ thể
+(lượng mỡ, lượng cơ, cân nặng).
+ Hệ thống Booking &amp; Thuật toán xếp lịch: Cho phép hội viên đặt lịch tập với
+Huấn luyện viên cá nhân (PT) hoặc đăng ký lớp học. Thuật toán xử lý chống
+trùng lịch dựa trên thời gian rảnh của PT và sức chứa tối đa của phòng tập.
+ Tự động hóa &amp; Thanh toán (Cron Jobs): Check-in bằng mã QR code. Hệ
+thống xử lý ngầm (Background Jobs) quét tự động hàng ngày để phát hiện gói
+tập sắp hết hạn, tự động gửi Email cảnh báo và xử lý thanh toán gia hạn tự động
+(Recurring Billing) qua cổng thanh toán trực tuyến.
