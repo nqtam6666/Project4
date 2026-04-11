@@ -3,7 +3,8 @@
     "allow": [
       "WebFetch(domain:gymstore.vn)",
       "WebFetch(domain:www.wheystore.vn)",
-      "WebFetch(domain:www.mvpfitness.vn)"
+      "WebFetch(domain:www.mvpfitness.vn)",
+      "Bash(\"D:/Project 4/git-push.ps1\":*)"
     ]
   }
 }
