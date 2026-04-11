@@ -1,5 +1,79 @@
 # NQT Gym Management System - Project Rules
 
+## ⛔ QUY TẮC AN TOÀN CHO CLAUDE (BẮT BUỘC)
+
+### 🚫 TUYỆT ĐỐI KHÔNG ĐƯỢC LÀM
+
+1. **KHÔNG XOÁ FILE/FOLDER** mà không hỏi trước
+2. **KHÔNG ĐỔI TÊN FILE/FOLDER** mà không hỏi trước
+3. **KHÔNG GHI ĐÈ TOÀN BỘ FILE** - chỉ dùng Edit tool để sửa đúng phần cần thiết
+4. **KHÔNG CHẠY LỆNH NGUY HIỂM**: `rm -rf`, `del /f`, `git reset --hard`, `DROP TABLE`, `TRUNCATE`
+5. **KHÔNG SỬA FILE CỦA NGƯỜI KHÁC** (có tiền tố khác `nqt_`) trừ khi được yêu cầu rõ ràng
+
+### ✅ QUY TRÌNH BẮT BUỘC TRƯỚC KHI THAY ĐỔI
+
+**Bước 1: PREVIEW** - Luôn show cho user biết sẽ làm gì:
+```
+📋 PREVIEW THAY ĐỔI:
+- File: backend/app/models/nqt_hoi_vien.py
+- Hành động: Thêm method nqt_lay_theo_email()
+- Dòng ảnh hưởng: 45-60
+- Lý do: User yêu cầu thêm chức năng tìm hội viên theo email
+```
+
+**Bước 2: CHỜ XÁC NHẬN** - Đợi user đồng ý trước khi thực hiện
+
+**Bước 3: THỰC HIỆN** - Chỉ sửa đúng phần đã preview
+
+### 🔒 CÁC HÀNH ĐỘNG CẦN XÁC NHẬN
+
+| Hành động | Mức độ | Yêu cầu |
+|-----------|--------|---------|
+| Tạo file mới | 🟡 Thấp | Preview tên + nội dung tóm tắt |
+| Sửa file (< 20 dòng) | 🟡 Thấp | Preview diff |
+| Sửa file (> 20 dòng) | 🟠 Trung bình | Preview chi tiết + xác nhận |
+| Xoá file/folder | 🔴 Cao | **BẮT BUỘC** xác nhận rõ ràng |
+| Đổi tên file/folder | 🔴 Cao | **BẮT BUỘC** xác nhận rõ ràng |
+| Chạy migration DB | 🔴 Cao | **BẮT BUỘC** xác nhận rõ ràng |
+| Git push/reset | 🔴 Cao | **BẮT BUỘC** xác nhận rõ ràng |
+
+### 📝 FORMAT PREVIEW CHUẨN
+
+```markdown
+## 📋 PREVIEW THAY ĐỔI
+
+### Tổng quan
+- **Số file thay đổi**: 2
+- **Số file tạo mới**: 1
+- **Số file xoá**: 0
+
+### Chi tiết
+
+#### 1. ✏️ SỬA: `backend/app/models/nqt_hoi_vien.py`
+- Dòng 45-60: Thêm method `nqt_lay_theo_email()`
+```python
+def nqt_lay_theo_email(self, nqt_email: str):
+    return self.query.filter_by(nqt_email=nqt_email).first()
+```
+
+#### 2. ➕ TẠO MỚI: `backend/app/services/nqt_dich_vu_email.py`
+- Mục đích: Service gửi email thông báo
+- Nội dung: Class NqtDichVuEmail với các method gửi mail
+
+---
+⚠️ **Xác nhận để tiếp tục? (yes/no)**
+```
+
+### 🛡️ BACKUP RULE
+
+Trước khi sửa file quan trọng (models, config, database), luôn suggest:
+```bash
+# Backup trước khi sửa
+cp ten_file.py ten_file.py.backup
+```
+
+---
+
 ## Project Overview
 - **Project**: Website Quản Lý Phòng Gym (Fitness SaaS - B2B)
 - **Author Prefix**: `nqt` (bắt buộc cho tất cả tên biến, hàm, class)
