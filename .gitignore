@@ -105,6 +105,9 @@ coverage.xml
 node_modules/
 package-lock.json
 
+# Tailwind CSS generated output
+frontend/static/css/output.css
+
 # =========================
 # Uploads & Media
 # =========================
