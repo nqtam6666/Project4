@@ -24,7 +24,7 @@ CREATE TABLE NqtTonKho (
     PRIMARY KEY (nqt_ma_ton_kho),
     UNIQUE KEY uk_nqt_tonkho (nqt_ma_bien_the, nqt_ma_chi_nhanh),
     KEY idx_nqt_tonkho_chinhanh (nqt_ma_chi_nhanh),
-    CONSTRAINT fk_nqt_tonkho_bienthe  FOREIGN KEY (nqt_ma_bien_the)  REFERENCES NqtBienTheSanPham (nqt_ma_bien_the),
+    CONSTRAINT fk_nqt_tonkho_bienthe  FOREIGN KEY (nqt_ma_bien_the)  REFERENCES NxvBienTheSanPham (nxv_ma_bien_the),
     CONSTRAINT fk_nqt_tonkho_chinhanh FOREIGN KEY (nqt_ma_chi_nhanh) REFERENCES NqtChiNhanh (nqt_ma_chi_nhanh) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -43,7 +43,7 @@ CREATE TABLE NqtLichSuTonKho (
     PRIMARY KEY (nqt_ma_lich_su),
     KEY idx_nqt_lstonkho_bienthe  (nqt_ma_bien_the),
     KEY idx_nqt_lstonkho_thoigian (nqt_thoi_gian),
-    CONSTRAINT fk_nqt_lstonkho_bienthe    FOREIGN KEY (nqt_ma_bien_the)    REFERENCES NqtBienTheSanPham (nqt_ma_bien_the),
+    CONSTRAINT fk_nqt_lstonkho_bienthe    FOREIGN KEY (nqt_ma_bien_the)    REFERENCES NxvBienTheSanPham (nxv_ma_bien_the),
     CONSTRAINT fk_nqt_lstonkho_nguoithh   FOREIGN KEY (nqt_nguoi_thuc_hien) REFERENCES NqtNguoiDung (nqt_ma_nguoi_dung) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -162,7 +162,7 @@ CREATE TABLE NqtChiTietGioHang (
     PRIMARY KEY (nqt_ma_chi_tiet_gio),
     UNIQUE KEY uk_nqt_ctgio (nqt_ma_gio_hang, nqt_ma_bien_the),
     CONSTRAINT fk_nqt_ctgio_giohang FOREIGN KEY (nqt_ma_gio_hang) REFERENCES NqtGioHang (nqt_ma_gio_hang) ON DELETE CASCADE,
-    CONSTRAINT fk_nqt_ctgio_bienthe FOREIGN KEY (nqt_ma_bien_the) REFERENCES NqtBienTheSanPham (nqt_ma_bien_the)
+    CONSTRAINT fk_nqt_ctgio_bienthe FOREIGN KEY (nqt_ma_bien_the) REFERENCES NxvBienTheSanPham (nxv_ma_bien_the)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE NqtDonHang (
@@ -219,7 +219,7 @@ CREATE TABLE NqtChiTietDonHang (
     PRIMARY KEY (nqt_ma_chi_tiet),
     KEY idx_nqt_ctdonhang_donhang (nqt_ma_don_hang),
     CONSTRAINT fk_nqt_ctdonhang_donhang FOREIGN KEY (nqt_ma_don_hang) REFERENCES NqtDonHang (nqt_ma_don_hang) ON DELETE CASCADE,
-    CONSTRAINT fk_nqt_ctdonhang_bienthe FOREIGN KEY (nqt_ma_bien_the) REFERENCES NqtBienTheSanPham (nqt_ma_bien_the)
+    CONSTRAINT fk_nqt_ctdonhang_bienthe FOREIGN KEY (nqt_ma_bien_the) REFERENCES NxvBienTheSanPham (nxv_ma_bien_the)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE NqtLichSuDonHang (
@@ -277,9 +277,9 @@ CREATE TABLE NqtKhuyenMaiMuaKem (
     nqt_ngay_ket_thuc       DATETIME        NOT NULL,
     nqt_la_hoat_dong        TINYINT(1)      NOT NULL DEFAULT 1,
     PRIMARY KEY (nqt_ma_uu_dai),
-    CONSTRAINT fk_nqt_kmmuakem_spkich  FOREIGN KEY (nqt_ma_san_pham_kich) REFERENCES NqtSanPham (nqt_ma_san_pham) ON DELETE SET NULL,
-    CONSTRAINT fk_nqt_kmmuakem_dmkich  FOREIGN KEY (nqt_ma_danh_muc_kich) REFERENCES NqtDanhMucSanPham (nqt_ma_danh_muc) ON DELETE SET NULL,
-    CONSTRAINT fk_nqt_kmmuakem_sptang  FOREIGN KEY (nqt_ma_san_pham_tang) REFERENCES NqtSanPham (nqt_ma_san_pham)
+    CONSTRAINT fk_nqt_kmmuakem_spkich  FOREIGN KEY (nqt_ma_san_pham_kich) REFERENCES NxvSanPham (nxv_ma_san_pham) ON DELETE SET NULL,
+    CONSTRAINT fk_nqt_kmmuakem_dmkich  FOREIGN KEY (nqt_ma_danh_muc_kich) REFERENCES NxvDanhMucSanPham (nxv_ma_danh_muc) ON DELETE SET NULL,
+    CONSTRAINT fk_nqt_kmmuakem_sptang  FOREIGN KEY (nqt_ma_san_pham_tang) REFERENCES NxvSanPham (nxv_ma_san_pham)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE NqtBanner (

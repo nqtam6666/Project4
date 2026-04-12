@@ -96,14 +96,38 @@ if ([string]::IsNullOrWhiteSpace($nqtStatus)) {
 }
 
 # -----------------------------------------------------------------------------
+# Doc AUTHOR_PREFIX tu .env
+# -----------------------------------------------------------------------------
+
+$nqtEnvPrefix = ""
+$nqtEnvFile = Join-Path $PSScriptRoot ".env"
+
+if (Test-Path $nqtEnvFile) {
+    Get-Content $nqtEnvFile | ForEach-Object {
+        if ($_ -match "^\s*AUTHOR_PREFIX\s*=\s*([a-zA-Z0-9_]+)") {
+            $nqtEnvPrefix = $matches[1].Trim().ToLower()
+        }
+    }
+}
+
+if (-not [string]::IsNullOrWhiteSpace($nqtEnvPrefix)) {
+    Write-OK "Doc AUTHOR_PREFIX tu .env: $nqtEnvPrefix"
+} else {
+    Write-Host "[!] Khong tim thay AUTHOR_PREFIX trong .env, dung username he thong" -ForegroundColor Yellow
+}
+
+# -----------------------------------------------------------------------------
 # Xac dinh ten nhanh
 # -----------------------------------------------------------------------------
 
 if ([string]::IsNullOrWhiteSpace($Branch)) {
-    $nqtDefaultBranch = $env:USERNAME.ToLower()
-
-    if ($nqtDefaultBranch.Length -gt 10) {
-        $nqtDefaultBranch = $nqtDefaultBranch.Substring(0, 3)
+    if (-not [string]::IsNullOrWhiteSpace($nqtEnvPrefix)) {
+        $nqtDefaultBranch = $nqtEnvPrefix
+    } else {
+        $nqtDefaultBranch = $env:USERNAME.ToLower()
+        if ($nqtDefaultBranch.Length -gt 10) {
+            $nqtDefaultBranch = $nqtDefaultBranch.Substring(0, 3)
+        }
     }
 
     Write-Host "Ten nhanh mac dinh: " -NoNewline
