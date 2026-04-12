@@ -9,6 +9,8 @@
 3. **KHÔNG GHI ĐÈ TOÀN BỘ FILE** - chỉ dùng Edit tool để sửa đúng phần cần thiết
 4. **KHÔNG CHẠY LỆNH NGUY HIỂM**: `rm -rf`, `del /f`, `git reset --hard`, `DROP TABLE`, `TRUNCATE`
 5. **KHÔNG SỬA FILE CỦA NGƯỜI KHÁC** (có tiền tố khác `nqt_`) trừ khi được yêu cầu rõ ràng
+6. **KHÔNG ĐỔI TÊN BẢNG DB, TÊN BIẾN, HÀM, CLASS** đã tồn tại — dù tiền tố là gì (`nqt_`, `nxv_`, hay bất kỳ)
+7. **KHÔNG TỰ Ý ĐỔI TIỀN TỐ** — mỗi thành viên có prefix riêng, Claude phải đọc từ `.env` để biết đang làm việc với ai
 
 ### ✅ QUY TRÌNH BẮT BUỘC TRƯỚC KHI THAY ĐỔI
 
@@ -82,15 +84,33 @@ cp ten_file.py ten_file.py.backup
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
 - **Database**: SQL Server
 
-## QUY TẮC ĐẶT TÊN BẮT BUỘC (TIỀN TỐ "nqt")
+## QUY TẮC ĐẶT TÊN BẮT BUỘC (TIỀN TỐ THEO THÀNH VIÊN)
+
+### 🔑 Đọc tiền tố từ .env
+
+Claude **PHẢI** đọc file `.env` để xác định tiền tố của người đang làm việc:
+
+```env
+# .env
+AUTHOR_PREFIX=nqt   # ← Mỗi thành viên tự đặt prefix của mình
+```
+
+| Thành viên | AUTHOR_PREFIX | Ví dụ |
+|------------|--------------|-------|
+| Nguyễn Quốc Thắng | `nqt` | `nqt_ho_ten`, `NqtHoiVien` |
+| Nguyễn Xuân Việt | `nxv` | `nxv_ho_ten`, `NxvSanPham` |
+| (thành viên khác) | `abc` | `abc_ho_ten`, `AbcXxx` |
+
+> **Khi tạo code mới**: dùng đúng `AUTHOR_PREFIX` từ `.env`
+> **Khi sửa code cũ**: giữ nguyên tiền tố gốc, KHÔNG đổi dù prefix khác với `.env`
 
 ### Nguyên tắc cốt lõi
-**TẤT CẢ tên biến, hàm, class, table PHẢI có tiền tố "nqt"** - viết theo phong cách clean code tiếng Việt.
+**Tiền tố = dấu hiệu nhận diện phần việc của từng người.** Code đã tồn tại (bất kể tiền tố gì) — KHÔNG được đổi tên.
 
 ### ⚠️ KHÔNG SỬA tiền tố của người khác
-- Nếu gặp code có tiền tố **khác** `nqt` (ví dụ: `abc_`, `vtq_`, `pnm_`...) — **KHÔNG được đổi**, đó là phần thành viên khác trong nhóm đã làm và muốn đánh dấu phần việc của họ.
-- Chỉ áp dụng tiền tố `nqt_` cho code **mới tạo** hoặc code **chưa có tiền tố nào**.
-- Khi sửa file của người khác: chỉ sửa logic, giữ nguyên toàn bộ tên biến/hàm/class của họ.
+- Nếu gặp code có tiền tố **khác** với `AUTHOR_PREFIX` trong `.env` — **KHÔNG được đổi tên**, đó là phần thành viên khác đã làm.
+- Chỉ áp dụng `AUTHOR_PREFIX` cho code **mới tạo** hoặc code **chưa có tiền tố nào**.
+- Khi sửa file của người khác: chỉ sửa **logic bên trong**, giữ nguyên toàn bộ tên biến/hàm/class/bảng của họ.
 
 ```python
 # ✅ ĐÚNG - Giữ nguyên tiền tố người khác

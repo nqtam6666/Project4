@@ -129,7 +129,7 @@ CREATE TABLE NqtDanhGiaSanPham (
     KEY idx_nqt_danhgia_sanpham   (nqt_ma_san_pham),
     KEY idx_nqt_danhgia_trangthai (nqt_trang_thai),
     KEY idx_nqt_danhgia_sosao     (nqt_so_sao),
-    CONSTRAINT fk_nqt_danhgia_sanpham   FOREIGN KEY (nqt_ma_san_pham)   REFERENCES NqtSanPham   (nqt_ma_san_pham),
+    CONSTRAINT fk_nqt_danhgia_sanpham   FOREIGN KEY (nqt_ma_san_pham)   REFERENCES NxvSanPham   (nxv_ma_san_pham),
     CONSTRAINT fk_nqt_danhgia_khachhang FOREIGN KEY (nqt_ma_khach_hang) REFERENCES NqtKhachHang (nqt_ma_khach_hang) ON DELETE SET NULL,
     CONSTRAINT fk_nqt_danhgia_donhang   FOREIGN KEY (nqt_ma_don_hang)   REFERENCES NqtDonHang   (nqt_ma_don_hang)   ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
