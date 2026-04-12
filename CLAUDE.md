@@ -78,10 +78,10 @@ cp ten_file.py ten_file.py.backup
 
 ## Project Overview
 - **Project**: Website Quản Lý Phòng Gym (Fitness SaaS - B2B)
-- **Author Prefix**: `nqt` (bắt buộc cho tất cả tên biến, hàm, class)
+- **Author Prefix**: đọc từ `.env` → `AUTHOR_PREFIX`
 - **Architecture**: Client-Server (RESTful API), MVC Pattern
 - **Backend**: Python Flask
-- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
+- **Frontend**: HTML5, TailwindCSS, JavaScript (ES6+), Node.js (build tools)
 - **Database**: SQL Server
 
 ## QUY TẮC ĐẶT TÊN BẮT BUỘC (TIỀN TỐ THEO THÀNH VIÊN)
@@ -303,10 +303,41 @@ NQT_SO_NGAY_NHAC = 3  # KHÔNG LÀM THẾ NÀY
 - APScheduler or Celery for background jobs
 
 ### Frontend
-- Bootstrap 5 for responsive UI
+- **TailwindCSS** for responsive UI (thay thế Bootstrap 5)
+- **Node.js + npm** cho build tools (Tailwind CLI, bundler)
 - Vanilla JavaScript (ES6+)
 - Chart.js for data visualization
 - QR code library for check-in
+
+### Node.js / Tailwind setup
+```bash
+# Khởi tạo (chạy 1 lần)
+npm init -y
+npm install -D tailwindcss
+npx tailwindcss init
+
+# Build CSS (dev)
+npx tailwindcss -i ./frontend/static/css/input.css -o ./frontend/static/css/output.css --watch
+
+# Build CSS (production)
+npx tailwindcss -i ./frontend/static/css/input.css -o ./frontend/static/css/output.css --minify
+```
+
+### Cấu trúc Tailwind
+```
+/frontend
+  /static
+    /css
+      input.css      # @tailwind directives
+      output.css     # Generated (gitignore)
+    /js
+    /images
+  /templates
+tailwind.config.js
+package.json
+```
+
+> ⚠️ `output.css` và `node_modules/` phải có trong `.gitignore`
 
 ## Project Structure
 ```
@@ -323,9 +354,15 @@ NQT_SO_NGAY_NHAC = 3  # KHÔNG LÀM THẾ NÀY
 /frontend
   /static
     /css
-    /js            # nqtQuanLyCauHinh.js, nqtHoiVien.js...
+      input.css        # @tailwind base/components/utilities
+      output.css       # Generated - KHÔNG commit
+    /js                # nqtQuanLyCauHinh.js, nqtHoiVien.js...
     /images
   /templates
+
+tailwind.config.js
+package.json
+node_modules/          # KHÔNG commit
 ```
 
 ## Role-Based Access Control (RBAC)
@@ -366,6 +403,15 @@ flask db upgrade
 # Run tests
 pytest
 
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Install Node dependencies (Tailwind)
+npm install
+
+# Build Tailwind CSS (dev - watch mode)
+npm run dev
+
+# Build Tailwind CSS (production)
+npm run build
 ```
