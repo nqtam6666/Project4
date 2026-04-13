@@ -42,6 +42,9 @@ def nqt_chay_seed():
             # Nhóm: website
             ("ten_website",         "NQT Gym",                          "string",  "website",  "Tên website"),
             ("mo_ta_website",       "Hệ thống quản lý phòng gym NQT",   "string",  "website",  "Mô tả website"),
+            ("logo_url",            "",                                 "string",  "website",  "URL logo website"),
+            ("favicon_url",         "",                                 "string",  "website",  "URL favicon"),
+            ("avatar_mac_dinh_url", "",                                 "string",  "website",  "URL avatar mặc định cho người dùng"),
             ("email_lien_he",       "contact@nqtgym.vn",                "string",  "website",  "Email liên hệ"),
             ("so_dien_thoai_lien_he", "1900 1234",                      "string",  "website",  "Hotline liên hệ"),
             ("dia_chi_tru_so",      "123 Cầu Giấy, Hà Nội",            "string",  "website",  "Địa chỉ trụ sở"),
@@ -61,8 +64,15 @@ def nqt_chay_seed():
             ("thoi_gian_khoa_phut", "30",                               "integer", "security", "Khoá tài khoản trong N phút"),
             ("otp_het_han_phut",    "10",                               "integer", "security", "OTP hết hạn sau N phút"),
             # Nhóm: email
-            ("email_gui_tu",        "no-reply@nqtgym.vn",               "string",  "email",    "Email gửi đi"),
-            ("ten_nguoi_gui_email", "NQT Gym",                          "string",  "email",    "Tên hiển thị người gửi email"),
+            ("smtp_host",           "smtp.gmail.com",                   "string",  "email",    "SMTP Server"),
+            ("smtp_port",           "587",                              "integer", "email",    "SMTP Port"),
+            ("smtp_bao_mat",        "tls",                              "string",  "email",    "Bảo mật: none/ssl/tls"),
+            ("smtp_email",          "",                                 "string",  "email",    "Email đăng nhập SMTP"),
+            ("smtp_mat_khau",       "",                                 "string",  "email",    "Mật khẩu ứng dụng SMTP"),
+            ("email_gui_tu",        "no-reply@nqtgym.vn",               "string",  "email",    "Email gửi đi (From)"),
+            ("ten_nguoi_gui_email", "NQT Gym",                          "string",  "email",    "Tên hiển thị người gửi"),
+            ("email_cc_mac_dinh",   "",                                 "string",  "email",    "Email CC mặc định"),
+            ("email_bcc_mac_dinh",  "",                                 "string",  "email",    "Email BCC mặc định"),
             # Nhóm: payment
             ("tien_te",             "VND",                              "string",  "payment",  "Đơn vị tiền tệ"),
             ("thue_vat_phan_tram",  "10",                               "integer", "payment",  "Thuế VAT (%)"),
@@ -134,6 +144,8 @@ def nqt_chay_seed():
             ("xuat_bao_cao",     "bao_cao"),
             # Nhóm cau_hinh
             ("quan_ly_cau_hinh", "cau_hinh"),
+            ("xem_cau_hinh",     "cau_hinh"),
+            ("sua_cau_hinh",     "cau_hinh"),
         ]
         for nqt_ten, nqt_nhom in nqt_danh_sach_quyen:
             db.session.add(NqtQuyenHan(nqt_ten_quyen=nqt_ten, nqt_nhom_quyen=nqt_nhom))
@@ -519,6 +531,22 @@ def nqt_chay_seed():
         print(f"[OK] NqtHoiVien — đã seed {len(nqt_danh_sach_hoi_vien)} rows")
 
     print("=== Seed hoàn tất ===")
+
+
+def nqt_chay_drop_va_seed():
+    """
+    Drop toàn bộ bảng, tạo lại với NVARCHAR (nhờ @compiles rule trong __init__.py),
+    sau đó seed dữ liệu mẫu.
+    Dùng khi bảng cũ có VARCHAR → tiếng Việt bị lỗi '?'.
+    """
+    from backend.app import db
+
+    print("=== DROP & RECREATE tất cả bảng ===")
+    db.drop_all()
+    print("[OK] Đã xóa tất cả bảng")
+    db.create_all()
+    print("[OK] Đã tạo lại tất cả bảng (NVARCHAR)")
+    nqt_chay_seed()
 
 
 # Chạy trực tiếp (không dùng flask CLI)

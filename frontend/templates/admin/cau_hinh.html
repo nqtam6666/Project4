@@ -1,0 +1,628 @@
+{% extends "admin/base_nqt.html" %}
+
+{% block title %}Cấu hình hệ thống{% endblock %}
+
+{% block head %}
+<style>
+    .nqt-config-card {
+        transition: all 0.3s ease;
+    }
+    .nqt-config-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+    }
+    .nqt-field-group {
+        position: relative;
+    }
+    .nqt-field-group::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, #3B82F6 0%, #8B5CF6 100%);
+        border-radius: 2px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .nqt-field-group:focus-within::before {
+        opacity: 1;
+    }
+    .nqt-input-pro {
+        transition: all 0.2s ease;
+    }
+    .nqt-input-pro:focus {
+        transform: scale(1.01);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    .nqt-tab-pill {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nqt-tab-pill.active {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    .nqt-status-dot {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header with Status -->
+    <div class="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 rounded-3xl p-8 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+        <div class="relative z-10">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold mb-2">Cấu hình hệ thống</h1>
+                    <p class="text-blue-100">Quản lý tất cả cài đặt của hệ thống NQT Gym</p>
+                </div>
+                <div class="flex items-center space-x-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-2xl">
+                    <span class="nqt-status-dot w-2.5 h-2.5 bg-green-400 rounded-full"></span>
+                    <span class="text-sm font-medium">Hệ thống hoạt động</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm p-2">
+        <div class="flex flex-wrap gap-2" id="nqtTabBar">
+            <button data-tab="website" onclick="nqtSwitchTab('website')" class="nqt-tab-pill active px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2">
+                <i class="fas fa-globe"></i><span>Website</span>
+            </button>
+            <button data-tab="business" onclick="nqtSwitchTab('business')" class="nqt-tab-pill px-5 py-2.5 rounded-xl text-sm font-semibold text-[#64748B] hover:bg-[#F1F5F9] flex items-center space-x-2">
+                <i class="fas fa-dumbbell"></i><span>Kinh doanh</span>
+            </button>
+            <button data-tab="email" onclick="nqtSwitchTab('email')" class="nqt-tab-pill px-5 py-2.5 rounded-xl text-sm font-semibold text-[#64748B] hover:bg-[#F1F5F9] flex items-center space-x-2">
+                <i class="fas fa-envelope"></i><span>Email SMTP</span>
+            </button>
+            <button data-tab="payment" onclick="nqtSwitchTab('payment')" class="nqt-tab-pill px-5 py-2.5 rounded-xl text-sm font-semibold text-[#64748B] hover:bg-[#F1F5F9] flex items-center space-x-2">
+                <i class="fas fa-credit-card"></i><span>Thanh toán</span>
+            </button>
+            <button data-tab="security" onclick="nqtSwitchTab('security')" class="nqt-tab-pill px-5 py-2.5 rounded-xl text-sm font-semibold text-[#64748B] hover:bg-[#F1F5F9] flex items-center space-x-2">
+                <i class="fas fa-shield-alt"></i><span>Bảo mật</span>
+            </button>
+            <button data-tab="loyalty" onclick="nqtSwitchTab('loyalty')" class="nqt-tab-pill px-5 py-2.5 rounded-xl text-sm font-semibold text-[#64748B] hover:bg-[#F1F5F9] flex items-center space-x-2">
+                <i class="fas fa-star"></i><span>Tích điểm</span>
+            </button>
+            <button data-tab="theme" onclick="nqtSwitchTab('theme')" class="nqt-tab-pill px-5 py-2.5 rounded-xl text-sm font-semibold text-[#64748B] hover:bg-[#F1F5F9] flex items-center space-x-2">
+                <i class="fas fa-palette"></i><span>Giao diện</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div id="nqtTabContent">
+        <div class="flex items-center justify-center py-20 text-[#64748B]">
+            <div class="text-center">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
+                <p class="font-medium">Đang tải cấu hình...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    let nqtCauHinhData = {};
+    let nqtActiveTab = 'website';
+
+    const nqtTabDefs = {
+        website: {
+            label: 'Thông tin Website',
+            description: 'Cấu hình thông tin cơ bản hiển thị trên website',
+            icon: 'fas fa-globe',
+            iconBg: 'bg-blue-100 text-blue-600',
+            groups: [
+                {
+                    title: 'Thông tin cơ bản',
+                    description: 'Tên và mô tả website',
+                    fields: [
+                        { key: 'ten_website', label: 'Tên website', type: 'text', placeholder: 'VD: NQT Gym', hint: 'Hiển thị trên tiêu đề trang' },
+                        { key: 'mo_ta_website', label: 'Mô tả ngắn', type: 'textarea', placeholder: 'Mô tả về gym của bạn...', hint: 'SEO meta description' },
+                    ]
+                },
+                {
+                    title: 'Hình ảnh thương hiệu',
+                    description: 'Logo và favicon',
+                    fields: [
+                        { key: 'logo_url', label: 'Logo website', type: 'image', hint: 'Khuyến nghị: 200x60px, PNG/SVG' },
+                        { key: 'favicon_url', label: 'Favicon', type: 'image', hint: 'Khuyến nghị: 32x32px, ICO/PNG' },
+                    ]
+                },
+                {
+                    title: 'Thông tin liên hệ',
+                    description: 'Hiển thị ở footer và trang liên hệ',
+                    fields: [
+                        { key: 'email_lien_he', label: 'Email liên hệ', type: 'email', placeholder: 'contact@example.com' },
+                        { key: 'so_dien_thoai_lien_he', label: 'Hotline', type: 'text', placeholder: '1900 1234' },
+                        { key: 'dia_chi_tru_so', label: 'Địa chỉ trụ sở', type: 'text', placeholder: '123 Đường ABC, Quận XYZ' },
+                    ]
+                },
+                {
+                    title: 'Mạng xã hội',
+                    description: 'Liên kết đến các trang mạng xã hội',
+                    fields: [
+                        { key: 'facebook_url', label: 'Facebook', type: 'text', placeholder: 'https://facebook.com/...', icon: 'fab fa-facebook' },
+                        { key: 'zalo_url', label: 'Zalo', type: 'text', placeholder: 'https://zalo.me/...', icon: 'fas fa-comment-dots' },
+                    ]
+                }
+            ]
+        },
+        business: {
+            label: 'Cài đặt Kinh doanh',
+            description: 'Cấu hình giờ hoạt động, check-in và các quy tắc nghiệp vụ',
+            icon: 'fas fa-dumbbell',
+            iconBg: 'bg-orange-100 text-orange-600',
+            groups: [
+                {
+                    title: 'Giờ hoạt động',
+                    description: 'Giờ mở cửa và đóng cửa mặc định',
+                    fields: [
+                        { key: 'gio_mo_cua', label: 'Giờ mở cửa', type: 'time' },
+                        { key: 'gio_dong_cua', label: 'Giờ đóng cửa', type: 'time' },
+                    ]
+                },
+                {
+                    title: 'Quy tắc Check-in',
+                    description: 'Cấu hình điểm danh hội viên',
+                    fields: [
+                        { key: 'so_luot_checkin_ngay_mac_dinh', label: 'Lượt check-in/ngày', type: 'number', hint: 'Số lần được check-in mỗi ngày' },
+                        { key: 'cho_phep_checkin_truoc_phut', label: 'Check-in sớm (phút)', type: 'number', hint: 'Cho phép check-in trước buổi tập' },
+                        { key: 'suc_chua_mac_dinh', label: 'Sức chứa mặc định', type: 'number', hint: 'Số người tối đa mỗi chi nhánh' },
+                    ]
+                },
+                {
+                    title: 'Nhắc nhở hết hạn',
+                    description: 'Thông báo trước khi gói tập hết hạn',
+                    fields: [
+                        { key: 'so_ngay_nhac_het_han', label: 'Nhắc lần 1 (ngày)', type: 'number', hint: 'Số ngày trước khi hết hạn' },
+                        { key: 'so_ngay_nhac_het_han_2', label: 'Nhắc lần 2 (ngày)', type: 'number', hint: 'Nhắc lại lần 2' },
+                    ]
+                }
+            ]
+        },
+        email: {
+            label: 'Cấu hình Email SMTP',
+            description: 'Thiết lập máy chủ gửi email cho hệ thống',
+            icon: 'fas fa-envelope',
+            iconBg: 'bg-green-100 text-green-600',
+            groups: [
+                {
+                    title: 'Máy chủ SMTP',
+                    description: 'Cấu hình kết nối đến mail server',
+                    fields: [
+                        { key: 'smtp_host', label: 'SMTP Host', type: 'text', placeholder: 'smtp.gmail.com', hint: 'Địa chỉ máy chủ SMTP' },
+                        { key: 'smtp_port', label: 'SMTP Port', type: 'number', placeholder: '587', hint: '587 (TLS) hoặc 465 (SSL)' },
+                        { key: 'smtp_bao_mat', label: 'Bảo mật', type: 'select', options: [
+                            { value: 'none', label: 'Không bảo mật' },
+                            { value: 'ssl', label: 'SSL (Port 465)' },
+                            { value: 'tls', label: 'TLS/STARTTLS (Port 587)' },
+                        ], hint: 'Phương thức mã hóa kết nối' },
+                    ]
+                },
+                {
+                    title: 'Xác thực SMTP',
+                    description: 'Thông tin đăng nhập email gửi đi',
+                    fields: [
+                        { key: 'smtp_email', label: 'Email đăng nhập', type: 'email', placeholder: 'your-email@gmail.com', hint: 'Email dùng để đăng nhập SMTP' },
+                        { key: 'smtp_mat_khau', label: 'Mật khẩu ứng dụng', type: 'password', placeholder: '••••••••••••', hint: 'Với Gmail: dùng App Password, không phải mật khẩu thường' },
+                    ]
+                },
+                {
+                    title: 'Thông tin người gửi',
+                    description: 'Hiển thị khi gửi email đến khách hàng',
+                    fields: [
+                        { key: 'email_gui_tu', label: 'Email hiển thị (From)', type: 'email', placeholder: 'no-reply@example.com', hint: 'Địa chỉ email người nhận thấy' },
+                        { key: 'ten_nguoi_gui_email', label: 'Tên hiển thị', type: 'text', placeholder: 'NQT Gym', hint: 'Tên người gửi' },
+                    ]
+                },
+                {
+                    title: 'CC/BCC mặc định',
+                    description: 'Tự động CC/BCC đến các email này',
+                    fields: [
+                        { key: 'email_cc_mac_dinh', label: 'CC mặc định', type: 'email', placeholder: 'admin@example.com', hint: 'Để trống nếu không cần' },
+                        { key: 'email_bcc_mac_dinh', label: 'BCC mặc định', type: 'email', placeholder: 'backup@example.com', hint: 'Để trống nếu không cần' },
+                    ]
+                }
+            ],
+            actions: [
+                { id: 'testEmail', label: 'Gửi email test', icon: 'fas fa-paper-plane', class: 'bg-green-600 hover:bg-green-700' }
+            ]
+        },
+        security: {
+            label: 'Bảo mật',
+            description: 'Cấu hình xác thực và bảo vệ tài khoản',
+            icon: 'fas fa-shield-alt',
+            iconBg: 'bg-red-100 text-red-600',
+            groups: [
+                {
+                    title: 'Token & Phiên',
+                    description: 'Cấu hình JWT và session',
+                    fields: [
+                        { key: 'jwt_expiry_giay', label: 'JWT hết hạn (giây)', type: 'number', hint: '3600 = 1 giờ, 86400 = 1 ngày' },
+                    ]
+                },
+                {
+                    title: 'Khóa tài khoản',
+                    description: 'Bảo vệ khỏi tấn công brute-force',
+                    fields: [
+                        { key: 'so_lan_sai_mat_khau', label: 'Số lần sai tối đa', type: 'number', hint: 'Khóa sau N lần sai mật khẩu' },
+                        { key: 'thoi_gian_khoa_phut', label: 'Thời gian khóa (phút)', type: 'number', hint: 'Khóa tài khoản trong N phút' },
+                    ]
+                },
+                {
+                    title: 'OTP',
+                    description: 'Xác thực 2 yếu tố',
+                    fields: [
+                        { key: 'otp_het_han_phut', label: 'OTP hết hạn (phút)', type: 'number', hint: 'Mã OTP có hiệu lực trong N phút' },
+                    ]
+                }
+            ]
+        },
+        payment: {
+            label: 'Thanh toán',
+            description: 'Cấu hình tiền tệ, thuế và phí',
+            icon: 'fas fa-credit-card',
+            iconBg: 'bg-purple-100 text-purple-600',
+            groups: [
+                {
+                    title: 'Tiền tệ & Thuế',
+                    description: 'Cấu hình đơn vị tiền và thuế VAT',
+                    fields: [
+                        { key: 'tien_te', label: 'Đơn vị tiền tệ', type: 'text', hint: 'VND, USD, EUR...' },
+                        { key: 'thue_vat_phan_tram', label: 'Thuế VAT (%)', type: 'number', hint: 'Áp dụng cho tất cả giao dịch' },
+                    ]
+                },
+                {
+                    title: 'Phí vận chuyển',
+                    description: 'Cấu hình phí ship cho đơn hàng',
+                    fields: [
+                        { key: 'phi_giao_hang_mac_dinh', label: 'Phí ship mặc định', type: 'number', hint: 'Đơn vị: VND' },
+                        { key: 'mien_phi_giao_hang_tu', label: 'Miễn phí ship từ', type: 'number', hint: 'Miễn phí khi đơn hàng >= N VND' },
+                    ]
+                }
+            ]
+        },
+        loyalty: {
+            label: 'Chương trình Tích điểm',
+            description: 'Cấu hình quy tắc tích và đổi điểm',
+            icon: 'fas fa-star',
+            iconBg: 'bg-yellow-100 text-yellow-600',
+            groups: [
+                {
+                    title: 'Quy tắc tích điểm',
+                    description: 'Cách thức tích lũy điểm thưởng',
+                    fields: [
+                        { key: 'ty_le_tich_diem', label: 'Mỗi bao nhiêu VND = 1 điểm', type: 'number', hint: 'VD: 100.000 = mỗi 100k được 1 điểm' },
+                        { key: 'diem_quy_doi_tien', label: '1 điểm = bao nhiêu VND', type: 'number', hint: 'Giá trị khi quy đổi điểm thành tiền' },
+                    ]
+                }
+            ]
+        },
+        theme: {
+            label: 'Giao diện',
+            description: 'Tùy chỉnh màu sắc thương hiệu',
+            icon: 'fas fa-palette',
+            iconBg: 'bg-pink-100 text-pink-600',
+            groups: [
+                {
+                    title: 'Màu sắc chính',
+                    description: 'Màu thương hiệu hiển thị trên toàn hệ thống',
+                    fields: [
+                        { key: 'mau_chu_dao', label: 'Màu chủ đạo', type: 'color', hint: 'Màu nền buttons, links...' },
+                        { key: 'mau_phu', label: 'Màu phụ', type: 'color', hint: 'Màu accent, hover...' },
+                    ]
+                }
+            ]
+        }
+    };
+
+    async function nqtLoadCauHinh() {
+
+        const groups = ['website', 'business', 'security', 'email', 'payment', 'loyalty', 'theme'];
+        const results = await Promise.all(groups.map(g =>
+            nqtApi.fetch(`/api/nqt-cau-hinh?nqt_nhom=${g}`)
+        ));
+        groups.forEach((g, i) => {
+            nqtCauHinhData[g] = {};
+            if (results[i] && results[i].nqt_thanh_cong) {
+                results[i].nqt_du_lieu.forEach(row => {
+                    nqtCauHinhData[g][row.nqt_khoa] = row.nqt_gia_tri;
+                });
+            }
+        });
+        nqtRenderTab(nqtActiveTab);
+    }
+
+    window.nqtSwitchTab = function nqtSwitchTab(tab) {
+        nqtActiveTab = tab;
+        document.querySelectorAll('.nqt-tab-pill').forEach(btn => {
+            const isActive = btn.dataset.tab === tab;
+            btn.classList.toggle('active', isActive);
+            btn.classList.toggle('text-[#64748B]', !isActive);
+            btn.classList.toggle('hover:bg-[#F1F5F9]', !isActive);
+        });
+        nqtRenderTab(tab);
+    }
+
+    function nqtRenderTab(tab) {
+        const def = nqtTabDefs[tab];
+        const groupData = nqtCauHinhData[tab] || {};
+        const content = document.getElementById('nqtTabContent');
+
+        let groupsHtml = def.groups.map((grp, gIdx) => {
+            let fieldsHtml = grp.fields.map(f => nqtRenderField(f, groupData[f.key])).join('');
+            return `
+                <div class="nqt-config-card bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
+                    <div class="px-6 py-4 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+                        <h3 class="font-bold text-[#0F172A]">${grp.title}</h3>
+                        <p class="text-sm text-[#64748B] mt-0.5">${grp.description}</p>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${fieldsHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Actions (like Test Email button)
+        let actionsHtml = '';
+        if (def.actions) {
+            actionsHtml = `
+                <div class="flex items-center justify-end space-x-3 mt-2">
+                    ${def.actions.map(a => `
+                        <button type="button" onclick="nqtRunAction('${a.id}')"
+                                class="px-5 py-2.5 ${a.class} text-white font-semibold rounded-xl transition-all flex items-center space-x-2">
+                            <i class="${a.icon}"></i><span>${a.label}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        content.innerHTML = `
+            <form id="formCauHinh" onsubmit="nqtSaveCauHinh(event, '${tab}')">
+                <!-- Tab Header -->
+                <div class="bg-white rounded-2xl border border-[#E2E8F0] p-6 mb-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 ${def.iconBg} rounded-2xl flex items-center justify-center">
+                                <i class="${def.icon} text-2xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-[#0F172A]">${def.label}</h2>
+                                <p class="text-sm text-[#64748B] mt-1">${def.description}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            ${actionsHtml}
+                            <button type="submit"
+                                    class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 transition-all flex items-center space-x-2">
+                                <i class="fas fa-save"></i><span>Lưu thay đổi</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Groups -->
+                <div class="space-y-6">
+                    ${groupsHtml}
+                </div>
+            </form>
+        `;
+
+        // Sync color pickers
+        content.querySelectorAll('input[type="color"]').forEach(picker => {
+            picker.addEventListener('input', () => {
+                const textInput = picker.parentElement.querySelector('input[type="text"]');
+                if (textInput) textInput.value = picker.value;
+            });
+        });
+    }
+
+    function nqtRenderField(f, val) {
+        val = val !== undefined ? val : '';
+        let inputHtml = '';
+        const baseClass = 'nqt-input-pro w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm';
+
+        if (f.type === 'textarea') {
+            inputHtml = `<textarea name="${f.key}" rows="3" placeholder="${f.placeholder || ''}"
+                class="${baseClass} resize-none">${nqtEscape(val)}</textarea>`;
+        } else if (f.type === 'select') {
+            const options = f.options.map(o =>
+                `<option value="${o.value}" ${val === o.value ? 'selected' : ''}>${o.label}</option>`
+            ).join('');
+            inputHtml = `<select name="${f.key}" class="${baseClass}">${options}</select>`;
+        } else if (f.type === 'color') {
+            inputHtml = `
+                <div class="flex items-center space-x-3">
+                    <input type="color" name="${f.key}" value="${nqtEscape(val) || '#2563EB'}"
+                           class="w-14 h-14 rounded-xl border-2 border-[#E2E8F0] cursor-pointer p-1 bg-white hover:border-blue-400 transition-colors">
+                    <input type="text" name="${f.key}_text" value="${nqtEscape(val) || '#2563EB'}"
+                           class="flex-1 px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono uppercase"
+                           oninput="this.previousElementSibling.value = this.value" maxlength="7">
+                </div>`;
+        } else if (f.type === 'image') {
+            const nqtHasImage = val && val.length > 0;
+            inputHtml = `
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-4">
+                        <div id="preview_${f.key}" class="w-20 h-20 rounded-xl border-2 border-dashed border-[#E2E8F0] flex items-center justify-center overflow-hidden bg-[#F8FAFC] hover:border-blue-400 transition-colors">
+                            ${nqtHasImage
+                                ? `<img src="${nqtEscape(val)}" class="w-full h-full object-contain" alt="">`
+                                : `<i class="fas fa-cloud-upload-alt text-2xl text-[#CBD5E1]"></i>`
+                            }
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <input type="file" id="file_${f.key}" accept="image/*" class="hidden" onchange="nqtPreviewImage('${f.key}', this)">
+                            <button type="button" onclick="document.getElementById('file_${f.key}').click()"
+                                    class="px-4 py-2 bg-[#F1F5F9] text-[#475569] font-medium rounded-lg hover:bg-[#E2E8F0] transition-all text-sm">
+                                <i class="fas fa-upload mr-2"></i>Tải lên
+                            </button>
+                            ${nqtHasImage ? `
+                            <button type="button" onclick="nqtClearImage('${f.key}')"
+                                    class="px-4 py-2 text-red-500 font-medium rounded-lg hover:bg-red-50 transition-all text-sm ml-2">
+                                <i class="fas fa-trash mr-1"></i>Xóa
+                            </button>` : ''}
+                        </div>
+                    </div>
+                    <input type="hidden" name="${f.key}" value="${nqtEscape(val)}">
+                </div>`;
+        } else if (f.type === 'password') {
+            inputHtml = `
+                <div class="relative">
+                    <input type="password" name="${f.key}" value="${nqtEscape(val)}" placeholder="${f.placeholder || ''}"
+                           class="${baseClass} pr-12" id="input_${f.key}">
+                    <button type="button" onclick="nqtTogglePassword('${f.key}')"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#64748B] transition-colors">
+                        <i class="fas fa-eye" id="icon_${f.key}"></i>
+                    </button>
+                </div>`;
+        } else {
+            const icon = f.icon ? `<i class="${f.icon} absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]"></i>` : '';
+            const pl = f.icon ? 'pl-11' : '';
+            inputHtml = `
+                <div class="relative">
+                    ${icon}
+                    <input type="${f.type}" name="${f.key}" value="${nqtEscape(val)}" placeholder="${f.placeholder || ''}"
+                           class="${baseClass} ${pl}">
+                </div>`;
+        }
+
+        const hint = f.hint ? `<p class="text-xs text-[#94A3B8] mt-1.5">${f.hint}</p>` : '';
+
+        return `
+            <div class="nqt-field-group pl-4 ${f.type === 'textarea' ? 'md:col-span-2' : ''}">
+                <label class="text-sm font-semibold text-[#334155] mb-2 block">${f.label}</label>
+                ${inputHtml}
+                ${hint}
+            </div>
+        `;
+    }
+
+    window.nqtTogglePassword = function nqtTogglePassword(key) {
+        const input = document.getElementById(`input_${key}`);
+        const icon = document.getElementById(`icon_${key}`);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    window.nqtSaveCauHinh = async function nqtSaveCauHinh(e, tab) {
+        e.preventDefault();
+        const form = document.getElementById('formCauHinh');
+        const def = nqtTabDefs[tab];
+        const payload = {};
+
+        def.groups.forEach(grp => {
+            grp.fields.forEach(f => {
+                if (f.type === 'color') {
+                    const textInput = form.querySelector(`[name="${f.key}_text"]`);
+                    payload[f.key] = textInput ? textInput.value.trim() : form.querySelector(`[name="${f.key}"]`).value;
+                } else {
+                    const el = form.querySelector(`[name="${f.key}"]`);
+                    if (el) payload[f.key] = el.value;
+                }
+            });
+        });
+
+        const res = await nqtApi.fetch('/api/nqt-cau-hinh', { method: 'PUT', body: payload });
+        if (res && res.nqt_thanh_cong) {
+            if (!nqtCauHinhData[tab]) nqtCauHinhData[tab] = {};
+            Object.assign(nqtCauHinhData[tab], payload);
+            nqtToast('Đã lưu cấu hình thành công!');
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi khi lưu', 'error');
+        }
+    }
+
+    window.nqtRunAction = async function nqtRunAction(actionId) {
+        if (actionId === 'testEmail') {
+            const email = prompt('Nhập email nhận test:', '');
+            if (!email) return;
+
+            nqtToast('Đang gửi email test...', 'info');
+            const res = await nqtApi.fetch('/api/nqt-email/test', {
+                method: 'POST',
+                body: { nqt_email_nhan: email }
+            });
+
+            if (res && res.nqt_thanh_cong) {
+                nqtToast('Gửi email test thành công! Kiểm tra hộp thư.', 'success');
+            } else {
+                nqtToast(res?.nqt_thong_diep || 'Gửi email thất bại', 'error');
+            }
+        }
+    }
+
+    function nqtEscape(str) {
+        if (str === null || str === undefined) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    window.nqtPreviewImage = async function nqtPreviewImage(key, input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+            nqtToast('File quá lớn. Tối đa 5MB', 'error');
+            input.value = '';
+            return;
+        }
+
+        const preview = document.getElementById(`preview_${key}`);
+        preview.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/nqt-upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('nqt_token')}` },
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.nqt_thanh_cong) {
+                const url = data.nqt_du_lieu.nqt_url;
+                preview.innerHTML = `<img src="${url}" class="w-full h-full object-contain" alt="">`;
+                document.querySelector(`[name="${key}"]`).value = url;
+                nqtToast('Upload thành công!');
+            } else {
+                preview.innerHTML = '<i class="fas fa-cloud-upload-alt text-2xl text-[#CBD5E1]"></i>';
+                nqtToast(data.nqt_thong_diep || 'Lỗi upload', 'error');
+            }
+        } catch (err) {
+            preview.innerHTML = '<i class="fas fa-cloud-upload-alt text-2xl text-[#CBD5E1]"></i>';
+            nqtToast('Lỗi kết nối', 'error');
+        }
+        input.value = '';
+    }
+
+    window.nqtClearImage = function nqtClearImage(key) {
+        document.getElementById(`preview_${key}`).innerHTML = '<i class="fas fa-cloud-upload-alt text-2xl text-[#CBD5E1]"></i>';
+        document.querySelector(`[name="${key}"]`).value = '';
+    }
+
+    // Init
+    nqtLoadCauHinh();
+})();
+</script>
+{% endblock %}

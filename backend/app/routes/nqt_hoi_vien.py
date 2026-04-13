@@ -1,8 +1,10 @@
 import uuid
-from datetime import date
+from datetime import date, timedelta
 from flask import Blueprint, request
+from sqlalchemy import func
 from backend.app import db
 from backend.app.models.nqt_hoi_vien import NqtHoiVien, NqtGoiTap, NqtDangKyGoiTap, NqtDiemDanh, NqtChiSoCoThe
+from backend.app.models.nqt_thanh_toan import NqtThanhToan
 from backend.app.utils.nqt_phan_hoi import nqt_ok, nqt_loi
 from backend.app.utils.nqt_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
 
@@ -92,6 +94,16 @@ def nqt_cap_nhat_hoi_vien(nqt_id):
     return nqt_ok(nqt_row.nqt_to_dict())
 
 
+@nqt_hoi_vien_bp.route('/nqt-hoi-vien/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('nqt_xoa_hoi_vien')
+def nqt_xoa_hoi_vien(nqt_id):
+    nqt_row = NqtHoiVien.query.get_or_404(nqt_id)
+    db.session.delete(nqt_row)
+    db.session.commit()
+    return nqt_ok(None, 'Xóa hội viên thành công')
+
+
 # ---- GÓI TẬP ----
 
 @nqt_hoi_vien_bp.route('/nqt-goi-tap', methods=['GET'])
@@ -132,6 +144,15 @@ def nqt_cap_nhat_goi_tap(nqt_id):
             setattr(nqt_row, nqt_f, nqt_data[nqt_f])
     db.session.commit()
     return nqt_ok(nqt_row.nqt_to_dict())
+
+
+@nqt_hoi_vien_bp.route('/nqt-goi-tap/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_goi_tap(nqt_id):
+    nqt_row = NqtGoiTap.query.get_or_404(nqt_id)
+    nqt_row.nqt_la_hoat_dong = False
+    db.session.commit()
+    return nqt_ok(None, 'Đã ẩn gói tập thành công')
 
 
 # ---- ĐĂNG KÝ GÓI TẬP ----
@@ -242,3 +263,48 @@ def nqt_them_chi_so(nqt_id):
     db.session.add(nqt_row)
     db.session.commit()
     return nqt_ok(nqt_row.nqt_to_dict(), 'Đã lưu chỉ số', 201)
+
+
+# ---- THỐNG KÊ DASHBOARD ----
+
+@nqt_hoi_vien_bp.route('/nqt-thong-ke-dashboard', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_thong_ke_dashboard():
+    nqt_hom_nay = date.today()
+    nqt_dau_thang = nqt_hom_nay.replace(day=1)
+    nqt_7_ngay_toi = nqt_hom_nay + timedelta(days=7)
+
+    # Tổng hội viên
+    nqt_tong_hv = NqtHoiVien.query.filter_by(nqt_la_hoat_dong=True).count()
+
+    # Đang tập luyện (check-in vào hôm nay, chưa ra)
+    nqt_dang_tap = NqtDiemDanh.query.filter(
+        func.cast(NqtDiemDanh.nqt_thoi_gian_vao, db.Date) == nqt_hom_nay,
+        NqtDiemDanh.nqt_thoi_gian_ra.is_(None)
+    ).count()
+
+    # Gói tập sắp hết hạn trong 7 ngày
+    nqt_sap_het_han = NqtDangKyGoiTap.query.filter(
+        NqtDangKyGoiTap.nqt_trang_thai == 'dang_hoat_dong',
+        NqtDangKyGoiTap.nqt_ngay_het_han >= nqt_hom_nay,
+        NqtDangKyGoiTap.nqt_ngay_het_han <= nqt_7_ngay_toi,
+    ).count()
+
+    # Doanh thu tháng hiện tại (thanh toán đã hoàn thành)
+    nqt_doanh_thu = db.session.query(func.sum(NqtThanhToan.nqt_so_tien)).filter(
+        NqtThanhToan.nqt_trang_thai == 'hoan_thanh',
+        func.cast(NqtThanhToan.nqt_ngay_thanh_toan, db.Date) >= nqt_dau_thang,
+    ).scalar() or 0
+
+    # Hội viên mới đăng ký tháng này
+    nqt_hv_moi = NqtHoiVien.query.filter(
+        NqtHoiVien.nqt_ngay_dang_ky >= nqt_dau_thang
+    ).count()
+
+    return nqt_ok({
+        'nqt_tong_hoi_vien': nqt_tong_hv,
+        'nqt_dang_tap_luyen': nqt_dang_tap,
+        'nqt_sap_het_han': nqt_sap_het_han,
+        'nqt_doanh_thu_thang': float(nqt_doanh_thu),
+        'nqt_hoi_vien_moi_thang': nqt_hv_moi,
+    })

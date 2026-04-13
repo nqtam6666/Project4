@@ -37,25 +37,48 @@
             <span class="text-xl font-bold tracking-tight text-[#0F172A]">NQT <span class="text-blue-600">Gym</span></span>
         </div>
 
-        <nav class="flex-1 px-4 py-4 space-y-1">
-            <a href="/admin/dashboard" id="nav-dashboard" class="nqt-sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+        <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+            <a href="/admin/dashboard" data-page="dashboard" data-title="Tổng quan" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
                 <i class="fas fa-chart-line w-5"></i>
                 <span class="font-medium">Tổng quan</span>
             </a>
-            <a href="/admin/hoi-vien" id="nav-hoi-vien" class="nqt-sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Quản lý</div>
+            <a href="/admin/hoi-vien" data-page="hoi-vien" data-title="Hội viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
                 <i class="fas fa-users w-5"></i>
                 <span class="font-medium">Hội viên</span>
             </a>
-            <a href="/admin/goi-tap" id="nav-goi-tap" class="nqt-sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <a href="/admin/khach-hang" data-page="khach-hang" data-title="Khách hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+                <i class="fas fa-user-tag w-5"></i>
+                <span class="font-medium">Khách hàng</span>
+            </a>
+            <a href="/admin/goi-tap" data-page="goi-tap" data-title="Gói tập" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
                 <i class="fas fa-tags w-5"></i>
                 <span class="font-medium">Gói tập</span>
             </a>
-            <a href="#" class="nqt-sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Kinh doanh</div>
+            <a href="/admin/don-hang" data-page="don-hang" data-title="Đơn hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+                <i class="fas fa-shopping-cart w-5"></i>
+                <span class="font-medium">Đơn hàng</span>
+            </a>
+            <a href="/admin/thanh-toan" data-page="thanh-toan" data-title="Thanh toán" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+                <i class="fas fa-credit-card w-5"></i>
+                <span class="font-medium">Thanh toán</span>
+            </a>
+
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Vận hành</div>
+            <a href="/admin/chi-nhanh" data-page="chi-nhanh" data-title="Chi nhánh" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
                 <i class="fas fa-store w-5"></i>
                 <span class="font-medium">Chi nhánh</span>
             </a>
-            <div class="pt-6 pb-2 px-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Hệ thống</div>
-            <a href="#" class="nqt-sidebar-item flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <a href="/admin/nhan-vien" data-page="nhan-vien" data-title="Nhân viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+                <i class="fas fa-id-badge w-5"></i>
+                <span class="font-medium">Nhân viên</span>
+            </a>
+
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Hệ thống</div>
+            <a href="/admin/cau-hinh" data-page="cau-hinh" data-title="Cấu hình" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
                 <i class="fas fa-cog w-5"></i>
                 <span class="font-medium">Cấu hình</span>
             </a>
@@ -88,13 +111,36 @@
         </header>
 
         <!-- Content Area -->
-        <div class="p-8 flex-1">
+        <div id="nqt-content-area" class="p-8 flex-1">
             {% block content %}{% endblock %}
         </div>
     </main>
 
+    <!-- Toast Container -->
+    <div id="nqt-toast-container" class="fixed top-6 right-6 z-[9999] space-y-3 pointer-events-none"></div>
+
     <!-- Global JS Utils -->
     <script>
+        // Toast notification
+        function nqtToast(nqtMsg, nqtType = 'success') {
+            const nqtContainer = document.getElementById('nqt-toast-container');
+            const nqtColors = {
+                success: 'bg-emerald-600 text-white',
+                error:   'bg-red-600 text-white',
+                info:    'bg-blue-600 text-white',
+                warn:    'bg-amber-500 text-white',
+            };
+            const nqtIcons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warn: 'fa-exclamation-triangle' };
+            const nqtEl = document.createElement('div');
+            nqtEl.className = `pointer-events-auto flex items-center space-x-3 px-5 py-4 rounded-2xl shadow-xl ${nqtColors[nqtType] || nqtColors.info} transition-all duration-300 translate-x-0 opacity-100 max-w-sm`;
+            nqtEl.innerHTML = `<i class="fas ${nqtIcons[nqtType] || 'fa-info-circle'} flex-shrink-0"></i><span class="text-sm font-semibold">${nqtMsg}</span>`;
+            nqtContainer.appendChild(nqtEl);
+            setTimeout(() => {
+                nqtEl.classList.add('opacity-0', 'translate-x-8');
+                setTimeout(() => nqtEl.remove(), 300);
+            }, 3500);
+        }
+
         // API Wrapper
         const nqtApi = {
             async fetch(url, options = {}) {
@@ -111,13 +157,13 @@
                 try {
                     const response = await fetch(url, options);
                     const data = await response.json();
-                    
+
                     if (response.status === 401) {
                         localStorage.removeItem('nqt_token');
                         window.location.href = '/admin/login';
                         return null;
                     }
-                    
+
                     return data;
                 } catch (error) {
                     console.error('API Error:', error);
@@ -131,28 +177,125 @@
             window.location.href = '/admin/login';
         }
 
-        // Check Login Status
+        // Check Login Status & Init SPA Navigation
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('nqt_token');
             if (!token && window.location.pathname !== '/admin/login') {
                 window.location.href = '/admin/login';
             }
-            
-            // Highlight active nav
-            const path = window.location.pathname;
-            document.querySelectorAll('.nqt-sidebar-item').forEach(item => {
-                if (item.getAttribute('href') === path) {
-                    item.classList.add('active');
-                }
-            });
 
-            // Load user info from token (optional claim)
+            // Highlight active nav
+            nqtUpdateActiveNav(window.location.pathname);
+
+            // Load user info from token
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 document.getElementById('nqt-user-name').textContent = payload.nqt_ho_ten || 'User';
                 document.getElementById('nqt-user-role').textContent = payload.nqt_vai_tro?.[0] || 'Member';
             } catch(e) {}
+
+            // SPA Navigation - Intercept sidebar clicks
+            nqtInitSpaNavigation();
         });
+
+        // Update active nav item
+        function nqtUpdateActiveNav(nqtPath) {
+            document.querySelectorAll('.nqt-sidebar-item').forEach(nqtItem => {
+                nqtItem.classList.remove('active');
+                if (nqtItem.getAttribute('href') === nqtPath) {
+                    nqtItem.classList.add('active');
+                }
+            });
+        }
+
+        // SPA Navigation System
+        function nqtInitSpaNavigation() {
+            document.querySelectorAll('.nqt-nav-link').forEach(nqtLink => {
+                nqtLink.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const nqtUrl = nqtLink.getAttribute('href');
+                    const nqtTitle = nqtLink.dataset.title || 'Admin';
+
+                    await nqtNavigateTo(nqtUrl, nqtTitle);
+                });
+            });
+
+            // Handle browser back/forward
+            window.addEventListener('popstate', async (e) => {
+                if (e.state && e.state.nqtUrl) {
+                    await nqtLoadPage(e.state.nqtUrl, e.state.nqtTitle, false);
+                }
+            });
+        }
+
+        // Navigate to a page without reload
+        async function nqtNavigateTo(nqtUrl, nqtTitle) {
+            await nqtLoadPage(nqtUrl, nqtTitle, true);
+        }
+
+        // Load page content via AJAX
+        async function nqtLoadPage(nqtUrl, nqtTitle, nqtPushState = true) {
+            const nqtContentArea = document.getElementById('nqt-content-area');
+            const nqtHeaderTitle = document.querySelector('header h1');
+
+            // Show loading state
+            nqtContentArea.style.opacity = '0.5';
+            nqtContentArea.style.pointerEvents = 'none';
+
+            try {
+                const nqtResponse = await fetch(nqtUrl, {
+                    headers: {
+                        'X-Partial': 'true',
+                        'Authorization': `Bearer ${localStorage.getItem('nqt_token') || ''}`
+                    }
+                });
+
+                if (nqtResponse.status === 401) {
+                    window.location.href = '/admin/login';
+                    return;
+                }
+
+                const nqtHtml = await nqtResponse.text();
+
+                // Update content
+                nqtContentArea.innerHTML = nqtHtml;
+                nqtContentArea.style.opacity = '1';
+                nqtContentArea.style.pointerEvents = 'auto';
+
+                // Update header title
+                if (nqtHeaderTitle) {
+                    nqtHeaderTitle.textContent = nqtTitle;
+                }
+
+                // Update document title
+                document.title = `${nqtTitle} - NQT Gym Admin`;
+
+                // Update URL and history
+                if (nqtPushState) {
+                    history.pushState({ nqtUrl, nqtTitle }, nqtTitle, nqtUrl);
+                }
+
+                // Update active nav
+                nqtUpdateActiveNav(nqtUrl);
+
+                // Execute any inline scripts in the loaded content
+                nqtContentArea.querySelectorAll('script').forEach(nqtOldScript => {
+                    const nqtNewScript = document.createElement('script');
+                    if (nqtOldScript.src) {
+                        nqtNewScript.src = nqtOldScript.src;
+                    } else {
+                        nqtNewScript.textContent = nqtOldScript.textContent;
+                    }
+                    nqtOldScript.parentNode.replaceChild(nqtNewScript, nqtOldScript);
+                });
+
+            } catch (nqtError) {
+                console.error('SPA Navigation Error:', nqtError);
+                nqtToast('Không thể tải trang', 'error');
+                nqtContentArea.style.opacity = '1';
+                nqtContentArea.style.pointerEvents = 'auto';
+            }
+        }
     </script>
     {% block scripts %}{% endblock %}
 </body>

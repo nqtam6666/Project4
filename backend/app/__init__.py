@@ -54,11 +54,16 @@ def nqt_tao_app(nqt_moi_truong: str = None):
     nqt_dang_ky_routes(app)
 
     # CLI: flask seed
-    from backend.app.seeds.nqt_seed import nqt_chay_seed
+    from backend.app.seeds.nqt_seed import nqt_chay_seed, nqt_chay_drop_va_seed
 
     @app.cli.command('seed')
     def nqt_lenh_seed():
         """Seed dữ liệu mẫu vào database (idempotent)."""
         nqt_chay_seed()
+
+    @app.cli.command('seed-fresh')
+    def nqt_lenh_seed_fresh():
+        """Drop toàn bộ bảng → tạo lại NVARCHAR → seed. Dùng khi bảng cũ bị VARCHAR."""
+        nqt_chay_drop_va_seed()
 
     return app

@@ -10,6 +10,33 @@ import string
 nqt_thanh_toan_bp = Blueprint('nqt_thanh_toan', __name__, url_prefix='/api')
 
 
+@nqt_thanh_toan_bp.route('/nqt-thanh-toan', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_lay_tat_ca_thanh_toan():
+    nqt_trang = request.args.get('nqt_trang', 1, type=int)
+    nqt_gioi_han = request.args.get('nqt_gioi_han', 20, type=int)
+    nqt_trang_thai = request.args.get('nqt_trang_thai')
+    nqt_phuong_thuc = request.args.get('nqt_phuong_thuc')
+    nqt_kh_id = request.args.get('nqt_ma_khach_hang', type=int)
+
+    nqt_q = NqtThanhToan.query
+    if nqt_trang_thai:
+        nqt_q = nqt_q.filter_by(nqt_trang_thai=nqt_trang_thai)
+    if nqt_phuong_thuc:
+        nqt_q = nqt_q.filter_by(nqt_phuong_thuc=nqt_phuong_thuc)
+    if nqt_kh_id:
+        nqt_q = nqt_q.filter_by(nqt_ma_khach_hang=nqt_kh_id)
+
+    nqt_phan_trang = nqt_q.order_by(NqtThanhToan.nqt_ngay_tao.desc()).paginate(
+        page=nqt_trang, per_page=nqt_gioi_han, error_out=False
+    )
+    return nqt_ok({
+        'nqt_danh_sach': [t.nqt_to_dict() for t in nqt_phan_trang.items],
+        'nqt_tong': nqt_phan_trang.total,
+        'nqt_trang': nqt_trang,
+    })
+
+
 def _nqt_tao_so_hoa_don():
     nqt_prefix = datetime.utcnow().strftime('HD%Y%m%d')
     nqt_suffix = ''.join(random.choices(string.digits, k=5))

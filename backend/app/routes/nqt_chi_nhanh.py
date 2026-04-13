@@ -10,7 +10,11 @@ nqt_chi_nhanh_bp = Blueprint('nqt_chi_nhanh', __name__, url_prefix='/api')
 @nqt_chi_nhanh_bp.route('/nqt-chi-nhanh', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
 def nqt_lay_tat_ca_chi_nhanh():
-    nqt_list = NqtChiNhanh.query.filter_by(nqt_la_hoat_dong=True).all()
+    nqt_tat_ca = request.args.get('nqt_tat_ca', '0') == '1'
+    nqt_q = NqtChiNhanh.query
+    if not nqt_tat_ca:
+        nqt_q = nqt_q.filter_by(nqt_la_hoat_dong=True)
+    nqt_list = nqt_q.order_by(NqtChiNhanh.nqt_ma_chi_nhanh).all()
     return nqt_ok([c.nqt_to_dict() for c in nqt_list])
 
 
