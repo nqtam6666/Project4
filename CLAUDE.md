@@ -81,7 +81,7 @@ cp ten_file.py ten_file.py.backup
 - **Author Prefix**: đọc từ `.env` → `AUTHOR_PREFIX`
 - **Architecture**: Client-Server (RESTful API), MVC Pattern
 - **Backend**: Python Flask
-- **Frontend**: HTML5, TailwindCSS, JavaScript (ES6+), Node.js (build tools)
+- **Frontend**: HTML5, TailwindCSS, JavaScript (ES6+), Node.js (build tools), ReUI
 - **Database**: SQL Server
 
 ## QUY TẮC ĐẶT TÊN BẮT BUỘC (TIỀN TỐ THEO THÀNH VIÊN)
