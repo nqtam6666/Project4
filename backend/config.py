@@ -7,11 +7,11 @@ load_dotenv()
 class NqtCauHinhFlask:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
     SQLALCHEMY_DATABASE_URI = (
-        'mysql+pymysql://{user}:{pw}@{host}/{db}?charset=utf8mb4'.format(
-            user=os.getenv('DB_USER', 'root'),
-            pw=os.getenv('DB_PASSWORD', ''),
+        'mssql+pyodbc://{host}/{db}?driver={driver}&Trusted_Connection={trusted}'.format(
             host=os.getenv('DB_SERVER', 'localhost'),
-            db=os.getenv('DB_NAME', 'nqt_gym'),
+            db=os.getenv('DB_NAME', 'nqtam_project4'),
+            driver=os.getenv('DB_DRIVER', 'ODBC Driver 17 for SQL Server').replace(' ', '+'),
+            trusted=os.getenv('DB_TRUSTED_CONNECTION', 'yes')
         )
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False

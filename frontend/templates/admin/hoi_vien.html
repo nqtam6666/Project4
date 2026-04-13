@@ -1,0 +1,273 @@
+{% extends "admin/base_nqt.html" %}
+
+{% block title %}Quản lý Hội viên{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <!-- Header Actions -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-[#E2E8F0] shadow-sm">
+        <div class="flex items-center space-x-4 flex-1">
+            <div class="relative flex-1 max-w-md">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-[#94A3B8]">
+                    <i class="fas fa-search text-sm"></i>
+                </span>
+                <input type="text" id="memberSearch" onkeyup="nqtHandleSearch(event)"
+                       class="w-full pl-11 pr-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none text-sm"
+                       placeholder="Tìm kiếm theo tên hoặc số điện thoại...">
+            </div>
+            <button onclick="loadMembers()" class="p-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl hover:bg-white transition-all">
+                <i class="fas fa-sync-alt text-[#64748B]"></i>
+            </button>
+        </div>
+        <button onclick="openModal('modalAddMember')" 
+                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Thêm hội viên</span>
+        </button>
+    </div>
+
+    <!-- Table Container -->
+    <div class="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Mã QR</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Họ tên</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">SĐT / Email</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Ngày đăng ký</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider text-center">Trạng thái</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="memberTableBody" class="divide-y divide-[#E2E8F0]">
+                    <!-- Data loaded via JS -->
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-[#64748B]">
+                            <i class="fas fa-circle-notch fa-spin text-2xl mb-2"></i>
+                            <p>Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="px-6 py-4 bg-[#F8FAFC] border-t border-[#E2E8F0] flex items-center justify-between">
+            <span class="text-sm text-[#64748B]" id="paginationData">Hiển thị 0 / 0 hội viên</span>
+            <div class="flex space-x-2" id="paginationControls">
+                <!-- Buttons injected by JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Member -->
+<div id="modalAddMember" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl animate-scale-up overflow-hidden">
+        <div class="px-8 py-6 border-b border-[#E2E8F0] flex items-center justify-between bg-blue-600 text-white">
+            <h3 class="text-xl font-bold">Thêm hội viên mới</h3>
+            <button onclick="closeModal('modalAddMember')" class="text-white hover:opacity-70 transition-opacity">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <form id="formAddMember" class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2 space-y-2">
+                <label class="text-sm font-bold text-[#334155]">Họ và tên *</label>
+                <input type="text" name="nqt_ho_ten" required
+                       class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-[#334155]">Số điện thoại *</label>
+                <input type="text" name="nqt_so_dien_thoai" required
+                       class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-[#334155]">Email</label>
+                <input type="email" name="nqt_email"
+                       class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-[#334155]">Giới tính</label>
+                <select name="nqt_gioi_tinh" class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                    <option value="nam">Nam</option>
+                    <option value="nu">Nữ</option>
+                    <option value="khac">Khác</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-[#334155]">Chi nhánh *</label>
+                <select name="nqt_ma_chi_nhanh" required id="selectBranch" class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                    <option value="1">Chi nhánh Cầu Giấy</option>
+                </select>
+            </div>
+            <div class="md:col-span-2 flex justify-end space-x-4 pt-4 border-t border-[#E2E8F0]">
+                <button type="button" onclick="closeModal('modalAddMember')" class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-all">Hủy</button>
+                <button type="submit" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all">Lưu hội viên</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Edit Member -->
+<div id="modalEditMember" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden">
+        <div class="px-8 py-6 border-b border-[#E2E8F0] flex items-center justify-between bg-[#0F172A] text-white">
+            <h3 class="text-xl font-bold">Cập nhật thông tin</h3>
+            <button onclick="closeModal('modalEditMember')" class="text-white hover:opacity-70 transition-opacity">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <form id="formEditMember" class="p-8 space-y-6">
+            <input type="hidden" name="nqt_ma_hoi_vien">
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-[#334155]">Họ và tên</label>
+                <input type="text" name="nqt_ho_ten" required
+                       class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-[#334155]">Trạng thái</label>
+                    <select name="nqt_la_hoat_dong" class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                        <option value="true">Đang hoạt động</option>
+                        <option value="false">Tạm khóa</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-[#334155]">Email</label>
+                    <input type="email" name="nqt_email"
+                           class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-[#334155]">Địa chỉ</label>
+                <input type="text" name="nqt_dia_chi" class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+            </div>
+            <div class="flex justify-end space-x-4 pt-4 border-t border-[#E2E8F0]">
+                <button type="button" onclick="closeModal('modalEditMember')" class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-all">Hủy</button>
+                <button type="submit" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all">Cập nhật</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let curPage = 1;
+    let curSearch = '';
+
+    async function loadMembers(page = 1) {
+        curPage = page;
+        const body = document.getElementById('memberTableBody');
+        body.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-[#64748B]"><i class="fas fa-circle-notch fa-spin text-2xl mb-2"></i></td></tr>';
+
+        const data = await nqtApi.fetch(`/api/nqt-hoi-vien?nqt_trang=${page}&nqt_gioi_han=10&nqt_tim_kiem=${curSearch}`);
+        if (!data || !data.nqt_thanh_cong) return;
+
+        const list = data.nqt_du_lieu.nqt_danh_sach;
+        body.innerHTML = '';
+        
+        if (list.length === 0) {
+            body.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-[#64748B]">Không tìm thấy hội viên nào.</td></tr>';
+        }
+
+        list.forEach(m => {
+            const statusClass = m.nqt_la_hoat_dong ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+            const statusText = m.nqt_la_hoat_dong ? 'Hoạt động' : 'Tạm khóa';
+            
+            body.innerHTML += `
+                <tr class="hover:bg-blue-50/30 transition-colors">
+                    <td class="px-6 py-4 font-mono text-xs text-[#64748B]">#${m.nqt_ma_qr.substring(0, 8)}...</td>
+                    <td class="px-6 py-4 text-[#0F172A] font-bold">${m.nqt_ho_ten}</td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-[#0F172A]">${m.nqt_so_dien_thoai}</div>
+                        <div class="text-xs text-[#64748B]">${m.nqt_email || 'n/a'}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-[#64748B]">${m.nqt_ngay_dang_ky || 'n/a'}</td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="px-3 py-1 text-xs font-bold rounded-full ${statusClass}">${statusText}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="editMember(${m.nqt_ma_hoi_vien})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><i class="fas fa-edit"></i></button>
+                        <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        updatePagination(data.nqt_du_lieu);
+    }
+
+    function updatePagination(meta) {
+        document.getElementById('paginationData').textContent = `Hiển thị ${meta.nqt_danh_sach.length} / ${meta.nqt_tong} hội viên`;
+        const ctrl = document.getElementById('paginationControls');
+        ctrl.innerHTML = '';
+        
+        for (let i = 1; i <= meta.nqt_tong_trang; i++) {
+            const activeClass = i === curPage ? 'bg-blue-600 text-white' : 'bg-white text-[#64748B] hover:bg-blue-50';
+            ctrl.innerHTML += `<button onclick="loadMembers(${i})" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all border border-[#E2E8F0] ${activeClass}">${i}</button>`;
+        }
+    }
+
+    function nqtHandleSearch(e) {
+        curSearch = e.target.value;
+        if (e.key === 'Enter' || curSearch === '') loadMembers(1);
+    }
+
+    // Modal helpers
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // Forms
+    document.getElementById('formAddMember').onsubmit = async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target));
+        data.nqt_ma_chi_nhanh = parseInt(data.nqt_ma_chi_nhanh);
+        
+        const res = await nqtApi.fetch('/api/nqt-hoi-vien', { method: 'POST', body: data });
+        if (res && res.nqt_thanh_cong) {
+            closeModal('modalAddMember');
+            e.target.reset();
+            loadMembers(1);
+            alert('Thêm hội viên thành công!');
+        } else {
+            alert(res?.nqt_thong_diep || 'Lỗi khi thêm hội viên');
+        }
+    };
+
+    async function editMember(id) {
+        const data = await nqtApi.fetch(`/api/nqt-hoi-vien/${id}`);
+        if (!data || !data.nqt_thanh_cong) return;
+        
+        const m = data.nqt_du_lieu;
+        const form = document.getElementById('formEditMember');
+        form.nqt_ma_hoi_vien.value = m.nqt_ma_hoi_vien;
+        form.nqt_ho_ten.value = m.nqt_ho_ten;
+        form.nqt_email.value = m.nqt_email || '';
+        form.nqt_dia_chi.value = m.nqt_dia_chi || '';
+        form.nqt_la_hoat_dong.value = m.nqt_la_hoat_dong.toString();
+        
+        openModal('modalEditMember');
+    }
+
+    document.getElementById('formEditMember').onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const id = fd.get('nqt_ma_hoi_vien');
+        const data = Object.fromEntries(fd);
+        data.nqt_la_hoat_dong = data.nqt_la_hoat_dong === 'true';
+
+        const res = await nqtApi.fetch(`/api/nqt-hoi-vien/${id}`, { method: 'PUT', body: data });
+        if (res && res.nqt_thanh_cong) {
+            closeModal('modalEditMember');
+            loadMembers(curPage);
+        } else {
+            alert(res?.nqt_thong_diep || 'Lỗi khi cập nhật');
+        }
+    };
+
+    loadMembers();
+</script>
+{% endblock %}

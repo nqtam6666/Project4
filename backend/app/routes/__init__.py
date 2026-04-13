@@ -12,6 +12,7 @@ def nqt_dang_ky_routes(app):
     from backend.app.routes.nqt_van_chuyen import nqt_van_chuyen_bp
     from backend.app.routes.nqt_blog import nqt_blog_bp
     from backend.app.routes.nqt_thong_bao import nqt_thong_bao_bp
+    from backend.app.routes.nqt_admin_views import nqt_admin_views_bp
 
     app.register_blueprint(nqt_auth_bp)
     app.register_blueprint(nqt_cau_hinh_bp)
@@ -26,3 +27,4 @@ def nqt_dang_ky_routes(app):
     app.register_blueprint(nqt_van_chuyen_bp)
     app.register_blueprint(nqt_blog_bp)
     app.register_blueprint(nqt_thong_bao_bp)
+    app.register_blueprint(nqt_admin_views_bp)

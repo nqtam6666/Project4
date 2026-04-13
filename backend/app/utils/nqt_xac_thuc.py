@@ -25,9 +25,11 @@ def nqt_yeu_cau_quyen(nqt_ten_quyen: str):
             nqt_claims = get_jwt()
             nqt_quyen_list = nqt_claims.get('nqt_quyen', [])
             nqt_vai_tro = nqt_claims.get('nqt_vai_tro', [])
-            if 'NqtQuanTri' in nqt_vai_tro:
+            if 'quan_tri' in nqt_vai_tro:
                 return f(*args, **kwargs)
-            if nqt_ten_quyen not in nqt_quyen_list:
+            # Hỗ trợ cả 2 format: 'nqt_xem_hoi_vien' và 'xem_hoi_vien'
+            nqt_ten_quyen_goc = nqt_ten_quyen.replace('nqt_', '', 1) if nqt_ten_quyen.startswith('nqt_') else nqt_ten_quyen
+            if nqt_ten_quyen not in nqt_quyen_list and nqt_ten_quyen_goc not in nqt_quyen_list:
                 return nqt_loi('Không có quyền thực hiện', nqt_ma_trang=403)
             return f(*args, **kwargs)
         return nqt_wrapper
