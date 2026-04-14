@@ -390,6 +390,50 @@ node_modules/          # KHÔNG commit
 - [ ] Secure password storage (bcrypt)
 - [ ] HTTPS only in production
 
+## 📷 QUY TẮC UPLOAD HÌNH ẢNH
+
+### Nguyên tắc cốt lõi
+**KHÔNG SỬ DỤNG URL HÌNH ẢNH BÊN NGOÀI.** Tất cả hình ảnh (avatar, ảnh sản phẩm, logo, v.v.) phải được upload lên server và lưu đường dẫn local.
+
+### Cách implement
+```python
+# ✅ ĐÚNG - Lưu đường dẫn local
+nqt_anh_dai_dien = "/uploads/avatars/user_123.jpg"
+nqt_anh_san_pham = "/uploads/products/goi_tap_001.png"
+
+# ❌ SAI - URL bên ngoài
+nqt_anh_dai_dien = "https://example.com/avatar.jpg"  # KHÔNG!
+nqt_anh_dai_dien = "https://placehold.co/200x200"    # KHÔNG!
+```
+
+### Cấu trúc thư mục uploads
+```
+/frontend
+  /static
+    /uploads
+      /avatars       # Avatar người dùng, hội viên
+      /products      # Ảnh sản phẩm, gói tập
+      /branches      # Ảnh chi nhánh
+      /equipment     # Ảnh thiết bị
+      /temp          # Upload tạm (xoá sau 24h)
+```
+
+### Quy tắc đặt tên file
+- Format: `{loai}_{ma}_{timestamp}.{ext}`
+- Ví dụ: `avatar_hv_001_1713024000.jpg`, `product_gt_005_1713024000.png`
+- Chỉ chấp nhận: `.jpg`, `.jpeg`, `.png`, `.webp`, `.gif`
+- Giới hạn dung lượng: 5MB/file
+
+### API Upload
+```python
+@nqt_upload_bp.route('/nqt-upload', methods=['POST'])
+def nqt_upload_hinh_anh():
+    # Validate file type, size
+    # Save to /uploads/{category}/
+    # Return local path
+    return {"nqt_duong_dan": "/uploads/avatars/file.jpg"}
+```
+
 ## Common Commands
 ```bash
 # Run Flask server

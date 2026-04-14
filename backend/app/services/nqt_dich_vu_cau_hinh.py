@@ -17,13 +17,21 @@ class NqtDichVuCauHinh:
         return nqt_gia_tri
 
     @classmethod
-    def nqt_cap_nhat(cls, nqt_khoa: str, nqt_gia_tri):
+    def nqt_cap_nhat(cls, nqt_khoa: str, nqt_gia_tri, nqt_nhom: str = 'website'):
         from backend.app.models.nqt_cau_hinh import NqtCauHinh
         nqt_row = NqtCauHinh.query.filter_by(nqt_khoa=nqt_khoa).first()
         if nqt_row:
             nqt_row.nqt_gia_tri = str(nqt_gia_tri)
-            db.session.commit()
-            cls._nqt_bo_nho_cache.pop(nqt_khoa, None)
+        else:
+            nqt_row = NqtCauHinh(
+                nqt_khoa=nqt_khoa,
+                nqt_gia_tri=str(nqt_gia_tri),
+                nqt_nhom=nqt_nhom,
+                nqt_kieu_du_lieu='string',
+            )
+            db.session.add(nqt_row)
+        db.session.commit()
+        cls._nqt_bo_nho_cache.pop(nqt_khoa, None)
 
     @classmethod
     def nqt_xoa_cache(cls):

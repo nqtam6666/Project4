@@ -4,7 +4,15 @@
       "WebFetch(domain:gymstore.vn)",
       "WebFetch(domain:www.wheystore.vn)",
       "WebFetch(domain:www.mvpfitness.vn)",
-      "Bash(\"D:/Project 4/git-push.ps1\":*)"
+      "Bash(\"D:/Project 4/git-push.ps1\":*)",
+      "Bash(flask seed-fresh:*)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c \":*)",
+      "Bash(curl -s \"http://localhost:5000/api/nqt-hoi-vien\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d[''''nqt_du_lieu''''][''''nqt_danh_sach''''][0], ensure_ascii=False, indent=2\\)\\)\")",
+      "Bash(python -c \":*)",
+      "Bash(python -c \"import pyodbc; print\\(pyodbc.version\\); print\\([d for d in pyodbc.drivers\\(\\) if ''SQL'' in d]\\)\")",
+      "Bash(curl -s http://localhost:5000/api/nqt-hoi-vien)",
+      "Bash(python -c \"import sys,json; print\\(json.load\\(sys.stdin\\)\\)\")"
     ]
   }
 }

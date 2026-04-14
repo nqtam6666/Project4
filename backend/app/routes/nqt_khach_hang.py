@@ -43,6 +43,43 @@ def nqt_lay_khach_hang(nqt_id):
     return nqt_ok(nqt_result)
 
 
+@nqt_khach_hang_bp.route('/nqt-khach-hang/<int:nqt_id>', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+def nqt_cap_nhat_khach_hang(nqt_id):
+    nqt_row = NqtKhachHang.query.get_or_404(nqt_id)
+    nqt_data = request.get_json() or {}
+
+    if 'nqt_ho_ten' in nqt_data:
+        nqt_row.nqt_ho_ten = nqt_data['nqt_ho_ten']
+    if 'nqt_email' in nqt_data:
+        nqt_row.nqt_email = nqt_data['nqt_email']
+    if 'nqt_so_dien_thoai' in nqt_data:
+        nqt_row.nqt_so_dien_thoai = nqt_data['nqt_so_dien_thoai']
+    if 'nqt_la_hoat_dong' in nqt_data:
+        nqt_row.nqt_la_hoat_dong = nqt_data['nqt_la_hoat_dong']
+    if 'nqt_ngay_sinh' in nqt_data:
+        nqt_row.nqt_ngay_sinh = nqt_data['nqt_ngay_sinh']
+
+    db.session.commit()
+    return nqt_ok(nqt_row.nqt_to_dict(), 'Cập nhật khách hàng thành công')
+
+
+@nqt_khach_hang_bp.route('/nqt-khach-hang/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_khach_hang(nqt_id):
+    nqt_row = NqtKhachHang.query.get_or_404(nqt_id)
+    # Xóa điểm liên quan
+    if nqt_row.nqt_diem:
+        db.session.delete(nqt_row.nqt_diem)
+    # Xóa địa chỉ giao hàng
+    NqtDiaChiGiaoHang.query.filter_by(nqt_ma_khach_hang=nqt_id).delete()
+    # Xóa giao dịch điểm
+    NqtGiaoDichDiem.query.filter_by(nqt_ma_khach_hang=nqt_id).delete()
+    db.session.delete(nqt_row)
+    db.session.commit()
+    return nqt_ok(None, 'Xóa khách hàng thành công')
+
+
 @nqt_khach_hang_bp.route('/nqt-khach-hang/nqt-dang-ky', methods=['POST'])
 def nqt_dang_ky_khach_hang():
     nqt_data = request.get_json() or {}

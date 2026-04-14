@@ -8,7 +8,7 @@ class NqtDanhMucBaiViet(db.Model):
     nqt_ma_danh_muc = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nqt_ten = db.Column(db.String(100), nullable=False)
     nqt_slug = db.Column(db.String(120), nullable=False, unique=True)
-    nqt_ma_cha = db.Column(db.Integer, db.ForeignKey('NqtDanhMucBaiViet.nqt_ma_danh_muc', ondelete='SET NULL'))
+    nqt_ma_cha = db.Column(db.Integer, db.ForeignKey('NqtDanhMucBaiViet.nqt_ma_danh_muc'))
     nqt_thu_tu = db.Column(db.Integer, nullable=False, default=0)
     nqt_la_hoat_dong = db.Column(db.Boolean, nullable=False, default=True)
 

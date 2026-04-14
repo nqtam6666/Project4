@@ -18,7 +18,7 @@ class NqtHoiVien(db.Model):
     nqt_anh_the = db.Column(db.String(500))
     nqt_ma_qr = db.Column(db.String(100), nullable=False, unique=True)
     nqt_nguon_gioi_thieu = db.Column(db.String(100))
-    nqt_ma_gioi_thieu = db.Column(db.Integer, db.ForeignKey('NqtHoiVien.nqt_ma_hoi_vien', ondelete='SET NULL'))
+    nqt_ma_gioi_thieu = db.Column(db.Integer, db.ForeignKey('NqtHoiVien.nqt_ma_hoi_vien'))
     nqt_ghi_chu = db.Column(db.Text)
     nqt_la_hoat_dong = db.Column(db.Boolean, nullable=False, default=True)
     nqt_ngay_tao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)

@@ -1,0 +1,88 @@
+Rule 1: NVARCHAR — Luôn dùng Unicode cho SQL Server
+Vấn đề: db.String() mặc định tạo VARCHAR, không hỗ trợ tiếng Việt → ký tự ễ, ị, ạ, ứ bị thay bằng ?.
+
+Rule: KHÔNG BAO GIỜ sửa model. Rule toàn cục đã được đặt trong backend/app/__init__.py:
+
+python
+from sqlalchemy import String, Text
+from sqlalchemy.ext.compiler import compiles
+@compiles(String, "mssql")
+def _compile_string_mssql(element, compiler, **kw):
+    return compiler.visit_NVARCHAR(element, **kw)
+@compiles(Text, "mssql")
+def _compile_text_mssql(element, compiler, **kw):
+    return "NVARCHAR(MAX)"
+Hiệu lực: Mọi db.String(N) → NVARCHAR(N), mọi db.Text → NVARCHAR(MAX).
+
+Lưu ý khi tạo bảng mới: Không cần làm gì thêm, rule tự động áp dụng. Nếu đã có bảng cũ dùng VARCHAR, phải DROP TABLE + CREATE TABLE lại.
+
+Rule 2: Bcrypt — KHÔNG dùng Werkzeug để hash password
+Vấn đề: nqt_auth.py dùng bcrypt.checkpw() để xác thực, nhưng seed dùng werkzeug.security.generate_password_hash() → tạo hash format khác → ValueError: Invalid salt.
+
+Rule: Luôn dùng bcrypt library để hash password:
+
+python
+import bcrypt
+hashed = bcrypt.hashpw("password".encode(), bcrypt.gensalt()).decode()
+KHÔNG BAO GIỜ dùng:
+
+python
+from werkzeug.security import generate_password_hash  # ❌ SAI
+Áp dụng cho: nqt_seed.py, bất kỳ script nào tạo user, API đổi password.
+
+Rule 3: SQL Server KHÔNG cho phép ON DELETE SET NULL trên self-referencing FK
+Vấn đề: SQL Server báo lỗi "cycles or multiple cascade paths" khi tạo bảng có FK tự tham chiếu với ondelete='SET NULL'.
+
+Rule: Với FK tự tham chiếu (self-referencing), bỏ ondelete:
+
+python
+# ✅ ĐÚNG — Không có ondelete
+nqt_ma_cha = db.Column(db.Integer, db.ForeignKey('NqtDanhMucBaiViet.nqt_ma_danh_muc'))
+nqt_ma_gioi_thieu = db.Column(db.Integer, db.ForeignKey('NqtHoiVien.nqt_ma_hoi_vien'))
+# ❌ SAI — SQL Server sẽ báo lỗi
+nqt_ma_cha = db.Column(db.Integer, db.ForeignKey('NqtDanhMucBaiViet.nqt_ma_danh_muc', ondelete='SET NULL'))
+Bảng bị ảnh hưởng: NqtDanhMucBaiViet, NqtHoiVien.
+
+Rule 4: Tên vai trò và quyền — Naming Convention
+Vấn đề: Auth decorator và seed data dùng tên vai trò khác nhau → 403 FORBIDDEN.
+
+Rule: Tuân thủ đúng format trong database:
+
+Thành phần	Format đúng (trong DB)	Ví dụ
+Vai trò	snake_case không có prefix	quan_tri, quan_ly, le_tan
+Quyền	snake_case không có prefix nqt_	xem_hoi_vien, them_hoi_vien
+Admin bypass trong nqt_xac_thuc.py check 'quan_tri' in nqt_vai_tro (KHÔNG phải 'NqtQuanTri').
+
+Permission check hỗ trợ cả 2 format: nqt_xem_hoi_vien và xem_hoi_vien (do có fallback strip prefix).
+
+Rule 5: Connection String — SQL Server + Windows Auth
+Format chuẩn trong .env:
+
+env
+DB_SERVER=NoPainNoGain
+DB_NAME=nqt_gym
+DB_DRIVER=ODBC+Driver+17+for+SQL+Server
+DB_TRUSTED_CONNECTION=yes
+Config trong backend/config.py:
+
+python
+SQLALCHEMY_DATABASE_URI = (
+    'mssql+pyodbc://{host}/{db}?driver={driver}&Trusted_Connection={trusted}'.format(...)
+)
+KHÔNG BAO GIỜ dùng mysql+pymysql:// — dự án đã chuyển sang SQL Server.
+
+Rule 6: UTF-8 Console — Luôn set PYTHONUTF8
+Vấn đề: Windows console mặc định dùng CP-1252 → error khi print tiếng Việt.
+
+Rule: Luôn chạy script với:
+
+powershell
+$env:PYTHONUTF8=1; python script.py
+Hoặc đã có trong .env nếu dùng Flask dev server.
+
+Checklist khi tạo Model/Bảng mới
+ Dùng db.String() hoặc db.Text() bình thường (Rule 1 tự chuyển NVARCHAR)
+ FK tự tham chiếu? → Bỏ ondelete (Rule 3)
+ Có trường password? → Dùng bcrypt.hashpw() (Rule 2)
+ Tên quyền mới? → Format snake_case không prefix nqt_ (Rule 4)
+ Chạy script? → Dùng $env:PYTHONUTF8=1 (Rule 6)

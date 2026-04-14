@@ -1,0 +1,274 @@
+{% extends "admin/base_nqt.html" %}
+
+{% block title %}Tổng quan hệ thống{% endblock %}
+
+{% block head %}
+<style>
+    .nqt-stat-card {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nqt-stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-color) 0%, var(--accent-light) 100%);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    .nqt-stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    .nqt-stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+    }
+    .nqt-stat-icon {
+        transition: all 0.3s ease;
+    }
+    .nqt-stat-card:hover .nqt-stat-icon {
+        transform: scale(1.1) rotate(-5deg);
+    }
+    .nqt-quick-action {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nqt-quick-action:hover {
+        transform: translateY(-4px) scale(1.02);
+    }
+
+    /* Activity items fade in */
+    .nqt-activity-item {
+        animation: nqt-fade-in 0.4s ease-out;
+    }
+    @keyframes nqt-fade-in {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "admin/_dashboard_content.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function() {
+        // Live clock
+        function nqtUpdateClock() {
+            const now = new Date();
+            const timeEl = document.getElementById('nqtCurrentTime');
+            const dayEl = document.getElementById('nqtDayOfWeek');
+            if (timeEl) {
+                timeEl.textContent = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+            if (dayEl) {
+                const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                dayEl.textContent = days[now.getDay()];
+            }
+        }
+        setInterval(nqtUpdateClock, 1000);
+
+        function nqtSetGreeting() {
+            const hour = new Date().getHours();
+            let greeting = 'Xin chào!';
+            if (hour >= 5 && hour < 12) greeting = 'Chào buổi sáng!';
+            else if (hour >= 12 && hour < 18) greeting = 'Chào buổi chiều!';
+            else if (hour >= 18 && hour < 22) greeting = 'Chào buổi tối!';
+            else greeting = 'Làm việc khuya nhé!';
+
+            const greetingEl = document.getElementById('nqtGreeting');
+            if (greetingEl) greetingEl.textContent = greeting;
+
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            const dateEl = document.getElementById('nqtCurrentDate');
+            if (dateEl) dateEl.textContent = new Date().toLocaleDateString('vi-VN', options);
+
+            try {
+                const token = localStorage.getItem('nqt_token');
+                if (token) {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const nameEl = document.getElementById('nqtUserNameWelcome');
+                    if (nameEl) nameEl.textContent = payload.nqt_ho_ten || 'Admin';
+                }
+            } catch(e) {}
+        }
+
+        // Animated counter
+        function nqtAnimateCounter(element, target, duration = 1000) {
+            if (!element) return;
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            element.innerHTML = '0';
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                if (target >= 1000000) {
+                    element.textContent = (current / 1000000).toFixed(1) + 'M';
+                } else if (target >= 1000) {
+                    element.textContent = Math.floor(current).toLocaleString('vi-VN');
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 16);
+        }
+
+        function nqtFormatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency', currency: 'VND', maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        async function nqtLoadStats() {
+            const data = await nqtApi.fetch('/api/nqt-thong-ke-dashboard');
+            if (data && data.nqt_thanh_cong) {
+                const s = data.nqt_du_lieu;
+                const el = (id) => document.getElementById(id);
+
+                // Animate counters
+                nqtAnimateCounter(el('nqtStatTongHoiVien'), s.nqt_tong_hoi_vien || 0);
+                nqtAnimateCounter(el('nqtStatDangTap'), s.nqt_dang_tap_luyen || 0);
+                nqtAnimateCounter(el('nqtStatSapHetHan'), s.nqt_sap_het_han || 0);
+                nqtAnimateCounter(el('nqtStatCheckinHomNay'), s.nqt_checkin_hom_nay || 0);
+
+                // Revenue
+                if (el('nqtStatDoanhThu')) el('nqtStatDoanhThu').textContent = nqtFormatCurrency(s.nqt_doanh_thu_thang || 0);
+
+                // Badges
+                if (el('nqtBadgeHvMoi')) el('nqtBadgeHvMoi').innerHTML = `<i class="fas fa-arrow-up mr-1 text-[8px]"></i>+${s.nqt_hoi_vien_moi_thang || 0} mới`;
+
+                // Quick stats in header
+                if (el('nqtQuickStatActive')) el('nqtQuickStatActive').textContent = s.nqt_dang_tap_luyen || 0;
+                if (el('nqtQuickStatNew')) el('nqtQuickStatNew').textContent = s.nqt_hoi_vien_moi_hom_nay || 0;
+
+                // Progress bars
+                const progressHv = el('nqtProgressHoiVien');
+                if (progressHv) {
+                    const percent = Math.min(100, ((s.nqt_tong_hoi_vien || 0) / (s.nqt_muc_tieu_hoi_vien || 1000)) * 100);
+                    setTimeout(() => { progressHv.style.width = percent + '%'; }, 500);
+                }
+
+                // Capacity bar
+                const capacityBar = el('nqtCapacityBar');
+                const capacityPercent = el('nqtCapacityPercent');
+                if (capacityBar && capacityPercent) {
+                    const capacity = Math.min(100, ((s.nqt_dang_tap_luyen || 0) / (s.nqt_suc_chua || 100)) * 100);
+                    capacityPercent.textContent = Math.round(capacity) + '%';
+                    setTimeout(() => { capacityBar.style.width = capacity + '%'; }, 700);
+                }
+            }
+
+            // Chi nhánh
+            const chiNhanhData = await nqtApi.fetch('/api/nqt-chi-nhanh');
+            if (chiNhanhData && chiNhanhData.nqt_thanh_cong) {
+                nqtAnimateCounter(document.getElementById('nqtStatChiNhanh'), chiNhanhData.nqt_du_lieu.length || 0);
+                const cityCount = document.getElementById('nqtChiNhanhThanhPho');
+                if (cityCount) {
+                    const cities = new Set(chiNhanhData.nqt_du_lieu.map(c => c.nqt_thanh_pho).filter(Boolean));
+                    cityCount.textContent = cities.size + ' thành phố';
+                }
+            }
+
+            // Gói tập
+            const goiTapData = await nqtApi.fetch('/api/nqt-goi-tap');
+            if (goiTapData && goiTapData.nqt_thanh_cong) {
+                nqtAnimateCounter(document.getElementById('nqtStatGoiTap'), goiTapData.nqt_du_lieu.length || 0);
+                const noiBat = goiTapData.nqt_du_lieu.filter(g => g.nqt_la_noi_bat).length;
+                const noiBatEl = document.getElementById('nqtGoiNoiBat');
+                if (noiBatEl) noiBatEl.textContent = noiBat + ' gói nổi bật';
+            }
+
+            // Load recent activity
+            nqtLoadRecentActivity();
+        }
+
+        async function nqtLoadRecentActivity() {
+            const activityEl = document.getElementById('nqtRecentActivity');
+            if (!activityEl) return;
+
+            const activities = [
+                { type: 'member', icon: 'fa-user-plus', color: 'blue', title: 'Hội viên mới đăng ký', time: '2 phút trước' },
+                { type: 'checkin', icon: 'fa-check-circle', color: 'emerald', title: 'Check-in thành công', time: '5 phút trước' },
+                { type: 'payment', icon: 'fa-credit-card', color: 'purple', title: 'Thanh toán gói VIP', time: '15 phút trước' },
+                { type: 'order', icon: 'fa-shopping-bag', color: 'amber', title: 'Đơn hàng mới #1234', time: '32 phút trước' },
+            ];
+
+            const nqtColorMap = {
+                blue:    { bg: 'bg-blue-100 dark:bg-blue-900/40',     text: 'text-blue-600 dark:text-blue-400' },
+                emerald: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-600 dark:text-emerald-400' },
+                purple:  { bg: 'bg-purple-100 dark:bg-purple-900/40',   text: 'text-purple-600 dark:text-purple-400' },
+                amber:   { bg: 'bg-amber-100 dark:bg-amber-900/40',     text: 'text-amber-600 dark:text-amber-400' },
+            };
+            activityEl.innerHTML = activities.map((a, i) => {
+                const c = nqtColorMap[a.color] || nqtColorMap.blue;
+                return `
+                <div class="nqt-activity-item p-3 lg:p-4 flex items-center space-x-3 lg:space-x-4 hover:bg-gray-50 dark:hover:bg-[#334155] transition-colors cursor-pointer group" style="animation-delay: ${i * 0.1}s;">
+                    <div class="w-9 h-9 lg:w-10 lg:h-10 ${c.bg} ${c.text} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <i class="fas ${a.icon} text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs lg:text-sm font-medium text-[#0F172A] dark:text-[#F1F5F9] truncate">${a.title}</p>
+                        <p class="text-[10px] lg:text-xs text-[#64748B] dark:text-[#94A3B8]">${a.time}</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-[#CBD5E1] dark:text-[#475569] text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                </div>`;
+            }).join('');
+        }
+
+        // Navigation helper
+        window.nqtNavigateTo = function(page, title) {
+            if (page && page.startsWith('/')) {
+                nqtLoadPage(page, title || 'Admin', true);
+            } else {
+                const link = document.querySelector(`[data-page="${page}"]`);
+                if (link) link.click();
+            }
+        };
+
+        // Check-in modal placeholder
+        window.nqtOpenCheckinModal = function() {
+            if (typeof nqtToast === 'function') nqtToast('Tính năng Check-in QR đang phát triển', 'info');
+        };
+
+        // Re-init SPA navigation
+        function nqtReinitNavLinks() {
+            document.querySelectorAll('#nqt-content-area .nqt-nav-link').forEach(nqtLink => {
+                nqtLink.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const nqtUrl = nqtLink.getAttribute('href');
+                    const nqtTitle = nqtLink.dataset.title || 'Admin';
+                    if (typeof nqtNavigateTo === 'function') {
+                        await nqtNavigateTo(nqtUrl, nqtTitle);
+                    }
+                });
+            });
+        }
+
+        nqtSetGreeting();
+        nqtUpdateClock();
+        nqtLoadStats();
+        nqtReinitNavLinks();
+
+        // Chart period buttons
+        document.querySelectorAll('.nqt-chart-period').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nqt-chart-period').forEach(b => {
+                    b.classList.remove('text-blue-600', 'bg-white', 'dark:bg-[#1E293B]', 'shadow-sm');
+                    b.classList.add('text-[#64748B]', 'dark:text-[#94A3B8]');
+                });
+                btn.classList.add('text-blue-600', 'bg-white', 'dark:bg-[#1E293B]', 'shadow-sm');
+                btn.classList.remove('text-[#64748B]', 'dark:text-[#94A3B8]');
+            });
+        });
+    })();
+</script>
+{% endblock %}
