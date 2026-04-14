@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request
+﻿from flask import Blueprint, render_template, request
 from bs4 import BeautifulSoup
 import re
 
-nqt_admin_views_bp = Blueprint('nqt_admin_views', __name__)
+nqt_admin_views_bp = Blueprint('g6_admin_views', __name__)
 
 def nqt_render_admin_template(nqt_template_name):
     """

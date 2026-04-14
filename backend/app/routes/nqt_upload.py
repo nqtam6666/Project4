@@ -1,11 +1,11 @@
-import os
+﻿import os
 import uuid
 from flask import Blueprint, request, current_app
 from werkzeug.utils import secure_filename
-from backend.app.utils.nqt_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.nqt_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
+from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
 
-nqt_upload_bp = Blueprint('nqt_upload', __name__, url_prefix='/api')
+nqt_upload_bp = Blueprint('g6_upload', __name__, url_prefix='/api')
 
 NQT_DUOI_FILE_CHO_PHEP = {'png', 'jpg', 'jpeg', 'gif', 'ico', 'svg', 'webp'}
 
@@ -27,7 +27,7 @@ def _nqt_tao_ten_file_an_toan(nqt_ten_goc: str) -> str:
 
 @nqt_upload_bp.route('/nqt-upload', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
-@nqt_yeu_cau_quyen('nqt_sua_cau_hinh')
+@nqt_yeu_cau_quyen('g6_sua_cau_hinh')
 def nqt_upload_file():
     """Upload file ảnh (favicon, logo, avatar mặc định, ...)."""
     if 'file' not in request.files:
@@ -55,6 +55,6 @@ def nqt_upload_file():
     nqt_url = f'/static/uploads/{nqt_ten_file}'
 
     return nqt_ok({
-        'nqt_url': nqt_url,
-        'nqt_ten_file': nqt_ten_file
+        'g6_url': nqt_url,
+        'g6_ten_file': nqt_ten_file
     }, 'Upload thành công')

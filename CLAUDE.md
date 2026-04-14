@@ -166,23 +166,69 @@ let hoiVien = null;  // SAI!
 function layThongTin() {}  // SAI!
 ```
 
-### Database Tables (PascalCase với tiền tố Nqt)
+### Database Tables (PascalCase với tiền tố G6)
 ```sql
 -- ✅ ĐÚNG
-NqtHoiVien, NqtGoiTap, NqtLichDat, NqtCauHinh, NqtNhanVien, NqtThietBi
+G6HoiVien, G6GoiTap, G6LichDat, G6CauHinh, G6NhanVien, G6ThietBi
 
 -- ❌ SAI
-HoiVien, GoiTap  -- SAI! Thiếu tiền tố Nqt
+HoiVien, GoiTap          -- SAI! Thiếu tiền tố G6
+NqtHoiVien, NxvGoiTap   -- SAI! Dùng tiền tố thành viên cho DB
 ```
 
-### Database Columns (snake_case với tiền tố nqt_)
+### Database Columns (snake_case với tiền tố g6_)
 ```sql
 -- ✅ ĐÚNG
-nqt_ma_hoi_vien, nqt_ho_ten, nqt_ngay_sinh, nqt_ngay_tao, nqt_ngay_cap_nhat
+g6_ma_hoi_vien, g6_ho_ten, g6_ngay_sinh, g6_ngay_tao, g6_ngay_cap_nhat
 
 -- ❌ SAI
-ma_hoi_vien, ho_ten  -- SAI! Thiếu tiền tố nqt_
+ma_hoi_vien, ho_ten  -- SAI! Thiếu tiền tố g6_
+nqt_ho_ten           -- SAI! Dùng tiền tố thành viên cho cột DB
 ```
+
+### Database Soft Delete (XOÁ MỀM)
+
+**Nguyên tắc cốt lõi**: Tất cả các bảng database phải có cột `g6_deleted_at` để hỗ trợ xoá mềm. **KHÔNG BAO GIỜ xoá vĩnh viễn dữ liệu** (hard delete).
+
+```sql
+-- ✅ ĐÚNG - Mỗi bảng phải có cột soft delete
+g6_deleted_at DATETIME2 NULL DEFAULT NULL  -- NULL = chưa xoá, có giá trị = đã xoá
+
+-- Ví dụ tạo bảng
+CREATE TABLE G6HoiVien (
+    g6_ma_hoi_vien INT PRIMARY KEY,
+    g6_ho_ten NVARCHAR(100),
+    g6_ngay_tao DATETIME2 DEFAULT GETDATE(),
+    g6_ngay_cap_nhat DATETIME2,
+    g6_deleted_at DATETIME2 NULL DEFAULT NULL  -- Cột soft delete BẮT BUỘC
+);
+```
+
+```python
+# ✅ ĐÚNG - Model Python
+class NqtHoiVien(db.Model):
+    # ... các cột khác
+    g6_deleted_at = db.Column(db.DateTime, nullable=True, default=None)
+
+# ✅ ĐÚNG - Query lọc bỏ records đã xoá
+def nqt_lay_tat_ca():
+    return NqtHoiVien.query.filter(NqtHoiVien.g6_deleted_at == None).all()
+
+# ✅ ĐÚNG - Soft delete
+def nqt_xoa_mem(nqt_ma):
+    hoi_vien = NqtHoiVien.query.get(nqt_ma)
+    hoi_vien.g6_deleted_at = datetime.utcnow()
+    db.session.commit()
+
+# ❌ SAI - Hard delete
+def nqt_xoa(nqt_ma):
+    hoi_vien = NqtHoiVien.query.get(nqt_ma)
+    db.session.delete(hoi_vien)  # KHÔNG LÀM THẾ NÀY!
+```
+
+| Cột | Kiểu | Mô tả |
+|-----|------|-------|
+| `g6_deleted_at` | `DATETIME2 NULL` | `NULL` = active, `timestamp` = đã xoá mềm |
 
 ### API Routes
 ```python

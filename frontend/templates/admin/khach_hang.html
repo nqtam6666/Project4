@@ -5,18 +5,18 @@
 {% block content %}
 <div class="space-y-6 animate-fade-in">
     <!-- Header Actions -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-[#E2E8F0] shadow-sm">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-[#E2E8F0] dark:border-slate-700 shadow-sm">
         <div class="flex items-center space-x-4 flex-1">
             <div class="relative flex-1 max-w-md">
                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-[#94A3B8]">
                     <i class="fas fa-search text-sm"></i>
                 </span>
                 <input type="text" id="nqtTimKiem" onkeyup="nqtXuLyTimKiem(event)"
-                       class="w-full pl-11 pr-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none text-sm"
+                       class="w-full pl-11 pr-4 py-2.5 bg-[#F8FAFC] dark:bg-slate-700 border border-[#E2E8F0] dark:border-slate-600 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none text-sm text-[#0F172A] dark:text-white placeholder-[#94A3B8] dark:placeholder-slate-400"
                        placeholder="Tìm kiếm theo tên, email, SĐT...">
             </div>
-            <button onclick="nqtTaiDanhSach()" class="p-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl hover:bg-white transition-all">
-                <i class="fas fa-sync-alt text-[#64748B]"></i>
+            <button onclick="nqtTaiDanhSach()" class="p-2.5 bg-[#F8FAFC] dark:bg-slate-700 border border-[#E2E8F0] dark:border-slate-600 rounded-2xl hover:bg-white dark:hover:bg-slate-600 transition-all">
+                <i class="fas fa-sync-alt text-[#64748B] dark:text-slate-400"></i>
             </button>
         </div>
         <button onclick="nqtMoModal('modalThemKhachHang')"
@@ -27,24 +27,24 @@
     </div>
 
     <!-- Table Container -->
-    <div class="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-[#E2E8F0] dark:border-slate-700 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Mã KH</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Họ tên</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Email / SĐT</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Hạng thành viên</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Điểm tích lũy</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Ngày đăng ký</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider text-center">Trạng thái</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider text-right">Thao tác</th>
+                    <tr class="bg-[#F8FAFC] dark:bg-slate-700 border-b border-[#E2E8F0] dark:border-slate-600">
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Mã KH</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Họ tên</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Email / SĐT</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Hạng thành viên</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Điểm tích lũy</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Ngày đăng ký</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider text-center">Trạng thái</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody id="nqtBangDuLieu" class="divide-y divide-[#E2E8F0]">
+                <tbody id="nqtBangDuLieu" class="divide-y divide-[#E2E8F0] dark:divide-slate-700">
                     <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-[#64748B]">
+                        <td colspan="8" class="px-6 py-12 text-center text-[#64748B] dark:text-slate-400">
                             <i class="fas fa-circle-notch fa-spin text-2xl mb-2"></i>
                             <p>Đang tải dữ liệu...</p>
                         </td>
@@ -54,8 +54,8 @@
         </div>
 
         <!-- Pagination -->
-        <div class="px-6 py-4 bg-[#F8FAFC] border-t border-[#E2E8F0] flex items-center justify-between">
-            <span class="text-sm text-[#64748B]" id="nqtThongTinTrang">Hiển thị 0 / 0 khách hàng</span>
+        <div class="px-6 py-4 bg-[#F8FAFC] dark:bg-slate-700 border-t border-[#E2E8F0] dark:border-slate-600 flex items-center justify-between">
+            <span class="text-sm text-[#64748B] dark:text-slate-400" id="nqtThongTinTrang">Hiển thị 0 / 0 khách hàng</span>
             <div class="flex space-x-2" id="nqtPhanTrang"></div>
         </div>
     </div>
@@ -264,7 +264,7 @@
     async function nqtTaiDanhSach(nqtTrang = 1) {
         nqtTrangHienTai = nqtTrang;
         const nqtBody = document.getElementById('nqtBangDuLieu');
-        nqtBody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-[#64748B]"><i class="fas fa-circle-notch fa-spin text-2xl"></i></td></tr>';
+        nqtBody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-[#64748B] dark:text-slate-400"><i class="fas fa-circle-notch fa-spin text-2xl"></i></td></tr>';
 
         let nqtUrl = `/api/nqt-khach-hang?nqt_trang=${nqtTrang}&nqt_gioi_han=10`;
         if (nqtTimKiemHienTai) nqtUrl += `&nqt_tim_kiem=${encodeURIComponent(nqtTimKiemHienTai)}`;
@@ -276,7 +276,7 @@
         nqtBody.innerHTML = '';
 
         if (nqtDanhSach.length === 0) {
-            nqtBody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-[#64748B]">Không tìm thấy khách hàng nào.</td></tr>';
+            nqtBody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-[#64748B] dark:text-slate-400">Không tìm thấy khách hàng nào.</td></tr>';
             return;
         }
 
@@ -288,29 +288,29 @@
             const nqtTrangThaiText = nqtTrangThai ? 'Hoạt động' : 'Tạm khóa';
 
             nqtBody.innerHTML += `
-                <tr class="hover:bg-blue-50/30 transition-colors">
-                    <td class="px-6 py-4 font-mono text-sm font-bold text-[#0F172A]">#${kh.nqt_ma_khach_hang}</td>
-                    <td class="px-6 py-4 font-medium text-[#0F172A]">${kh.nqt_ho_ten}</td>
+                <tr class="hover:bg-blue-50/30 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="px-6 py-4 font-mono text-sm font-bold text-[#0F172A] dark:text-white">#${kh.nqt_ma_khach_hang}</td>
+                    <td class="px-6 py-4 font-medium text-[#0F172A] dark:text-white">${kh.nqt_ho_ten}</td>
                     <td class="px-6 py-4">
-                        <div class="text-sm text-[#0F172A]">${kh.nqt_email || 'N/A'}</div>
-                        <div class="text-xs text-[#64748B]">${kh.nqt_so_dien_thoai || ''}</div>
+                        <div class="text-sm text-[#0F172A] dark:text-white">${kh.nqt_email || 'N/A'}</div>
+                        <div class="text-xs text-[#64748B] dark:text-slate-400">${kh.nqt_so_dien_thoai || ''}</div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="px-3 py-1 text-xs font-bold rounded-full border ${nqtMau}">${nqtHang.nqt_ten_hang}</span>
                     </td>
                     <td class="px-6 py-4 font-bold text-blue-600">${kh.nqt_diem_hien_tai || 0}</td>
-                    <td class="px-6 py-4 text-sm text-[#64748B]">${kh.nqt_ngay_tao?.split('T')[0] || 'N/A'}</td>
+                    <td class="px-6 py-4 text-sm text-[#64748B] dark:text-slate-400">${kh.nqt_ngay_tao?.split('T')[0] || 'N/A'}</td>
                     <td class="px-6 py-4 text-center">
                         <span class="px-3 py-1 text-xs font-bold rounded-full ${nqtTrangThaiClass}">${nqtTrangThaiText}</span>
                     </td>
                     <td class="px-6 py-4 text-right space-x-1">
-                        <button onclick="nqtXemChiTiet(${kh.nqt_ma_khach_hang})" class="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Chi tiết">
+                        <button onclick="nqtXemChiTiet(${kh.nqt_ma_khach_hang})" class="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Chi tiết">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button onclick="nqtSuaKhachHang(${kh.nqt_ma_khach_hang})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Sửa">
+                        <button onclick="nqtSuaKhachHang(${kh.nqt_ma_khach_hang})" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Sửa">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="nqtXoaKhachHang(${kh.nqt_ma_khach_hang}, '${kh.nqt_ho_ten.replace(/'/g, "\\'")}')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
+                        <button onclick="nqtXoaKhachHang(${kh.nqt_ma_khach_hang}, '${kh.nqt_ho_ten.replace(/'/g, "\\'")}')" class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Xóa">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -328,8 +328,8 @@
         nqtCtrl.innerHTML = '';
 
         for (let i = 1; i <= nqtTongTrang; i++) {
-            const nqtActive = i === nqtTrangHienTai ? 'bg-blue-600 text-white' : 'bg-white text-[#64748B] hover:bg-blue-50';
-            nqtCtrl.innerHTML += `<button onclick="nqtTaiDanhSach(${i})" class="w-8 h-8 rounded-lg text-xs font-bold transition-all border border-[#E2E8F0] ${nqtActive}">${i}</button>`;
+            const nqtActive = i === nqtTrangHienTai ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 text-[#64748B] dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-700';
+            nqtCtrl.innerHTML += `<button onclick="nqtTaiDanhSach(${i})" class="w-8 h-8 rounded-lg text-xs font-bold transition-all border border-[#E2E8F0] dark:border-slate-600 ${nqtActive}">${i}</button>`;
         }
     }
 
@@ -421,19 +421,19 @@
                 const nqtDau = ls.nqt_so_diem >= 0 ? '+' : '';
                 const nqtMauDiem = ls.nqt_so_diem >= 0 ? 'text-green-600' : 'text-red-600';
                 lsDiv.innerHTML += `
-                    <div class="flex justify-between text-sm p-2 bg-[#F8FAFC] rounded-lg">
-                        <span class="text-[#64748B]">${ls.nqt_ngay_tao?.split('T')[0] || ''} - ${ls.nqt_ly_do || ''}</span>
+                    <div class="flex justify-between text-sm p-2 bg-[#F8FAFC] dark:bg-slate-700 rounded-lg">
+                        <span class="text-[#64748B] dark:text-slate-400">${ls.nqt_ngay_tao?.split('T')[0] || ''} - ${ls.nqt_ly_do || ''}</span>
                         <span class="font-bold ${nqtMauDiem}">${nqtDau}${ls.nqt_so_diem}</span>
                     </div>
                 `;
             });
             if ((resDiem.nqt_du_lieu.nqt_lich_su || []).length === 0) {
-                lsDiv.innerHTML = '<p class="text-sm text-[#64748B]">Chưa có giao dịch điểm nào.</p>';
+                lsDiv.innerHTML = '<p class="text-sm text-[#64748B] dark:text-slate-400">Chưa có giao dịch điểm nào.</p>';
             }
         } else {
             document.getElementById('nqtChiTietDiem').textContent = '0';
             document.getElementById('nqtChiTietTongDiem').textContent = '0';
-            document.getElementById('nqtChiTietLichSuDiem').innerHTML = '<p class="text-sm text-[#64748B]">Chưa có giao dịch điểm nào.</p>';
+            document.getElementById('nqtChiTietLichSuDiem').innerHTML = '<p class="text-sm text-[#64748B] dark:text-slate-400">Chưa có giao dịch điểm nào.</p>';
         }
 
         // Địa chỉ
@@ -443,14 +443,14 @@
             resDiaChi.nqt_du_lieu.forEach(dc => {
                 const nqtMacDinh = dc.nqt_la_mac_dinh ? '<span class="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">Mặc định</span>' : '';
                 dcDiv.innerHTML += `
-                    <div class="p-3 bg-[#F8FAFC] rounded-lg text-sm">
-                        <div class="font-medium">${dc.nqt_ho_ten_nguoi_nhan} - ${dc.nqt_so_dien_thoai}${nqtMacDinh}</div>
-                        <div class="text-[#64748B]">${dc.nqt_dia_chi_chi_tiet}, ${dc.nqt_phuong_xa || ''}, ${dc.nqt_quan_huyen || ''}, ${dc.nqt_tinh_thanh || ''}</div>
+                    <div class="p-3 bg-[#F8FAFC] dark:bg-slate-700 rounded-lg text-sm">
+                        <div class="font-medium text-[#0F172A] dark:text-white">${dc.nqt_ho_ten_nguoi_nhan} - ${dc.nqt_so_dien_thoai}${nqtMacDinh}</div>
+                        <div class="text-[#64748B] dark:text-slate-400">${dc.nqt_dia_chi_chi_tiet}, ${dc.nqt_phuong_xa || ''}, ${dc.nqt_quan_huyen || ''}, ${dc.nqt_tinh_thanh || ''}</div>
                     </div>
                 `;
             });
         } else {
-            dcDiv.innerHTML = '<p class="text-sm text-[#64748B]">Chưa có địa chỉ nào.</p>';
+            dcDiv.innerHTML = '<p class="text-sm text-[#64748B] dark:text-slate-400">Chưa có địa chỉ nào.</p>';
         }
 
         nqtMoModal('modalChiTiet');

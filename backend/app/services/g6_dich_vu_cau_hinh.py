@@ -5,36 +5,36 @@ class NqtDichVuCauHinh:
     _nqt_bo_nho_cache = {}
 
     @classmethod
-    def nqt_lay(cls, nqt_khoa: str, nqt_mac_dinh=None):
-        from backend.app.models.nqt_cau_hinh import NqtCauHinh
+    def g6_lay(cls, nqt_khoa: str, nqt_mac_dinh=None):
+        from backend.app.models.g6_cau_hinh import G6CauHinh
         if nqt_khoa in cls._nqt_bo_nho_cache:
             return cls._nqt_bo_nho_cache[nqt_khoa]
-        nqt_row = NqtCauHinh.query.filter_by(nqt_khoa=nqt_khoa).first()
+        nqt_row = G6CauHinh.query.filter_by(g6_khoa=nqt_khoa).first()
         if not nqt_row:
             return nqt_mac_dinh
-        nqt_gia_tri = cls._nqt_ep_kieu(nqt_row.nqt_gia_tri, nqt_row.nqt_kieu_du_lieu)
+        nqt_gia_tri = cls._nqt_ep_kieu(nqt_row.g6_gia_tri, nqt_row.g6_kieu_du_lieu)
         cls._nqt_bo_nho_cache[nqt_khoa] = nqt_gia_tri
         return nqt_gia_tri
 
     @classmethod
-    def nqt_cap_nhat(cls, nqt_khoa: str, nqt_gia_tri, nqt_nhom: str = 'website'):
-        from backend.app.models.nqt_cau_hinh import NqtCauHinh
-        nqt_row = NqtCauHinh.query.filter_by(nqt_khoa=nqt_khoa).first()
+    def g6_cap_nhat(cls, nqt_khoa: str, nqt_gia_tri, nqt_nhom: str = 'website'):
+        from backend.app.models.g6_cau_hinh import G6CauHinh
+        nqt_row = G6CauHinh.query.filter_by(g6_khoa=nqt_khoa).first()
         if nqt_row:
-            nqt_row.nqt_gia_tri = str(nqt_gia_tri)
+            nqt_row.g6_gia_tri = str(nqt_gia_tri)
         else:
-            nqt_row = NqtCauHinh(
-                nqt_khoa=nqt_khoa,
-                nqt_gia_tri=str(nqt_gia_tri),
-                nqt_nhom=nqt_nhom,
-                nqt_kieu_du_lieu='string',
+            nqt_row = G6CauHinh(
+                g6_khoa=nqt_khoa,
+                g6_gia_tri=str(nqt_gia_tri),
+                g6_nhom=nqt_nhom,
+                g6_kieu_du_lieu='string',
             )
             db.session.add(nqt_row)
         db.session.commit()
         cls._nqt_bo_nho_cache.pop(nqt_khoa, None)
 
     @classmethod
-    def nqt_xoa_cache(cls):
+    def g6_xoa_cache(cls):
         cls._nqt_bo_nho_cache.clear()
 
     @staticmethod
