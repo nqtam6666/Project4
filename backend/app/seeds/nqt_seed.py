@@ -1,5 +1,5 @@
 """
-Seed dữ liệu mẫu cho NQT Gym Management System.
+Seed dữ liệu mẫu cho G6 Gym Management System.
 Idempotent: mỗi nhóm kiểm tra xem đã có dữ liệu chưa trước khi insert.
 
 Chạy qua Flask CLI:
@@ -13,522 +13,532 @@ from datetime import date, time, datetime
 import bcrypt
 
 
-
 def nqt_chay_seed():
     from backend.app import db
-    from backend.app.models.nqt_cau_hinh import NqtCauHinh
-    from backend.app.models.nqt_nguoi_dung import (
-        NqtVaiTro, NqtQuyenHan, NqtNguoiDung,
-        NqtNguoiDungVaiTro, NqtVaiTroQuyen,
+    from backend.app.models.g6_cau_hinh import G6CauHinh
+    from backend.app.models.g6_nguoi_dung import (
+        G6VaiTro, G6QuyenHan, G6NguoiDung,
+        G6NguoiDungVaiTro, G6VaiTroQuyen,
     )
-    from backend.app.models.nqt_chi_nhanh import NqtChiNhanh, NqtThietBi
-    from backend.app.models.nqt_nhan_vien import NqtNhanVien
-    from backend.app.models.nqt_hoi_vien import NqtGoiTap, NqtHoiVien
-    from backend.app.models.nqt_khach_hang import NqtHangThanhVien
+    from backend.app.models.g6_chi_nhanh import G6ChiNhanh, G6ThietBi
+    from backend.app.models.g6_nhan_vien import G6NhanVien
+    from backend.app.models.g6_hoi_vien import G6GoiTap, G6HoiVien
+    from backend.app.models.g6_khach_hang import G6HangThanhVien
 
     print("=== Bắt đầu seed dữ liệu ===")
-    
+
     # Tạo bảng nếu chưa có (cần thiết khi chuyển sang DB mới)
     db.create_all()
     print("[INFO] Đã kiểm tra/tạo schema database")
 
     # ------------------------------------------------------------------
-    # 1. NqtCauHinh
+    # 1. G6CauHinh
     # ------------------------------------------------------------------
-    if NqtCauHinh.query.first():
-        print("[SKIP] NqtCauHinh — đã có dữ liệu")
+    if G6CauHinh.query.first():
+        print("[SKIP] G6CauHinh — đã có dữ liệu")
     else:
-        nqt_danh_sach_cau_hinh = [
+        g6_danh_sach_cau_hinh = [
             # Nhóm: website
-            ("ten_website",         "NQT Gym",                          "string",  "website",  "Tên website"),
-            ("mo_ta_website",       "Hệ thống quản lý phòng gym NQT",   "string",  "website",  "Mô tả website"),
-            ("logo_url",            "",                                 "string",  "website",  "URL logo website"),
-            ("favicon_url",         "",                                 "string",  "website",  "URL favicon"),
-            ("avatar_mac_dinh_url", "",                                 "string",  "website",  "URL avatar mặc định cho người dùng"),
-            ("email_lien_he",       "contact@nqtgym.vn",                "string",  "website",  "Email liên hệ"),
-            ("so_dien_thoai_lien_he", "1900 1234",                      "string",  "website",  "Hotline liên hệ"),
-            ("dia_chi_tru_so",      "123 Cầu Giấy, Hà Nội",            "string",  "website",  "Địa chỉ trụ sở"),
-            ("facebook_url",        "https://facebook.com/nqtgym",      "string",  "website",  "Link Facebook"),
-            ("zalo_url",            "https://zalo.me/nqtgym",           "string",  "website",  "Link Zalo"),
-            # Nhóm: business
-            ("gio_mo_cua",          "05:00",                            "string",  "business", "Giờ mở cửa mặc định"),
-            ("gio_dong_cua",        "23:00",                            "string",  "business", "Giờ đóng cửa mặc định"),
-            ("so_ngay_nhac_het_han", "7",                               "integer", "business", "Số ngày nhắc trước khi gói hết hạn"),
-            ("so_ngay_nhac_het_han_2", "3",                             "integer", "business", "Số ngày nhắc lần 2 trước khi gói hết hạn"),
-            ("so_luot_checkin_ngay_mac_dinh", "1",                      "integer", "business", "Số lượt check-in tối đa mỗi ngày (mặc định)"),
-            ("cho_phep_checkin_truoc_phut",   "15",                     "integer", "business", "Cho phép check-in trước N phút"),
-            ("suc_chua_mac_dinh",   "100",                              "integer", "business", "Sức chứa mặc định mỗi chi nhánh"),
+            ("g6_ten_website",         "G6 Gym",                           "string",  "website",  "Tên website"),
+            ("g6_mo_ta_website",       "Hệ thống quản lý phòng gym G6",   "string",  "website",  "Mô tả website"),
+            ("g6_logo_url",            "",                                 "string",  "website",  "URL logo website"),
+            ("g6_favicon_url",         "",                                 "string",  "website",  "URL favicon"),
+            ("g6_so_dien_thoai_hotline", "1900 6868",                     "string",  "website",  "Hotline hiển thị"),
+            ("g6_email_lien_he",       "contact@g6gym.vn",                 "string",  "website",  "Email liên hệ"),
+            ("g6_dia_chi_tru_so",      "123 Cầu Giấy, Hà Nội",            "string",  "website",  "Địa chỉ trụ sở"),
+            ("g6_facebook_url",        "https://facebook.com/g6gym",       "string",  "website",  "Facebook fanpage"),
+            ("g6_zalo_url",            "https://zalo.me/g6gym",            "string",  "website",  "Zalo OA"),
+            ("g6_instagram_url",       "",                                 "string",  "website",  "Instagram"),
+            ("g6_youtube_url",         "",                                 "string",  "website",  "YouTube channel"),
+            ("g6_footer_noi_dung",     "",                                 "string",  "website",  "Nội dung footer"),
             # Nhóm: security
-            ("jwt_expiry_giay",     "3600",                             "integer", "security", "JWT access token hết hạn sau N giây"),
-            ("so_lan_sai_mat_khau", "5",                                "integer", "security", "Số lần sai mật khẩu trước khi khoá tài khoản"),
-            ("thoi_gian_khoa_phut", "30",                               "integer", "security", "Khoá tài khoản trong N phút"),
-            ("otp_het_han_phut",    "10",                               "integer", "security", "OTP hết hạn sau N phút"),
+            ("g6_loai_ma_hoa_mat_khau", "bcrypt",                          "string",  "security", "Thuật toán mã hóa: bcrypt|argon2|pbkdf2"),
+            ("g6_jwt_het_han_phut",    "60",                               "int",     "security", "JWT access token hết hạn (phút)"),
+            ("g6_jwt_refresh_ngay",    "7",                                "int",     "security", "JWT refresh token hết hạn (ngày)"),
+            ("g6_so_lan_dang_nhap_sai", "5",                               "int",     "security", "Số lần đăng nhập sai tối đa"),
+            ("g6_khoa_tai_khoan_phut", "30",                               "int",     "security", "Khóa tài khoản sau N phút"),
+            ("g6_do_dai_mat_khau_toi_thieu", "8",                          "int",     "security", "Độ dài mật khẩu tối thiểu"),
             # Nhóm: email
-            ("smtp_host",           "smtp.gmail.com",                   "string",  "email",    "SMTP Server"),
-            ("smtp_port",           "587",                              "integer", "email",    "SMTP Port"),
-            ("smtp_bao_mat",        "tls",                              "string",  "email",    "Bảo mật: none/ssl/tls"),
-            ("smtp_email",          "",                                 "string",  "email",    "Email đăng nhập SMTP"),
-            ("smtp_mat_khau",       "",                                 "string",  "email",    "Mật khẩu ứng dụng SMTP"),
-            ("email_gui_tu",        "no-reply@nqtgym.vn",               "string",  "email",    "Email gửi đi (From)"),
-            ("ten_nguoi_gui_email", "NQT Gym",                          "string",  "email",    "Tên hiển thị người gửi"),
-            ("email_cc_mac_dinh",   "",                                 "string",  "email",    "Email CC mặc định"),
-            ("email_bcc_mac_dinh",  "",                                 "string",  "email",    "Email BCC mặc định"),
+            ("g6_smtp_host",           "",                                 "string",  "email",    "SMTP host"),
+            ("g6_smtp_port",           "587",                              "int",     "email",    "SMTP port"),
+            ("g6_smtp_username",       "",                                 "string",  "email",    "SMTP username"),
+            ("g6_smtp_mat_khau",       "",                                 "string",  "email",    "SMTP password"),
+            ("g6_smtp_ma_hoa",         "TLS",                              "string",  "email",    "SMTP encryption: TLS|SSL|None"),
+            ("g6_email_gui_di",        "",                                 "string",  "email",    "From email address"),
+            ("g6_ten_email_gui_di",    "",                                 "string",  "email",    "From email name"),
             # Nhóm: payment
-            ("tien_te",             "VND",                              "string",  "payment",  "Đơn vị tiền tệ"),
-            ("thue_vat_phan_tram",  "10",                               "integer", "payment",  "Thuế VAT (%)"),
-            ("phi_giao_hang_mac_dinh", "30000",                         "integer", "payment",  "Phí giao hàng mặc định (VND)"),
-            ("mien_phi_giao_hang_tu",  "500000",                        "integer", "payment",  "Miễn phí giao hàng khi đơn >= N VND"),
-            # Nhóm: loyalty
-            ("ty_le_tich_diem",     "100",                              "integer", "loyalty",  "Mỗi N VND mua hàng được 1 điểm"),
-            ("diem_quy_doi_tien",   "1000",                             "integer", "loyalty",  "1 điểm = N VND khi quy đổi"),
+            ("g6_don_vi_tien_te",      "VND",                              "string",  "payment",  "Đơn vị tiền tệ"),
+            ("g6_vnpay_terminal_id",   "",                                 "string",  "payment",  "VNPay Terminal ID"),
+            ("g6_vnpay_secret_key",    "",                                 "string",  "payment",  "VNPay Secret Key"),
+            ("g6_momo_partner_code",   "",                                 "string",  "payment",  "MoMo Partner Code"),
+            ("g6_momo_access_key",     "",                                 "string",  "payment",  "MoMo Access Key"),
+            ("g6_momo_secret_key",     "",                                 "string",  "payment",  "MoMo Secret Key"),
+            ("g6_thue_vat_phan_tram",  "0",                                "int",     "payment",  "Thuế VAT %"),
+            # Nhóm: website (notification / loyalty)
+            ("g6_so_ngay_nhac_het_han", "7",                               "int",     "website",  "Nhắc hội viên trước N ngày hết hạn"),
+            ("g6_so_ngay_nhac_lan_2",  "3",                                "int",     "website",  "Nhắc lần 2 trước N ngày hết hạn"),
+            ("g6_diem_tren_moi_1000_dong", "1",                            "int",     "website",  "1 điểm / N đồng chi tiêu"),
+            ("g6_1_diem_bang_dong",    "100",                              "int",     "website",  "1 điểm = N đồng khi dùng"),
+            # Nhóm: security (OTP)
+            ("g6_otp_het_han_phut",    "5",                                "int",     "security", "OTP hết hạn sau N phút"),
+            ("g6_otp_so_lan_nhap_sai", "3",                                "int",     "security", "OTP sai tối đa N lần"),
             # Nhóm: theme
-            ("mau_chu_dao",         "#2563EB",                          "string",  "theme",    "Màu chủ đạo (hex)"),
-            ("mau_phu",             "#10B981",                          "string",  "theme",    "Màu phụ (hex)"),
+            ("g6_mau_chinh",           "#0d6efd",                          "string",  "theme",    "Màu chủ đạo (hex)"),
+            ("g6_mau_phu",             "#6c757d",                          "string",  "theme",    "Màu phụ (hex)"),
+            ("g6_che_do_toi",          "0",                                "bool",    "theme",    "Bật chế độ tối mặc định"),
         ]
-        for nqt_khoa, nqt_gia_tri, nqt_kieu, nqt_nhom, nqt_mo_ta in nqt_danh_sach_cau_hinh:
-            db.session.add(NqtCauHinh(
-                nqt_khoa=nqt_khoa,
-                nqt_gia_tri=nqt_gia_tri,
-                nqt_kieu_du_lieu=nqt_kieu,
-                nqt_nhom=nqt_nhom,
-                nqt_mo_ta=nqt_mo_ta,
+        for g6_khoa, g6_gia_tri, g6_kieu, g6_nhom, g6_mo_ta in g6_danh_sach_cau_hinh:
+            db.session.add(G6CauHinh(
+                g6_khoa=g6_khoa,
+                g6_gia_tri=g6_gia_tri,
+                g6_kieu_du_lieu=g6_kieu,
+                g6_nhom=g6_nhom,
+                g6_mo_ta=g6_mo_ta,
             ))
         db.session.commit()
-        print(f"[OK] NqtCauHinh — đã seed {len(nqt_danh_sach_cau_hinh)} rows")
+        print(f"[OK] G6CauHinh — đã seed {len(g6_danh_sach_cau_hinh)} rows")
 
     # ------------------------------------------------------------------
-    # 2. NqtVaiTro
+    # 2. G6VaiTro
     # ------------------------------------------------------------------
-    if NqtVaiTro.query.first():
-        print("[SKIP] NqtVaiTro — đã có dữ liệu")
+    if G6VaiTro.query.first():
+        print("[SKIP] G6VaiTro — đã có dữ liệu")
     else:
-        nqt_danh_sach_vai_tro = [
-            ("quan_tri",         "Quản trị hệ thống — toàn quyền"),
-            ("quan_ly",          "Quản lý chi nhánh"),
-            ("huan_luyen_vien",  "Huấn luyện viên PT"),
-            ("le_tan",           "Lễ tân / Nhân viên tiếp đón"),
+        g6_danh_sach_vai_tro = [
+            ("G6QuanTri",         "Quản trị hệ thống — toàn quyền"),
+            ("G6QuanLy",          "Quản lý chi nhánh"),
+            ("G6HuanLuyenVien",   "Huấn luyện viên PT"),
+            ("G6LeTan",           "Lễ tân - check-in, đăng ký hội viên"),
         ]
-        for nqt_ten, nqt_mo_ta in nqt_danh_sach_vai_tro:
-            db.session.add(NqtVaiTro(nqt_ten_vai_tro=nqt_ten, nqt_mo_ta=nqt_mo_ta))
+        for g6_ten, g6_mo_ta in g6_danh_sach_vai_tro:
+            db.session.add(G6VaiTro(g6_ten_vai_tro=g6_ten, g6_mo_ta=g6_mo_ta))
         db.session.commit()
-        print(f"[OK] NqtVaiTro — đã seed {len(nqt_danh_sach_vai_tro)} rows")
+        print(f"[OK] G6VaiTro — đã seed {len(g6_danh_sach_vai_tro)} rows")
 
     # ------------------------------------------------------------------
-    # 3. NqtQuyenHan
+    # 3. G6QuyenHan
     # ------------------------------------------------------------------
-    if NqtQuyenHan.query.first():
-        print("[SKIP] NqtQuyenHan — đã có dữ liệu")
+    if G6QuyenHan.query.first():
+        print("[SKIP] G6QuyenHan — đã có dữ liệu")
     else:
-        nqt_danh_sach_quyen = [
+        g6_danh_sach_quyen = [
             # Nhóm hoi_vien
-            ("xem_hoi_vien",     "hoi_vien"),
-            ("them_hoi_vien",    "hoi_vien"),
-            ("sua_hoi_vien",     "hoi_vien"),
-            ("xoa_hoi_vien",     "hoi_vien"),
-            # Nhóm goi_tap
-            ("xem_goi_tap",      "goi_tap"),
-            ("them_goi_tap",     "goi_tap"),
-            ("sua_goi_tap",      "goi_tap"),
-            ("xoa_goi_tap",      "goi_tap"),
-            # Nhóm nhan_vien
-            ("xem_nhan_vien",    "nhan_vien"),
-            ("them_nhan_vien",   "nhan_vien"),
-            ("sua_nhan_vien",    "nhan_vien"),
-            ("xoa_nhan_vien",    "nhan_vien"),
+            ("g6_xem_hoi_vien",        "hoi_vien"),
+            ("g6_tao_hoi_vien",        "hoi_vien"),
+            ("g6_sua_hoi_vien",        "hoi_vien"),
+            ("g6_xoa_hoi_vien",        "hoi_vien"),
+            # Nhóm san_pham
+            ("g6_xem_san_pham",        "san_pham"),
+            ("g6_tao_san_pham",        "san_pham"),
+            ("g6_sua_san_pham",        "san_pham"),
+            ("g6_xoa_san_pham",        "san_pham"),
             # Nhóm don_hang
-            ("xem_don_hang",     "don_hang"),
-            ("sua_don_hang",     "don_hang"),
-            ("huy_don_hang",     "don_hang"),
+            ("g6_xem_don_hang",        "don_hang"),
+            ("g6_cap_nhat_don_hang",   "don_hang"),
+            ("g6_huy_don_hang",        "don_hang"),
             # Nhóm bao_cao
-            ("xem_bao_cao",      "bao_cao"),
-            ("xuat_bao_cao",     "bao_cao"),
+            ("g6_xem_doanh_thu",       "bao_cao"),
+            ("g6_xuat_bao_cao",        "bao_cao"),
             # Nhóm cau_hinh
-            ("quan_ly_cau_hinh", "cau_hinh"),
-            ("xem_cau_hinh",     "cau_hinh"),
-            ("sua_cau_hinh",     "cau_hinh"),
+            ("g6_xem_cau_hinh",        "cau_hinh"),
+            ("g6_sua_cau_hinh",        "cau_hinh"),
+            # Nhóm nhan_vien
+            ("g6_quan_ly_nhan_vien",   "nhan_vien"),
+            # Nhóm kho_hang
+            ("g6_xem_kho_hang",        "kho_hang"),
+            ("g6_dieu_chinh_kho",      "kho_hang"),
+            # Nhóm hoi_vien (checkin)
+            ("g6_checkin_hoi_vien",     "hoi_vien"),
+            # Nhóm lop_hoc
+            ("g6_xem_lich_lop_hoc",    "lop_hoc"),
+            ("g6_quan_ly_lop_hoc",     "lop_hoc"),
         ]
-        for nqt_ten, nqt_nhom in nqt_danh_sach_quyen:
-            db.session.add(NqtQuyenHan(nqt_ten_quyen=nqt_ten, nqt_nhom_quyen=nqt_nhom))
+        for g6_ten, g6_nhom in g6_danh_sach_quyen:
+            db.session.add(G6QuyenHan(g6_ten_quyen=g6_ten, g6_nhom_quyen=g6_nhom))
         db.session.commit()
-        print(f"[OK] NqtQuyenHan — đã seed {len(nqt_danh_sach_quyen)} rows")
+        print(f"[OK] G6QuyenHan — đã seed {len(g6_danh_sach_quyen)} rows")
 
     # ------------------------------------------------------------------
-    # 4. NqtVaiTroQuyen (mapping)
+    # 4. G6VaiTroQuyen (mapping)
     # ------------------------------------------------------------------
-    if NqtVaiTroQuyen.query.first():
-        print("[SKIP] NqtVaiTroQuyen — đã có dữ liệu")
+    if G6VaiTroQuyen.query.first():
+        print("[SKIP] G6VaiTroQuyen — đã có dữ liệu")
     else:
-        nqt_vai_tro_map = {v.nqt_ten_vai_tro: v.nqt_ma_vai_tro for v in NqtVaiTro.query.all()}
-        nqt_quyen_map   = {q.nqt_ten_quyen:   q.nqt_ma_quyen   for q in NqtQuyenHan.query.all()}
+        g6_vai_tro_map = {v.g6_ten_vai_tro: v.g6_ma_vai_tro for v in G6VaiTro.query.all()}
+        g6_quyen_map   = {q.g6_ten_quyen:   q.g6_ma_quyen   for q in G6QuyenHan.query.all()}
 
-        # quan_tri nhận tất cả quyền
-        nqt_quyen_theo_vai_tro = {
-            "quan_tri": list(nqt_quyen_map.keys()),
-            "quan_ly": [
-                "xem_hoi_vien", "them_hoi_vien", "sua_hoi_vien",
-                "xem_goi_tap",  "them_goi_tap",  "sua_goi_tap",
-                "xem_nhan_vien","them_nhan_vien", "sua_nhan_vien",
-                "xem_don_hang", "sua_don_hang",
-                "xem_bao_cao",  "xuat_bao_cao",
+        # G6QuanTri nhận tất cả quyền
+        g6_quyen_theo_vai_tro = {
+            "G6QuanTri": list(g6_quyen_map.keys()),
+            "G6QuanLy": [
+                "g6_xem_hoi_vien", "g6_tao_hoi_vien", "g6_sua_hoi_vien",
+                "g6_xem_san_pham", "g6_tao_san_pham", "g6_sua_san_pham",
+                "g6_xem_don_hang", "g6_cap_nhat_don_hang",
+                "g6_xem_doanh_thu", "g6_xuat_bao_cao",
+                "g6_quan_ly_nhan_vien",
+                "g6_xem_kho_hang", "g6_dieu_chinh_kho",
+                "g6_checkin_hoi_vien",
+                "g6_xem_lich_lop_hoc", "g6_quan_ly_lop_hoc",
             ],
-            "huan_luyen_vien": [
-                "xem_hoi_vien",
-                "xem_goi_tap",
-                "xem_bao_cao",
+            "G6HuanLuyenVien": [
+                "g6_xem_hoi_vien",
+                "g6_xem_san_pham",
+                "g6_xem_lich_lop_hoc",
             ],
-            "le_tan": [
-                "xem_hoi_vien", "them_hoi_vien", "sua_hoi_vien",
-                "xem_goi_tap",
-                "xem_don_hang",
+            "G6LeTan": [
+                "g6_xem_hoi_vien", "g6_tao_hoi_vien", "g6_sua_hoi_vien",
+                "g6_checkin_hoi_vien",
+                "g6_xem_san_pham",
+                "g6_xem_don_hang",
+                "g6_xem_lich_lop_hoc",
             ],
         }
 
-        nqt_dem = 0
-        for nqt_ten_vai_tro, nqt_ds_quyen in nqt_quyen_theo_vai_tro.items():
-            nqt_ma_vai_tro = nqt_vai_tro_map.get(nqt_ten_vai_tro)
-            if not nqt_ma_vai_tro:
+        g6_dem = 0
+        for g6_ten_vai_tro, g6_ds_quyen in g6_quyen_theo_vai_tro.items():
+            g6_ma_vai_tro = g6_vai_tro_map.get(g6_ten_vai_tro)
+            if not g6_ma_vai_tro:
                 continue
-            for nqt_ten_quyen in nqt_ds_quyen:
-                nqt_ma_quyen = nqt_quyen_map.get(nqt_ten_quyen)
-                if nqt_ma_quyen:
-                    db.session.add(NqtVaiTroQuyen(
-                        nqt_ma_vai_tro=nqt_ma_vai_tro,
-                        nqt_ma_quyen=nqt_ma_quyen,
+            for g6_ten_quyen in g6_ds_quyen:
+                g6_ma_quyen = g6_quyen_map.get(g6_ten_quyen)
+                if g6_ma_quyen:
+                    db.session.add(G6VaiTroQuyen(
+                        g6_ma_vai_tro=g6_ma_vai_tro,
+                        g6_ma_quyen=g6_ma_quyen,
                     ))
-                    nqt_dem += 1
+                    g6_dem += 1
         db.session.commit()
-        print(f"[OK] NqtVaiTroQuyen — đã seed {nqt_dem} rows")
+        print(f"[OK] G6VaiTroQuyen — đã seed {g6_dem} rows")
 
     # ------------------------------------------------------------------
-    # 5. NqtChiNhanh
+    # 5. G6ChiNhanh
     # ------------------------------------------------------------------
-    if NqtChiNhanh.query.first():
-        print("[SKIP] NqtChiNhanh — đã có dữ liệu")
+    if G6ChiNhanh.query.first():
+        print("[SKIP] G6ChiNhanh — đã có dữ liệu")
     else:
-        nqt_danh_sach_chi_nhanh = [
+        g6_danh_sach_chi_nhanh = [
             {
-                "nqt_ten_chi_nhanh": "NQT Gym - Cầu Giấy",
-                "nqt_dia_chi": "123 Xuân Thủy, Cầu Giấy",
-                "nqt_thanh_pho": "Hà Nội",
-                "nqt_tinh": "Hà Nội",
-                "nqt_hotline": "024 3567 8901",
-                "nqt_email": "caugiay@nqtgym.vn",
-                "nqt_gio_mo_cua": time(5, 0),
-                "nqt_gio_dong_cua": time(23, 0),
-                "nqt_suc_chua_toi_da": 120,
-                "nqt_co_sauna": True,
-                "nqt_co_ho_boi": False,
-                "nqt_vi_do": 21.036944,
-                "nqt_kinh_do": 105.782778,
+                "g6_ten_chi_nhanh": "G6 Gym - Cầu Giấy",
+                "g6_dia_chi": "123 Xuân Thủy, Cầu Giấy",
+                "g6_thanh_pho": "Hà Nội",
+                "g6_tinh": "Hà Nội",
+                "g6_hotline": "024 3567 8901",
+                "g6_email": "caugiay@g6gym.vn",
+                "g6_gio_mo_cua": time(5, 0),
+                "g6_gio_dong_cua": time(23, 0),
+                "g6_suc_chua_toi_da": 120,
+                "g6_co_sauna": True,
+                "g6_co_ho_boi": False,
+                "g6_vi_do": 21.036944,
+                "g6_kinh_do": 105.782778,
             },
             {
-                "nqt_ten_chi_nhanh": "NQT Gym - Đống Đa",
-                "nqt_dia_chi": "45 Láng Hạ, Đống Đa",
-                "nqt_thanh_pho": "Hà Nội",
-                "nqt_tinh": "Hà Nội",
-                "nqt_hotline": "024 3678 9012",
-                "nqt_email": "dongda@nqtgym.vn",
-                "nqt_gio_mo_cua": time(5, 30),
-                "nqt_gio_dong_cua": time(22, 30),
-                "nqt_suc_chua_toi_da": 80,
-                "nqt_co_sauna": True,
-                "nqt_co_ho_boi": True,
-                "nqt_vi_do": 21.022222,
-                "nqt_kinh_do": 105.841389,
+                "g6_ten_chi_nhanh": "G6 Gym - Đống Đa",
+                "g6_dia_chi": "45 Láng Hạ, Đống Đa",
+                "g6_thanh_pho": "Hà Nội",
+                "g6_tinh": "Hà Nội",
+                "g6_hotline": "024 3678 9012",
+                "g6_email": "dongda@g6gym.vn",
+                "g6_gio_mo_cua": time(5, 30),
+                "g6_gio_dong_cua": time(22, 30),
+                "g6_suc_chua_toi_da": 80,
+                "g6_co_sauna": True,
+                "g6_co_ho_boi": True,
+                "g6_vi_do": 21.022222,
+                "g6_kinh_do": 105.841389,
             },
         ]
-        for nqt_cn in nqt_danh_sach_chi_nhanh:
-            db.session.add(NqtChiNhanh(**nqt_cn))
+        for g6_cn in g6_danh_sach_chi_nhanh:
+            db.session.add(G6ChiNhanh(**g6_cn))
         db.session.commit()
-        print(f"[OK] NqtChiNhanh — đã seed {len(nqt_danh_sach_chi_nhanh)} rows")
+        print(f"[OK] G6ChiNhanh — đã seed {len(g6_danh_sach_chi_nhanh)} rows")
 
     # ------------------------------------------------------------------
-    # 6. NqtNguoiDung
+    # 6. G6NguoiDung
     # ------------------------------------------------------------------
-    if NqtNguoiDung.query.first():
-        print("[SKIP] NqtNguoiDung — đã có dữ liệu")
+    if G6NguoiDung.query.first():
+        print("[SKIP] G6NguoiDung — đã có dữ liệu")
     else:
-        nqt_cn_1 = NqtChiNhanh.query.first()
-        nqt_danh_sach_nguoi_dung = [
+        g6_cn_1 = G6ChiNhanh.query.first()
+        g6_danh_sach_nguoi_dung = [
             {
-                "nqt_ten_dang_nhap": "admin",
-                "nqt_mat_khau": bcrypt.hashpw("Admin@123".encode(), bcrypt.gensalt()).decode(),
-                "nqt_ho_ten": "Quản Trị Viên",
-                "nqt_email": "admin@nqtgym.vn",
-                "nqt_so_dien_thoai": "0901 000 001",
-                "nqt_ma_chi_nhanh": nqt_cn_1.nqt_ma_chi_nhanh if nqt_cn_1 else None,
+                "g6_ten_dang_nhap": "admin",
+                "g6_mat_khau": bcrypt.hashpw("Admin@123".encode(), bcrypt.gensalt()).decode(),
+                "g6_ho_ten": "Quản Trị Viên",
+                "g6_email": "admin@g6gym.vn",
+                "g6_so_dien_thoai": "0901000001",
+                "g6_ma_chi_nhanh": g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else None,
             },
             {
-                "nqt_ten_dang_nhap": "manager_caugiay",
-                "nqt_mat_khau": bcrypt.hashpw("Manager@123".encode(), bcrypt.gensalt()).decode(),
-                "nqt_ho_ten": "Nguyễn Văn Quản",
-                "nqt_email": "manager@nqtgym.vn",
-                "nqt_so_dien_thoai": "0901 000 002",
-                "nqt_ma_chi_nhanh": nqt_cn_1.nqt_ma_chi_nhanh if nqt_cn_1 else None,
+                "g6_ten_dang_nhap": "manager_caugiay",
+                "g6_mat_khau": bcrypt.hashpw("Manager@123".encode(), bcrypt.gensalt()).decode(),
+                "g6_ho_ten": "Nguyễn Văn Quản",
+                "g6_email": "manager@g6gym.vn",
+                "g6_so_dien_thoai": "0901000002",
+                "g6_ma_chi_nhanh": g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else None,
             },
             {
-                "nqt_ten_dang_nhap": "letan_01",
-                "nqt_mat_khau": bcrypt.hashpw("LeTan@123".encode(), bcrypt.gensalt()).decode(),
-                "nqt_ho_ten": "Trần Thị Lễ",
-                "nqt_email": "letan@nqtgym.vn",
-                "nqt_so_dien_thoai": "0901 000 003",
-                "nqt_ma_chi_nhanh": nqt_cn_1.nqt_ma_chi_nhanh if nqt_cn_1 else None,
+                "g6_ten_dang_nhap": "letan_01",
+                "g6_mat_khau": bcrypt.hashpw("LeTan@123".encode(), bcrypt.gensalt()).decode(),
+                "g6_ho_ten": "Trần Thị Lễ",
+                "g6_email": "letan@g6gym.vn",
+                "g6_so_dien_thoai": "0901000003",
+                "g6_ma_chi_nhanh": g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else None,
             },
         ]
-        for nqt_nd in nqt_danh_sach_nguoi_dung:
-            db.session.add(NqtNguoiDung(**nqt_nd))
+        for g6_nd in g6_danh_sach_nguoi_dung:
+            db.session.add(G6NguoiDung(**g6_nd))
         db.session.commit()
-        print(f"[OK] NqtNguoiDung — đã seed {len(nqt_danh_sach_nguoi_dung)} rows")
+        print(f"[OK] G6NguoiDung — đã seed {len(g6_danh_sach_nguoi_dung)} rows")
 
     # ------------------------------------------------------------------
-    # 7. NqtNguoiDungVaiTro (gán role)
+    # 7. G6NguoiDungVaiTro (gán role)
     # ------------------------------------------------------------------
-    if NqtNguoiDungVaiTro.query.first():
-        print("[SKIP] NqtNguoiDungVaiTro — đã có dữ liệu")
+    if G6NguoiDungVaiTro.query.first():
+        print("[SKIP] G6NguoiDungVaiTro — đã có dữ liệu")
     else:
-        nqt_nd_map = {u.nqt_ten_dang_nhap: u.nqt_ma_nguoi_dung for u in NqtNguoiDung.query.all()}
-        nqt_vt_map = {v.nqt_ten_vai_tro:   v.nqt_ma_vai_tro    for v in NqtVaiTro.query.all()}
+        g6_nd_map = {u.g6_ten_dang_nhap: u.g6_ma_nguoi_dung for u in G6NguoiDung.query.all()}
+        g6_vt_map = {v.g6_ten_vai_tro:   v.g6_ma_vai_tro    for v in G6VaiTro.query.all()}
 
-        nqt_gan_vai_tro = [
-            ("admin",            "quan_tri"),
-            ("manager_caugiay",  "quan_ly"),
-            ("letan_01",         "le_tan"),
+        g6_gan_vai_tro = [
+            ("admin",            "G6QuanTri"),
+            ("manager_caugiay",  "G6QuanLy"),
+            ("letan_01",         "G6LeTan"),
         ]
-        nqt_dem = 0
-        for nqt_ten_dang_nhap, nqt_ten_vai_tro in nqt_gan_vai_tro:
-            nqt_ma_nd = nqt_nd_map.get(nqt_ten_dang_nhap)
-            nqt_ma_vt = nqt_vt_map.get(nqt_ten_vai_tro)
-            if nqt_ma_nd and nqt_ma_vt:
-                db.session.add(NqtNguoiDungVaiTro(
-                    nqt_ma_nguoi_dung=nqt_ma_nd,
-                    nqt_ma_vai_tro=nqt_ma_vt,
+        g6_dem = 0
+        for g6_ten_dang_nhap, g6_ten_vai_tro in g6_gan_vai_tro:
+            g6_ma_nd = g6_nd_map.get(g6_ten_dang_nhap)
+            g6_ma_vt = g6_vt_map.get(g6_ten_vai_tro)
+            if g6_ma_nd and g6_ma_vt:
+                db.session.add(G6NguoiDungVaiTro(
+                    g6_ma_nguoi_dung=g6_ma_nd,
+                    g6_ma_vai_tro=g6_ma_vt,
                 ))
-                nqt_dem += 1
+                g6_dem += 1
         db.session.commit()
-        print(f"[OK] NqtNguoiDungVaiTro — đã seed {nqt_dem} rows")
+        print(f"[OK] G6NguoiDungVaiTro — đã seed {g6_dem} rows")
 
     # ------------------------------------------------------------------
-    # 8. NqtNhanVien
+    # 8. G6NhanVien
     # ------------------------------------------------------------------
-    if NqtNhanVien.query.first():
-        print("[SKIP] NqtNhanVien — đã có dữ liệu")
+    if G6NhanVien.query.first():
+        print("[SKIP] G6NhanVien — đã có dữ liệu")
     else:
-        nqt_nd_map = {u.nqt_ten_dang_nhap: u.nqt_ma_nguoi_dung for u in NqtNguoiDung.query.all()}
-        nqt_cn_1   = NqtChiNhanh.query.first()
-        nqt_ma_cn  = nqt_cn_1.nqt_ma_chi_nhanh if nqt_cn_1 else 1
+        g6_nd_map = {u.g6_ten_dang_nhap: u.g6_ma_nguoi_dung for u in G6NguoiDung.query.all()}
+        g6_cn_1   = G6ChiNhanh.query.first()
+        g6_ma_cn  = g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else 1
 
-        nqt_danh_sach_nhan_vien = [
+        g6_danh_sach_nhan_vien = [
             {
-                "nqt_ma_nguoi_dung": nqt_nd_map.get("admin"),
-                "nqt_ma_chi_nhanh": nqt_ma_cn,
-                "nqt_ho_ten": "Quản Trị Viên",
-                "nqt_ngay_sinh": date(1990, 1, 1),
-                "nqt_gioi_tinh": "nam",
-                "nqt_so_dien_thoai": "0901 000 001",
-                "nqt_email": "admin@nqtgym.vn",
-                "nqt_ngay_vao_lam": date(2023, 1, 1),
-                "nqt_luong_co_ban": 20_000_000,
+                "g6_ma_nguoi_dung": g6_nd_map.get("admin"),
+                "g6_ma_chi_nhanh": g6_ma_cn,
+                "g6_ho_ten": "Quản Trị Viên",
+                "g6_ngay_sinh": date(1990, 1, 1),
+                "g6_gioi_tinh": "nam",
+                "g6_so_dien_thoai": "0901000001",
+                "g6_email": "admin@g6gym.vn",
+                "g6_ngay_vao_lam": date(2023, 1, 1),
+                "g6_luong_co_ban": 20_000_000,
             },
             {
-                "nqt_ma_nguoi_dung": nqt_nd_map.get("manager_caugiay"),
-                "nqt_ma_chi_nhanh": nqt_ma_cn,
-                "nqt_ho_ten": "Nguyễn Văn Quản",
-                "nqt_ngay_sinh": date(1992, 6, 15),
-                "nqt_gioi_tinh": "nam",
-                "nqt_so_dien_thoai": "0901 000 002",
-                "nqt_email": "manager@nqtgym.vn",
-                "nqt_ngay_vao_lam": date(2023, 3, 1),
-                "nqt_luong_co_ban": 15_000_000,
+                "g6_ma_nguoi_dung": g6_nd_map.get("manager_caugiay"),
+                "g6_ma_chi_nhanh": g6_ma_cn,
+                "g6_ho_ten": "Nguyễn Văn Quản",
+                "g6_ngay_sinh": date(1992, 6, 15),
+                "g6_gioi_tinh": "nam",
+                "g6_so_dien_thoai": "0901000002",
+                "g6_email": "manager@g6gym.vn",
+                "g6_ngay_vao_lam": date(2023, 3, 1),
+                "g6_luong_co_ban": 15_000_000,
             },
             {
-                "nqt_ma_nguoi_dung": nqt_nd_map.get("letan_01"),
-                "nqt_ma_chi_nhanh": nqt_ma_cn,
-                "nqt_ho_ten": "Trần Thị Lễ",
-                "nqt_ngay_sinh": date(1998, 9, 20),
-                "nqt_gioi_tinh": "nu",
-                "nqt_so_dien_thoai": "0901 000 003",
-                "nqt_email": "letan@nqtgym.vn",
-                "nqt_ngay_vao_lam": date(2024, 1, 15),
-                "nqt_luong_co_ban": 8_000_000,
+                "g6_ma_nguoi_dung": g6_nd_map.get("letan_01"),
+                "g6_ma_chi_nhanh": g6_ma_cn,
+                "g6_ho_ten": "Trần Thị Lễ",
+                "g6_ngay_sinh": date(1998, 9, 20),
+                "g6_gioi_tinh": "nu",
+                "g6_so_dien_thoai": "0901000003",
+                "g6_email": "letan@g6gym.vn",
+                "g6_ngay_vao_lam": date(2024, 1, 15),
+                "g6_luong_co_ban": 8_000_000,
             },
         ]
-        for nqt_nv in nqt_danh_sach_nhan_vien:
-            db.session.add(NqtNhanVien(**nqt_nv))
+        for g6_nv in g6_danh_sach_nhan_vien:
+            db.session.add(G6NhanVien(**g6_nv))
         db.session.commit()
-        print(f"[OK] NqtNhanVien — đã seed {len(nqt_danh_sach_nhan_vien)} rows")
+        print(f"[OK] G6NhanVien — đã seed {len(g6_danh_sach_nhan_vien)} rows")
 
     # ------------------------------------------------------------------
-    # 9. NqtGoiTap
+    # 9. G6GoiTap
     # ------------------------------------------------------------------
-    if NqtGoiTap.query.first():
-        print("[SKIP] NqtGoiTap — đã có dữ liệu")
+    if G6GoiTap.query.first():
+        print("[SKIP] G6GoiTap — đã có dữ liệu")
     else:
-        nqt_danh_sach_goi = [
+        g6_danh_sach_goi = [
             {
-                "nqt_ten_goi": "Gói 1 Tháng",
-                "nqt_mo_ta": "Tập luyện tự do 1 tháng, 1 lượt/ngày",
-                "nqt_so_ngay": 30,
-                "nqt_gia": 500_000,
-                "nqt_gia_khuyen_mai": None,
-                "nqt_co_pt": False,
-                "nqt_so_buoi_pt": 0,
-                "nqt_co_sauna": False,
-                "nqt_mau_hien_thi": "#3B82F6",
-                "nqt_la_noi_bat": False,
-                "nqt_thu_tu_hien_thi": 1,
+                "g6_ten_goi": "Gói 1 Tháng",
+                "g6_mo_ta": "Tập luyện tự do 1 tháng, 1 lượt/ngày",
+                "g6_so_ngay": 30,
+                "g6_gia": 500_000,
+                "g6_gia_khuyen_mai": None,
+                "g6_co_pt": False,
+                "g6_so_buoi_pt": 0,
+                "g6_co_sauna": False,
+                "g6_mau_hien_thi": "#3B82F6",
+                "g6_la_noi_bat": False,
+                "g6_thu_tu_hien_thi": 1,
             },
             {
-                "nqt_ten_goi": "Gói 3 Tháng",
-                "nqt_mo_ta": "Tập luyện tự do 3 tháng — tiết kiệm 10%",
-                "nqt_so_ngay": 90,
-                "nqt_gia": 1_350_000,
-                "nqt_gia_khuyen_mai": 1_200_000,
-                "nqt_co_pt": False,
-                "nqt_so_buoi_pt": 0,
-                "nqt_co_sauna": False,
-                "nqt_mau_hien_thi": "#10B981",
-                "nqt_la_noi_bat": False,
-                "nqt_thu_tu_hien_thi": 2,
+                "g6_ten_goi": "Gói 3 Tháng",
+                "g6_mo_ta": "Tập luyện tự do 3 tháng — tiết kiệm 10%",
+                "g6_so_ngay": 90,
+                "g6_gia": 1_350_000,
+                "g6_gia_khuyen_mai": 1_200_000,
+                "g6_co_pt": False,
+                "g6_so_buoi_pt": 0,
+                "g6_co_sauna": False,
+                "g6_mau_hien_thi": "#10B981",
+                "g6_la_noi_bat": False,
+                "g6_thu_tu_hien_thi": 2,
             },
             {
-                "nqt_ten_goi": "Gói 6 Tháng",
-                "nqt_mo_ta": "Tập luyện tự do 6 tháng — tiết kiệm 20%",
-                "nqt_so_ngay": 180,
-                "nqt_gia": 2_400_000,
-                "nqt_gia_khuyen_mai": None,
-                "nqt_co_pt": False,
-                "nqt_so_buoi_pt": 0,
-                "nqt_co_sauna": True,
-                "nqt_mau_hien_thi": "#F59E0B",
-                "nqt_la_noi_bat": True,
-                "nqt_thu_tu_hien_thi": 3,
+                "g6_ten_goi": "Gói 6 Tháng",
+                "g6_mo_ta": "Tập luyện tự do 6 tháng — tiết kiệm 20%",
+                "g6_so_ngay": 180,
+                "g6_gia": 2_400_000,
+                "g6_gia_khuyen_mai": None,
+                "g6_co_pt": False,
+                "g6_so_buoi_pt": 0,
+                "g6_co_sauna": True,
+                "g6_mau_hien_thi": "#F59E0B",
+                "g6_la_noi_bat": True,
+                "g6_thu_tu_hien_thi": 3,
             },
             {
-                "nqt_ten_goi": "Gói 1 Năm",
-                "nqt_mo_ta": "Tập luyện tự do 12 tháng — tiết kiệm 30%",
-                "nqt_so_ngay": 365,
-                "nqt_gia": 4_200_000,
-                "nqt_gia_khuyen_mai": None,
-                "nqt_co_pt": False,
-                "nqt_so_buoi_pt": 0,
-                "nqt_co_sauna": True,
-                "nqt_mau_hien_thi": "#8B5CF6",
-                "nqt_la_noi_bat": False,
-                "nqt_thu_tu_hien_thi": 4,
+                "g6_ten_goi": "Gói 1 Năm",
+                "g6_mo_ta": "Tập luyện tự do 12 tháng — tiết kiệm 30%",
+                "g6_so_ngay": 365,
+                "g6_gia": 4_200_000,
+                "g6_gia_khuyen_mai": None,
+                "g6_co_pt": False,
+                "g6_so_buoi_pt": 0,
+                "g6_co_sauna": True,
+                "g6_mau_hien_thi": "#8B5CF6",
+                "g6_la_noi_bat": False,
+                "g6_thu_tu_hien_thi": 4,
             },
             {
-                "nqt_ten_goi": "Gói PT 12 Buổi",
-                "nqt_mo_ta": "12 buổi tập cùng huấn luyện viên cá nhân",
-                "nqt_so_ngay": 60,
-                "nqt_gia": 3_600_000,
-                "nqt_gia_khuyen_mai": None,
-                "nqt_co_pt": True,
-                "nqt_so_buoi_pt": 12,
-                "nqt_co_sauna": False,
-                "nqt_mau_hien_thi": "#EF4444",
-                "nqt_la_noi_bat": False,
-                "nqt_thu_tu_hien_thi": 5,
+                "g6_ten_goi": "Gói PT 12 Buổi",
+                "g6_mo_ta": "12 buổi tập cùng huấn luyện viên cá nhân",
+                "g6_so_ngay": 60,
+                "g6_gia": 3_600_000,
+                "g6_gia_khuyen_mai": None,
+                "g6_co_pt": True,
+                "g6_so_buoi_pt": 12,
+                "g6_co_sauna": False,
+                "g6_mau_hien_thi": "#EF4444",
+                "g6_la_noi_bat": False,
+                "g6_thu_tu_hien_thi": 5,
             },
         ]
-        for nqt_gt in nqt_danh_sach_goi:
-            db.session.add(NqtGoiTap(**nqt_gt))
+        for g6_gt in g6_danh_sach_goi:
+            db.session.add(G6GoiTap(**g6_gt))
         db.session.commit()
-        print(f"[OK] NqtGoiTap — đã seed {len(nqt_danh_sach_goi)} rows")
+        print(f"[OK] G6GoiTap — đã seed {len(g6_danh_sach_goi)} rows")
 
     # ------------------------------------------------------------------
-    # 10. NqtHangThanhVien
+    # 10. G6HangThanhVien
     # ------------------------------------------------------------------
-    if NqtHangThanhVien.query.first():
-        print("[SKIP] NqtHangThanhVien — đã có dữ liệu")
+    if G6HangThanhVien.query.first():
+        print("[SKIP] G6HangThanhVien — đã có dữ liệu")
     else:
-        nqt_danh_sach_hang = [
-            ("Đồng",        0,      1.0,  "#CD7F32", "bronze"),
-            ("Bạc",         5000,   1.2,  "#C0C0C0", "silver"),
-            ("Vàng",        15000,  1.5,  "#FFD700", "gold"),
-            ("Kim Cương",   50000,  2.0,  "#B9F2FF", "diamond"),
+        g6_danh_sach_hang = [
+            ("Đồng",        0,      1.0,  "#CD7F32"),
+            ("Bạc",         5000,   1.2,  "#C0C0C0"),
+            ("Vàng",        15000,  1.5,  "#FFD700"),
+            ("Kim Cương",   50000,  2.0,  "#B9F2FF"),
         ]
-        for nqt_ten, nqt_diem, nqt_he_so, nqt_mau, nqt_icon in nqt_danh_sach_hang:
-            db.session.add(NqtHangThanhVien(
-                nqt_ten_hang=nqt_ten,
-                nqt_diem_toi_thieu=nqt_diem,
-                nqt_he_so_tich_diem=nqt_he_so,
-                nqt_mau_hien_thi=nqt_mau,
-                nqt_icon=nqt_icon,
+        for g6_ten, g6_diem, g6_he_so, g6_mau in g6_danh_sach_hang:
+            db.session.add(G6HangThanhVien(
+                g6_ten_hang=g6_ten,
+                g6_diem_toi_thieu=g6_diem,
+                g6_he_so_tich_diem=g6_he_so,
+                g6_mau_hien_thi=g6_mau,
             ))
         db.session.commit()
-        print(f"[OK] NqtHangThanhVien — đã seed {len(nqt_danh_sach_hang)} rows")
+        print(f"[OK] G6HangThanhVien — đã seed {len(g6_danh_sach_hang)} rows")
 
     # ------------------------------------------------------------------
-    # 11. NqtHoiVien
+    # 11. G6HoiVien
     # ------------------------------------------------------------------
-    if NqtHoiVien.query.first():
-        print("[SKIP] NqtHoiVien — đã có dữ liệu")
+    if G6HoiVien.query.first():
+        print("[SKIP] G6HoiVien — đã có dữ liệu")
     else:
         import uuid
-        nqt_cn_1  = NqtChiNhanh.query.first()
-        nqt_ma_cn = nqt_cn_1.nqt_ma_chi_nhanh if nqt_cn_1 else 1
+        g6_cn_1  = G6ChiNhanh.query.first()
+        g6_ma_cn = g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else 1
 
-        nqt_danh_sach_hoi_vien = [
+        g6_danh_sach_hoi_vien = [
             {
-                "nqt_ma_chi_nhanh": nqt_ma_cn,
-                "nqt_ho_ten": "Nguyễn Thị Hoa",
-                "nqt_ngay_sinh": date(1995, 3, 12),
-                "nqt_gioi_tinh": "nu",
-                "nqt_so_dien_thoai": "0912 345 001",
-                "nqt_email": "hoa.nguyen@example.com",
-                "nqt_dia_chi": "12 Trần Duy Hưng, Cầu Giấy, Hà Nội",
-                "nqt_ngay_dang_ky": date(2025, 1, 10),
-                "nqt_ma_qr": f"NQT-{uuid.uuid4().hex[:10].upper()}",
+                "g6_ma_chi_nhanh": g6_ma_cn,
+                "g6_ho_ten": "Nguyễn Thị Hoa",
+                "g6_ngay_sinh": date(1995, 3, 12),
+                "g6_gioi_tinh": "nu",
+                "g6_so_dien_thoai": "0912345001",
+                "g6_email": "hoa.nguyen@example.com",
+                "g6_dia_chi": "12 Trần Duy Hưng, Cầu Giấy, Hà Nội",
+                "g6_ngay_dang_ky": date(2025, 1, 10),
+                "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
             {
-                "nqt_ma_chi_nhanh": nqt_ma_cn,
-                "nqt_ho_ten": "Trần Văn Mạnh",
-                "nqt_ngay_sinh": date(1990, 7, 25),
-                "nqt_gioi_tinh": "nam",
-                "nqt_so_dien_thoai": "0912 345 002",
-                "nqt_email": "manh.tran@example.com",
-                "nqt_dia_chi": "34 Hoàng Quốc Việt, Cầu Giấy, Hà Nội",
-                "nqt_ngay_dang_ky": date(2025, 2, 1),
-                "nqt_ma_qr": f"NQT-{uuid.uuid4().hex[:10].upper()}",
+                "g6_ma_chi_nhanh": g6_ma_cn,
+                "g6_ho_ten": "Trần Văn Mạnh",
+                "g6_ngay_sinh": date(1990, 7, 25),
+                "g6_gioi_tinh": "nam",
+                "g6_so_dien_thoai": "0912345002",
+                "g6_email": "manh.tran@example.com",
+                "g6_dia_chi": "34 Hoàng Quốc Việt, Cầu Giấy, Hà Nội",
+                "g6_ngay_dang_ky": date(2025, 2, 1),
+                "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
             {
-                "nqt_ma_chi_nhanh": nqt_ma_cn,
-                "nqt_ho_ten": "Lê Thị Thu",
-                "nqt_ngay_sinh": date(1998, 11, 5),
-                "nqt_gioi_tinh": "nu",
-                "nqt_so_dien_thoai": "0912 345 003",
-                "nqt_email": "thu.le@example.com",
-                "nqt_dia_chi": "56 Nguyễn Phong Sắc, Cầu Giấy, Hà Nội",
-                "nqt_ngay_dang_ky": date(2025, 3, 15),
-                "nqt_ma_qr": f"NQT-{uuid.uuid4().hex[:10].upper()}",
+                "g6_ma_chi_nhanh": g6_ma_cn,
+                "g6_ho_ten": "Lê Thị Thu",
+                "g6_ngay_sinh": date(1998, 11, 5),
+                "g6_gioi_tinh": "nu",
+                "g6_so_dien_thoai": "0912345003",
+                "g6_email": "thu.le@example.com",
+                "g6_dia_chi": "56 Nguyễn Phong Sắc, Cầu Giấy, Hà Nội",
+                "g6_ngay_dang_ky": date(2025, 3, 15),
+                "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
             {
-                "nqt_ma_chi_nhanh": nqt_ma_cn,
-                "nqt_ho_ten": "Phạm Đức Minh",
-                "nqt_ngay_sinh": date(1993, 5, 18),
-                "nqt_gioi_tinh": "nam",
-                "nqt_so_dien_thoai": "0912 345 004",
-                "nqt_email": "minh.pham@example.com",
-                "nqt_dia_chi": "78 Dịch Vọng, Cầu Giấy, Hà Nội",
-                "nqt_ngay_dang_ky": date(2025, 4, 1),
-                "nqt_ma_qr": f"NQT-{uuid.uuid4().hex[:10].upper()}",
+                "g6_ma_chi_nhanh": g6_ma_cn,
+                "g6_ho_ten": "Phạm Đức Minh",
+                "g6_ngay_sinh": date(1993, 5, 18),
+                "g6_gioi_tinh": "nam",
+                "g6_so_dien_thoai": "0912345004",
+                "g6_email": "minh.pham@example.com",
+                "g6_dia_chi": "78 Dịch Vọng, Cầu Giấy, Hà Nội",
+                "g6_ngay_dang_ky": date(2025, 4, 1),
+                "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
             {
-                "nqt_ma_chi_nhanh": nqt_ma_cn,
-                "nqt_ho_ten": "Hoàng Lan Anh",
-                "nqt_ngay_sinh": date(2000, 8, 30),
-                "nqt_gioi_tinh": "nu",
-                "nqt_so_dien_thoai": "0912 345 005",
-                "nqt_email": "lananh.hoang@example.com",
-                "nqt_dia_chi": "90 Mai Dịch, Cầu Giấy, Hà Nội",
-                "nqt_ngay_dang_ky": date(2025, 4, 10),
-                "nqt_ma_qr": f"NQT-{uuid.uuid4().hex[:10].upper()}",
+                "g6_ma_chi_nhanh": g6_ma_cn,
+                "g6_ho_ten": "Hoàng Lan Anh",
+                "g6_ngay_sinh": date(2000, 8, 30),
+                "g6_gioi_tinh": "nu",
+                "g6_so_dien_thoai": "0912345005",
+                "g6_email": "lananh.hoang@example.com",
+                "g6_dia_chi": "90 Mai Dịch, Cầu Giấy, Hà Nội",
+                "g6_ngay_dang_ky": date(2025, 4, 10),
+                "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
         ]
-        for nqt_hv in nqt_danh_sach_hoi_vien:
-            db.session.add(NqtHoiVien(**nqt_hv))
+        for g6_hv in g6_danh_sach_hoi_vien:
+            db.session.add(G6HoiVien(**g6_hv))
         db.session.commit()
-        print(f"[OK] NqtHoiVien — đã seed {len(nqt_danh_sach_hoi_vien)} rows")
+        print(f"[OK] G6HoiVien — đã seed {len(g6_danh_sach_hoi_vien)} rows")
 
     print("=== Seed hoàn tất ===")
 

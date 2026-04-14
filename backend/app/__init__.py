@@ -43,10 +43,10 @@ def nqt_tao_app(nqt_moi_truong: str = None):
 
     # Import models để Migrate nhận diện
     from backend.app.models import (  # noqa: F401
-        nqt_cau_hinh, nqt_nguoi_dung, nqt_chi_nhanh,
-        nqt_nhan_vien, nqt_hoi_vien, nqt_khach_hang,
-        nqt_don_hang, nqt_khuyen_mai, nqt_thanh_toan,
-        nqt_van_chuyen, nqt_blog, nqt_thong_bao, nqt_xac_thuc,
+        g6_cau_hinh, g6_nguoi_dung, g6_chi_nhanh,
+        g6_nhan_vien, g6_hoi_vien, g6_khach_hang,
+        g6_don_hang, g6_khuyen_mai, g6_thanh_toan,
+        g6_van_chuyen, g6_blog, g6_thong_bao, g6_xac_thuc,
     )
 
     # Đăng ký blueprints
