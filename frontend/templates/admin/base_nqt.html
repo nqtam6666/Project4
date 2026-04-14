@@ -1,18 +1,23 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" id="nqtHtmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - NQT Gym Management</title>
+    <link id="nqt-favicon" rel="icon" type="image/png">
+    <!-- Dark mode: apply trước khi render để tránh flash trắng -->
+    <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind dark mode config (phải đặt sau CDN) -->
+    <script>tailwind.config = { darkMode: 'class' }</script>
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
         .nqt-glass {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
@@ -20,72 +25,80 @@
         }
         .nqt-sidebar-item:hover, .nqt-sidebar-item.active {
             background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-            color: white;
+            color: white !important;
             box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+        /* Dark mode toggle button */
+        #nqtDarkModeBtn {
+            transition: all 0.3s ease;
+        }
+        /* Smooth transition cho các element khi đổi mode */
+        aside, header, .nqt-stat-card, .nqt-bottom-stat {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
     </style>
     {% block head %}{% endblock %}
 </head>
-<body class="bg-[#F8FAFC] text-[#1E293B] min-h-screen flex">
+<body class="bg-[#F8FAFC] dark:bg-[#0F172A] text-[#1E293B] dark:text-[#E2E8F0] min-h-screen flex">
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-[#E2E8F0] flex flex-col fixed h-full z-20">
+    <aside class="w-64 bg-white dark:bg-[#1E293B] border-r border-[#E2E8F0] dark:border-[#334155] flex flex-col fixed h-full z-20">
         <div class="p-6 flex items-center space-x-3">
             <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
                 <i class="fas fa-dumbbell text-xl"></i>
             </div>
-            <span class="text-xl font-bold tracking-tight text-[#0F172A]">NQT <span class="text-blue-600">Gym</span></span>
+            <span class="text-xl font-bold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">NQT <span class="text-blue-600">Gym</span></span>
         </div>
 
         <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-            <a href="/admin/dashboard" data-page="dashboard" data-title="Tổng quan" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <a href="/admin/dashboard" data-page="dashboard" data-title="Tổng quan" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
                 <i class="fas fa-chart-line w-5"></i>
                 <span class="font-medium">Tổng quan</span>
             </a>
 
-            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Quản lý</div>
-            <a href="/admin/hoi-vien" data-page="hoi-vien" data-title="Hội viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] dark:text-[#475569] uppercase tracking-wider">Quản lý</div>
+            <a href="/admin/hoi-vien" data-page="hoi-vien" data-title="Hội viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
                 <i class="fas fa-users w-5"></i>
                 <span class="font-medium">Hội viên</span>
             </a>
-            <a href="/admin/khach-hang" data-page="khach-hang" data-title="Khách hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <a href="/admin/khach-hang" data-page="khach-hang" data-title="Khách hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
                 <i class="fas fa-user-tag w-5"></i>
                 <span class="font-medium">Khách hàng</span>
             </a>
-            <a href="/admin/goi-tap" data-page="goi-tap" data-title="Gói tập" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <a href="/admin/goi-tap" data-page="goi-tap" data-title="Gói tập" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
                 <i class="fas fa-tags w-5"></i>
                 <span class="font-medium">Gói tập</span>
             </a>
 
-            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Kinh doanh</div>
-            <a href="/admin/don-hang" data-page="don-hang" data-title="Đơn hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] dark:text-[#475569] uppercase tracking-wider">Kinh doanh</div>
+            <a href="/admin/don-hang" data-page="don-hang" data-title="Đơn hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
                 <i class="fas fa-shopping-cart w-5"></i>
                 <span class="font-medium">Đơn hàng</span>
             </a>
-            <a href="/admin/thanh-toan" data-page="thanh-toan" data-title="Thanh toán" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <a href="/admin/thanh-toan" data-page="thanh-toan" data-title="Thanh toán" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
                 <i class="fas fa-credit-card w-5"></i>
                 <span class="font-medium">Thanh toán</span>
             </a>
 
-            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Vận hành</div>
-            <a href="/admin/chi-nhanh" data-page="chi-nhanh" data-title="Chi nhánh" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] dark:text-[#475569] uppercase tracking-wider">Vận hành</div>
+            <a href="/admin/chi-nhanh" data-page="chi-nhanh" data-title="Chi nhánh" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
                 <i class="fas fa-store w-5"></i>
                 <span class="font-medium">Chi nhánh</span>
             </a>
-            <a href="/admin/nhan-vien" data-page="nhan-vien" data-title="Nhân viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <a href="/admin/nhan-vien" data-page="nhan-vien" data-title="Nhân viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
                 <i class="fas fa-id-badge w-5"></i>
                 <span class="font-medium">Nhân viên</span>
             </a>
 
-            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Hệ thống</div>
-            <a href="/admin/cau-hinh" data-page="cau-hinh" data-title="Cấu hình" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B]">
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] dark:text-[#475569] uppercase tracking-wider">Hệ thống</div>
+            <a href="/admin/cau-hinh" data-page="cau-hinh" data-title="Cấu hình" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
                 <i class="fas fa-cog w-5"></i>
                 <span class="font-medium">Cấu hình</span>
             </a>
         </nav>
 
-        <div class="p-4 border-t border-[#E2E8F0]">
-            <button onclick="nqtLogout()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200">
+        <div class="p-4 border-t border-[#E2E8F0] dark:border-[#334155]">
+            <button onclick="nqtLogout()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">
                 <i class="fas fa-sign-out-alt w-5"></i>
                 <span class="font-medium">Đăng xuất</span>
             </button>
@@ -95,17 +108,26 @@
     <!-- Main Content -->
     <main class="flex-1 ml-64 min-h-screen flex flex-col">
         <!-- Header -->
-        <header class="h-16 bg-white border-b border-[#E2E8F0] flex items-center justify-between px-8 sticky top-0 z-10">
+        <header class="h-16 bg-white dark:bg-[#1E293B] border-b border-[#E2E8F0] dark:border-[#334155] flex items-center justify-between px-8 sticky top-0 z-10">
             <div class="flex items-center space-x-4">
-                <h1 class="text-xl font-semibold text-[#0F172A]">{% block title %}Dashboard{% endblock %}</h1>
+                <h1 class="text-xl font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{% block title %}Dashboard{% endblock %}</h1>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-3">
+                <!-- Dark / Light mode toggle -->
+                <button id="nqtDarkModeBtn" onclick="nqtToggleDarkMode()"
+                    class="w-9 h-9 rounded-xl flex items-center justify-center border border-[#E2E8F0] dark:border-[#334155] bg-[#F8FAFC] dark:bg-[#0F172A] text-[#64748B] dark:text-amber-400 hover:bg-gray-100 dark:hover:bg-[#334155] transition-all duration-200"
+                    title="Chuyển đổi Dark/Light mode">
+                    <i id="nqtDarkModeIcon" class="fas fa-moon text-sm"></i>
+                </button>
+
+                <div class="w-px h-6 bg-[#E2E8F0] dark:bg-[#334155]"></div>
+
                 <div class="flex flex-col items-end">
-                    <span id="nqt-user-name" class="text-sm font-semibold text-[#0F172A]">...</span>
-                    <span id="nqt-user-role" class="text-xs text-[#64748B]">Admin</span>
+                    <span id="nqt-user-name" class="text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">...</span>
+                    <span id="nqt-user-role" class="text-xs text-[#64748B] dark:text-[#94A3B8]">Admin</span>
                 </div>
-                <div class="w-10 h-10 bg-gray-100 rounded-full border border-gray-200 flex items-center justify-center">
-                    <i class="fas fa-user-circle text-2xl text-gray-400"></i>
+                <div class="w-10 h-10 bg-gray-100 dark:bg-[#334155] rounded-full border border-gray-200 dark:border-[#475569] flex items-center justify-center">
+                    <i class="fas fa-user-circle text-2xl text-gray-400 dark:text-gray-500"></i>
                 </div>
             </div>
         </header>
@@ -121,6 +143,25 @@
 
     <!-- Global JS Utils -->
     <script>
+        // Dark mode toggle
+        function nqtToggleDarkMode() {
+            const nqtHtml = document.getElementById('nqtHtmlRoot');
+            const nqtIcon = document.getElementById('nqtDarkModeIcon');
+            const nqtIsDark = nqtHtml.classList.toggle('dark');
+            localStorage.setItem('nqt_dark_mode', nqtIsDark);
+            if (nqtIcon) {
+                nqtIcon.className = nqtIsDark ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm';
+            }
+        }
+
+        // Sync icon on load
+        (function() {
+            const nqtIcon = document.getElementById('nqtDarkModeIcon');
+            if (nqtIcon && localStorage.getItem('nqt_dark_mode') === 'true') {
+                nqtIcon.className = 'fas fa-sun text-sm';
+            }
+        })();
+
         // Toast notification
         function nqtToast(nqtMsg, nqtType = 'success') {
             const nqtContainer = document.getElementById('nqt-toast-container');
@@ -142,7 +183,7 @@
         }
 
         // API Wrapper
-        const nqtApi = {
+        window.nqtApi = {
             async fetch(url, options = {}) {
                 const token = localStorage.getItem('nqt_token');
                 if (!options.headers) options.headers = {};
@@ -193,6 +234,15 @@
                 document.getElementById('nqt-user-name').textContent = payload.nqt_ho_ten || 'User';
                 document.getElementById('nqt-user-role').textContent = payload.nqt_vai_tro?.[0] || 'Member';
             } catch(e) {}
+
+            // Load favicon từ config
+            fetch('/api/nqt-cau-hinh/favicon_url', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(r => r.json()).then(data => {
+                if (data.nqt_thanh_cong && data.nqt_du_lieu.nqt_gia_tri) {
+                    document.getElementById('nqt-favicon').href = data.nqt_du_lieu.nqt_gia_tri;
+                }
+            }).catch(() => {});
 
             // SPA Navigation - Intercept sidebar clicks
             nqtInitSpaNavigation();
@@ -286,7 +336,11 @@
                     } else {
                         nqtNewScript.textContent = nqtOldScript.textContent;
                     }
-                    nqtOldScript.parentNode.replaceChild(nqtNewScript, nqtOldScript);
+                    try {
+                        nqtOldScript.parentNode.replaceChild(nqtNewScript, nqtOldScript);
+                    } catch(nqtScriptErr) {
+                        console.warn('Script exec skipped:', nqtScriptErr.message);
+                    }
                 });
 
             } catch (nqtError) {

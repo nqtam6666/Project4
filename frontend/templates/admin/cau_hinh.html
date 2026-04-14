@@ -542,6 +542,7 @@
                 }
             });
         });
+        payload['nqt_nhom'] = tab;
 
         const res = await nqtApi.fetch('/api/nqt-cau-hinh', { method: 'PUT', body: payload });
         if (res && res.nqt_thanh_cong) {

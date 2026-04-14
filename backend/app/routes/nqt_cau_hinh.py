@@ -36,9 +36,10 @@ def nqt_cap_nhat_cau_hinh():
     nqt_data = request.get_json() or {}
     if not isinstance(nqt_data, dict):
         return nqt_loi('Dữ liệu không hợp lệ')
+    nqt_nhom = nqt_data.pop('nqt_nhom', 'website')
     nqt_da_cap_nhat = []
     for nqt_khoa, nqt_gia_tri in nqt_data.items():
-        NqtDichVuCauHinh.nqt_cap_nhat(nqt_khoa, nqt_gia_tri)
+        NqtDichVuCauHinh.nqt_cap_nhat(nqt_khoa, nqt_gia_tri, nqt_nhom)
         nqt_da_cap_nhat.append(nqt_khoa)
     NqtDichVuCauHinh.nqt_xoa_cache()
     return nqt_ok({'nqt_da_cap_nhat': nqt_da_cap_nhat}, 'Cập nhật thành công')
