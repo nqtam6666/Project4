@@ -166,22 +166,24 @@ let hoiVien = null;  // SAI!
 function layThongTin() {}  // SAI!
 ```
 
-### Database Tables (PascalCase với tiền tố Nqt)
+### Database Tables (PascalCase với tiền tố G6)
 ```sql
 -- ✅ ĐÚNG
-NqtHoiVien, NqtGoiTap, NqtLichDat, NqtCauHinh, NqtNhanVien, NqtThietBi
+G6HoiVien, G6GoiTap, G6LichDat, G6CauHinh, G6NhanVien, G6ThietBi
 
 -- ❌ SAI
-HoiVien, GoiTap  -- SAI! Thiếu tiền tố Nqt
+HoiVien, GoiTap          -- SAI! Thiếu tiền tố G6
+NqtHoiVien, NxvGoiTap   -- SAI! Dùng tiền tố thành viên cho DB
 ```
 
-### Database Columns (snake_case với tiền tố nqt_)
+### Database Columns (snake_case với tiền tố g6_)
 ```sql
 -- ✅ ĐÚNG
-nqt_ma_hoi_vien, nqt_ho_ten, nqt_ngay_sinh, nqt_ngay_tao, nqt_ngay_cap_nhat
+g6_ma_hoi_vien, g6_ho_ten, g6_ngay_sinh, g6_ngay_tao, g6_ngay_cap_nhat
 
 -- ❌ SAI
-ma_hoi_vien, ho_ten  -- SAI! Thiếu tiền tố nqt_
+ma_hoi_vien, ho_ten  -- SAI! Thiếu tiền tố g6_
+nqt_ho_ten           -- SAI! Dùng tiền tố thành viên cho cột DB
 ```
 
 ### API Routes

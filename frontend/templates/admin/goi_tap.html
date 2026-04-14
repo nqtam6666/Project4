@@ -7,8 +7,8 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h2 class="text-2xl font-bold text-[#0F172A]">Danh sách Gói tập</h2>
-            <p class="text-[#64748B] text-sm font-medium">Cấu hình các gói dịch vụ cho phòng tập</p>
+            <h2 class="text-2xl font-bold text-[#0F172A] dark:text-white">Danh sách Gói tập</h2>
+            <p class="text-[#64748B] dark:text-slate-400 text-sm font-medium">Cấu hình các gói dịch vụ cho phòng tập</p>
         </div>
         <button onclick="openModal('modalAddPackage')" 
                 class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center space-x-2">
@@ -20,7 +20,7 @@
     <!-- Package Grid -->
     <div id="packageGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         <!-- Data loaded via JS -->
-        <div class="col-span-full py-20 text-center text-[#64748B]">
+        <div class="col-span-full py-20 text-center text-[#64748B] dark:text-slate-400">
             <i class="fas fa-circle-notch fa-spin text-3xl mb-4"></i>
             <p>Đang tải danh sách gói tập...</p>
         </div>
@@ -182,7 +182,7 @@
         grid.innerHTML = '';
 
         if (list.length === 0) {
-            grid.innerHTML = '<div class="col-span-full py-20 text-center text-[#64748B]"><i class="fas fa-box-open text-4xl mb-4"></i><p>Chưa có gói tập nào</p></div>';
+            grid.innerHTML = '<div class="col-span-full py-20 text-center text-[#64748B] dark:text-slate-400"><i class="fas fa-box-open text-4xl mb-4"></i><p>Chưa có gói tập nào</p></div>';
             return;
         }
 
@@ -190,31 +190,31 @@
             const formattedGia = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(g.nqt_gia);
             const escapedName = g.nqt_ten_goi.replace(/'/g, "\\'");
             grid.innerHTML += `
-                <div class="bg-white rounded-3xl border border-[#E2E8F0] p-8 shadow-sm hover:shadow-xl transition-all group border-t-8 ${g.nqt_la_noi_bat ? 'border-orange-500' : 'border-blue-500'}">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl border border-[#E2E8F0] dark:border-slate-700 p-8 shadow-sm hover:shadow-xl transition-all group border-t-8 ${g.nqt_la_noi_bat ? 'border-orange-500' : 'border-blue-500'}">
                     <div class="flex justify-between items-start mb-6">
                         <div>
-                            <h3 class="text-xl font-bold text-[#0F172A]">${g.nqt_ten_goi}</h3>
-                            <p class="text-[#64748B] text-sm font-medium mt-1">${g.nqt_so_ngay} ngày tập luyện</p>
+                            <h3 class="text-xl font-bold text-[#0F172A] dark:text-white">${g.nqt_ten_goi}</h3>
+                            <p class="text-[#64748B] dark:text-slate-400 text-sm font-medium mt-1">${g.nqt_so_ngay} ngày tập luyện</p>
                         </div>
                         ${g.nqt_la_noi_bat ? '<span class="px-3 py-1 bg-orange-100 text-orange-600 text-[10px] font-bold uppercase rounded-lg">Nổi bật</span>' : ''}
                     </div>
-                    
+
                     <div class="space-y-4 mb-8">
-                        <div class="flex items-center text-sm text-[#475569]">
-                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i> 
+                        <div class="flex items-center text-sm text-[#475569] dark:text-slate-300">
+                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
                             ${g.nqt_co_pt ? 'Gồm PT' : 'Tập tự do'}
                         </div>
-                        <div class="flex items-center text-sm text-[#475569]">
-                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i> 
+                        <div class="flex items-center text-sm text-[#475569] dark:text-slate-300">
+                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
                             ${g.nqt_co_sauna ? 'Có xông hơi' : 'Phòng tập tiêu chuẩn'}
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between pt-6 border-t border-[#F1F5F9]">
+                    <div class="flex items-center justify-between pt-6 border-t border-[#F1F5F9] dark:border-slate-700">
                         <div class="text-2xl font-extrabold text-blue-600 leading-none">${formattedGia}</div>
                         <div class="flex space-x-1">
-                            <button onclick="editPackage(${g.nqt_ma_goi_tap})" class="w-10 h-10 flex items-center justify-center text-[#64748B] hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
-                            <button onclick="deletePackage(${g.nqt_ma_goi_tap}, '${escapedName}')" class="w-10 h-10 flex items-center justify-center text-[#64748B] hover:bg-red-50 hover:text-red-600 rounded-xl transition-all" title="Xóa"><i class="fas fa-trash-alt"></i></button>
+                            <button onclick="editPackage(${g.nqt_ma_goi_tap})" class="w-10 h-10 flex items-center justify-center text-[#64748B] dark:text-slate-400 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                            <button onclick="deletePackage(${g.nqt_ma_goi_tap}, '${escapedName}')" class="w-10 h-10 flex items-center justify-center text-[#64748B] dark:text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all" title="Xóa"><i class="fas fa-trash-alt"></i></button>
                         </div>
                     </div>
                 </div>

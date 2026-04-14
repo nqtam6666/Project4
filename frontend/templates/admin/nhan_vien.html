@@ -5,22 +5,22 @@
 {% block content %}
 <div class="space-y-6">
     <!-- Header Actions -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-[#E2E8F0] shadow-sm">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-[#E2E8F0] dark:border-slate-700 shadow-sm">
         <div class="flex items-center space-x-4 flex-1">
             <div class="relative">
                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-[#94A3B8]"><i class="fas fa-filter text-sm"></i></span>
                 <select id="filterChiNhanh" onchange="nqtLoadNhanVien()"
-                        class="pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl outline-none text-sm text-[#334155] focus:ring-2 focus:ring-blue-500">
+                        class="pl-10 pr-4 py-2.5 bg-[#F8FAFC] dark:bg-slate-700 border border-[#E2E8F0] dark:border-slate-600 rounded-2xl outline-none text-sm text-[#334155] dark:text-slate-300 focus:ring-2 focus:ring-blue-500">
                     <option value="">Tất cả chi nhánh</option>
                 </select>
             </div>
             <select id="filterTrangThai" onchange="nqtLoadNhanVien()"
-                    class="px-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl outline-none text-sm text-[#334155] focus:ring-2 focus:ring-blue-500">
+                    class="px-4 py-2.5 bg-[#F8FAFC] dark:bg-slate-700 border border-[#E2E8F0] dark:border-slate-600 rounded-2xl outline-none text-sm text-[#334155] dark:text-slate-300 focus:ring-2 focus:ring-blue-500">
                 <option value="">Đang làm</option>
                 <option value="nghi_viec">Nghỉ việc</option>
             </select>
-            <button onclick="nqtLoadNhanVien()" class="p-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl hover:bg-white transition-all">
-                <i class="fas fa-sync-alt text-[#64748B]"></i>
+            <button onclick="nqtLoadNhanVien()" class="p-2.5 bg-[#F8FAFC] dark:bg-slate-700 border border-[#E2E8F0] dark:border-slate-600 rounded-2xl hover:bg-white dark:hover:bg-slate-600 transition-all">
+                <i class="fas fa-sync-alt text-[#64748B] dark:text-slate-400"></i>
             </button>
         </div>
         <button onclick="nqtOpenModal('modalAddStaff')"
@@ -30,22 +30,22 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-[#E2E8F0] dark:border-slate-700 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Họ tên</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Chi nhánh</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">SĐT / Email</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Ngày vào làm</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Lương cơ bản</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider text-center">Trạng thái</th>
-                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider text-right">Thao tác</th>
+                    <tr class="bg-[#F8FAFC] dark:bg-slate-700 border-b border-[#E2E8F0] dark:border-slate-600">
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Họ tên</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Chi nhánh</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">SĐT / Email</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Ngày vào làm</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider">Lương cơ bản</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider text-center">Trạng thái</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[#64748B] dark:text-slate-400 uppercase tracking-wider text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody id="staffTableBody" class="divide-y divide-[#E2E8F0]">
-                    <tr><td colspan="7" class="px-6 py-12 text-center text-[#64748B]"><i class="fas fa-circle-notch fa-spin text-2xl"></i></td></tr>
+                <tbody id="staffTableBody" class="divide-y divide-[#E2E8F0] dark:divide-slate-700">
+                    <tr><td colspan="7" class="px-6 py-12 text-center text-[#64748B] dark:text-slate-400"><i class="fas fa-circle-notch fa-spin text-2xl"></i></td></tr>
                 </tbody>
             </table>
         </div>
@@ -203,21 +203,25 @@
 
         // Populate filter
         const filter = document.getElementById('filterChiNhanh');
-        branches.forEach(b => {
-            filter.innerHTML += `<option value="${b.nqt_ma_chi_nhanh}">${b.nqt_ten_chi_nhanh}</option>`;
-        });
+        if (filter) {
+            branches.forEach(b => {
+                filter.innerHTML += `<option value="${b.nqt_ma_chi_nhanh}">${b.nqt_ten_chi_nhanh}</option>`;
+            });
+        }
 
         // Populate add form select
         const sel = document.getElementById('addStaffBranch');
-        sel.innerHTML = '<option value="">-- Chọn chi nhánh --</option>';
-        branches.forEach(b => {
-            sel.innerHTML += `<option value="${b.nqt_ma_chi_nhanh}">${b.nqt_ten_chi_nhanh}</option>`;
-        });
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Chọn chi nhánh --</option>';
+            branches.forEach(b => {
+                sel.innerHTML += `<option value="${b.nqt_ma_chi_nhanh}">${b.nqt_ten_chi_nhanh}</option>`;
+            });
+        }
     }
 
     async function nqtLoadNhanVien() {
         const tbody = document.getElementById('staffTableBody');
-        tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center"><i class="fas fa-circle-notch fa-spin text-2xl text-[#64748B]"></i></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center"><i class="fas fa-circle-notch fa-spin text-2xl text-[#64748B] dark:text-slate-400"></i></td></tr>';
 
         const nqtChiNhanh = document.getElementById('filterChiNhanh').value;
         const nqtTrangThai = document.getElementById('filterTrangThai').value;
@@ -232,7 +236,7 @@
         tbody.innerHTML = '';
 
         if (nqtAllStaff.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center text-[#64748B]">Không có nhân viên nào.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center text-[#64748B] dark:text-slate-400">Không có nhân viên nào.</td></tr>';
             return;
         }
 
@@ -248,15 +252,15 @@
             const nqtBranchName = nqtBranchMap[s.nqt_ma_chi_nhanh] || `Chi nhánh #${s.nqt_ma_chi_nhanh}`;
             const nqtLuong = s.nqt_luong_co_ban ? new Intl.NumberFormat('vi-VN').format(s.nqt_luong_co_ban) + ' ₫' : '—';
             tbody.innerHTML += `
-                <tr class="hover:bg-blue-50/30 transition-colors">
-                    <td class="px-6 py-4 font-bold text-[#0F172A]">${s.nqt_ho_ten}</td>
-                    <td class="px-6 py-4 text-sm text-[#64748B]">${nqtBranchName}</td>
+                <tr class="hover:bg-blue-50/30 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="px-6 py-4 font-bold text-[#0F172A] dark:text-white">${s.nqt_ho_ten}</td>
+                    <td class="px-6 py-4 text-sm text-[#64748B] dark:text-slate-400">${nqtBranchName}</td>
                     <td class="px-6 py-4">
-                        <div class="text-sm font-medium">${s.nqt_so_dien_thoai || '—'}</div>
-                        <div class="text-xs text-[#64748B]">${s.nqt_email || '—'}</div>
+                        <div class="text-sm font-medium dark:text-slate-300">${s.nqt_so_dien_thoai || '—'}</div>
+                        <div class="text-xs text-[#64748B] dark:text-slate-400">${s.nqt_email || '—'}</div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-[#64748B]">${s.nqt_ngay_vao_lam || '—'}</td>
-                    <td class="px-6 py-4 text-sm font-medium">${nqtLuong}</td>
+                    <td class="px-6 py-4 text-sm text-[#64748B] dark:text-slate-400">${s.nqt_ngay_vao_lam || '—'}</td>
+                    <td class="px-6 py-4 text-sm font-medium dark:text-slate-300">${nqtLuong}</td>
                     <td class="px-6 py-4 text-center">
                         <span class="px-3 py-1 text-xs font-bold rounded-full ${nqtStatusColors[s.nqt_trang_thai] || 'bg-gray-100 text-gray-600'}">
                             ${nqtStatusLabels[s.nqt_trang_thai] || s.nqt_trang_thai}
