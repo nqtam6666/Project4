@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - NQT Gym Management</title>
-    <link id="nqt-favicon" rel="icon" href="https://cdn-icons-png.flaticon.com/512/69/69840.png">
+    <link id="nqt-favicon" rel="icon" href="/static/uploads/938ab6b4d07f47d0ab4bfe0388bb819d.ico">
     <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
@@ -20,6 +20,10 @@
         .nqt-modal-backdrop.nqt-modal-hidden { opacity: 0; pointer-events: none; }
         .nqt-modal-panel { transition: opacity 0.18s ease, transform 0.18s ease; }
         .nqt-modal-panel.nqt-modal-hidden { opacity: 0; transform: scale(0.95) translateY(-8px); }
+        /* Row selection highlight */
+        .nqt-row-selected { background-color: #eff6ff; border-left: 2px solid #3b82f6; }
+        .dark .nqt-row-selected { background-color: rgba(59,130,246,0.08); border-left: 2px solid #3b82f6; }
+        tr:not(.nqt-row-selected) { border-left: 2px solid transparent; }
         /* Command Palette */
         #nqtCmdInput::placeholder { color: #a3a3a3; }
         .nqt-cmd-item.active { background: rgba(0,0,0,0.05); }
@@ -195,7 +199,7 @@
     </div>
 
     <!-- Global JS -->
-    <script>
+    <script data-nqt-base="1">
         // ========== NQT FACEHASH - Avatar Generator ==========
         (function() {
             function nqtStringHash(str) {
@@ -241,7 +245,7 @@
             };
         })();
     </script>
-    <script>
+    <script data-nqt-base="1">
         // ========== DARK MODE ==========
         function nqtToggleDarkMode() {
             const nqtHtml = document.getElementById('nqtHtmlRoot');
@@ -519,7 +523,7 @@
             else nqtNavigateTo(t.url, t.label);
         };
 
-        // Ctrl+K global shortcut
+        // Ctrl+K global shortcut + Global ESC handler
         document.addEventListener('keydown', e => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
@@ -527,7 +531,16 @@
                 overlay.classList.contains('hidden') ? nqtAbrirComandos() : nqtInchideComenzi();
             }
             if (e.key === 'Escape') {
-                if (!document.getElementById('nqtCmdOverlay').classList.contains('hidden')) nqtInchideComenzi();
+                // Close command palette first
+                if (!document.getElementById('nqtCmdOverlay').classList.contains('hidden')) {
+                    nqtInchideComenzi();
+                    return;
+                }
+                // Close notification panel
+                if (nqtNotifOpen) { nqtDongNotif(); return; }
+                // Close any open page modal (first visible one)
+                const nqtOpenModal = document.querySelector('.fixed.inset-0.bg-black\\/80:not(.hidden), .fixed.inset-0.bg-black\\/50:not(.hidden)');
+                if (nqtOpenModal) nqtDongModal(nqtOpenModal.id);
             }
         });
 
@@ -606,9 +619,19 @@
                 document.title = `${nqtTitle} - NQT Gym Admin`;
                 if (nqtPushState) history.pushState({ nqtUrl, nqtTitle }, nqtTitle, nqtUrl);
                 nqtUpdateActiveNav(nqtUrl);
+                // Inject scripts — với external src: chỉ inject nếu chưa load
                 nqtContentArea.querySelectorAll('script').forEach(nqtOldScript => {
                     const nqtNewScript = document.createElement('script');
-                    nqtOldScript.src ? nqtNewScript.src = nqtOldScript.src : nqtNewScript.textContent = nqtOldScript.textContent;
+                    if (nqtOldScript.src) {
+                        // Bỏ qua nếu script src đã có trong document (tránh re-load Chart.js, v.v.)
+                        if (document.querySelector(`script[src="${nqtOldScript.src}"]`)) {
+                            nqtOldScript.remove();
+                            return;
+                        }
+                        nqtNewScript.src = nqtOldScript.src;
+                    } else {
+                        nqtNewScript.textContent = nqtOldScript.textContent;
+                    }
                     try { nqtOldScript.parentNode.replaceChild(nqtNewScript, nqtOldScript); } catch(e) {}
                 });
                 nqtContentArea.getBoundingClientRect();

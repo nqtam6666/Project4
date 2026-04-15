@@ -30,25 +30,28 @@ def nqt_render_admin_template(nqt_template_name):
                 if nqt_content_div:
                     nqt_content = nqt_content_div
 
-        # Lấy styles từ head (block head)
-        nqt_styles = ''
+        # Lấy styles + external scripts từ head (block head)
+        nqt_head_extras = ''
         nqt_head = nqt_soup.find('head')
         if nqt_head:
-            for nqt_style in nqt_head.find_all('style'):
-                nqt_styles += str(nqt_style)
+            for nqt_tag in nqt_head.children:
+                tag_name = getattr(nqt_tag, 'name', None)
+                if tag_name == 'style':
+                    nqt_head_extras += str(nqt_tag)
+                elif tag_name == 'script' and nqt_tag.get('src'):
+                    # External script từ {% block head %} — cần thiết cho các page (Chart.js, v.v.)
+                    nqt_head_extras += str(nqt_tag)
 
-        # Lấy scripts từ cuối body (block scripts)
+        # Lấy scripts từ cuối body (block scripts) — bỏ qua scripts global của base (có data-nqt-base)
         nqt_scripts = ''
         nqt_body = nqt_soup.find('body')
         if nqt_body:
             for nqt_script in nqt_body.find_all('script'):
-                # Bỏ qua các script global (nqtApi, nqtToast, etc.)
-                nqt_script_text = nqt_script.get_text()
-                if 'nqtApi' not in nqt_script_text[:100] and 'nqtToast' not in nqt_script_text[:100]:
+                if not nqt_script.get('data-nqt-base'):
                     nqt_scripts += str(nqt_script)
 
-        # Trả về: styles + content + scripts
-        nqt_partial_html = nqt_styles
+        # Trả về: head extras (styles + external scripts) + content + body scripts
+        nqt_partial_html = nqt_head_extras
         if nqt_content:
             nqt_partial_html += str(nqt_content.decode_contents() if hasattr(nqt_content, 'decode_contents') else nqt_content)
         nqt_partial_html += nqt_scripts

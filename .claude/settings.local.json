@@ -15,7 +15,9 @@
       "Bash(python -c \"import sys,json; print\\(json.load\\(sys.stdin\\)\\)\")",
       "Bash(python -c \"from backend.app import nqt_tao_app; from backend.app.seeds.nqt_seed import nqt_chay_seed; app = nqt_tao_app\\(\\); app.app_context\\(\\).push\\(\\); nqt_chay_seed\\(\\)\")",
       "Bash(set PYTHONIOENCODING=utf-8)",
-      "WebFetch(domain:ui.shadcn.com)"
+      "WebFetch(domain:ui.shadcn.com)",
+      "Bash(python -c \"from backend.app import nqt_tao_app; app = nqt_tao_app\\(\\); ctx = app.app_context\\(\\); ctx.push\\(\\); print\\('OK'\\)\")",
+      "Bash(python -c ':*)"
     ]
   }
 }

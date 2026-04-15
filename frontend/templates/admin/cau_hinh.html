@@ -415,6 +415,8 @@
 
     window.nqtSaveCauHinh = async function(e, tab) {
         e.preventDefault();
+        const nqtSaveBtn = document.querySelector('#formCauHinh [type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtSaveBtn, 'Đang lưu...');
         const form = document.getElementById('formCauHinh');
         const def = nqtTabDefs[tab];
         const payload = {};
@@ -433,6 +435,7 @@
         payload['g6_nhom'] = tab;
 
         const res = await nqtApi.fetch('/api/nqt-cau-hinh', { method: 'PUT', body: payload });
+        nqtRestore();
         if (res && res.nqt_thanh_cong) {
             if (!nqtCauHinhData[tab]) nqtCauHinhData[tab] = {};
             Object.assign(nqtCauHinhData[tab], payload);
