@@ -91,3 +91,15 @@ def nqt_them_lich_lam(nqt_id):
     db.session.add(nqt_row)
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict(), 'Thêm lịch thành công', 201)
+
+
+@nqt_nhan_vien_bp.route('/nqt-nhan-vien/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_quan_ly_nhan_vien')
+def nqt_xoa_nhan_vien(nqt_id):
+    from datetime import date
+    nqt_row = G6NhanVien.query.get_or_404(nqt_id)
+    nqt_row.g6_trang_thai = 'nghi_viec'
+    nqt_row.g6_ngay_nghi_viec = date.today()
+    db.session.commit()
+    return nqt_ok(None, 'Đã cho nhân viên nghỉ việc')

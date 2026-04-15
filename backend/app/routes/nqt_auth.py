@@ -1,7 +1,7 @@
-﻿import bcrypt
+import bcrypt
 from datetime import datetime, timezone, timedelta
 from flask import Blueprint, request
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, get_jwt
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, get_jwt, verify_jwt_in_request
 from backend.app import db
 from backend.app.models.g6_nguoi_dung import G6NguoiDung, G6NguoiDungVaiTro, G6VaiTroQuyen
 from backend.app.models.g6_xac_thuc import G6PhienDangNhap
@@ -34,8 +34,8 @@ def nqt_dang_nhap():
 
     # Xác thực mật khẩu
     if not bcrypt.checkpw(nqt_mk.encode(), nqt_user.g6_mat_khau.encode()):
-        nqt_so_lan_sai_max = NqtDichVuCauHinh.g6_lay('g6_so_lan_sai_mat_khau', nqt_mac_dinh=5)
-        nqt_khoa_phut = NqtDichVuCauHinh.g6_lay('g6_thoi_gian_khoa_phut', nqt_mac_dinh=30)
+        nqt_so_lan_sai_max = NqtDichVuCauHinh.g6_lay('g6_so_lan_dang_nhap_sai', nqt_mac_dinh=5)
+        nqt_khoa_phut = NqtDichVuCauHinh.g6_lay('g6_khoa_tai_khoan_phut', nqt_mac_dinh=30)
         nqt_user.g6_lan_dang_nhap_sai += 1
         if nqt_user.g6_lan_dang_nhap_sai >= nqt_so_lan_sai_max:
             nqt_user.g6_khoa_den = datetime.utcnow() + timedelta(minutes=nqt_khoa_phut)
@@ -60,11 +60,17 @@ def nqt_dang_nhap():
         'g6_ho_ten': nqt_user.g6_ho_ten,
         'g6_loai': 'nhan_vien',
     }
+    nqt_jwt_expiry = int(NqtDichVuCauHinh.g6_lay('g6_jwt_het_han_phut', nqt_mac_dinh=60)) * 60
     nqt_access_token = create_access_token(
         identity=str(nqt_user.g6_ma_nguoi_dung),
-        additional_claims=nqt_additional_claims
+        additional_claims=nqt_additional_claims,
+        expires_delta=timedelta(seconds=nqt_jwt_expiry)
     )
-    nqt_refresh_token = create_refresh_token(identity=str(nqt_user.g6_ma_nguoi_dung))
+    nqt_refresh_expiry = int(NqtDichVuCauHinh.g6_lay('g6_jwt_refresh_ngay', nqt_mac_dinh=7))
+    nqt_refresh_token = create_refresh_token(
+        identity=str(nqt_user.g6_ma_nguoi_dung),
+        expires_delta=timedelta(days=nqt_refresh_expiry)
+    )
 
     return nqt_ok({
         'g6_access_token': nqt_access_token,
@@ -74,8 +80,12 @@ def nqt_dang_nhap():
 
 
 @nqt_auth_bp.route('/nqt-lam-moi-token', methods=['POST'])
-@nqt_yeu_cau_dang_nhap
 def nqt_lam_moi_token():
+    try:
+        verify_jwt_in_request(refresh=True)
+    except Exception:
+        return nqt_loi('Refresh token không hợp lệ hoặc đã hết hạn', nqt_ma_trang=401)
+
     nqt_identity = get_jwt_identity()
     nqt_user = G6NguoiDung.query.get(int(nqt_identity))
     if not nqt_user or not nqt_user.g6_la_hoat_dong:
@@ -87,6 +97,7 @@ def nqt_lam_moi_token():
         for vtq in ndvt.g6_vai_tro.g6_quyen:
             nqt_quyen_list.append(vtq.g6_quyen.g6_ten_quyen)
 
+    nqt_jwt_expiry = int(NqtDichVuCauHinh.g6_lay('g6_jwt_het_han_phut', nqt_mac_dinh=60)) * 60
     nqt_access_token = create_access_token(
         identity=nqt_identity,
         additional_claims={
@@ -94,9 +105,32 @@ def nqt_lam_moi_token():
             'g6_quyen': list(set(nqt_quyen_list)),
             'g6_ho_ten': nqt_user.g6_ho_ten,
             'g6_loai': 'nhan_vien',
-        }
+        },
+        expires_delta=timedelta(seconds=nqt_jwt_expiry)
     )
     return nqt_ok({'g6_access_token': nqt_access_token})
+
+
+@nqt_auth_bp.route('/nqt-dang-xuat', methods=['POST'])
+def nqt_dang_xuat():
+    try:
+        verify_jwt_in_request(refresh=True)
+        nqt_identity = get_jwt_identity()
+        nqt_jti = get_jwt().get('jti')
+        if nqt_jti:
+            import hashlib
+            nqt_jti_hash = hashlib.sha256(nqt_jti.encode()).hexdigest()
+            nqt_phien = G6PhienDangNhap.query.filter_by(
+                g6_ma_nguoi_dung=int(nqt_identity),
+                g6_ma_refresh_token_hash=nqt_jti_hash,
+                g6_la_thu_hoi=False,
+            ).first()
+            if nqt_phien:
+                nqt_phien.g6_la_thu_hoi = True
+                db.session.commit()
+    except Exception:
+        pass
+    return nqt_ok(None, 'Đăng xuất thành công')
 
 
 @nqt_auth_bp.route('/nqt-toi', methods=['GET'])
