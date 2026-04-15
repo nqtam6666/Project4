@@ -1,477 +1,174 @@
-<div class="space-y-8 nqt-dashboard-container">
-    <!-- Welcome Header với animated gradient -->
-    <div class="nqt-welcome-header bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 rounded-3xl p-8 text-white relative overflow-hidden group">
-        <!-- Animated background shapes -->
-        <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 group-hover:scale-110 transition-transform duration-700"></div>
-        <div class="absolute bottom-0 left-1/4 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 group-hover:scale-125 transition-transform duration-700 delay-100"></div>
-        <div class="absolute top-1/2 right-1/4 w-32 h-32 bg-white/10 rounded-full animate-pulse"></div>
-        <div class="absolute -bottom-8 -right-8 w-48 h-48 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-2xl"></div>
-
-        <!-- Floating particles -->
-        <div class="nqt-particles absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute w-2 h-2 bg-white/20 rounded-full top-1/4 left-1/4 animate-float"></div>
-            <div class="absolute w-3 h-3 bg-white/15 rounded-full top-1/3 right-1/3 animate-float-delayed"></div>
-            <div class="absolute w-1.5 h-1.5 bg-white/25 rounded-full bottom-1/4 left-1/2 animate-float"></div>
+<div class="space-y-6">
+    <!-- Welcome Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">
+                <span id="nqtGreeting">Xin chào</span>, <span id="nqtUserNameWelcome">Admin</span>
+            </h1>
+            <p class="text-sm text-[#666] dark:text-[#888] mt-0.5" id="nqtCurrentDate">...</p>
         </div>
-
-        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div class="space-y-3">
-                <div class="flex items-center space-x-3">
-                    <span class="nqt-greeting-badge px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium flex items-center space-x-2">
-                        <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                        <span id="nqtGreeting">Xin chào!</span>
-                    </span>
-                    <span class="px-3 py-1 bg-emerald-500/30 text-emerald-200 rounded-full text-xs font-bold">Online</span>
-                </div>
-                <h1 class="text-3xl lg:text-4xl font-bold mb-2 leading-tight">
-                    Chào mừng trở lại, <br class="lg:hidden"/><span id="nqtUserNameWelcome" class="text-blue-200">Admin</span>
-                </h1>
-                <p class="text-blue-100/90 max-w-lg text-sm lg:text-base">Đây là tổng quan hoạt động của NQT Gym hôm nay. Mọi thứ đang vận hành tốt!</p>
-
-                <!-- Quick stats inline -->
-                <div class="flex items-center space-x-4 pt-2">
-                    <div class="flex items-center space-x-2 text-sm">
-                        <span class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-bolt text-yellow-300"></i>
-                        </span>
-                        <span class="text-blue-100"><span id="nqtQuickStatActive" class="font-bold text-white">0</span> đang tập</span>
-                    </div>
-                    <div class="w-px h-6 bg-white/20"></div>
-                    <div class="flex items-center space-x-2 text-sm">
-                        <span class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-user-plus text-emerald-300"></i>
-                        </span>
-                        <span class="text-blue-100"><span id="nqtQuickStatNew" class="font-bold text-white">0</span> mới hôm nay</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-4">
-                <!-- Live clock -->
-                <div class="hidden lg:block text-right">
-                    <p class="text-blue-200 text-xs uppercase tracking-wider mb-1">Hôm nay</p>
-                    <p class="text-2xl font-bold tracking-tight" id="nqtCurrentDate">...</p>
-                    <p class="text-lg font-mono text-blue-200/80 mt-1" id="nqtCurrentTime">--:--:--</p>
-                </div>
-                <div class="w-20 h-20 bg-white/15 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl group-hover:scale-105 transition-transform duration-300">
-                    <div class="text-center">
-                        <i class="fas fa-calendar-day text-2xl mb-1"></i>
-                        <p class="text-xs font-bold" id="nqtDayOfWeek">...</p>
-                    </div>
-                </div>
-            </div>
+        <div class="text-right">
+            <div class="text-2xl font-medium text-[#191919] dark:text-[#fafafa] tabular-nums" id="nqtCurrentTime">--:--</div>
+            <div class="text-xs text-[#666] dark:text-[#888]" id="nqtDayOfWeek">...</div>
         </div>
     </div>
 
-    <!-- Stats Grid với skeleton loading và animated counters -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Tổng hội viên -->
-        <div class="nqt-stat-card group bg-white dark:bg-[#1E293B] p-5 lg:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-700 transition-all duration-300 cursor-pointer" style="--accent-color: #3B82F6; --accent-light: #93C5FD;" onclick="nqtNavigateTo('hoi-vien')">
-            <div class="flex items-start justify-between mb-4">
-                <div class="nqt-stat-icon w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl lg:rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200/50 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                    <i class="fas fa-users text-lg lg:text-xl"></i>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="nqtNavigateTo('hoi-vien')">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-users text-sm text-[#525252] dark:text-[#a3a3a3]"></i>
                 </div>
-                <span id="nqtBadgeHvMoi" class="nqt-badge-animate px-2.5 py-1 text-[10px] lg:text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full flex items-center border border-emerald-100 dark:border-emerald-800">
-                    <i class="fas fa-arrow-up mr-1 text-[8px]"></i>+0 mới
-                </span>
+                <span id="nqtBadgeHvMoi" class="text-[10px] text-[#16a34a] dark:text-[#4ade80] font-medium">+0 mới</span>
             </div>
-            <h3 class="text-[#64748B] dark:text-[#94A3B8] text-xs lg:text-sm font-medium mb-1 flex items-center">
-                <span>Tổng hội viên</span>
-                <i class="fas fa-arrow-right ml-2 text-[10px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
-            </h3>
-            <div class="flex items-baseline space-x-2">
-                <p id="nqtStatTongHoiVien" class="text-2xl lg:text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9] nqt-counter" data-target="0">
-                    <span class="nqt-skeleton-text w-16 h-8 rounded animate-pulse inline-block"></span>
-                </p>
-                <span class="text-[#94A3B8] dark:text-[#475569] text-xs lg:text-sm">nguoi</span>
-            </div>
-            <!-- Progress bar mini -->
-            <div class="mt-3 h-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-full overflow-hidden">
-                <div id="nqtProgressHoiVien" class="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
-            </div>
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Tổng hội viên</p>
+            <p id="nqtStatTongHoiVien" class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">0</p>
         </div>
 
         <!-- Doanh thu tháng -->
-        <div class="nqt-stat-card group bg-white dark:bg-[#1E293B] p-5 lg:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm hover:shadow-xl hover:border-emerald-200 dark:hover:border-emerald-700 transition-all duration-300 cursor-pointer" style="--accent-color: #10B981; --accent-light: #6EE7B7;" onclick="nqtNavigateTo('thanh-toan')">
-            <div class="flex items-start justify-between mb-4">
-                <div class="nqt-stat-icon w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl lg:rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200/50 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                    <i class="fas fa-chart-line text-lg lg:text-xl"></i>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="nqtNavigateTo('thanh-toan')">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-chart-line text-sm text-[#525252] dark:text-[#a3a3a3]"></i>
                 </div>
-                <span id="nqtBadgeDoanhThu" class="nqt-badge-animate px-2.5 py-1 text-[10px] lg:text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full flex items-center border border-emerald-100 dark:border-emerald-800">
-                    <i class="fas fa-arrow-up mr-1 text-[8px]"></i>+0%
-                </span>
+                <span id="nqtBadgeDoanhThu" class="text-[10px] text-[#16a34a] dark:text-[#4ade80] font-medium">+0%</span>
             </div>
-            <h3 class="text-[#64748B] dark:text-[#94A3B8] text-xs lg:text-sm font-medium mb-1 flex items-center">
-                <span>Doanh thu tháng</span>
-                <i class="fas fa-arrow-right ml-2 text-[10px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
-            </h3>
-            <p id="nqtStatDoanhThu" class="text-2xl lg:text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">
-                <span class="nqt-skeleton-text w-24 h-8 rounded animate-pulse inline-block"></span>
-            </p>
-            <!-- Sparkline mini chart placeholder -->
-            <div class="mt-3 flex items-end space-x-0.5 h-6">
-                <div class="nqt-sparkline-bar w-1.5 bg-emerald-200 dark:bg-emerald-800 rounded-t transition-all duration-500" style="height: 40%"></div>
-                <div class="nqt-sparkline-bar w-1.5 bg-emerald-300 dark:bg-emerald-700 rounded-t transition-all duration-500" style="height: 60%"></div>
-                <div class="nqt-sparkline-bar w-1.5 bg-emerald-200 dark:bg-emerald-800 rounded-t transition-all duration-500" style="height: 45%"></div>
-                <div class="nqt-sparkline-bar w-1.5 bg-emerald-300 dark:bg-emerald-700 rounded-t transition-all duration-500" style="height: 80%"></div>
-                <div class="nqt-sparkline-bar w-1.5 bg-emerald-400 dark:bg-emerald-600 rounded-t transition-all duration-500" style="height: 65%"></div>
-                <div class="nqt-sparkline-bar w-1.5 bg-emerald-300 dark:bg-emerald-700 rounded-t transition-all duration-500" style="height: 90%"></div>
-                <div class="nqt-sparkline-bar w-1.5 bg-emerald-500 rounded-t transition-all duration-500" style="height: 100%"></div>
-            </div>
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Doanh thu tháng</p>
+            <p id="nqtStatDoanhThu" class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">0 ₫</p>
         </div>
 
         <!-- Đang tập luyện -->
-        <div class="nqt-stat-card group bg-white dark:bg-[#1E293B] p-5 lg:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm hover:shadow-xl hover:border-purple-200 dark:hover:border-purple-700 transition-all duration-300" style="--accent-color: #8B5CF6; --accent-light: #C4B5FD;">
-            <div class="flex items-start justify-between mb-4">
-                <div class="nqt-stat-icon w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl lg:rounded-2xl flex items-center justify-center shadow-lg shadow-purple-200/50 group-hover:scale-110 transition-all duration-300">
-                    <i class="fas fa-running text-lg lg:text-xl nqt-icon-running"></i>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-running text-sm text-[#525252] dark:text-[#a3a3a3]"></i>
                 </div>
-                <span class="nqt-live-badge px-2.5 py-1 text-[10px] lg:text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center border border-purple-100 dark:border-purple-800">
-                    <span class="relative flex h-2 w-2 mr-1.5">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-                    </span>
-                    LIVE
+                <span class="text-[10px] text-[#666] dark:text-[#888] font-medium flex items-center">
+                    <span class="w-1.5 h-1.5 bg-[#16a34a] rounded-full mr-1"></span>
+                    Live
                 </span>
             </div>
-            <h3 class="text-[#64748B] dark:text-[#94A3B8] text-xs lg:text-sm font-medium mb-1">Đang tập luyện</h3>
-            <div class="flex items-baseline space-x-2">
-                <p id="nqtStatDangTap" class="text-2xl lg:text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9] nqt-counter">
-                    <span class="nqt-skeleton-text w-12 h-8 rounded animate-pulse inline-block"></span>
-                </p>
-                <span class="text-[#94A3B8] dark:text-[#475569] text-xs lg:text-sm">nguoi</span>
-            </div>
-            <!-- Capacity indicator -->
-            <div class="mt-3">
-                <div class="flex justify-between text-[10px] text-[#94A3B8] dark:text-[#475569] mb-1">
-                    <span>Công suất</span>
-                    <span id="nqtCapacityPercent">0%</span>
-                </div>
-                <div class="h-1.5 bg-purple-100 dark:bg-purple-900/40 rounded-full overflow-hidden">
-                    <div id="nqtCapacityBar" class="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
-                </div>
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Đang tập luyện</p>
+            <div class="flex items-baseline space-x-1">
+                <p id="nqtStatDangTap" class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">0</p>
+                <span class="text-xs text-[#a3a3a3]">/ <span id="nqtCapacityPercent">0</span>%</span>
             </div>
         </div>
 
         <!-- Sắp hết hạn -->
-        <div class="nqt-stat-card group bg-white dark:bg-[#1E293B] p-5 lg:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm hover:shadow-xl hover:border-amber-200 dark:hover:border-amber-700 transition-all duration-300 cursor-pointer" style="--accent-color: #F59E0B; --accent-light: #FCD34D;" onclick="nqtNavigateTo('hoi-vien')">
-            <div class="flex items-start justify-between mb-4">
-                <div class="nqt-stat-icon w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-xl lg:rounded-2xl flex items-center justify-center shadow-lg shadow-amber-200/50 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                    <i class="fas fa-exclamation-triangle text-lg lg:text-xl nqt-icon-warning"></i>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="nqtNavigateTo('hoi-vien')">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-[#fef2f2] dark:bg-[#451a1a] rounded-md flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-sm text-[#dc2626] dark:text-[#f87171]"></i>
                 </div>
-                <span id="nqtBadgeSapHetHan" class="nqt-badge-warning px-2.5 py-1 text-[10px] lg:text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 rounded-full border border-amber-200 dark:border-amber-800 flex items-center">
-                    <i class="fas fa-bell mr-1 text-[8px] nqt-bell-shake"></i>
-                    Cần xử lý
-                </span>
+                <span class="text-[10px] text-[#dc2626] dark:text-[#f87171] font-medium">Cần xử lý</span>
             </div>
-            <h3 class="text-[#64748B] dark:text-[#94A3B8] text-xs lg:text-sm font-medium mb-1 flex items-center">
-                <span>Gói sắp hết hạn</span>
-                <i class="fas fa-arrow-right ml-2 text-[10px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
-            </h3>
-            <div class="flex items-baseline space-x-2">
-                <p id="nqtStatSapHetHan" class="text-2xl lg:text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9] nqt-counter">
-                    <span class="nqt-skeleton-text w-12 h-8 rounded animate-pulse inline-block"></span>
-                </p>
-                <span class="text-[#94A3B8] dark:text-[#475569] text-xs lg:text-sm">gói</span>
-            </div>
-            <!-- Warning levels -->
-            <div class="mt-3 flex items-center space-x-2 text-[10px]">
-                <span class="flex items-center text-red-500">
-                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-1"></span>
-                    <span id="nqtHetHan3Ngay">0</span> (3 ngày)
-                </span>
-                <span class="flex items-center text-amber-500">
-                    <span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1"></span>
-                    <span id="nqtHetHan7Ngay">0</span> (7 ngày)
-                </span>
-            </div>
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Gói sắp hết hạn</p>
+            <p id="nqtStatSapHetHan" class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">0</p>
         </div>
     </div>
 
-    <!-- Main Content Grid - Improved layout -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-        <!-- Chart Area - Enhanced -->
-        <div class="xl:col-span-2 bg-white dark:bg-[#1E293B] rounded-2xl lg:rounded-3xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm overflow-hidden">
-            <div class="px-5 lg:px-6 py-4 lg:py-5 border-b border-[#E2E8F0] dark:border-[#334155] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Chart Area -->
+        <div class="lg:col-span-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md">
+            <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
                 <div>
-                    <h2 class="text-base lg:text-lg font-bold text-[#0F172A] dark:text-[#F1F5F9] flex items-center">
-                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                        Biểu đồ tăng trưởng
-                    </h2>
-                    <p class="text-xs lg:text-sm text-[#64748B] dark:text-[#94A3B8]">Hội viên đăng ký trong 7 ngày qua</p>
+                    <h2 class="text-sm font-medium text-[#191919] dark:text-[#fafafa]">Biểu đồ tăng trưởng</h2>
+                    <p class="text-xs text-[#666] dark:text-[#888]">Hội viên đăng ký trong 7 ngày qua</p>
                 </div>
-                <div class="flex items-center space-x-1 lg:space-x-2 bg-[#F8FAFC] dark:bg-[#0F172A] p-1 rounded-xl">
-                    <button class="nqt-chart-period px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium text-blue-600 bg-white dark:bg-[#1E293B] rounded-lg shadow-sm transition-all" data-period="7">7 ngày</button>
-                    <button class="nqt-chart-period px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium text-[#64748B] dark:text-[#94A3B8] hover:text-[#334155] dark:hover:text-[#F1F5F9] rounded-lg transition-all" data-period="30">30 ngày</button>
-                    <button class="nqt-chart-period px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm font-medium text-[#64748B] dark:text-[#94A3B8] hover:text-[#334155] dark:hover:text-[#F1F5F9] rounded-lg transition-all" data-period="90">90 ngày</button>
+                <div class="flex items-center space-x-1 text-xs">
+                    <button class="nqt-chart-period px-2.5 py-1 text-[#191919] dark:text-[#fafafa] bg-[#f5f5f5] dark:bg-[#404040] rounded-md font-medium" data-period="7">7 ngày</button>
+                    <button class="nqt-chart-period px-2.5 py-1 text-[#666] dark:text-[#888] hover:bg-[#f5f5f5] dark:hover:bg-[#404040] rounded-md" data-period="30">30 ngày</button>
+                    <button class="nqt-chart-period px-2.5 py-1 text-[#666] dark:text-[#888] hover:bg-[#f5f5f5] dark:hover:bg-[#404040] rounded-md" data-period="90">90 ngày</button>
                 </div>
             </div>
-            <div class="p-5 lg:p-6">
-                <!-- Chart placeholder with animated bars -->
-                <div id="nqtChartContainer" class="h-56 lg:h-72 rounded-xl relative overflow-hidden">
-                    <!-- Skeleton loading cho chart -->
-                    <div id="nqtChartSkeleton" class="absolute inset-0 flex items-end justify-around px-4 pb-8">
-                        <div class="w-8 bg-gradient-to-t from-blue-200 dark:from-blue-900 to-blue-100 dark:to-blue-800 rounded-t animate-pulse" style="height: 45%"></div>
-                        <div class="w-8 bg-gradient-to-t from-blue-200 dark:from-blue-900 to-blue-100 dark:to-blue-800 rounded-t animate-pulse" style="height: 65%"></div>
-                        <div class="w-8 bg-gradient-to-t from-blue-200 dark:from-blue-900 to-blue-100 dark:to-blue-800 rounded-t animate-pulse" style="height: 55%"></div>
-                        <div class="w-8 bg-gradient-to-t from-blue-200 dark:from-blue-900 to-blue-100 dark:to-blue-800 rounded-t animate-pulse" style="height: 80%"></div>
-                        <div class="w-8 bg-gradient-to-t from-blue-200 dark:from-blue-900 to-blue-100 dark:to-blue-800 rounded-t animate-pulse" style="height: 70%"></div>
-                        <div class="w-8 bg-gradient-to-t from-blue-200 dark:from-blue-900 to-blue-100 dark:to-blue-800 rounded-t animate-pulse" style="height: 90%"></div>
-                        <div class="w-8 bg-gradient-to-t from-blue-200 dark:from-blue-900 to-blue-100 dark:to-blue-800 rounded-t animate-pulse" style="height: 75%"></div>
-                    </div>
-                    <!-- Chart canvas placeholder -->
-                    <canvas id="nqtGrowthChart" class="w-full h-full opacity-0 transition-opacity duration-500"></canvas>
-                </div>
-                <!-- Chart legend -->
-                <div class="flex items-center justify-center space-x-6 mt-4 text-xs text-[#64748B] dark:text-[#94A3B8]">
-                    <span class="flex items-center"><span class="w-3 h-3 bg-blue-500 rounded mr-2"></span>Đăng ký mới</span>
-                    <span class="flex items-center"><span class="w-3 h-3 bg-emerald-500 rounded mr-2"></span>Gia hạn</span>
-                </div>
+            <div class="p-4">
+                <canvas id="nqtChartDoanhThu" height="160"></canvas>
             </div>
         </div>
 
-        <!-- Quick Actions & Activity - Enhanced -->
-        <div class="space-y-6">
+        <!-- Quick Actions & Activity -->
+        <div class="space-y-4">
             <!-- Quick Actions -->
-            <div class="bg-white dark:bg-[#1E293B] rounded-2xl lg:rounded-3xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm overflow-hidden">
-                <div class="px-5 lg:px-6 py-4 lg:py-5 border-b border-[#E2E8F0] dark:border-[#334155]">
-                    <h2 class="text-base lg:text-lg font-bold text-[#0F172A] dark:text-[#F1F5F9] flex items-center">
-                        <i class="fas fa-bolt text-amber-500 mr-2"></i>
-                        Thao tác nhanh
-                    </h2>
+            <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md">
+                <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040]">
+                    <h2 class="text-sm font-medium text-[#191919] dark:text-[#fafafa]">Thao tác nhanh</h2>
                 </div>
-                <div class="p-3 lg:p-4 grid grid-cols-2 gap-2 lg:gap-3">
-                    <a href="/admin/hoi-vien" class="nqt-quick-action nqt-nav-link group p-3 lg:p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 hover:from-blue-100 hover:to-blue-200/50 dark:hover:from-blue-900/50 dark:hover:to-blue-800/40 rounded-xl flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-200/30 dark:border-blue-800/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300" data-page="hoi-vien" data-title="Hội viên">
-                        <div class="w-10 h-10 lg:w-12 lg:h-12 bg-blue-500 text-white rounded-xl flex items-center justify-center mb-2 lg:mb-3 shadow-lg shadow-blue-200/50 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-300">
-                            <i class="fas fa-user-plus text-sm lg:text-lg"></i>
-                        </div>
-                        <span class="text-[10px] lg:text-xs font-bold text-center">Thêm hội viên</span>
+                <div class="p-3 grid grid-cols-2 gap-2">
+                    <a href="/admin/hoi-vien" class="nqt-nav-link p-3 bg-[#f5f5f5] dark:bg-[#333] hover:bg-[#e5e5e5] dark:hover:bg-[#404040] rounded-md text-center transition-colors" data-page="hoi-vien" data-title="Hội viên">
+                        <i class="fas fa-user-plus text-[#525252] dark:text-[#a3a3a3] mb-1.5 block"></i>
+                        <span class="text-xs text-[#191919] dark:text-[#fafafa]">Thêm hội viên</span>
                     </a>
-                    <a href="#" class="nqt-quick-action group p-3 lg:p-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 hover:from-emerald-100 hover:to-emerald-200/50 dark:hover:from-emerald-900/50 dark:hover:to-emerald-800/40 rounded-xl flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200/30 dark:border-emerald-800/50 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all duration-300" onclick="nqtOpenCheckinModal(); return false;">
-                        <div class="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-500 text-white rounded-xl flex items-center justify-center mb-2 lg:mb-3 shadow-lg shadow-emerald-200/50 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                            <i class="fas fa-qrcode text-sm lg:text-lg"></i>
-                        </div>
-                        <span class="text-[10px] lg:text-xs font-bold text-center">Quét Check-in</span>
+                    <a href="#" class="p-3 bg-[#f5f5f5] dark:bg-[#333] hover:bg-[#e5e5e5] dark:hover:bg-[#404040] rounded-md text-center transition-colors" onclick="nqtOpenCheckinModal(); return false;">
+                        <i class="fas fa-qrcode text-[#525252] dark:text-[#a3a3a3] mb-1.5 block"></i>
+                        <span class="text-xs text-[#191919] dark:text-[#fafafa]">Check-in</span>
                     </a>
-                    <a href="/admin/don-hang" class="nqt-quick-action nqt-nav-link group p-3 lg:p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/30 dark:to-purple-800/20 hover:from-purple-100 hover:to-purple-200/50 dark:hover:from-purple-900/50 dark:hover:to-purple-800/40 rounded-xl flex flex-col items-center justify-center text-purple-600 dark:text-purple-400 border border-purple-200/30 dark:border-purple-800/50 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300" data-page="don-hang" data-title="Đơn hàng">
-                        <div class="relative w-10 h-10 lg:w-12 lg:h-12 bg-purple-500 text-white rounded-xl flex items-center justify-center mb-2 lg:mb-3 shadow-lg shadow-purple-200/50 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-300">
-                            <i class="fas fa-shopping-cart text-sm lg:text-lg"></i>
-                            <span id="nqtBadgeDonHangMoi" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center hidden">0</span>
-                        </div>
-                        <span class="text-[10px] lg:text-xs font-bold text-center">Đơn hàng</span>
+                    <a href="/admin/don-hang" class="nqt-nav-link p-3 bg-[#f5f5f5] dark:bg-[#333] hover:bg-[#e5e5e5] dark:hover:bg-[#404040] rounded-md text-center transition-colors" data-page="don-hang" data-title="Đơn hàng">
+                        <i class="fas fa-shopping-bag text-[#525252] dark:text-[#a3a3a3] mb-1.5 block"></i>
+                        <span class="text-xs text-[#191919] dark:text-[#fafafa]">Đơn hàng</span>
                     </a>
-                    <a href="/admin/thanh-toan" class="nqt-quick-action nqt-nav-link group p-3 lg:p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/30 dark:to-amber-800/20 hover:from-amber-100 hover:to-amber-200/50 dark:hover:from-amber-900/50 dark:hover:to-amber-800/40 rounded-xl flex flex-col items-center justify-center text-amber-600 dark:text-amber-400 border border-amber-200/30 dark:border-amber-800/50 hover:border-amber-300 dark:hover:border-amber-700 transition-all duration-300" data-page="thanh-toan" data-title="Thanh toán">
-                        <div class="w-10 h-10 lg:w-12 lg:h-12 bg-amber-500 text-white rounded-xl flex items-center justify-center mb-2 lg:mb-3 shadow-lg shadow-amber-200/50 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                            <i class="fas fa-file-invoice-dollar text-sm lg:text-lg"></i>
-                        </div>
-                        <span class="text-[10px] lg:text-xs font-bold text-center">Thanh toán</span>
+                    <a href="/admin/thanh-toan" class="nqt-nav-link p-3 bg-[#f5f5f5] dark:bg-[#333] hover:bg-[#e5e5e5] dark:hover:bg-[#404040] rounded-md text-center transition-colors" data-page="thanh-toan" data-title="Thanh toán">
+                        <i class="fas fa-credit-card text-[#525252] dark:text-[#a3a3a3] mb-1.5 block"></i>
+                        <span class="text-xs text-[#191919] dark:text-[#fafafa]">Thanh toán</span>
                     </a>
                 </div>
             </div>
 
-            <!-- Recent Activity - Enhanced with real-time feel -->
-            <div class="bg-white dark:bg-[#1E293B] rounded-2xl lg:rounded-3xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm overflow-hidden">
-                <div class="px-5 lg:px-6 py-4 lg:py-5 border-b border-[#E2E8F0] dark:border-[#334155] flex items-center justify-between">
-                    <h2 class="text-base lg:text-lg font-bold text-[#0F172A] dark:text-[#F1F5F9] flex items-center">
-                        <span class="relative flex h-2 w-2 mr-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
+            <!-- Recent Activity -->
+            <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md">
+                <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+                    <h2 class="text-sm font-medium text-[#191919] dark:text-[#fafafa] flex items-center">
+                        <span class="w-1.5 h-1.5 bg-[#16a34a] rounded-full mr-2"></span>
                         Hoạt động
                     </h2>
-                    <button class="text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline flex items-center">
-                        Xem tất cả <i class="fas fa-chevron-right ml-1 text-[10px]"></i>
-                    </button>
+                    <button class="text-xs text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa]">Xem tất cả</button>
                 </div>
-                <div class="divide-y divide-[#E2E8F0] dark:divide-[#334155] max-h-64 lg:max-h-80 overflow-y-auto nqt-custom-scrollbar" id="nqtRecentActivity">
-                    <!-- Activity skeleton -->
-                    <div class="nqt-activity-skeleton">
-                        <div class="p-3 lg:p-4 flex items-center space-x-3 lg:space-x-4 animate-pulse">
-                            <div class="w-9 h-9 lg:w-10 lg:h-10 bg-gray-200 dark:bg-[#334155] rounded-xl flex-shrink-0"></div>
-                            <div class="flex-1">
-                                <div class="h-3 lg:h-4 bg-gray-200 dark:bg-[#334155] rounded w-3/4 mb-2"></div>
-                                <div class="h-2 lg:h-3 bg-gray-100 dark:bg-[#2D3D52] rounded w-1/2"></div>
-                            </div>
-                        </div>
-                        <div class="p-3 lg:p-4 flex items-center space-x-3 lg:space-x-4 animate-pulse">
-                            <div class="w-9 h-9 lg:w-10 lg:h-10 bg-gray-200 dark:bg-[#334155] rounded-xl flex-shrink-0"></div>
-                            <div class="flex-1">
-                                <div class="h-3 lg:h-4 bg-gray-200 dark:bg-[#334155] rounded w-2/3 mb-2"></div>
-                                <div class="h-2 lg:h-3 bg-gray-100 dark:bg-[#2D3D52] rounded w-1/3"></div>
-                            </div>
-                        </div>
-                        <div class="p-3 lg:p-4 flex items-center space-x-3 lg:space-x-4 animate-pulse">
-                            <div class="w-9 h-9 lg:w-10 lg:h-10 bg-gray-200 dark:bg-[#334155] rounded-xl flex-shrink-0"></div>
-                            <div class="flex-1">
-                                <div class="h-3 lg:h-4 bg-gray-200 dark:bg-[#334155] rounded w-1/2 mb-2"></div>
-                                <div class="h-2 lg:h-3 bg-gray-100 dark:bg-[#2D3D52] rounded w-2/5"></div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="divide-y divide-[#e5e5e5] dark:divide-[#404040] max-h-64 overflow-y-auto" id="nqtRecentActivity">
+                    <div class="p-3 text-sm text-[#666] dark:text-[#888] text-center">Đang tải...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Stats - Enhanced with hover effects and better mobile -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
-        <div class="nqt-bottom-stat group bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl lg:rounded-3xl p-5 lg:p-6 text-white relative overflow-hidden cursor-pointer hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300" onclick="nqtNavigateTo('hoi-vien')">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500"></div>
-            <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-            <div class="relative z-10">
-                <div class="flex items-center justify-between mb-3 lg:mb-4">
-                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                        <i class="fas fa-dumbbell text-xl lg:text-2xl"></i>
-                    </div>
-                    <span class="text-[10px] lg:text-xs font-bold bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full">Hôm nay</span>
+    <!-- Bottom Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="nqtNavigateTo('hoi-vien')">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-dumbbell text-[#525252] dark:text-[#a3a3a3]"></i>
                 </div>
-                <p class="text-blue-100 text-xs lg:text-sm mb-1">Check-in hôm nay</p>
-                <div class="flex items-baseline space-x-2">
-                    <p class="text-2xl lg:text-3xl font-bold nqt-counter" id="nqtStatCheckinHomNay">0</p>
-                    <span class="text-blue-200 text-xs">lượt</span>
-                </div>
-                <div class="mt-3 flex items-center text-[10px] text-blue-200">
-                    <i class="fas fa-chart-line mr-1"></i>
-                    <span id="nqtCheckinCompare">So với hôm qua: --</span>
+                <div>
+                    <p class="text-xs text-[#666] dark:text-[#888]">Check-in hôm nay</p>
+                    <p class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]" id="nqtStatCheckinHomNay">0</p>
                 </div>
             </div>
         </div>
 
-        <div class="nqt-bottom-stat group bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-2xl lg:rounded-3xl p-5 lg:p-6 text-white relative overflow-hidden cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300" onclick="nqtNavigateTo('chi-nhanh')">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500"></div>
-            <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-            <div class="relative z-10">
-                <div class="flex items-center justify-between mb-3 lg:mb-4">
-                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                        <i class="fas fa-store text-xl lg:text-2xl"></i>
-                    </div>
-                    <span class="text-[10px] lg:text-xs font-bold bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center">
-                        <span class="w-1.5 h-1.5 bg-emerald-300 rounded-full mr-1.5 animate-pulse"></span>
-                        Đang mở
-                    </span>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="nqtNavigateTo('chi-nhanh')">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-store text-[#525252] dark:text-[#a3a3a3]"></i>
                 </div>
-                <p class="text-emerald-100 text-xs lg:text-sm mb-1">Chi nhánh hoạt động</p>
-                <div class="flex items-baseline space-x-2">
-                    <p class="text-2xl lg:text-3xl font-bold nqt-counter" id="nqtStatChiNhanh">0</p>
-                    <span class="text-emerald-200 text-xs">chi nhánh</span>
-                </div>
-                <div class="mt-3 flex items-center space-x-3 text-[10px]">
-                    <span class="flex items-center text-emerald-200">
-                        <i class="fas fa-map-marker-alt mr-1"></i>
-                        <span id="nqtChiNhanhThanhPho">-- thành phố</span>
-                    </span>
+                <div>
+                    <p class="text-xs text-[#666] dark:text-[#888]">Chi nhánh</p>
+                    <p class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]"><span id="nqtStatChiNhanh">0</span> <span class="text-xs font-normal text-[#666]" id="nqtChiNhanhThanhPho"></span></p>
                 </div>
             </div>
         </div>
 
-        <div class="nqt-bottom-stat group bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 rounded-2xl lg:rounded-3xl p-5 lg:p-6 text-white relative overflow-hidden cursor-pointer hover:shadow-2xl hover:shadow-purple-500/25 transition-all duration-300" onclick="nqtNavigateTo('goi-tap')">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500"></div>
-            <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-            <div class="relative z-10">
-                <div class="flex items-center justify-between mb-3 lg:mb-4">
-                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                        <i class="fas fa-box text-xl lg:text-2xl"></i>
-                    </div>
-                    <span class="text-[10px] lg:text-xs font-bold bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full">Tổng</span>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="nqtNavigateTo('goi-tap')">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-box text-[#525252] dark:text-[#a3a3a3]"></i>
                 </div>
-                <p class="text-purple-100 text-xs lg:text-sm mb-1">Gói tập đang bán</p>
-                <div class="flex items-baseline space-x-2">
-                    <p class="text-2xl lg:text-3xl font-bold nqt-counter" id="nqtStatGoiTap">0</p>
-                    <span class="text-purple-200 text-xs">gói</span>
-                </div>
-                <div class="mt-3 flex items-center space-x-3 text-[10px]">
-                    <span class="flex items-center text-purple-200">
-                        <i class="fas fa-fire mr-1 text-orange-300"></i>
-                        <span id="nqtGoiNoiBat">-- gói nổi bật</span>
-                    </span>
+                <div>
+                    <p class="text-xs text-[#666] dark:text-[#888]">Gói tập đang bán</p>
+                    <p class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]"><span id="nqtStatGoiTap">0</span> <span class="text-xs font-normal text-[#666]" id="nqtGoiNoiBat"></span></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- CSS Animations for Dashboard -->
-<style>
-@keyframes nqt-float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-}
-@keyframes nqt-float-delayed {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-15px); }
-}
-.animate-float { animation: nqt-float 3s ease-in-out infinite; }
-.animate-float-delayed { animation: nqt-float-delayed 4s ease-in-out infinite 0.5s; }
-
-.nqt-bell-shake {
-    animation: nqt-bell-shake 1s ease-in-out infinite;
-}
-@keyframes nqt-bell-shake {
-    0%, 100% { transform: rotate(0); }
-    25% { transform: rotate(10deg); }
-    75% { transform: rotate(-10deg); }
-}
-
-.nqt-icon-running {
-    animation: nqt-running 0.5s ease-in-out infinite alternate;
-}
-@keyframes nqt-running {
-    from { transform: translateX(-2px); }
-    to { transform: translateX(2px); }
-}
-
-.nqt-icon-warning {
-    animation: nqt-warning-pulse 1.5s ease-in-out infinite;
-}
-@keyframes nqt-warning-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-}
-
-.nqt-custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.nqt-custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 4px; }
-.nqt-custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
-.nqt-custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
-
-/* Dark mode scrollbar */
-.dark .nqt-custom-scrollbar::-webkit-scrollbar-track { background: #1E293B; }
-.dark .nqt-custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
-.dark .nqt-custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748B; }
-
-/* Skeleton shimmer - light/dark */
-.nqt-skeleton-text {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: nqt-shimmer 1.5s infinite;
-}
-.dark .nqt-skeleton-text {
-    background: linear-gradient(90deg, #334155 25%, #3D4F66 50%, #334155 75%);
-    background-size: 200% 100%;
-}
-@keyframes nqt-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-.nqt-counter { transition: all 0.3s ease; }
-
-.nqt-stat-card {
-    animation: nqt-card-enter 0.5s ease-out backwards;
-}
-.nqt-stat-card:nth-child(1) { animation-delay: 0.1s; }
-.nqt-stat-card:nth-child(2) { animation-delay: 0.2s; }
-.nqt-stat-card:nth-child(3) { animation-delay: 0.3s; }
-.nqt-stat-card:nth-child(4) { animation-delay: 0.4s; }
-
-@keyframes nqt-card-enter {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.nqt-bottom-stat {
-    animation: nqt-card-enter 0.5s ease-out backwards;
-}
-.nqt-bottom-stat:nth-child(1) { animation-delay: 0.5s; }
-.nqt-bottom-stat:nth-child(2) { animation-delay: 0.6s; }
-.nqt-bottom-stat:nth-child(3) { animation-delay: 0.7s; }
-</style>

@@ -34,8 +34,8 @@ def nqt_dang_nhap():
 
     # Xác thực mật khẩu
     if not bcrypt.checkpw(nqt_mk.encode(), nqt_user.g6_mat_khau.encode()):
-        nqt_so_lan_sai_max = NqtDichVuCauHinh.g6_lay('g6_so_lan_dang_nhap_sai', nqt_mac_dinh=5)
-        nqt_khoa_phut = NqtDichVuCauHinh.g6_lay('g6_khoa_tai_khoan_phut', nqt_mac_dinh=30)
+        nqt_so_lan_sai_max = NqtDichVuCauHinh.g6_lay('g6_so_lan_sai_mat_khau', nqt_mac_dinh=5)
+        nqt_khoa_phut = NqtDichVuCauHinh.g6_lay('g6_thoi_gian_khoa_phut', nqt_mac_dinh=30)
         nqt_user.g6_lan_dang_nhap_sai += 1
         if nqt_user.g6_lan_dang_nhap_sai >= nqt_so_lan_sai_max:
             nqt_user.g6_khoa_den = datetime.utcnow() + timedelta(minutes=nqt_khoa_phut)

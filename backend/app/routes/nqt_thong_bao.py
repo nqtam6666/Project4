@@ -84,13 +84,13 @@ def nqt_gui_email_test():
         return nqt_loi('Vui lòng nhập email nhận')
 
     # Lấy cấu hình SMTP từ database
-    nqt_smtp_host = NqtDichVuCauHinh.g6_lay('smtp_host', nqt_mac_dinh='smtp.gmail.com')
-    nqt_smtp_port = NqtDichVuCauHinh.g6_lay('smtp_port', nqt_mac_dinh=587)
-    nqt_smtp_bao_mat = NqtDichVuCauHinh.g6_lay('smtp_bao_mat', nqt_mac_dinh='tls')
-    nqt_smtp_email = NqtDichVuCauHinh.g6_lay('smtp_email', nqt_mac_dinh='')
-    nqt_smtp_mat_khau = NqtDichVuCauHinh.g6_lay('smtp_mat_khau', nqt_mac_dinh='')
-    nqt_email_gui_tu = NqtDichVuCauHinh.g6_lay('email_gui_tu', nqt_mac_dinh=nqt_smtp_email)
-    nqt_ten_nguoi_gui = NqtDichVuCauHinh.g6_lay('ten_nguoi_gui_email', nqt_mac_dinh='NQT Gym')
+    nqt_smtp_host = NqtDichVuCauHinh.g6_lay('g6_smtp_host', nqt_mac_dinh='smtp.gmail.com')
+    nqt_smtp_port = NqtDichVuCauHinh.g6_lay('g6_smtp_port', nqt_mac_dinh=587)
+    nqt_smtp_bao_mat = NqtDichVuCauHinh.g6_lay('g6_smtp_bao_mat', nqt_mac_dinh='tls')
+    nqt_smtp_email = NqtDichVuCauHinh.g6_lay('g6_smtp_email', nqt_mac_dinh='')
+    nqt_smtp_mat_khau = NqtDichVuCauHinh.g6_lay('g6_smtp_mat_khau', nqt_mac_dinh='')
+    nqt_email_gui_tu = NqtDichVuCauHinh.g6_lay('g6_email_gui_tu', nqt_mac_dinh=nqt_smtp_email)
+    nqt_ten_nguoi_gui = NqtDichVuCauHinh.g6_lay('g6_ten_nguoi_gui_email', nqt_mac_dinh='NQT Gym')
 
     if not nqt_smtp_email or not nqt_smtp_mat_khau:
         return nqt_loi('Chưa cấu hình email đăng nhập SMTP và mật khẩu')

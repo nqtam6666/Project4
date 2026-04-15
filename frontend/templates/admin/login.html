@@ -1,91 +1,82 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" id="nqtHtmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - NQT Gym</title>
+    <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass-bg {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-        }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
     </style>
 </head>
-<body class="bg-[#F1F5F9] min-h-screen flex items-center justify-center p-4">
-    <div class="fixed inset-0 overflow-hidden -z-10">
-        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-400 rounded-full mix-blend-multiply filter blur-[120px] opacity-20 animate-pulse"></div>
-        <div class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-purple-400 rounded-full mix-blend-multiply filter blur-[120px] opacity-20 animate-pulse"></div>
-    </div>
+<body class="bg-[#FAFAF9] dark:bg-[#1a1a1a] min-h-screen flex items-center justify-center p-4 transition-colors duration-200">
 
-    <div class="w-full max-w-md">
-        <div class="glass-bg rounded-3xl shadow-2xl p-10 space-y-8">
-            <div class="text-center space-y-2">
-                <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl shadow-blue-200 mx-auto mb-6">
-                    <i class="fas fa-dumbbell"></i>
-                </div>
-                <h1 class="text-3xl font-extrabold text-[#0F172A] tracking-tight">Chào mừng trở lại!</h1>
-                <p class="text-[#64748B] font-medium">Đăng nhập vào hệ thống quản trị NQT Gym</p>
+    <div class="w-full max-w-sm">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="w-12 h-12 bg-[#191919] dark:bg-white rounded-md flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-dumbbell text-white dark:text-[#191919] text-lg"></i>
             </div>
+            <h1 class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">Đăng nhập</h1>
+            <p class="text-sm text-[#666] dark:text-[#888] mt-1">NQT Gym Management</p>
+        </div>
 
-            <form id="loginForm" class="space-y-6">
-                <div class="space-y-2">
-                    <label class="text-sm font-semibold text-[#334155] ml-1">Tên đăng nhập</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-[#94A3B8]">
-                            <i class="fas fa-user text-sm"></i>
-                        </span>
-                        <input type="text" id="username" name="nqt_ten_dang_nhap" required
-                               class="w-full pl-11 pr-4 py-3 bg-white border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-[#0F172A] placeholder-[#94A3B8]"
-                               placeholder="admin">
-                    </div>
+        <!-- Login Card -->
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-6">
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1.5">
+                        Tên đăng nhập
+                    </label>
+                    <input type="text" id="username" name="g6_ten_dang_nhap" required
+                           class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#d4d4d4] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa] placeholder-[#a3a3a3] dark:placeholder-[#666] focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-[#fafafa] focus:ring-offset-1 dark:focus:ring-offset-[#262626] transition-shadow"
+                           placeholder="admin">
                 </div>
 
-                <div class="space-y-2">
-                    <label class="text-sm font-semibold text-[#334155] ml-1">Mật khẩu</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-[#94A3B8]">
-                            <i class="fas fa-lock text-sm"></i>
-                        </span>
-                        <input type="password" id="password" name="nqt_mat_khau" required
-                               class="w-full pl-11 pr-4 py-3 bg-white border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-[#0F172A] placeholder-[#94A3B8]"
-                               placeholder="••••••••">
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1.5">
+                        Mật khẩu
+                    </label>
+                    <input type="password" id="password" name="g6_mat_khau" required
+                           class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#d4d4d4] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa] placeholder-[#a3a3a3] dark:placeholder-[#666] focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-[#fafafa] focus:ring-offset-1 dark:focus:ring-offset-[#262626] transition-shadow"
+                           placeholder="••••••••">
                 </div>
 
-                <div id="errorMessage" class="hidden animate-bounce text-red-500 text-sm font-medium text-center bg-red-50 py-3 rounded-xl border border-red-100 italic">
-                    <i class="fas fa-exclamation-circle mr-2"></i> Sai thông tin đăng nhập!
+                <div id="errorMessage" class="hidden text-sm text-[#dc2626] dark:text-[#f87171] bg-[#fef2f2] dark:bg-[#451a1a] border border-[#fecaca] dark:border-[#7f1d1d] rounded-md px-3 py-2">
+                    <i class="fas fa-exclamation-circle mr-1.5"></i>
+                    <span>Sai thông tin đăng nhập</span>
                 </div>
 
                 <button type="submit" id="loginBtn"
-                        class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 transition-all duration-300 transform hover:-translate-y-1 active:scale-[0.98]">
-                    Đăng nhập ngay <i class="fas fa-arrow-right ml-2"></i>
+                        class="w-full py-2.5 bg-[#191919] dark:bg-[#fafafa] hover:bg-[#404040] dark:hover:bg-[#e5e5e5] text-white dark:text-[#191919] text-sm font-medium rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-[#fafafa] focus:ring-offset-2 dark:focus:ring-offset-[#262626] disabled:opacity-50 disabled:cursor-not-allowed">
+                    Đăng nhập
                 </button>
             </form>
-
-            <div class="text-center">
-                <p class="text-xs text-[#94A3B8] font-medium uppercase tracking-widest">NQT Gym Management System v1.0</p>
-            </div>
         </div>
+
+        <!-- Footer -->
+        <p class="text-center text-xs text-[#a3a3a3] dark:text-[#666] mt-6">
+            NQT Gym Management System
+        </p>
     </div>
 
-    <script shadow="true">
+    <script>
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
             const errorMsg = document.getElementById('errorMessage');
-            
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang xử lý...';
+
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i>Đang xử lý...';
             btn.disabled = true;
             errorMsg.classList.add('hidden');
 
             const payload = {
-                nqt_ten_dang_nhap: document.getElementById('username').value,
-                nqt_mat_khau: document.getElementById('password').value
+                g6_ten_dang_nhap: document.getElementById('username').value,
+                g6_mat_khau: document.getElementById('password').value
             };
 
             try {
@@ -97,23 +88,22 @@
                 const data = await res.json();
 
                 if (data.nqt_thanh_cong) {
-                    localStorage.setItem('nqt_token', data.nqt_du_lieu.nqt_access_token);
+                    localStorage.setItem('nqt_token', data.nqt_du_lieu.g6_access_token);
                     window.location.href = '/admin/dashboard';
                 } else {
-                    errorMsg.textContent = data.nqt_thong_diep || 'Đăng nhập thất bại';
+                    errorMsg.querySelector('span').textContent = data.nqt_thong_diep || 'Đăng nhập thất bại';
                     errorMsg.classList.remove('hidden');
-                    btn.innerHTML = 'Đăng nhập ngay <i class="fas fa-arrow-right ml-2"></i>';
+                    btn.innerHTML = 'Đăng nhập';
                     btn.disabled = false;
                 }
             } catch (err) {
-                errorMsg.textContent = 'Lỗi kết nối máy chủ';
+                errorMsg.querySelector('span').textContent = 'Lỗi kết nối máy chủ';
                 errorMsg.classList.remove('hidden');
-                btn.innerHTML = 'Đăng nhập ngay <i class="fas fa-arrow-right ml-2"></i>';
+                btn.innerHTML = 'Đăng nhập';
                 btn.disabled = false;
             }
         });
 
-        // Redirect if already logged in
         if (localStorage.getItem('nqt_token')) {
             window.location.href = '/admin/dashboard';
         }
