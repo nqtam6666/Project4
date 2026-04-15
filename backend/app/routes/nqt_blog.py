@@ -103,3 +103,21 @@ def nqt_tao_danh_gia():
     db.session.add(nqt_row)
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict(), 'Cảm ơn bạn đã đánh giá', 201)
+
+
+@nqt_blog_bp.route('/nqt-bai-viet/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_bai_viet(nqt_id):
+    nqt_row = G6BaiViet.query.get_or_404(nqt_id)
+    nqt_row.g6_trang_thai = 'an'
+    db.session.commit()
+    return nqt_ok(None, 'Đã ẩn bài viết')
+
+
+@nqt_blog_bp.route('/nqt-danh-muc-bai-viet/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_danh_muc(nqt_id):
+    nqt_row = G6DanhMucBaiViet.query.get_or_404(nqt_id)
+    nqt_row.g6_la_hoat_dong = False
+    db.session.commit()
+    return nqt_ok(None, 'Đã vô hiệu hóa danh mục')

@@ -91,3 +91,16 @@ def nqt_cap_nhat_nguoi_dung(nqt_id):
 def nqt_lay_vai_tro():
     nqt_list = G6VaiTro.query.all()
     return nqt_ok([v.g6_to_dict() for v in nqt_list])
+
+
+@nqt_nguoi_dung_bp.route('/nqt-nguoi-dung/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_quan_ly_nhan_vien')
+def nqt_xoa_nguoi_dung(nqt_id):
+    nqt_calling_id = int(get_jwt_identity())
+    if nqt_calling_id == nqt_id:
+        return nqt_loi('Không thể vô hiệu hóa tài khoản của chính mình', nqt_ma_trang=400)
+    nqt_row = G6NguoiDung.query.get_or_404(nqt_id)
+    nqt_row.g6_la_hoat_dong = False
+    db.session.commit()
+    return nqt_ok(None, 'Đã vô hiệu hóa tài khoản')

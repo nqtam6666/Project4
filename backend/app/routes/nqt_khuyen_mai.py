@@ -87,3 +87,21 @@ def nqt_tao_banner():
     db.session.add(nqt_row)
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict(), 'Tạo banner thành công', 201)
+
+
+@nqt_khuyen_mai_bp.route('/nqt-ma-giam-gia/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_ma_giam_gia(nqt_id):
+    nqt_row = G6MaGiamGia.query.get_or_404(nqt_id)
+    nqt_row.g6_la_hoat_dong = False
+    db.session.commit()
+    return nqt_ok(None, 'Đã vô hiệu hóa mã giảm giá')
+
+
+@nqt_khuyen_mai_bp.route('/nqt-banner/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_banner(nqt_id):
+    nqt_row = G6Banner.query.get_or_404(nqt_id)
+    nqt_row.g6_la_hoat_dong = False
+    db.session.commit()
+    return nqt_ok(None, 'Đã ẩn banner')

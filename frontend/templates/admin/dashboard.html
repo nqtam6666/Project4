@@ -151,6 +151,7 @@
     async function nqtVeChart(soNgay = 7) {
         const canvas = document.getElementById('nqtChartDoanhThu');
         if (!canvas) return;
+        if (typeof Chart === 'undefined') return;
         const ctx = canvas.getContext('2d');
         const colors = nqtGetChartColors();
 
