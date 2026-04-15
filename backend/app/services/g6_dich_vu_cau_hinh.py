@@ -22,6 +22,7 @@ class NqtDichVuCauHinh:
         nqt_row = G6CauHinh.query.filter_by(g6_khoa=nqt_khoa).first()
         if nqt_row:
             nqt_row.g6_gia_tri = str(nqt_gia_tri)
+            nqt_row.g6_nhom = nqt_nhom
         else:
             nqt_row = G6CauHinh(
                 g6_khoa=nqt_khoa,

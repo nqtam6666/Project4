@@ -62,11 +62,11 @@ INSERT INTO G6CauHinh (g6_khoa, g6_gia_tri, g6_kieu_du_lieu, g6_nhom, g6_mo_ta) 
 ('g6_momo_secret_key',        '',            'string',  'payment',  'MoMo Secret Key'),
 ('g6_thue_vat_phan_tram',     '0',           'int',     'payment',  'Thuế VAT %'),
 -- Notification
-('g6_so_ngay_nhac_het_han',   '7',           'int',     'website',  'Nhắc hội viên trước N ngày hết hạn'),
-('g6_so_ngay_nhac_lan_2',     '3',           'int',     'website',  'Nhắc lần 2 trước N ngày hết hạn'),
+('g6_so_ngay_nhac_het_han',   '7',           'int',     'business', 'Nhắc hội viên trước N ngày hết hạn'),
+('g6_so_ngay_nhac_lan_2',     '3',           'int',     'business', 'Nhắc lần 2 trước N ngày hết hạn'),
 -- Loyalty
-('g6_diem_tren_moi_1000_dong','1',           'int',     'website',  '1 điểm / N đồng chi tiêu'),
-('g6_1_diem_bang_dong',       '100',         'int',     'website',  '1 điểm = N đồng khi dùng'),
+('g6_diem_tren_moi_1000_dong','1',           'int',     'loyalty',  '1 điểm / N đồng chi tiêu'),
+('g6_1_diem_bang_dong',       '100',         'int',     'loyalty',  '1 điểm = N đồng khi dùng'),
 -- OTP
 ('g6_otp_het_han_phut',       '5',           'int',     'security', 'OTP hết hạn sau N phút'),
 ('g6_otp_so_lan_nhap_sai',    '3',           'int',     'security', 'OTP sai tối đa N lần'),

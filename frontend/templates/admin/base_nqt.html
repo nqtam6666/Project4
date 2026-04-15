@@ -4,207 +4,296 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - NQT Gym Management</title>
-    <link id="nqt-favicon" rel="icon" type="image/png">
-    <!-- Dark mode: apply trước khi render để tránh flash trắng -->
+    <link id="nqt-favicon" rel="icon" href="https://cdn-icons-png.flaticon.com/512/69/69840.png">
     <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tailwind dark mode config (phải đặt sau CDN) -->
     <script>tailwind.config = { darkMode: 'class' }</script>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
-        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
-        .nqt-glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .nqt-sidebar-item:hover, .nqt-sidebar-item.active {
-            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-            color: white !important;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-        }
-        /* Dark mode toggle button */
-        #nqtDarkModeBtn {
-            transition: all 0.3s ease;
-        }
-        /* Smooth transition cho các element khi đổi mode */
-        aside, header, .nqt-stat-card, .nqt-bottom-stat {
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-        }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        #nqt-content-area { transition: opacity 0.18s ease, transform 0.18s ease; }
+        #nqt-content-area.nqt-page-leaving { opacity: 0; transform: translateY(6px); }
+        #nqt-content-area.nqt-page-entering { opacity: 0; transform: translateY(-6px); }
+        /* Modal animation */
+        .nqt-modal-backdrop { transition: opacity 0.18s ease; }
+        .nqt-modal-backdrop.nqt-modal-hidden { opacity: 0; pointer-events: none; }
+        .nqt-modal-panel { transition: opacity 0.18s ease, transform 0.18s ease; }
+        .nqt-modal-panel.nqt-modal-hidden { opacity: 0; transform: scale(0.95) translateY(-8px); }
+        /* Command Palette */
+        #nqtCmdInput::placeholder { color: #a3a3a3; }
+        .nqt-cmd-item.active { background: rgba(0,0,0,0.05); }
+        .dark .nqt-cmd-item.active { background: rgba(255,255,255,0.07); }
+        /* Notification dropdown */
+        #nqtNotifPanel { animation: nqtSlideDown 0.15s ease; }
+        @keyframes nqtSlideDown { from { opacity:0; transform: translateY(-6px) scale(0.97); } to { opacity:1; transform: translateY(0) scale(1); } }
     </style>
     {% block head %}{% endblock %}
 </head>
-<body class="bg-[#F8FAFC] dark:bg-[#0F172A] text-[#1E293B] dark:text-[#E2E8F0] min-h-screen flex">
+<body class="bg-[#FAFAF9] dark:bg-[#1a1a1a] text-[#191919] dark:text-[#fafafa] min-h-screen flex transition-colors duration-200">
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-white dark:bg-[#1E293B] border-r border-[#E2E8F0] dark:border-[#334155] flex flex-col fixed h-full z-20">
-        <div class="p-6 flex items-center space-x-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-                <i class="fas fa-dumbbell text-xl"></i>
+    <aside class="w-56 bg-white dark:bg-[#262626] border-r border-[#e5e5e5] dark:border-[#404040] flex flex-col fixed h-full z-20">
+        <!-- Logo -->
+        <div class="p-4 flex items-center space-x-2.5 border-b border-[#e5e5e5] dark:border-[#404040]">
+            <div class="w-8 h-8 bg-[#191919] dark:bg-white rounded-md flex items-center justify-center">
+                <i class="fas fa-dumbbell text-white dark:text-[#191919] text-sm"></i>
             </div>
-            <span class="text-xl font-bold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">NQT <span class="text-blue-600">Gym</span></span>
+            <span class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">NQT Gym</span>
         </div>
 
-        <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-            <a href="/admin/dashboard" data-page="dashboard" data-title="Tổng quan" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
-                <i class="fas fa-chart-line w-5"></i>
-                <span class="font-medium">Tổng quan</span>
+        <!-- Navigation -->
+        <nav class="flex-1 p-2 space-y-0.5 overflow-y-auto">
+            <a href="/admin/dashboard" data-page="dashboard" data-title="Tổng quan" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-chart-line w-4 text-center"></i>
+                <span>Tổng quan</span>
             </a>
 
-            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] dark:text-[#475569] uppercase tracking-wider">Quản lý</div>
-            <a href="/admin/hoi-vien" data-page="hoi-vien" data-title="Hội viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
-                <i class="fas fa-users w-5"></i>
-                <span class="font-medium">Hội viên</span>
+            <div class="pt-4 pb-1.5 px-3 text-[11px] font-medium text-[#a3a3a3] dark:text-[#666] uppercase tracking-wide">Quản lý</div>
+            <a href="/admin/hoi-vien" data-page="hoi-vien" data-title="Hội viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-users w-4 text-center"></i>
+                <span>Hội viên</span>
             </a>
-            <a href="/admin/khach-hang" data-page="khach-hang" data-title="Khách hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
-                <i class="fas fa-user-tag w-5"></i>
-                <span class="font-medium">Khách hàng</span>
+            <a href="/admin/khach-hang" data-page="khach-hang" data-title="Khách hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-user-tag w-4 text-center"></i>
+                <span>Khách hàng</span>
             </a>
-            <a href="/admin/goi-tap" data-page="goi-tap" data-title="Gói tập" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
-                <i class="fas fa-tags w-5"></i>
-                <span class="font-medium">Gói tập</span>
-            </a>
-
-            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] dark:text-[#475569] uppercase tracking-wider">Kinh doanh</div>
-            <a href="/admin/don-hang" data-page="don-hang" data-title="Đơn hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
-                <i class="fas fa-shopping-cart w-5"></i>
-                <span class="font-medium">Đơn hàng</span>
-            </a>
-            <a href="/admin/thanh-toan" data-page="thanh-toan" data-title="Thanh toán" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
-                <i class="fas fa-credit-card w-5"></i>
-                <span class="font-medium">Thanh toán</span>
+            <a href="/admin/goi-tap" data-page="goi-tap" data-title="Gói tập" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-box w-4 text-center"></i>
+                <span>Gói tập</span>
             </a>
 
-            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] dark:text-[#475569] uppercase tracking-wider">Vận hành</div>
-            <a href="/admin/chi-nhanh" data-page="chi-nhanh" data-title="Chi nhánh" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
-                <i class="fas fa-store w-5"></i>
-                <span class="font-medium">Chi nhánh</span>
+            <div class="pt-4 pb-1.5 px-3 text-[11px] font-medium text-[#a3a3a3] dark:text-[#666] uppercase tracking-wide">Kinh doanh</div>
+            <a href="/admin/don-hang" data-page="don-hang" data-title="Đơn hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-shopping-bag w-4 text-center"></i>
+                <span>Đơn hàng</span>
             </a>
-            <a href="/admin/nhan-vien" data-page="nhan-vien" data-title="Nhân viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
-                <i class="fas fa-id-badge w-5"></i>
-                <span class="font-medium">Nhân viên</span>
+            <a href="/admin/thanh-toan" data-page="thanh-toan" data-title="Thanh toán" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-credit-card w-4 text-center"></i>
+                <span>Thanh toán</span>
             </a>
 
-            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-[#94A3B8] dark:text-[#475569] uppercase tracking-wider">Hệ thống</div>
-            <a href="/admin/cau-hinh" data-page="cau-hinh" data-title="Cấu hình" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-[#64748B] dark:text-[#94A3B8]">
-                <i class="fas fa-cog w-5"></i>
-                <span class="font-medium">Cấu hình</span>
+            <div class="pt-4 pb-1.5 px-3 text-[11px] font-medium text-[#a3a3a3] dark:text-[#666] uppercase tracking-wide">Vận hành</div>
+            <a href="/admin/chi-nhanh" data-page="chi-nhanh" data-title="Chi nhánh" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-store w-4 text-center"></i>
+                <span>Chi nhánh</span>
+            </a>
+            <a href="/admin/nhan-vien" data-page="nhan-vien" data-title="Nhân viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-id-badge w-4 text-center"></i>
+                <span>Nhân viên</span>
+            </a>
+
+            <div class="pt-4 pb-1.5 px-3 text-[11px] font-medium text-[#a3a3a3] dark:text-[#666] uppercase tracking-wide">Hệ thống</div>
+            <a href="/admin/cau-hinh" data-page="cau-hinh" data-title="Cấu hình" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-cog w-4 text-center"></i>
+                <span>Cấu hình</span>
             </a>
         </nav>
 
-        <div class="p-4 border-t border-[#E2E8F0] dark:border-[#334155]">
-            <button onclick="nqtLogout()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">
-                <i class="fas fa-sign-out-alt w-5"></i>
-                <span class="font-medium">Đăng xuất</span>
+        <!-- Logout -->
+        <div class="p-2 border-t border-[#e5e5e5] dark:border-[#404040]">
+            <button onclick="nqtLogout()" class="w-full flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#451a1a] transition-colors">
+                <i class="fas fa-sign-out-alt w-4 text-center"></i>
+                <span>Đăng xuất</span>
             </button>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 ml-64 min-h-screen flex flex-col">
+    <main class="flex-1 ml-56 min-h-screen flex flex-col">
         <!-- Header -->
-        <header class="h-16 bg-white dark:bg-[#1E293B] border-b border-[#E2E8F0] dark:border-[#334155] flex items-center justify-between px-8 sticky top-0 z-10">
-            <div class="flex items-center space-x-4">
-                <h1 class="text-xl font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{% block title %}Dashboard{% endblock %}</h1>
-            </div>
+        <header class="h-14 bg-white dark:bg-[#262626] border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between px-6 sticky top-0 z-10">
             <div class="flex items-center space-x-3">
-                <!-- Dark / Light mode toggle -->
+                <h1 class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">
+                    {% block title %}Dashboard{% endblock %}
+                </h1>
+            </div>
+            <div class="flex items-center space-x-1">
+                <!-- Command Palette trigger -->
+                <button onclick="nqtAbrirComandos()" title="Tìm kiếm nhanh (Ctrl+K)"
+                    class="hidden sm:flex items-center space-x-2 px-2.5 py-1.5 rounded-md text-xs text-[#a3a3a3] dark:text-[#666] border border-[#e5e5e5] dark:border-[#404040] hover:border-[#d4d4d4] dark:hover:border-[#525252] hover:text-[#666] dark:hover:text-[#a3a3a3] transition-colors mr-2">
+                    <i class="fas fa-search text-xs"></i>
+                    <span>Tìm kiếm...</span>
+                    <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 bg-[#f5f5f5] dark:bg-[#333] rounded text-[10px] font-mono border border-[#e5e5e5] dark:border-[#404040]">⌘K</kbd>
+                </button>
+
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button id="nqtNotifBtn" onclick="nqtToggleNotif()"
+                        class="w-8 h-8 rounded-md flex items-center justify-center text-[#525252] dark:text-[#a3a3a3] hover:bg-[#f5f5f5] dark:hover:bg-[#404040] transition-colors relative">
+                        <i class="fas fa-bell text-sm"></i>
+                        <span id="nqtNotifBadge" class="hidden absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#dc2626] text-white text-[9px] font-bold rounded-full flex items-center justify-center"></span>
+                    </button>
+                    <!-- Dropdown -->
+                    <div id="nqtNotifPanel" class="hidden absolute right-0 top-10 w-80 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md shadow-lg z-50">
+                        <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+                            <span class="text-sm font-medium text-[#191919] dark:text-[#fafafa]">Thông báo</span>
+                            <button onclick="nqtDocTatCaThongBao()" class="text-xs text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa]">Đánh dấu đã đọc</button>
+                        </div>
+                        <div id="nqtNotifList" class="max-h-72 overflow-y-auto divide-y divide-[#e5e5e5] dark:divide-[#404040]">
+                            <div class="px-4 py-6 text-center text-sm text-[#666] dark:text-[#888]">
+                                <i class="fas fa-circle-notch fa-spin mb-2 block text-lg"></i>Đang tải...
+                            </div>
+                        </div>
+                        <div class="px-4 py-2.5 border-t border-[#e5e5e5] dark:border-[#404040] text-center">
+                            <button onclick="nqtNavigateTo('/admin/hoi-vien', 'Hội viên'); nqtDongNotif();" class="text-xs text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa]">Xem tất cả</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dark mode toggle -->
                 <button id="nqtDarkModeBtn" onclick="nqtToggleDarkMode()"
-                    class="w-9 h-9 rounded-xl flex items-center justify-center border border-[#E2E8F0] dark:border-[#334155] bg-[#F8FAFC] dark:bg-[#0F172A] text-[#64748B] dark:text-amber-400 hover:bg-gray-100 dark:hover:bg-[#334155] transition-all duration-200"
+                    class="w-8 h-8 rounded-md flex items-center justify-center text-[#525252] dark:text-[#a3a3a3] hover:bg-[#f5f5f5] dark:hover:bg-[#404040] transition-colors"
                     title="Chuyển đổi Dark/Light mode">
                     <i id="nqtDarkModeIcon" class="fas fa-moon text-sm"></i>
                 </button>
 
-                <div class="w-px h-6 bg-[#E2E8F0] dark:bg-[#334155]"></div>
+                <div class="w-px h-5 bg-[#e5e5e5] dark:bg-[#404040] mx-1"></div>
 
-                <div class="flex flex-col items-end">
-                    <span id="nqt-user-name" class="text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">...</span>
-                    <span id="nqt-user-role" class="text-xs text-[#64748B] dark:text-[#94A3B8]">Admin</span>
-                </div>
-                <div class="w-10 h-10 bg-gray-100 dark:bg-[#334155] rounded-full border border-gray-200 dark:border-[#475569] flex items-center justify-center">
-                    <i class="fas fa-user-circle text-2xl text-gray-400 dark:text-gray-500"></i>
+                <!-- User info -->
+                <div class="flex items-center space-x-2.5">
+                    <div class="text-right hidden sm:block">
+                        <div id="nqt-user-name" class="text-sm font-medium text-[#191919] dark:text-[#fafafa]">...</div>
+                        <div id="nqt-user-role" class="text-[11px] text-[#666] dark:text-[#888]">Admin</div>
+                    </div>
+                    <div id="nqt-user-avatar" class="w-8 h-8 bg-[#191919] dark:bg-[#fafafa] rounded-md flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <i class="fas fa-user text-white dark:text-[#191919] text-xs"></i>
+                    </div>
                 </div>
             </div>
         </header>
 
         <!-- Content Area -->
-        <div id="nqt-content-area" class="p-8 flex-1">
+        <div id="nqt-content-area" class="p-6 flex-1">
             {% block content %}{% endblock %}
         </div>
     </main>
 
     <!-- Toast Container -->
-    <div id="nqt-toast-container" class="fixed top-6 right-6 z-[9999] space-y-3 pointer-events-none"></div>
+    <div id="nqt-toast-container" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
 
-    <!-- Global JS Utils -->
+    <!-- Command Palette -->
+    <div id="nqtCmdOverlay" class="hidden fixed inset-0 bg-black/60 z-[9998] flex items-start justify-center pt-24 px-4" onclick="if(event.target===this) nqtInchideComenzi()">
+        <div class="w-full max-w-lg bg-white dark:bg-[#262626] rounded-lg border border-[#e5e5e5] dark:border-[#404040] shadow-2xl overflow-hidden">
+            <!-- Search input -->
+            <div class="flex items-center px-4 border-b border-[#e5e5e5] dark:border-[#404040]">
+                <i class="fas fa-search text-[#a3a3a3] text-sm mr-3 flex-shrink-0"></i>
+                <input id="nqtCmdInput" type="text" placeholder="Tìm trang, tính năng..."
+                    class="flex-1 py-3.5 text-sm bg-transparent text-[#191919] dark:text-[#fafafa] outline-none"
+                    oninput="nqtLocLenh(this.value)" onkeydown="nqtCmdKeyDown(event)">
+                <kbd class="flex-shrink-0 px-1.5 py-0.5 bg-[#f5f5f5] dark:bg-[#333] rounded text-[10px] font-mono text-[#666] dark:text-[#888] border border-[#e5e5e5] dark:border-[#404040]">ESC</kbd>
+            </div>
+            <!-- Results -->
+            <div id="nqtCmdResults" class="max-h-80 overflow-y-auto py-1.5"></div>
+            <!-- Footer hint -->
+            <div class="px-4 py-2 border-t border-[#e5e5e5] dark:border-[#404040] flex items-center space-x-4 text-[10px] text-[#a3a3a3] dark:text-[#666]">
+                <span><kbd class="font-mono">↑↓</kbd> Chọn</span>
+                <span><kbd class="font-mono">Enter</kbd> Mở</span>
+                <span><kbd class="font-mono">Esc</kbd> Đóng</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global JS -->
     <script>
-        // Dark mode toggle
+        // ========== NQT FACEHASH - Avatar Generator ==========
+        (function() {
+            function nqtStringHash(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return Math.abs(hash);
+            }
+            const NQT_COLORS = [
+                ['#667eea', '#764ba2'], ['#f093fb', '#f5576c'], ['#4facfe', '#00f2fe'],
+                ['#43e97b', '#38f9d7'], ['#fa709a', '#fee140'], ['#a8edea', '#fed6e3'],
+                ['#ffecd2', '#fcb69f'], ['#667eea', '#764ba2'], ['#ff9a9e', '#fecfef'], ['#a18cd1', '#fbc2eb'],
+            ];
+            const NQT_EYES = [
+                `<circle cx="14" cy="18" r="3" fill="currentColor"/><circle cx="26" cy="18" r="3" fill="currentColor"/>`,
+                `<rect x="12" y="14" width="3" height="10" rx="1.5" fill="currentColor"/><rect x="9" y="17" width="9" height="3" rx="1.5" fill="currentColor"/><rect x="23" y="14" width="3" height="10" rx="1.5" fill="currentColor"/><rect x="20" y="17" width="9" height="3" rx="1.5" fill="currentColor"/>`,
+                `<rect x="10" y="17" width="8" height="3" rx="1.5" fill="currentColor"/><rect x="22" y="17" width="8" height="3" rx="1.5" fill="currentColor"/>`,
+                `<path d="M10 19c0-2 2-4 4-4s4 2 4 4" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M22 19c0-2 2-4 4-4s4 2 4 4" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+            ];
+            window.nqtTaoAvatar = function(name, size = 40) {
+                if (!name) name = 'U';
+                const hash = nqtStringHash(name);
+                const colors = NQT_COLORS[hash % NQT_COLORS.length];
+                const eyes = NQT_EYES[hash % NQT_EYES.length];
+                const initial = name.trim().split(' ').pop()[0].toUpperCase();
+                const gradientId = `nqtGrad${hash}`;
+                const rotations = [{x:-5,y:5},{x:5,y:5},{x:5,y:0},{x:0,y:5},{x:-5,y:0},{x:0,y:0},{x:0,y:-5},{x:-5,y:-5},{x:5,y:-5}];
+                const rot = rotations[hash % rotations.length];
+                return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style="border-radius:50%;"><defs><linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${colors[0]}"/><stop offset="100%" style="stop-color:${colors[1]}"/></linearGradient><radialGradient id="${gradientId}h" cx="50%" cy="30%" r="60%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.2)"/><stop offset="100%" style="stop-color:rgba(255,255,255,0)"/></radialGradient></defs><rect width="40" height="40" fill="url(#${gradientId})" rx="20"/><rect width="40" height="40" fill="url(#${gradientId}h)" rx="20"/><g transform="rotate(${rot.x} 20 20)" style="color:rgba(255,255,255,0.9)">${eyes}</g><text x="20" y="32" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="10" font-weight="600" font-family="Inter,sans-serif">${initial}</text></svg>`;
+            };
+            window.nqtTaoAvatarElement = function(name, size = 40, className = '') {
+                const div = document.createElement('div');
+                div.className = className;
+                div.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;`;
+                div.innerHTML = nqtTaoAvatar(name, size);
+                return div;
+            };
+            window.nqtAvatarHtml = function(name, size = 40, className = '') {
+                return `<div class="${className}" style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;">${nqtTaoAvatar(name, size)}</div>`;
+            };
+        })();
+    </script>
+    <script>
+        // ========== DARK MODE ==========
         function nqtToggleDarkMode() {
             const nqtHtml = document.getElementById('nqtHtmlRoot');
             const nqtIcon = document.getElementById('nqtDarkModeIcon');
             const nqtIsDark = nqtHtml.classList.toggle('dark');
             localStorage.setItem('nqt_dark_mode', nqtIsDark);
-            if (nqtIcon) {
-                nqtIcon.className = nqtIsDark ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm';
-            }
+            nqtIcon.className = nqtIsDark ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm';
         }
-
-        // Sync icon on load
         (function() {
             const nqtIcon = document.getElementById('nqtDarkModeIcon');
-            if (nqtIcon && localStorage.getItem('nqt_dark_mode') === 'true') {
-                nqtIcon.className = 'fas fa-sun text-sm';
-            }
+            if (nqtIcon && localStorage.getItem('nqt_dark_mode') === 'true') nqtIcon.className = 'fas fa-sun text-sm';
         })();
 
-        // Toast notification
+        // ========== TOAST ==========
         function nqtToast(nqtMsg, nqtType = 'success') {
             const nqtContainer = document.getElementById('nqt-toast-container');
-            const nqtColors = {
-                success: 'bg-emerald-600 text-white',
-                error:   'bg-red-600 text-white',
-                info:    'bg-blue-600 text-white',
-                warn:    'bg-amber-500 text-white',
+            const nqtIcons = { success: 'fa-check-circle', error: 'fa-times-circle', warn: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+            const nqtStyles = {
+                success: 'bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919]',
+                error: 'bg-[#dc2626] text-white',
+                warn: 'bg-[#d97706] text-white',
+                info: 'bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919]',
             };
-            const nqtIcons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warn: 'fa-exclamation-triangle' };
             const nqtEl = document.createElement('div');
-            nqtEl.className = `pointer-events-auto flex items-center space-x-3 px-5 py-4 rounded-2xl shadow-xl ${nqtColors[nqtType] || nqtColors.info} transition-all duration-300 translate-x-0 opacity-100 max-w-sm`;
-            nqtEl.innerHTML = `<i class="fas ${nqtIcons[nqtType] || 'fa-info-circle'} flex-shrink-0"></i><span class="text-sm font-semibold">${nqtMsg}</span>`;
+            nqtEl.className = `pointer-events-auto flex items-center space-x-2 px-4 py-2.5 rounded-md text-sm font-medium shadow-lg ${nqtStyles[nqtType] || nqtStyles.info} transition-all duration-300 translate-y-2 opacity-0`;
+            nqtEl.innerHTML = `<i class="fas ${nqtIcons[nqtType] || 'fa-info-circle'} text-xs flex-shrink-0"></i><span>${nqtMsg}</span>`;
             nqtContainer.appendChild(nqtEl);
+            requestAnimationFrame(() => { nqtEl.classList.remove('translate-y-2', 'opacity-0'); });
             setTimeout(() => {
-                nqtEl.classList.add('opacity-0', 'translate-x-8');
+                nqtEl.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => nqtEl.remove(), 300);
-            }, 3500);
+            }, 3000);
         }
 
-        // API Wrapper
+        // ========== API WRAPPER ==========
         window.nqtApi = {
             async fetch(url, options = {}) {
                 const token = localStorage.getItem('nqt_token');
                 if (!options.headers) options.headers = {};
-                if (token) {
-                    options.headers['Authorization'] = `Bearer ${token}`;
-                }
+                if (token) options.headers['Authorization'] = `Bearer ${token}`;
                 if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
                     options.headers['Content-Type'] = 'application/json';
                     options.body = JSON.stringify(options.body);
                 }
-
                 try {
                     const response = await fetch(url, options);
                     const data = await response.json();
-
                     if (response.status === 401) {
                         localStorage.removeItem('nqt_token');
                         window.location.href = '/admin/login';
                         return null;
                     }
-
                     return data;
                 } catch (error) {
                     console.error('API Error:', error);
@@ -213,141 +302,320 @@
             }
         };
 
+        // ========== BUTTON LOADING UTILITY ==========
+        // Usage: const nqtRestore = nqtBtnLoading(btn, 'Đang lưu...')
+        //        sau khi xong: nqtRestore()
+        window.nqtBtnLoading = function(nqtBtn, nqtMsg = 'Đang xử lý...') {
+            if (!nqtBtn) return () => {};
+            const nqtOrigText = nqtBtn.innerHTML;
+            const nqtOrigDisabled = nqtBtn.disabled;
+            nqtBtn.disabled = true;
+            nqtBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin text-xs mr-1.5"></i>${nqtMsg}`;
+            nqtBtn.style.opacity = '0.75';
+            return function() {
+                nqtBtn.disabled = nqtOrigDisabled;
+                nqtBtn.innerHTML = nqtOrigText;
+                nqtBtn.style.opacity = '';
+            };
+        };
+
+        // ========== LOGOUT ==========
         function nqtLogout() {
             localStorage.removeItem('nqt_token');
             window.location.href = '/admin/login';
         }
 
-        // Check Login Status & Init SPA Navigation
+        // ========== MODAL HELPERS ==========
+        window.nqtMoModal = function(id) {
+            const backdrop = document.getElementById(id);
+            if (!backdrop) return;
+            backdrop.classList.remove('hidden');
+            backdrop.classList.add('nqt-modal-backdrop', 'nqt-modal-hidden');
+            const panel = backdrop.querySelector(':scope > div');
+            if (panel) panel.classList.add('nqt-modal-panel', 'nqt-modal-hidden');
+            document.body.style.overflow = 'hidden';
+            backdrop.getBoundingClientRect();
+            backdrop.classList.remove('nqt-modal-hidden');
+            if (panel) panel.classList.remove('nqt-modal-hidden');
+        };
+        window.nqtDongModal = function(id) {
+            const backdrop = document.getElementById(id);
+            if (!backdrop) return;
+            backdrop.classList.add('nqt-modal-backdrop', 'nqt-modal-hidden');
+            const panel = backdrop.querySelector(':scope > div');
+            if (panel) panel.classList.add('nqt-modal-panel', 'nqt-modal-hidden');
+            setTimeout(() => {
+                backdrop.classList.add('hidden');
+                backdrop.classList.remove('nqt-modal-backdrop', 'nqt-modal-hidden');
+                if (panel) panel.classList.remove('nqt-modal-panel', 'nqt-modal-hidden');
+                document.body.style.overflow = '';
+            }, 180);
+        };
+
+        // ========== NOTIFICATION BELL ==========
+        let nqtNotifOpen = false;
+        let nqtNotifData = [];
+
+        function nqtToggleNotif() {
+            nqtNotifOpen = !nqtNotifOpen;
+            const panel = document.getElementById('nqtNotifPanel');
+            if (nqtNotifOpen) {
+                panel.classList.remove('hidden');
+                nqtTaiThongBao();
+                // Close when clicking outside
+                setTimeout(() => document.addEventListener('click', nqtCloseNotifOutside), 10);
+            } else {
+                nqtDongNotif();
+            }
+        }
+        function nqtDongNotif() {
+            nqtNotifOpen = false;
+            document.getElementById('nqtNotifPanel').classList.add('hidden');
+            document.removeEventListener('click', nqtCloseNotifOutside);
+        }
+        function nqtCloseNotifOutside(e) {
+            const btn = document.getElementById('nqtNotifBtn');
+            const panel = document.getElementById('nqtNotifPanel');
+            if (!btn?.contains(e.target) && !panel?.contains(e.target)) nqtDongNotif();
+        }
+
+        async function nqtTaiThongBao() {
+            const list = document.getElementById('nqtNotifList');
+
+            // Lấy hội viên sắp hết hạn và thanh toán chờ xử lý song song
+            const [resHv, resTT] = await Promise.all([
+                nqtApi.fetch('/api/nqt-hoi-vien?g6_sap_het_han=7&g6_gioi_han=5'),
+                nqtApi.fetch('/api/nqt-thanh-toan?g6_trang_thai=cho_xu_ly&g6_gioi_han=5'),
+            ]);
+
+            nqtNotifData = [];
+            if (resHv?.nqt_thanh_cong) {
+                (resHv.nqt_du_lieu.g6_danh_sach || []).forEach(hv => {
+                    nqtNotifData.push({ type: 'warning', icon: 'fa-clock', title: `${hv.g6_ho_ten} — sắp hết hạn`, sub: 'Gói tập', url: '/admin/hoi-vien' });
+                });
+            }
+            if (resTT?.nqt_thanh_cong) {
+                const count = resTT.nqt_du_lieu.g6_tong || 0;
+                if (count > 0) nqtNotifData.push({ type: 'info', icon: 'fa-credit-card', title: `${count} thanh toán chờ xác nhận`, sub: 'Thanh toán', url: '/admin/thanh-toan' });
+            }
+
+            // Update badge
+            const badge = document.getElementById('nqtNotifBadge');
+            if (nqtNotifData.length > 0) {
+                badge.textContent = nqtNotifData.length > 9 ? '9+' : nqtNotifData.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            // Render list
+            if (nqtNotifData.length === 0) {
+                list.innerHTML = `<div class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]"><i class="fas fa-check-circle text-[#16a34a] text-xl mb-2 block"></i>Không có thông báo mới</div>`;
+                return;
+            }
+            const nqtTypeColors = { warning: 'text-[#d97706] bg-[#fef3c7] dark:bg-[#92400e]/20', info: 'text-[#2563eb] bg-[#dbeafe] dark:bg-[#1e40af]/20' };
+            list.innerHTML = nqtNotifData.map(n => `
+                <button onclick="nqtNavigateTo('${n.url}', '${n.sub}'); nqtDongNotif();" class="w-full flex items-start space-x-3 px-4 py-3 hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors text-left">
+                    <div class="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5 ${nqtTypeColors[n.type] || nqtTypeColors.info}">
+                        <i class="fas ${n.icon} text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-[#191919] dark:text-[#fafafa] truncate">${n.title}</p>
+                        <p class="text-xs text-[#666] dark:text-[#888]">${n.sub}</p>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        function nqtDocTatCaThongBao() {
+            document.getElementById('nqtNotifBadge').classList.add('hidden');
+            document.getElementById('nqtNotifList').innerHTML = `<div class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]"><i class="fas fa-check-circle text-[#16a34a] text-xl mb-2 block"></i>Không có thông báo mới</div>`;
+        }
+
+        // Poll notifications mỗi 60s
+        setInterval(() => {
+            if (!document.hidden) {
+                nqtApi.fetch('/api/nqt-thanh-toan?g6_trang_thai=cho_xu_ly&g6_gioi_han=1').then(res => {
+                    if (!res?.nqt_thanh_cong) return;
+                    const count = res.nqt_du_lieu.g6_tong || 0;
+                    const badge = document.getElementById('nqtNotifBadge');
+                    if (badge) {
+                        if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.classList.remove('hidden'); }
+                        else badge.classList.add('hidden');
+                    }
+                }).catch(() => {});
+            }
+        }, 60000);
+
+        // ========== COMMAND PALETTE ==========
+        const nqtTrangLenh = [
+            { label: 'Tổng quan', sub: 'Dashboard', icon: 'fa-chart-line', url: '/admin/dashboard' },
+            { label: 'Hội viên', sub: 'Quản lý', icon: 'fa-users', url: '/admin/hoi-vien' },
+            { label: 'Khách hàng', sub: 'Quản lý', icon: 'fa-user-tag', url: '/admin/khach-hang' },
+            { label: 'Gói tập', sub: 'Quản lý', icon: 'fa-box', url: '/admin/goi-tap' },
+            { label: 'Đơn hàng', sub: 'Kinh doanh', icon: 'fa-shopping-bag', url: '/admin/don-hang' },
+            { label: 'Thanh toán', sub: 'Kinh doanh', icon: 'fa-credit-card', url: '/admin/thanh-toan' },
+            { label: 'Chi nhánh', sub: 'Vận hành', icon: 'fa-store', url: '/admin/chi-nhanh' },
+            { label: 'Nhân viên', sub: 'Vận hành', icon: 'fa-id-badge', url: '/admin/nhan-vien' },
+            { label: 'Cấu hình', sub: 'Hệ thống', icon: 'fa-cog', url: '/admin/cau-hinh' },
+            { label: 'Đăng xuất', sub: 'Tài khoản', icon: 'fa-sign-out-alt', action: 'nqtLogout()' },
+        ];
+        let nqtCmdActive = 0;
+        let nqtCmdFiltered = [...nqtTrangLenh];
+
+        window.nqtAbrirComandos = function() {
+            nqtCmdFiltered = [...nqtTrangLenh];
+            nqtCmdActive = 0;
+            document.getElementById('nqtCmdOverlay').classList.remove('hidden');
+            const inp = document.getElementById('nqtCmdInput');
+            inp.value = '';
+            nqtRenderCmdResults();
+            setTimeout(() => inp.focus(), 50);
+        };
+        window.nqtInchideComenzi = function() {
+            document.getElementById('nqtCmdOverlay').classList.add('hidden');
+        };
+        window.nqtLocLenh = function(query) {
+            const q = query.toLowerCase().trim();
+            nqtCmdFiltered = q ? nqtTrangLenh.filter(t => t.label.toLowerCase().includes(q) || t.sub.toLowerCase().includes(q)) : [...nqtTrangLenh];
+            nqtCmdActive = 0;
+            nqtRenderCmdResults();
+        };
+        function nqtRenderCmdResults() {
+            const el = document.getElementById('nqtCmdResults');
+            if (nqtCmdFiltered.length === 0) {
+                el.innerHTML = `<div class="px-4 py-6 text-center text-sm text-[#666] dark:text-[#888]">Không tìm thấy kết quả</div>`;
+                return;
+            }
+            el.innerHTML = nqtCmdFiltered.map((t, i) => `
+                <button class="nqt-cmd-item w-full flex items-center space-x-3 px-4 py-2.5 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07] ${i === nqtCmdActive ? 'active' : ''}"
+                    onclick="nqtCmdSelect(${i})">
+                    <div class="w-7 h-7 rounded-md bg-[#f5f5f5] dark:bg-[#333] flex items-center justify-center flex-shrink-0">
+                        <i class="fas ${t.icon} text-xs text-[#525252] dark:text-[#a3a3a3]"></i>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <p class="text-sm text-[#191919] dark:text-[#fafafa]">${t.label}</p>
+                    </div>
+                    <span class="text-xs text-[#a3a3a3] dark:text-[#666]">${t.sub}</span>
+                </button>
+            `).join('');
+        }
+        window.nqtCmdKeyDown = function(e) {
+            if (e.key === 'ArrowDown') { e.preventDefault(); nqtCmdActive = Math.min(nqtCmdActive + 1, nqtCmdFiltered.length - 1); nqtRenderCmdResults(); nqtCmdScrollActive(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); nqtCmdActive = Math.max(nqtCmdActive - 1, 0); nqtRenderCmdResults(); nqtCmdScrollActive(); }
+            else if (e.key === 'Enter') { e.preventDefault(); nqtCmdSelect(nqtCmdActive); }
+            else if (e.key === 'Escape') { nqtInchideComenzi(); }
+        };
+        function nqtCmdScrollActive() {
+            const el = document.getElementById('nqtCmdResults');
+            const active = el?.querySelectorAll('.nqt-cmd-item')[nqtCmdActive];
+            active?.scrollIntoView({ block: 'nearest' });
+        }
+        window.nqtCmdSelect = function(i) {
+            const t = nqtCmdFiltered[i];
+            if (!t) return;
+            nqtInchideComenzi();
+            if (t.action) eval(t.action);
+            else nqtNavigateTo(t.url, t.label);
+        };
+
+        // Ctrl+K global shortcut
+        document.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const overlay = document.getElementById('nqtCmdOverlay');
+                overlay.classList.contains('hidden') ? nqtAbrirComandos() : nqtInchideComenzi();
+            }
+            if (e.key === 'Escape') {
+                if (!document.getElementById('nqtCmdOverlay').classList.contains('hidden')) nqtInchideComenzi();
+            }
+        });
+
+        // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('nqt_token');
             if (!token && window.location.pathname !== '/admin/login') {
                 window.location.href = '/admin/login';
             }
 
-            // Highlight active nav
             nqtUpdateActiveNav(window.location.pathname);
 
-            // Load user info from token
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                document.getElementById('nqt-user-name').textContent = payload.nqt_ho_ten || 'User';
-                document.getElementById('nqt-user-role').textContent = payload.nqt_vai_tro?.[0] || 'Member';
+                const nqtHoTen = payload.g6_ho_ten || 'User';
+                document.getElementById('nqt-user-name').textContent = nqtHoTen;
+                const nqtRoleMap = { 'G6QuanTri': 'Quản trị viên', 'G6QuanLy': 'Quản lý', 'G6HuanLuyenVien': 'HLV', 'G6LeTan': 'Lễ tân' };
+                document.getElementById('nqt-user-role').textContent = nqtRoleMap[payload.g6_vai_tro?.[0]] || 'Thành viên';
+                // Set avatar
+                const avatarEl = document.getElementById('nqt-user-avatar');
+                if (avatarEl) { avatarEl.innerHTML = nqtTaoAvatar(nqtHoTen, 32); }
             } catch(e) {}
 
-            // Load favicon từ config
-            fetch('/api/nqt-cau-hinh/favicon_url', {
-                headers: { 'Authorization': `Bearer ${token}` }
+            fetch('/api/nqt-cau-hinh/g6_favicon_url', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('nqt_token')}` }
             }).then(r => r.json()).then(data => {
-                if (data.nqt_thanh_cong && data.nqt_du_lieu.nqt_gia_tri) {
-                    document.getElementById('nqt-favicon').href = data.nqt_du_lieu.nqt_gia_tri;
+                if (data.nqt_thanh_cong && data.nqt_du_lieu?.g6_gia_tri) {
+                    document.getElementById('nqt-favicon').href = data.nqt_du_lieu.g6_gia_tri;
                 }
             }).catch(() => {});
 
-            // SPA Navigation - Intercept sidebar clicks
             nqtInitSpaNavigation();
+
+            // Load notification badge on startup
+            setTimeout(() => {
+                if (localStorage.getItem('nqt_token')) nqtTaiThongBao();
+            }, 1500);
         });
 
-        // Update active nav item
+        // ========== SPA NAVIGATION ==========
         function nqtUpdateActiveNav(nqtPath) {
             document.querySelectorAll('.nqt-sidebar-item').forEach(nqtItem => {
                 nqtItem.classList.remove('active');
-                if (nqtItem.getAttribute('href') === nqtPath) {
-                    nqtItem.classList.add('active');
-                }
+                if (nqtItem.getAttribute('href') === nqtPath) nqtItem.classList.add('active');
             });
         }
-
-        // SPA Navigation System
         function nqtInitSpaNavigation() {
             document.querySelectorAll('.nqt-nav-link').forEach(nqtLink => {
                 nqtLink.addEventListener('click', async (e) => {
                     e.preventDefault();
-                    const nqtUrl = nqtLink.getAttribute('href');
-                    const nqtTitle = nqtLink.dataset.title || 'Admin';
-
-                    await nqtNavigateTo(nqtUrl, nqtTitle);
+                    await nqtNavigateTo(nqtLink.getAttribute('href'), nqtLink.dataset.title || 'Admin');
                 });
             });
-
-            // Handle browser back/forward
             window.addEventListener('popstate', async (e) => {
-                if (e.state && e.state.nqtUrl) {
-                    await nqtLoadPage(e.state.nqtUrl, e.state.nqtTitle, false);
-                }
+                if (e.state?.nqtUrl) await nqtLoadPage(e.state.nqtUrl, e.state.nqtTitle, false);
             });
         }
-
-        // Navigate to a page without reload
         async function nqtNavigateTo(nqtUrl, nqtTitle) {
             await nqtLoadPage(nqtUrl, nqtTitle, true);
         }
-
-        // Load page content via AJAX
         async function nqtLoadPage(nqtUrl, nqtTitle, nqtPushState = true) {
             const nqtContentArea = document.getElementById('nqt-content-area');
             const nqtHeaderTitle = document.querySelector('header h1');
-
-            // Show loading state
-            nqtContentArea.style.opacity = '0.5';
-            nqtContentArea.style.pointerEvents = 'none';
-
+            nqtContentArea.classList.add('nqt-page-leaving');
             try {
                 const nqtResponse = await fetch(nqtUrl, {
-                    headers: {
-                        'X-Partial': 'true',
-                        'Authorization': `Bearer ${localStorage.getItem('nqt_token') || ''}`
-                    }
+                    headers: { 'X-Partial': 'true', 'Authorization': `Bearer ${localStorage.getItem('nqt_token') || ''}` }
                 });
-
-                if (nqtResponse.status === 401) {
-                    window.location.href = '/admin/login';
-                    return;
-                }
-
+                if (nqtResponse.status === 401) { window.location.href = '/admin/login'; return; }
                 const nqtHtml = await nqtResponse.text();
-
-                // Update content
+                await new Promise(r => setTimeout(r, 180));
+                nqtContentArea.classList.remove('nqt-page-leaving');
+                nqtContentArea.classList.add('nqt-page-entering');
                 nqtContentArea.innerHTML = nqtHtml;
-                nqtContentArea.style.opacity = '1';
-                nqtContentArea.style.pointerEvents = 'auto';
-
-                // Update header title
-                if (nqtHeaderTitle) {
-                    nqtHeaderTitle.textContent = nqtTitle;
-                }
-
-                // Update document title
+                if (nqtHeaderTitle) nqtHeaderTitle.textContent = nqtTitle;
                 document.title = `${nqtTitle} - NQT Gym Admin`;
-
-                // Update URL and history
-                if (nqtPushState) {
-                    history.pushState({ nqtUrl, nqtTitle }, nqtTitle, nqtUrl);
-                }
-
-                // Update active nav
+                if (nqtPushState) history.pushState({ nqtUrl, nqtTitle }, nqtTitle, nqtUrl);
                 nqtUpdateActiveNav(nqtUrl);
-
-                // Execute any inline scripts in the loaded content
                 nqtContentArea.querySelectorAll('script').forEach(nqtOldScript => {
                     const nqtNewScript = document.createElement('script');
-                    if (nqtOldScript.src) {
-                        nqtNewScript.src = nqtOldScript.src;
-                    } else {
-                        nqtNewScript.textContent = nqtOldScript.textContent;
-                    }
-                    try {
-                        nqtOldScript.parentNode.replaceChild(nqtNewScript, nqtOldScript);
-                    } catch(nqtScriptErr) {
-                        console.warn('Script exec skipped:', nqtScriptErr.message);
-                    }
+                    nqtOldScript.src ? nqtNewScript.src = nqtOldScript.src : nqtNewScript.textContent = nqtOldScript.textContent;
+                    try { nqtOldScript.parentNode.replaceChild(nqtNewScript, nqtOldScript); } catch(e) {}
                 });
-
+                nqtContentArea.getBoundingClientRect();
+                nqtContentArea.classList.remove('nqt-page-entering');
             } catch (nqtError) {
-                console.error('SPA Navigation Error:', nqtError);
                 nqtToast('Không thể tải trang', 'error');
-                nqtContentArea.style.opacity = '1';
-                nqtContentArea.style.pointerEvents = 'auto';
+                nqtContentArea.classList.remove('nqt-page-leaving', 'nqt-page-entering');
             }
         }
     </script>

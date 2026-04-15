@@ -3,313 +3,220 @@
 {% block title %}Quản lý Gói tập{% endblock %}
 
 {% block content %}
-<div class="space-y-8 animate-fade-in">
+<div class="space-y-4">
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h2 class="text-2xl font-bold text-[#0F172A] dark:text-white">Danh sách Gói tập</h2>
-            <p class="text-[#64748B] dark:text-slate-400 text-sm font-medium">Cấu hình các gói dịch vụ cho phòng tập</p>
+            <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">Quản lý Gói tập</h1>
+            <p class="text-sm text-[#666] dark:text-[#888]">Cấu hình các gói dịch vụ cho phòng tập</p>
         </div>
-        <button onclick="openModal('modalAddPackage')" 
-                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center space-x-2">
-            <i class="fas fa-plus"></i>
-            <span>Tạo gói mới</span>
+        <button onclick="nqtMoModal('modalAddPackage')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">
+            <i class="fas fa-plus"></i>Tạo gói mới
         </button>
     </div>
 
     <!-- Package Grid -->
-    <div id="packageGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        <!-- Data loaded via JS -->
-        <div class="col-span-full py-20 text-center text-[#64748B] dark:text-slate-400">
-            <i class="fas fa-circle-notch fa-spin text-3xl mb-4"></i>
-            <p>Đang tải danh sách gói tập...</p>
-        </div>
+    <div id="packageGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div class="col-span-full py-12 text-center text-[#666] dark:text-[#888]">Đang tải...</div>
     </div>
 </div>
 
-<!-- Modal: Add Package -->
-<div id="modalAddPackage" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl animate-scale-up overflow-hidden">
-        <div class="px-8 py-6 border-b border-[#E2E8F0] flex items-center justify-between bg-emerald-600 text-white">
-            <h3 class="text-xl font-bold">Tạo gói tập mới</h3>
-            <button onclick="closeModal('modalAddPackage')" class="text-white hover:opacity-70 transition-opacity">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+<!-- Modal: Add -->
+<div id="modalAddPackage" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalAddPackage')">
+    <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+            <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]">Tạo gói tập mới</h3>
+            <button onclick="nqtDongModal('modalAddPackage')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
         </div>
-        <form id="formAddPackage" class="p-8 space-y-5">
-            <div class="space-y-2">
-                <label class="text-sm font-bold text-[#334155]">Tên gói tập *</label>
-                <input type="text" name="nqt_ten_goi" required placeholder="Ví dụ: Gói 3 tháng Gold"
-                       class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all outline-none">
+        <form id="formAddPackage" class="p-4 overflow-y-auto space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Tên gói <span class="text-[#dc2626]">*</span></label>
+                <input type="text" name="g6_ten_goi" required placeholder="Gói 3 tháng Gold" class="flex h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-[#a3a3a3] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] disabled:cursor-not-allowed disabled:opacity-50 dark:text-[#fafafa]">
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="text-sm font-bold text-[#334155]">Giá (VND) *</label>
-                    <input type="number" name="nqt_gia" required value="0"
-                           class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all outline-none">
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Giá (VND) <span class="text-[#dc2626]">*</span></label>
+                    <input type="number" name="g6_gia" required value="0" class="flex h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] dark:text-[#fafafa]">
                 </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-bold text-[#334155]">Số ngày *</label>
-                    <input type="number" name="nqt_so_ngay" required value="30"
-                           class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all outline-none">
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Số ngày <span class="text-[#dc2626]">*</span></label>
+                    <input type="number" name="g6_so_ngay" required value="30" class="flex h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] dark:text-[#fafafa]">
                 </div>
             </div>
-            <div class="space-y-2">
-                <label class="text-sm font-bold text-[#334155]">Chi nhánh *</label>
-                <select name="nqt_ma_chi_nhanh" required id="selectBranchAddPkg" class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl transition-all outline-none">
-                    <option value="">-- Đang tải --</option>
+            <div>
+                <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Chi nhánh <span class="text-[#dc2626]">*</span></label>
+                <select name="g6_ma_chi_nhanh" required id="selectBranchAddPkg" class="flex h-9 w-full items-center justify-between rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-[#191919] dark:focus:ring-[#fafafa] dark:text-[#fafafa]">
+                    <option value="">-- Chọn --</option>
                 </select>
             </div>
-            <div class="flex items-center space-x-2 p-2">
-                <input type="checkbox" name="nqt_co_pt" id="checkPT" class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
-                <label for="checkPT" class="text-sm font-medium text-[#334155]">Bao gồm huấn luyện viên (PT)</label>
-            </div>
-            <div class="flex justify-end space-x-4 pt-4 border-t border-[#E2E8F0]">
-                <button type="button" onclick="closeModal('modalAddPackage')" class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-all">Hủy</button>
-                <button type="submit" class="px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all">Lưu gói tập</button>
+            <label class="flex items-center space-x-2">
+                <input type="checkbox" name="g6_co_pt" id="checkPT" class="w-4 h-4 rounded border-[#d4d4d4] text-[#191919]">
+                <span class="text-sm text-[#191919] dark:text-[#fafafa]">Bao gồm PT</span>
+            </label>
+            <div class="flex justify-end space-x-2 pt-4 border-t border-[#e5e5e5] dark:border-[#404040]">
+                <button type="button" onclick="nqtDongModal('modalAddPackage')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Lưu</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal: Edit Package -->
-<div id="modalEditPackage" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden">
-        <div class="px-8 py-6 border-b border-[#E2E8F0] flex items-center justify-between bg-[#0F172A] text-white">
-            <h3 class="text-xl font-bold">Chỉnh sửa gói tập</h3>
-            <button onclick="closeModal('modalEditPackage')" class="text-white hover:opacity-70 transition-opacity">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+<!-- Modal: Edit -->
+<div id="modalEditPackage" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalEditPackage')">
+    <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+            <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]">Chỉnh sửa gói tập</h3>
+            <button onclick="nqtDongModal('modalEditPackage')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
         </div>
-        <form id="formEditPackage" class="p-8 space-y-5">
-            <input type="hidden" name="nqt_ma_goi_tap">
-            <div class="space-y-2">
-                <label class="text-sm font-bold text-[#334155]">Tên gói tập *</label>
-                <input type="text" name="nqt_ten_goi" required
-                       class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+        <form id="formEditPackage" class="p-4 overflow-y-auto space-y-4">
+            <input type="hidden" name="g6_ma_goi_tap">
+            <div>
+                <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Tên gói</label>
+                <input type="text" name="g6_ten_goi" required class="flex h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] dark:text-[#fafafa]">
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="text-sm font-bold text-[#334155]">Giá (VND) *</label>
-                    <input type="number" name="nqt_gia" required
-                           class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Giá (VND)</label>
+                    <input type="number" name="g6_gia" required class="flex h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] dark:text-[#fafafa]">
                 </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-bold text-[#334155]">Giá khuyến mãi</label>
-                    <input type="number" name="nqt_gia_khuyen_mai"
-                           class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Giá KM</label>
+                    <input type="number" name="g6_gia_khuyen_mai" class="flex h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] dark:text-[#fafafa]">
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="text-sm font-bold text-[#334155]">Trạng thái</label>
-                    <select name="nqt_la_hoat_dong" class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
-                        <option value="true">Đang hoạt động</option>
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Trạng thái</label>
+                    <select name="g6_la_hoat_dong" class="flex h-9 w-full items-center rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-[#191919] dark:focus:ring-[#fafafa] dark:text-[#fafafa]">
+                        <option value="true">Hoạt động</option>
                         <option value="false">Tạm ẩn</option>
                     </select>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-bold text-[#334155]">Nổi bật</label>
-                    <select name="nqt_la_noi_bat" class="w-full px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Nổi bật</label>
+                    <select name="g6_la_noi_bat" class="flex h-9 w-full items-center rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-[#191919] dark:focus:ring-[#fafafa] dark:text-[#fafafa]">
                         <option value="false">Không</option>
                         <option value="true">Có</option>
                     </select>
                 </div>
             </div>
-            <div class="flex justify-end space-x-4 pt-4 border-t border-[#E2E8F0]">
-                <button type="button" onclick="closeModal('modalEditPackage')" class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-all">Hủy</button>
-                <button type="submit" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all">Cập nhật</button>
+            <div class="flex justify-end space-x-2 pt-4 border-t border-[#e5e5e5] dark:border-[#404040]">
+                <button type="button" onclick="nqtDongModal('modalEditPackage')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Cập nhật</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal: Confirm Delete Package -->
-<div id="modalConfirmDeletePkg" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
-        <div class="px-8 py-6 border-b border-[#E2E8F0] flex items-center justify-between bg-red-600 text-white">
-            <h3 class="text-xl font-bold">Xác nhận xóa</h3>
-            <button onclick="closeModal('modalConfirmDeletePkg')" class="text-white hover:opacity-70 transition-opacity">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+<!-- Modal: Delete -->
+<div id="modalConfirmDeletePkg" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalConfirmDeletePkg')">
+    <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-sm p-6 text-center">
+        <div class="w-12 h-12 mx-auto mb-4 bg-[#fef2f2] dark:bg-[#451a1a] rounded-full flex items-center justify-center">
+            <i class="fas fa-exclamation-triangle text-[#dc2626] text-xl"></i>
         </div>
-        <div class="p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
-            </div>
-            <p class="text-[#334155] font-medium mb-2">Bạn có chắc chắn muốn ẩn gói tập</p>
-            <p class="text-lg font-bold text-red-600" id="deletePkgTargetName"></p>
-            <p class="text-sm text-[#64748B] mt-2">Gói tập sẽ bị ẩn khỏi danh sách hiển thị nhưng dữ liệu vẫn được lưu.</p>
-            <div class="flex justify-center space-x-4 mt-8">
-                <button onclick="closeModal('modalConfirmDeletePkg')" class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-all">Hủy</button>
-                <button onclick="confirmDeletePkg()" class="px-8 py-3 bg-red-600 text-white font-bold rounded-2xl shadow-lg shadow-red-100 hover:bg-red-700 transition-all">
-                    <i class="fas fa-trash mr-2"></i>Ẩn gói tập
-                </button>
-            </div>
+        <h3 class="font-semibold text-[#191919] dark:text-[#fafafa] mb-2">Xác nhận ẩn</h3>
+        <p class="text-sm text-[#666] dark:text-[#888] mb-1">Bạn có chắc muốn ẩn gói tập</p>
+        <p class="font-semibold text-[#dc2626] mb-4" id="deletePkgTargetName"></p>
+        <div class="flex justify-center space-x-2">
+            <button onclick="nqtDongModal('modalConfirmDeletePkg')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+            <button onclick="nqtXacNhanXoaGoiTap()" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#dc2626] text-white text-sm font-medium rounded-md hover:bg-[#b91c1c] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#dc2626]">Ẩn</button>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
 (function() {
-    let allPackages = [];
-    let deletePkgTargetId = null;
+    let allPackages = [], deletePkgTargetId = null;
 
-    // Load branches for dropdown
     async function loadBranches() {
         const data = await nqtApi.fetch('/api/nqt-chi-nhanh');
-        if (!data || !data.nqt_thanh_cong) return;
-        const branches = data.nqt_du_lieu;
-        const sel = document.getElementById('selectBranchAddPkg');
-        sel.innerHTML = '';
-        branches.forEach(b => {
-            sel.innerHTML += `<option value="${b.nqt_ma_chi_nhanh}">${b.nqt_ten_chi_nhanh}</option>`;
-        });
+        if (data?.nqt_thanh_cong) {
+            document.getElementById('selectBranchAddPkg').innerHTML = data.nqt_du_lieu.map(b => `<option value="${b.g6_ma_chi_nhanh}">${b.g6_ten_chi_nhanh}</option>`).join('');
+        }
     }
 
     async function loadPackages() {
         const grid = document.getElementById('packageGrid');
-        grid.innerHTML = '<div class="col-span-full py-20 text-center"><i class="fas fa-circle-notch fa-spin text-3xl mb-4"></i></div>';
+        grid.innerHTML = '<div class="col-span-full py-12 text-center text-[#666] dark:text-[#888]">Đang tải...</div>';
 
         const data = await nqtApi.fetch('/api/nqt-goi-tap');
-        if (!data || !data.nqt_thanh_cong) return;
+        if (!data?.nqt_thanh_cong) return;
 
-        const list = data.nqt_du_lieu;
-        allPackages = list;
-        grid.innerHTML = '';
+        allPackages = data.nqt_du_lieu;
+        if (allPackages.length === 0) { grid.innerHTML = '<div class="col-span-full py-12 text-center text-[#666] dark:text-[#888]">Chưa có gói tập nào</div>'; return; }
 
-        if (list.length === 0) {
-            grid.innerHTML = '<div class="col-span-full py-20 text-center text-[#64748B] dark:text-slate-400"><i class="fas fa-box-open text-4xl mb-4"></i><p>Chưa có gói tập nào</p></div>';
-            return;
-        }
-
-        list.forEach(g => {
-            const formattedGia = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(g.nqt_gia);
-            const escapedName = g.nqt_ten_goi.replace(/'/g, "\\'");
-            grid.innerHTML += `
-                <div class="bg-white dark:bg-slate-800 rounded-3xl border border-[#E2E8F0] dark:border-slate-700 p-8 shadow-sm hover:shadow-xl transition-all group border-t-8 ${g.nqt_la_noi_bat ? 'border-orange-500' : 'border-blue-500'}">
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <h3 class="text-xl font-bold text-[#0F172A] dark:text-white">${g.nqt_ten_goi}</h3>
-                            <p class="text-[#64748B] dark:text-slate-400 text-sm font-medium mt-1">${g.nqt_so_ngay} ngày tập luyện</p>
-                        </div>
-                        ${g.nqt_la_noi_bat ? '<span class="px-3 py-1 bg-orange-100 text-orange-600 text-[10px] font-bold uppercase rounded-lg">Nổi bật</span>' : ''}
+        const fmt = n => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
+        grid.innerHTML = allPackages.map(g => `
+            <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 ${g.g6_la_noi_bat ? 'border-l-4 border-l-[#f59e0b]' : ''}">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]">${g.g6_ten_goi}</h3>
+                        <p class="text-xs text-[#666] dark:text-[#888]">${g.g6_so_ngay} ngày</p>
                     </div>
-
-                    <div class="space-y-4 mb-8">
-                        <div class="flex items-center text-sm text-[#475569] dark:text-slate-300">
-                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
-                            ${g.nqt_co_pt ? 'Gồm PT' : 'Tập tự do'}
-                        </div>
-                        <div class="flex items-center text-sm text-[#475569] dark:text-slate-300">
-                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
-                            ${g.nqt_co_sauna ? 'Có xông hơi' : 'Phòng tập tiêu chuẩn'}
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between pt-6 border-t border-[#F1F5F9] dark:border-slate-700">
-                        <div class="text-2xl font-extrabold text-blue-600 leading-none">${formattedGia}</div>
-                        <div class="flex space-x-1">
-                            <button onclick="editPackage(${g.nqt_ma_goi_tap})" class="w-10 h-10 flex items-center justify-center text-[#64748B] dark:text-slate-400 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
-                            <button onclick="deletePackage(${g.nqt_ma_goi_tap}, '${escapedName}')" class="w-10 h-10 flex items-center justify-center text-[#64748B] dark:text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all" title="Xóa"><i class="fas fa-trash-alt"></i></button>
-                        </div>
+                    ${g.g6_la_noi_bat ? '<span class="text-[10px] font-medium px-1.5 py-0.5 bg-[#fef3c7] text-[#92400e] rounded-md">Nổi bật</span>' : ''}
+                </div>
+                <div class="space-y-1 mb-4 text-sm text-[#666] dark:text-[#888]">
+                    <p><i class="fas fa-check text-[#16a34a] mr-1.5 text-xs"></i>${g.g6_co_pt ? 'Gồm PT' : 'Tập tự do'}</p>
+                </div>
+                <div class="flex items-center justify-between pt-3 border-t border-[#e5e5e5] dark:border-[#404040]">
+                    <span class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">${fmt(g.g6_gia)}</span>
+                    <div class="flex space-x-1">
+                        <button onclick="nqtSuaGoiTap(${g.g6_ma_goi_tap})" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa] hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors"><i class="fas fa-edit"></i></button>
+                        <button onclick="nqtXoaGoiTap(${g.g6_ma_goi_tap}, '${g.g6_ten_goi.replace(/'/g, "\\'")}')" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#451a1a] transition-colors"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
-            `;
-        });
+            </div>
+        `).join('');
     }
 
-    // Modal helpers
-    window.openModal = function(id) { document.getElementById(id).classList.remove('hidden'); }
-    window.closeModal = function(id) { document.getElementById(id).classList.add('hidden'); }
 
-    // CREATE
-    document.getElementById('formAddPackage').onsubmit = async (e) => {
+    document.getElementById('formAddPackage').onsubmit = async e => {
         e.preventDefault();
-        const fd = new FormData(e.target);
-        const data = Object.fromEntries(fd);
-        data.nqt_gia = parseFloat(data.nqt_gia);
-        data.nqt_so_ngay = parseInt(data.nqt_so_ngay);
-        data.nqt_ma_chi_nhanh = parseInt(data.nqt_ma_chi_nhanh);
-        data.nqt_co_pt = e.target.nqt_co_pt.checked;
+        const fd = new FormData(e.target), data = Object.fromEntries(fd);
+        data.g6_gia = parseFloat(data.g6_gia);
+        data.g6_so_ngay = parseInt(data.g6_so_ngay);
+        data.g6_ma_chi_nhanh = parseInt(data.g6_ma_chi_nhanh);
+        data.g6_co_pt = e.target.g6_co_pt.checked;
 
         const res = await nqtApi.fetch('/api/nqt-goi-tap', { method: 'POST', body: data });
-        if (res && res.nqt_thanh_cong) {
-            closeModal('modalAddPackage');
-            e.target.reset();
-            loadPackages();
-            nqtToast('Tạo gói tập thành công!');
-        } else {
-            nqtToast(res?.nqt_thong_diep || 'Lỗi khi tạo gói tập', 'error');
-        }
+        if (res?.nqt_thanh_cong) { nqtDongModal('modalAddPackage'); e.target.reset(); loadPackages(); nqtToast('Tạo thành công!', 'success'); }
+        else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
     };
 
-    // EDIT - Load data into form
-    window.editPackage = function(id) {
-        const g = allPackages.find(p => p.nqt_ma_goi_tap === id);
+    window.nqtSuaGoiTap = id => {
+        const g = allPackages.find(p => p.g6_ma_goi_tap === id);
         if (!g) return;
-
         const form = document.getElementById('formEditPackage');
-        form.nqt_ma_goi_tap.value = g.nqt_ma_goi_tap;
-        form.nqt_ten_goi.value = g.nqt_ten_goi;
-        form.nqt_gia.value = g.nqt_gia;
-        form.nqt_gia_khuyen_mai.value = g.nqt_gia_khuyen_mai || '';
-        form.nqt_la_hoat_dong.value = g.nqt_la_hoat_dong.toString();
-        form.nqt_la_noi_bat.value = g.nqt_la_noi_bat.toString();
-
-        openModal('modalEditPackage');
-    }
-
-    // EDIT - Submit
-    document.getElementById('formEditPackage').onsubmit = async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const id = fd.get('nqt_ma_goi_tap');
-        const data = {};
-        data.nqt_ten_goi = fd.get('nqt_ten_goi');
-        data.nqt_gia = parseFloat(fd.get('nqt_gia'));
-        const gkm = fd.get('nqt_gia_khuyen_mai');
-        data.nqt_gia_khuyen_mai = gkm ? parseFloat(gkm) : null;
-        data.nqt_la_hoat_dong = fd.get('nqt_la_hoat_dong') === 'true';
-        data.nqt_la_noi_bat = fd.get('nqt_la_noi_bat') === 'true';
-
-        const res = await nqtApi.fetch(`/api/nqt-goi-tap/${id}`, { method: 'PUT', body: data });
-        if (res && res.nqt_thanh_cong) {
-            closeModal('modalEditPackage');
-            loadPackages();
-            nqtToast('Cập nhật gói tập thành công!');
-        } else {
-            nqtToast(res?.nqt_thong_diep || 'Lỗi khi cập nhật gói tập', 'error');
-        }
+        form.g6_ma_goi_tap.value = g.g6_ma_goi_tap;
+        form.g6_ten_goi.value = g.g6_ten_goi;
+        form.g6_gia.value = g.g6_gia;
+        form.g6_gia_khuyen_mai.value = g.g6_gia_khuyen_mai || '';
+        form.g6_la_hoat_dong.value = g.g6_la_hoat_dong.toString();
+        form.g6_la_noi_bat.value = g.g6_la_noi_bat.toString();
+        nqtMoModal('modalEditPackage');
     };
 
-    // DELETE - Open confirm
-    window.deletePackage = function(id, name) {
-        deletePkgTargetId = id;
-        document.getElementById('deletePkgTargetName').textContent = name;
-        openModal('modalConfirmDeletePkg');
-    }
+    document.getElementById('formEditPackage').onsubmit = async e => {
+        e.preventDefault();
+        const fd = new FormData(e.target), id = fd.get('g6_ma_goi_tap');
+        const data = { g6_ten_goi: fd.get('g6_ten_goi'), g6_gia: parseFloat(fd.get('g6_gia')), g6_gia_khuyen_mai: fd.get('g6_gia_khuyen_mai') ? parseFloat(fd.get('g6_gia_khuyen_mai')) : null, g6_la_hoat_dong: fd.get('g6_la_hoat_dong') === 'true', g6_la_noi_bat: fd.get('g6_la_noi_bat') === 'true' };
+        const res = await nqtApi.fetch(`/api/nqt-goi-tap/${id}`, { method: 'PUT', body: data });
+        if (res?.nqt_thanh_cong) { nqtDongModal('modalEditPackage'); loadPackages(); nqtToast('Cập nhật thành công!', 'success'); }
+        else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
+    };
 
-    // DELETE - Confirm
-    window.confirmDeletePkg = async function() {
+    window.nqtXoaGoiTap = (id, name) => { deletePkgTargetId = id; document.getElementById('deletePkgTargetName').textContent = name; nqtMoModal('modalConfirmDeletePkg'); };
+    window.nqtXacNhanXoaGoiTap = async () => {
         if (!deletePkgTargetId) return;
         const res = await nqtApi.fetch(`/api/nqt-goi-tap/${deletePkgTargetId}`, { method: 'DELETE' });
-        closeModal('modalConfirmDeletePkg');
-        if (res && res.nqt_thanh_cong) {
-            loadPackages();
-            nqtToast('Đã ẩn gói tập thành công!');
-        } else {
-            nqtToast(res?.nqt_thong_diep || 'Lỗi khi xóa gói tập', 'error');
-        }
+        nqtDongModal('modalConfirmDeletePkg');
+        if (res?.nqt_thanh_cong) { loadPackages(); nqtToast('Đã ẩn gói tập!', 'success'); } else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
         deletePkgTargetId = null;
-    }
+    };
 
-    // Init
-    loadBranches();
-    loadPackages();
+    loadBranches(); loadPackages();
 })();
 </script>
 {% endblock %}

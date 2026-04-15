@@ -12,7 +12,10 @@
       "Bash(python -c \":*)",
       "Bash(python -c \"import pyodbc; print\\(pyodbc.version\\); print\\([d for d in pyodbc.drivers\\(\\) if ''SQL'' in d]\\)\")",
       "Bash(curl -s http://localhost:5000/api/nqt-hoi-vien)",
-      "Bash(python -c \"import sys,json; print\\(json.load\\(sys.stdin\\)\\)\")"
+      "Bash(python -c \"import sys,json; print\\(json.load\\(sys.stdin\\)\\)\")",
+      "Bash(python -c \"from backend.app import nqt_tao_app; from backend.app.seeds.nqt_seed import nqt_chay_seed; app = nqt_tao_app\\(\\); app.app_context\\(\\).push\\(\\); nqt_chay_seed\\(\\)\")",
+      "Bash(set PYTHONIOENCODING=utf-8)",
+      "WebFetch(domain:ui.shadcn.com)"
     ]
   }
 }

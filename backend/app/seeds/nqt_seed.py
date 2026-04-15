@@ -540,6 +540,508 @@ def nqt_chay_seed():
         db.session.commit()
         print(f"[OK] G6HoiVien — đã seed {len(g6_danh_sach_hoi_vien)} rows")
 
+    # ------------------------------------------------------------------
+    # 12. G6KhachHang
+    # ------------------------------------------------------------------
+    from backend.app.models.g6_khach_hang import G6KhachHang
+    if G6KhachHang.query.first():
+        print("[SKIP] G6KhachHang — đã có dữ liệu")
+    else:
+        g6_danh_sach_khach_hang = [
+            {
+                "g6_ho_ten": "Nguyễn Văn An",
+                "g6_email": "an.nguyen@email.com",
+                "g6_so_dien_thoai": "0987654321",
+                "g6_la_hoat_dong": True,
+            },
+            {
+                "g6_ho_ten": "Trần Thị Bình",
+                "g6_email": "binh.tran@email.com",
+                "g6_so_dien_thoai": "0912345678",
+                "g6_la_hoat_dong": True,
+            },
+            {
+                "g6_ho_ten": "Lê Văn Cường",
+                "g6_email": "cuong.le@email.com",
+                "g6_so_dien_thoai": "0909123456",
+                "g6_la_hoat_dong": True,
+            },
+            {
+                "g6_ho_ten": "Phạm Thị Dung",
+                "g6_email": "dung.pham@email.com",
+                "g6_so_dien_thoai": "0933456789",
+                "g6_la_hoat_dong": True,
+            },
+            {
+                "g6_ho_ten": "Hoàng Văn Em",
+                "g6_email": "em.hoang@email.com",
+                "g6_so_dien_thoai": "0944567890",
+                "g6_la_hoat_dong": True,
+            },
+        ]
+        for g6_kh in g6_danh_sach_khach_hang:
+            db.session.add(G6KhachHang(**g6_kh))
+        db.session.commit()
+        print(f"[OK] G6KhachHang — đã seed {len(g6_danh_sach_khach_hang)} rows")
+
+    # ------------------------------------------------------------------
+    # 13. G6DonHang + G6ChiTietDonHang + G6LichSuDonHang
+    # ------------------------------------------------------------------
+    from backend.app.models.g6_don_hang import G6DonHang, G6ChiTietDonHang, G6LichSuDonHang
+    if G6DonHang.query.first():
+        print("[SKIP] G6DonHang — đã có dữ liệu")
+    else:
+        from datetime import timedelta
+        import random
+
+        g6_khach_hangs = G6KhachHang.query.all()
+        g6_nguoi_dung = G6NguoiDung.query.first()
+
+        g6_san_pham_mau = [
+            {"ten": "Whey Protein Isolate 2kg", "gia": 1_500_000},
+            {"ten": "BCAA Amino Acid 300g", "gia": 450_000},
+            {"ten": "Creatine Monohydrate 500g", "gia": 350_000},
+            {"ten": "Pre-Workout Energy 400g", "gia": 680_000},
+            {"ten": "Mass Gainer 3kg", "gia": 980_000},
+            {"ten": "Găng tay tập gym", "gia": 180_000},
+            {"ten": "Bình lắc shaker 700ml", "gia": 95_000},
+            {"ten": "Đai lưng tập gym", "gia": 320_000},
+            {"ten": "Dây kháng lực set 5 dây", "gia": 250_000},
+            {"ten": "Áo tank top gym nam", "gia": 220_000},
+        ]
+
+        g6_danh_sach_don_hang = [
+            # Đơn chờ xác nhận
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[0].g6_ma_khach_hang if g6_khach_hangs else None,
+                "g6_ho_ten_nguoi_nhan": "Nguyễn Văn An",
+                "g6_so_dien_thoai": "0987654321",
+                "g6_dia_chi_giao_hang": "123 Cầu Giấy, Hà Nội",
+                "g6_tong_tien_hang": 2_130_000,
+                "g6_phi_van_chuyen": 30_000,
+                "g6_so_tien_giam": 0,
+                "g6_tong_thanh_toan": 2_160_000,
+                "g6_trang_thai": "cho_xac_nhan",
+                "g6_phuong_thuc_thanh_toan": "cod",
+                "g6_ghi_chu_khach": "Giao giờ hành chính",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(hours=2),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[1].g6_ma_khach_hang if len(g6_khach_hangs) > 1 else None,
+                "g6_ho_ten_nguoi_nhan": "Trần Thị Bình",
+                "g6_so_dien_thoai": "0912345678",
+                "g6_dia_chi_giao_hang": "45 Láng Hạ, Đống Đa, Hà Nội",
+                "g6_tong_tien_hang": 1_950_000,
+                "g6_phi_van_chuyen": 25_000,
+                "g6_so_tien_giam": 100_000,
+                "g6_tong_thanh_toan": 1_875_000,
+                "g6_trang_thai": "cho_xac_nhan",
+                "g6_phuong_thuc_thanh_toan": "bank_transfer",
+                "g6_ghi_chu_khach": "Gọi trước khi giao",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(hours=5),
+            },
+            # Đơn đã xác nhận
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[2].g6_ma_khach_hang if len(g6_khach_hangs) > 2 else None,
+                "g6_ho_ten_nguoi_nhan": "Lê Văn Cường",
+                "g6_so_dien_thoai": "0909123456",
+                "g6_dia_chi_giao_hang": "78 Nguyễn Trãi, Thanh Xuân, Hà Nội",
+                "g6_tong_tien_hang": 800_000,
+                "g6_phi_van_chuyen": 20_000,
+                "g6_so_tien_giam": 50_000,
+                "g6_tong_thanh_toan": 770_000,
+                "g6_trang_thai": "da_xac_nhan",
+                "g6_phuong_thuc_thanh_toan": "momo",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=1),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[3].g6_ma_khach_hang if len(g6_khach_hangs) > 3 else None,
+                "g6_ho_ten_nguoi_nhan": "Phạm Thị Dung",
+                "g6_so_dien_thoai": "0933456789",
+                "g6_dia_chi_giao_hang": "90 Trần Phú, Hà Đông, Hà Nội",
+                "g6_tong_tien_hang": 1_500_000,
+                "g6_phi_van_chuyen": 30_000,
+                "g6_so_tien_giam": 0,
+                "g6_tong_thanh_toan": 1_530_000,
+                "g6_trang_thai": "da_xac_nhan",
+                "g6_phuong_thuc_thanh_toan": "vnpay",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=1, hours=3),
+            },
+            # Đơn đang giao
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[4].g6_ma_khach_hang if len(g6_khach_hangs) > 4 else None,
+                "g6_ho_ten_nguoi_nhan": "Hoàng Văn Em",
+                "g6_so_dien_thoai": "0944567890",
+                "g6_dia_chi_giao_hang": "56 Giải Phóng, Hai Bà Trưng, Hà Nội",
+                "g6_tong_tien_hang": 2_480_000,
+                "g6_phi_van_chuyen": 0,
+                "g6_so_tien_giam": 200_000,
+                "g6_tong_thanh_toan": 2_280_000,
+                "g6_trang_thai": "dang_giao",
+                "g6_phuong_thuc_thanh_toan": "cod",
+                "g6_ghi_chu_khach": "Để ở bảo vệ nếu không có người nhận",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=2),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[0].g6_ma_khach_hang if g6_khach_hangs else None,
+                "g6_ho_ten_nguoi_nhan": "Nguyễn Văn An",
+                "g6_so_dien_thoai": "0987654321",
+                "g6_dia_chi_giao_hang": "123 Cầu Giấy, Hà Nội",
+                "g6_tong_tien_hang": 570_000,
+                "g6_phi_van_chuyen": 25_000,
+                "g6_so_tien_giam": 0,
+                "g6_tong_thanh_toan": 595_000,
+                "g6_trang_thai": "dang_giao",
+                "g6_phuong_thuc_thanh_toan": "bank_transfer",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=2, hours=5),
+            },
+            # Đơn đã giao
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[1].g6_ma_khach_hang if len(g6_khach_hangs) > 1 else None,
+                "g6_ho_ten_nguoi_nhan": "Trần Thị Bình",
+                "g6_so_dien_thoai": "0912345678",
+                "g6_dia_chi_giao_hang": "45 Láng Hạ, Đống Đa, Hà Nội",
+                "g6_tong_tien_hang": 980_000,
+                "g6_phi_van_chuyen": 30_000,
+                "g6_so_tien_giam": 0,
+                "g6_tong_thanh_toan": 1_010_000,
+                "g6_trang_thai": "da_giao",
+                "g6_phuong_thuc_thanh_toan": "cod",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=5),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[2].g6_ma_khach_hang if len(g6_khach_hangs) > 2 else None,
+                "g6_ho_ten_nguoi_nhan": "Lê Văn Cường",
+                "g6_so_dien_thoai": "0909123456",
+                "g6_dia_chi_giao_hang": "78 Nguyễn Trãi, Thanh Xuân, Hà Nội",
+                "g6_tong_tien_hang": 1_850_000,
+                "g6_phi_van_chuyen": 0,
+                "g6_so_tien_giam": 150_000,
+                "g6_tong_thanh_toan": 1_700_000,
+                "g6_trang_thai": "da_giao",
+                "g6_phuong_thuc_thanh_toan": "momo",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=7),
+            },
+            # Đơn đã hủy
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[3].g6_ma_khach_hang if len(g6_khach_hangs) > 3 else None,
+                "g6_ho_ten_nguoi_nhan": "Phạm Thị Dung",
+                "g6_so_dien_thoai": "0933456789",
+                "g6_dia_chi_giao_hang": "90 Trần Phú, Hà Đông, Hà Nội",
+                "g6_tong_tien_hang": 350_000,
+                "g6_phi_van_chuyen": 20_000,
+                "g6_so_tien_giam": 0,
+                "g6_tong_thanh_toan": 370_000,
+                "g6_trang_thai": "da_huy",
+                "g6_phuong_thuc_thanh_toan": "cod",
+                "g6_ghi_chu_noi_bo": "Khách yêu cầu hủy",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=3),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[4].g6_ma_khach_hang if len(g6_khach_hangs) > 4 else None,
+                "g6_ho_ten_nguoi_nhan": "Hoàng Văn Em",
+                "g6_so_dien_thoai": "0944567890",
+                "g6_dia_chi_giao_hang": "56 Giải Phóng, Hai Bà Trưng, Hà Nội",
+                "g6_tong_tien_hang": 450_000,
+                "g6_phi_van_chuyen": 25_000,
+                "g6_so_tien_giam": 0,
+                "g6_tong_thanh_toan": 475_000,
+                "g6_trang_thai": "da_huy",
+                "g6_phuong_thuc_thanh_toan": "bank_transfer",
+                "g6_ghi_chu_noi_bo": "Hết hàng",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=4),
+            },
+        ]
+
+        # Tạo đơn hàng
+        for g6_dh in g6_danh_sach_don_hang:
+            db.session.add(G6DonHang(**g6_dh))
+        db.session.commit()
+        print(f"[OK] G6DonHang — đã seed {len(g6_danh_sach_don_hang)} rows")
+
+        # Tạo chi tiết đơn hàng
+        g6_don_hangs = G6DonHang.query.all()
+        g6_dem_ct = 0
+        for g6_dh in g6_don_hangs:
+            g6_so_sp = random.randint(2, 4)
+            g6_san_pham_chon = random.sample(g6_san_pham_mau, g6_so_sp)
+            for idx, g6_sp in enumerate(g6_san_pham_chon):
+                g6_so_luong = random.randint(1, 3)
+                g6_don_gia = g6_sp["gia"]
+                g6_thanh_tien = g6_don_gia * g6_so_luong
+                db.session.add(G6ChiTietDonHang(
+                    g6_ma_don_hang=g6_dh.g6_ma_don_hang,
+                    g6_ma_bien_the=idx + 1,
+                    g6_ten_san_pham=g6_sp["ten"],
+                    g6_sku=f"SKU-{random.randint(1000, 9999)}",
+                    g6_so_luong=g6_so_luong,
+                    g6_don_gia=g6_don_gia,
+                    g6_thanh_tien=g6_thanh_tien,
+                ))
+                g6_dem_ct += 1
+        db.session.commit()
+        print(f"[OK] G6ChiTietDonHang — đã seed {g6_dem_ct} rows")
+
+        # Tạo lịch sử đơn hàng
+        g6_dem_ls = 0
+        for g6_dh in g6_don_hangs:
+            # Tạo bản ghi ban đầu
+            db.session.add(G6LichSuDonHang(
+                g6_ma_don_hang=g6_dh.g6_ma_don_hang,
+                g6_trang_thai_cu=None,
+                g6_trang_thai_moi="cho_xac_nhan",
+                g6_ghi_chu="Đơn hàng mới",
+                g6_nguoi_thay_doi=None,
+                g6_ngay_tao=g6_dh.g6_ngay_tao,
+            ))
+            g6_dem_ls += 1
+
+            # Thêm lịch sử theo trạng thái hiện tại
+            if g6_dh.g6_trang_thai in ["da_xac_nhan", "dang_giao", "da_giao"]:
+                db.session.add(G6LichSuDonHang(
+                    g6_ma_don_hang=g6_dh.g6_ma_don_hang,
+                    g6_trang_thai_cu="cho_xac_nhan",
+                    g6_trang_thai_moi="da_xac_nhan",
+                    g6_ghi_chu="Đã xác nhận đơn hàng",
+                    g6_nguoi_thay_doi=g6_nguoi_dung.g6_ma_nguoi_dung if g6_nguoi_dung else None,
+                    g6_ngay_tao=g6_dh.g6_ngay_tao + timedelta(hours=1),
+                ))
+                g6_dem_ls += 1
+
+            if g6_dh.g6_trang_thai in ["dang_giao", "da_giao"]:
+                db.session.add(G6LichSuDonHang(
+                    g6_ma_don_hang=g6_dh.g6_ma_don_hang,
+                    g6_trang_thai_cu="da_xac_nhan",
+                    g6_trang_thai_moi="dang_giao",
+                    g6_ghi_chu="Đã giao cho đơn vị vận chuyển",
+                    g6_nguoi_thay_doi=g6_nguoi_dung.g6_ma_nguoi_dung if g6_nguoi_dung else None,
+                    g6_ngay_tao=g6_dh.g6_ngay_tao + timedelta(hours=6),
+                ))
+                g6_dem_ls += 1
+
+            if g6_dh.g6_trang_thai == "da_giao":
+                db.session.add(G6LichSuDonHang(
+                    g6_ma_don_hang=g6_dh.g6_ma_don_hang,
+                    g6_trang_thai_cu="dang_giao",
+                    g6_trang_thai_moi="da_giao",
+                    g6_ghi_chu="Giao hàng thành công",
+                    g6_nguoi_thay_doi=g6_nguoi_dung.g6_ma_nguoi_dung if g6_nguoi_dung else None,
+                    g6_ngay_tao=g6_dh.g6_ngay_tao + timedelta(days=2),
+                ))
+                g6_dem_ls += 1
+
+            if g6_dh.g6_trang_thai == "da_huy":
+                db.session.add(G6LichSuDonHang(
+                    g6_ma_don_hang=g6_dh.g6_ma_don_hang,
+                    g6_trang_thai_cu="cho_xac_nhan",
+                    g6_trang_thai_moi="da_huy",
+                    g6_ghi_chu=g6_dh.g6_ghi_chu_noi_bo or "Đơn hàng bị hủy",
+                    g6_nguoi_thay_doi=g6_nguoi_dung.g6_ma_nguoi_dung if g6_nguoi_dung else None,
+                    g6_ngay_tao=g6_dh.g6_ngay_tao + timedelta(hours=2),
+                ))
+                g6_dem_ls += 1
+
+        db.session.commit()
+        print(f"[OK] G6LichSuDonHang — đã seed {g6_dem_ls} rows")
+
+    # ------------------------------------------------------------------
+    # 14. G6ThanhToan + G6HoaDon
+    # ------------------------------------------------------------------
+    from backend.app.models.g6_thanh_toan import G6ThanhToan, G6HoaDon
+    if G6ThanhToan.query.first():
+        print("[SKIP] G6ThanhToan — đã có dữ liệu")
+    else:
+        from datetime import timedelta
+        import random
+
+        g6_khach_hangs = G6KhachHang.query.all()
+
+        g6_danh_sach_thanh_toan = [
+            # Thanh toán thành công - Đơn hàng
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[0].g6_ma_khach_hang if g6_khach_hangs else None,
+                "g6_loai_giao_dich": "don_hang",
+                "g6_so_tien": 2_160_000,
+                "g6_phuong_thuc": "cod",
+                "g6_trang_thai": "thanh_cong",
+                "g6_ghi_chu": "Thanh toán đơn hàng #1",
+                "g6_ngay_thanh_toan": datetime.utcnow() - timedelta(days=5),
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=5),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[1].g6_ma_khach_hang if len(g6_khach_hangs) > 1 else None,
+                "g6_loai_giao_dich": "don_hang",
+                "g6_so_tien": 1_875_000,
+                "g6_phuong_thuc": "bank_transfer",
+                "g6_trang_thai": "thanh_cong",
+                "g6_ma_giao_dich_cong": "VCB202604100001",
+                "g6_ghi_chu": "Thanh toán đơn hàng #2",
+                "g6_ngay_thanh_toan": datetime.utcnow() - timedelta(days=4),
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=4),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[2].g6_ma_khach_hang if len(g6_khach_hangs) > 2 else None,
+                "g6_loai_giao_dich": "don_hang",
+                "g6_so_tien": 770_000,
+                "g6_phuong_thuc": "momo",
+                "g6_trang_thai": "thanh_cong",
+                "g6_ma_giao_dich_cong": "MOMO202604100023",
+                "g6_ghi_chu": "Thanh toán đơn hàng #3",
+                "g6_ngay_thanh_toan": datetime.utcnow() - timedelta(days=3),
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=3),
+            },
+            # Thanh toán thành công - Gói tập
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[0].g6_ma_khach_hang if g6_khach_hangs else None,
+                "g6_loai_giao_dich": "goi_tap",
+                "g6_so_tien": 1_200_000,
+                "g6_phuong_thuc": "vnpay",
+                "g6_trang_thai": "thanh_cong",
+                "g6_ma_giao_dich_cong": "VNPAY202604080045",
+                "g6_ghi_chu": "Đăng ký gói 3 tháng",
+                "g6_ngay_thanh_toan": datetime.utcnow() - timedelta(days=7),
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=7),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[3].g6_ma_khach_hang if len(g6_khach_hangs) > 3 else None,
+                "g6_loai_giao_dich": "goi_tap",
+                "g6_so_tien": 4_200_000,
+                "g6_phuong_thuc": "bank_transfer",
+                "g6_trang_thai": "thanh_cong",
+                "g6_ma_giao_dich_cong": "TCB202604050012",
+                "g6_ghi_chu": "Đăng ký gói 1 năm",
+                "g6_ngay_thanh_toan": datetime.utcnow() - timedelta(days=10),
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=10),
+            },
+            # Chờ xử lý
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[1].g6_ma_khach_hang if len(g6_khach_hangs) > 1 else None,
+                "g6_loai_giao_dich": "don_hang",
+                "g6_so_tien": 1_530_000,
+                "g6_phuong_thuc": "vnpay",
+                "g6_trang_thai": "cho_xu_ly",
+                "g6_ghi_chu": "Đang chờ xác nhận từ VNPay",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(hours=2),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[4].g6_ma_khach_hang if len(g6_khach_hangs) > 4 else None,
+                "g6_loai_giao_dich": "goi_tap",
+                "g6_so_tien": 500_000,
+                "g6_phuong_thuc": "momo",
+                "g6_trang_thai": "cho_xu_ly",
+                "g6_ghi_chu": "Đang chờ xác nhận từ MoMo",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(hours=1),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[2].g6_ma_khach_hang if len(g6_khach_hangs) > 2 else None,
+                "g6_loai_giao_dich": "don_hang",
+                "g6_so_tien": 2_280_000,
+                "g6_phuong_thuc": "bank_transfer",
+                "g6_trang_thai": "cho_xu_ly",
+                "g6_ghi_chu": "Chờ xác nhận chuyển khoản",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(hours=5),
+            },
+            # Thất bại
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[3].g6_ma_khach_hang if len(g6_khach_hangs) > 3 else None,
+                "g6_loai_giao_dich": "don_hang",
+                "g6_so_tien": 595_000,
+                "g6_phuong_thuc": "vnpay",
+                "g6_trang_thai": "that_bai",
+                "g6_ghi_chu": "Giao dịch bị hủy do timeout",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=2),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[0].g6_ma_khach_hang if g6_khach_hangs else None,
+                "g6_loai_giao_dich": "goi_tap",
+                "g6_so_tien": 3_600_000,
+                "g6_phuong_thuc": "momo",
+                "g6_trang_thai": "that_bai",
+                "g6_ghi_chu": "Số dư không đủ",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=1),
+            },
+            # Hoàn tiền
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[4].g6_ma_khach_hang if len(g6_khach_hangs) > 4 else None,
+                "g6_loai_giao_dich": "don_hang",
+                "g6_so_tien": 475_000,
+                "g6_phuong_thuc": "momo",
+                "g6_trang_thai": "hoan_tien",
+                "g6_ma_giao_dich_cong": "MOMO-REFUND-001",
+                "g6_ghi_chu": "Hoàn tiền do hết hàng",
+                "g6_ngay_thanh_toan": datetime.utcnow() - timedelta(days=3),
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=4),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[1].g6_ma_khach_hang if len(g6_khach_hangs) > 1 else None,
+                "g6_loai_giao_dich": "goi_tap",
+                "g6_so_tien": 500_000,
+                "g6_phuong_thuc": "vnpay",
+                "g6_trang_thai": "hoan_tien",
+                "g6_ma_giao_dich_cong": "VNPAY-REFUND-002",
+                "g6_ghi_chu": "Khách yêu cầu hủy gói",
+                "g6_ngay_thanh_toan": datetime.utcnow() - timedelta(days=6),
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=8),
+            },
+            # Thêm thanh toán dịch vụ và nạp điểm
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[2].g6_ma_khach_hang if len(g6_khach_hangs) > 2 else None,
+                "g6_loai_giao_dich": "dich_vu",
+                "g6_so_tien": 300_000,
+                "g6_phuong_thuc": "cod",
+                "g6_trang_thai": "thanh_cong",
+                "g6_ghi_chu": "Thuê PT 1 buổi",
+                "g6_ngay_thanh_toan": datetime.utcnow() - timedelta(days=2),
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=2),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[3].g6_ma_khach_hang if len(g6_khach_hangs) > 3 else None,
+                "g6_loai_giao_dich": "nap_diem",
+                "g6_so_tien": 1_000_000,
+                "g6_phuong_thuc": "bank_transfer",
+                "g6_trang_thai": "thanh_cong",
+                "g6_ma_giao_dich_cong": "VCB202604120099",
+                "g6_ghi_chu": "Nạp điểm tích lũy",
+                "g6_ngay_thanh_toan": datetime.utcnow() - timedelta(days=1),
+                "g6_ngay_tao": datetime.utcnow() - timedelta(days=1),
+            },
+            {
+                "g6_ma_khach_hang": g6_khach_hangs[4].g6_ma_khach_hang if len(g6_khach_hangs) > 4 else None,
+                "g6_loai_giao_dich": "dich_vu",
+                "g6_so_tien": 150_000,
+                "g6_phuong_thuc": "momo",
+                "g6_trang_thai": "cho_xu_ly",
+                "g6_ghi_chu": "Thuê tủ đồ 1 tháng",
+                "g6_ngay_tao": datetime.utcnow() - timedelta(hours=3),
+            },
+        ]
+
+        # Tạo thanh toán
+        for g6_tt in g6_danh_sach_thanh_toan:
+            db.session.add(G6ThanhToan(**g6_tt))
+        db.session.commit()
+        print(f"[OK] G6ThanhToan — đã seed {len(g6_danh_sach_thanh_toan)} rows")
+
+        # Tạo hóa đơn cho các giao dịch thành công
+        g6_thanh_toans = G6ThanhToan.query.filter_by(g6_trang_thai='thanh_cong').all()
+        g6_dem_hd = 0
+        for idx, g6_tt in enumerate(g6_thanh_toans):
+            g6_tien_truoc_thue = int(float(g6_tt.g6_so_tien) / 1.1)
+            g6_tien_thue = int(float(g6_tt.g6_so_tien)) - g6_tien_truoc_thue
+            g6_so_hd = f"HD{datetime.now().strftime('%Y%m')}{str(idx + 1).zfill(4)}"
+
+            db.session.add(G6HoaDon(
+                g6_ma_thanh_toan=g6_tt.g6_ma_thanh_toan,
+                g6_so_hoa_don=g6_so_hd,
+                g6_tien_truoc_thue=g6_tien_truoc_thue,
+                g6_tien_thue=g6_tien_thue,
+                g6_tong_cong=int(float(g6_tt.g6_so_tien)),
+                g6_ngay_xuat=g6_tt.g6_ngay_thanh_toan or datetime.utcnow(),
+            ))
+            g6_dem_hd += 1
+        db.session.commit()
+        print(f"[OK] G6HoaDon — đã seed {g6_dem_hd} rows")
+
     print("=== Seed hoàn tất ===")
 
 
