@@ -14,14 +14,14 @@
 
     <!-- Filters -->
     <div class="flex flex-col sm:flex-row gap-3">
-        <select id="nqtLocTrangThai" onchange="nqtTaiDanhSach(1)" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+        <select id="nqtLocTrangThai" onchange="nqtTaiDanhSach(1)" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
             <option value="">Tất cả trạng thái</option>
             <option value="cho_xu_ly">Chờ xử lý</option>
             <option value="thanh_cong">Thành công</option>
             <option value="that_bai">Thất bại</option>
             <option value="hoan_tien">Hoàn tiền</option>
         </select>
-        <select id="nqtLocPhuongThuc" onchange="nqtTaiDanhSach(1)" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+        <select id="nqtLocPhuongThuc" onchange="nqtTaiDanhSach(1)" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
             <option value="">Tất cả phương thức</option>
             <option value="cod">COD</option>
             <option value="bank_transfer">Chuyển khoản</option>
@@ -87,10 +87,6 @@
             <table class="w-full text-sm">
                 <thead class="bg-[#fafafa] dark:bg-[#333] border-b border-[#e5e5e5] dark:border-[#404040]">
                     <tr>
-                        <th class="px-3 py-3 w-10">
-                            <input type="checkbox" id="nqtChonTatCaCheckbox" onchange="nqtChonTatCa(this.checked)"
-                                   class="w-4 h-4 rounded border-[#d4d4d4] text-[#191919] focus:ring-[#191919]">
-                        </th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Mã GD</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Khách hàng</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Loại GD</th>
@@ -199,32 +195,33 @@
     let nqtThanhToanHienTai = null;
     let nqtDaChon = [];
 
-    window.nqtChonTatCa = function(checked) {
-        const checkboxes = document.querySelectorAll('.nqt-row-checkbox');
-        checkboxes.forEach(cb => {
-            cb.checked = checked;
-            const id = parseInt(cb.dataset.id);
-            if (checked && !nqtDaChon.includes(id)) nqtDaChon.push(id);
-            else if (!checked) nqtDaChon = [];
+    window.nqtToggleRow = function(id, e) {
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        const idx = nqtDaChon.indexOf(id);
+        if (idx === -1) nqtDaChon.push(id);
+        else nqtDaChon.splice(idx, 1);
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            const trId = parseInt(tr.dataset.rowId);
+            const sel = nqtDaChon.includes(trId);
+            if (sel) {
+                tr.classList.remove('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+                tr.classList.add('nqt-row-selected');
+            } else {
+                tr.classList.remove('nqt-row-selected');
+                tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+            }
         });
         nqtCapNhatBulkBar();
-    }
-
-    window.nqtChonMotRecord = function(id, checked) {
-        if (checked && !nqtDaChon.includes(id)) nqtDaChon.push(id);
-        else if (!checked) nqtDaChon = nqtDaChon.filter(x => x !== id);
-        const allCheckboxes = document.querySelectorAll('.nqt-row-checkbox');
-        const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
-        document.getElementById('nqtChonTatCaCheckbox').checked = allChecked;
-        nqtCapNhatBulkBar();
-    }
+    };
 
     window.nqtBoChonTatCa = function() {
         nqtDaChon = [];
-        document.querySelectorAll('.nqt-row-checkbox').forEach(cb => cb.checked = false);
-        document.getElementById('nqtChonTatCaCheckbox').checked = false;
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            tr.classList.remove('nqt-row-selected');
+            tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+        });
         nqtCapNhatBulkBar();
-    }
+    };
 
     function nqtCapNhatBulkBar() {
         const bar = document.getElementById('nqtBulkBar');
@@ -241,8 +238,7 @@
     window.nqtXacNhanBulkAction = async function() {
         if (nqtDaChon.length === 0) return;
         const btn = document.getElementById('nqtBulkConfirmBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang xử lý...';
+        const nqtRestoreBulk = nqtBtnLoading(btn, 'Đang xử lý...');
 
         let nqtThanhCong = 0, nqtThatBai = 0;
         for (const id of nqtDaChon) {
@@ -251,8 +247,7 @@
             else nqtThatBai++;
         }
 
-        btn.disabled = false;
-        btn.innerHTML = 'Xác nhận';
+        nqtRestoreBulk();
         nqtDongModal('modalBulkAction');
         nqtBoChonTatCa();
         nqtTaiDanhSach(nqtTrangHienTai);
@@ -314,11 +309,7 @@
             const nqtLoai = nqtLoaiGdMap[tt.g6_loai_giao_dich] || tt.g6_loai_giao_dich;
             const isChecked = nqtDaChon.includes(tt.g6_ma_thanh_toan);
             return `
-                <tr class="hover:bg-[#fafafa] dark:hover:bg-[#333] transition-colors">
-                    <td class="px-3 py-3">
-                        <input type="checkbox" class="nqt-row-checkbox w-4 h-4 rounded border-[#d4d4d4] text-[#191919] focus:ring-[#191919]"
-                               data-id="${tt.g6_ma_thanh_toan}" ${isChecked ? 'checked' : ''} onchange="nqtChonMotRecord(${tt.g6_ma_thanh_toan}, this.checked)">
-                    </td>
+                <tr data-row-id="${tt.g6_ma_thanh_toan}" class="cursor-pointer transition-all duration-100 ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#333]'}" onclick="nqtToggleRow(${tt.g6_ma_thanh_toan}, event)">
                     <td class="px-4 py-3 font-mono font-medium text-[#191919] dark:text-[#fafafa]">#${tt.g6_ma_thanh_toan}</td>
                     <td class="px-4 py-3 text-[#191919] dark:text-[#fafafa]">${tt.g6_ten_khach_hang || 'Khách vãng lai'}</td>
                     <td class="px-4 py-3 text-[#666] dark:text-[#888]">${nqtLoai}</td>
@@ -425,7 +416,10 @@
 
     window.nqtXacNhanThanhToan = async function() {
         if (!nqtThanhToanHienTai) return;
+        const nqtBtn = document.querySelector('#nqtCtActions button');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang xác nhận...');
         const res = await nqtApi.fetch(`/api/nqt-thanh-toan/${nqtThanhToanHienTai.g6_ma_thanh_toan}/nqt-xac-nhan`, { method: 'PUT' });
+        nqtRestore?.();
         if (res && res.nqt_thanh_cong) {
             nqtToast('Xác nhận thanh toán thành công!', 'success');
             nqtDongModal('modalChiTiet');

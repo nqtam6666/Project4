@@ -221,6 +221,12 @@
         let url = `/api/nqt-hoi-vien?g6_trang=${trang}&g6_gioi_han=10`;
         if (nqtTimKiemHienTai) url += `&g6_tim_kiem=${encodeURIComponent(nqtTimKiemHienTai)}`;
 
+        const nqtTrangThai = document.getElementById('nqtLocTrangThai')?.value;
+        if (nqtTrangThai) url += `&g6_trang_thai=${nqtTrangThai}`;
+
+        const nqtChiNhanh = document.getElementById('nqtLocChiNhanh')?.value;
+        if (nqtChiNhanh) url += `&g6_ma_chi_nhanh=${nqtChiNhanh}`;
+
         const data = await nqtApi.fetch(url);
         if (!data?.nqt_thanh_cong) return;
 
@@ -279,7 +285,13 @@
         ctrl.innerHTML = html;
     }
 
-    window.nqtXuLyTimKiem = function(e) { nqtTimKiemHienTai = e.target.value; if (e.key === 'Enter' || !nqtTimKiemHienTai) nqtTaiDanhSach(1); }
+    let nqtDebounceTimer = null;
+    window.nqtXuLyTimKiem = function(e) {
+        nqtTimKiemHienTai = e.target.value;
+        if (e.key === 'Enter') { clearTimeout(nqtDebounceTimer); nqtTaiDanhSach(1); return; }
+        clearTimeout(nqtDebounceTimer);
+        nqtDebounceTimer = setTimeout(() => nqtTaiDanhSach(1), 350);
+    };
     window.nqtTaiDanhSach = nqtTaiDanhSach;
 
     document.getElementById('formThemHoiVien').onsubmit = async (e) => {

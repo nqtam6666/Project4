@@ -487,7 +487,7 @@ def nqt_chay_seed():
                 "g6_so_dien_thoai": "0912345001",
                 "g6_email": "hoa.nguyen@example.com",
                 "g6_dia_chi": "12 Trần Duy Hưng, Cầu Giấy, Hà Nội",
-                "g6_ngay_dang_ky": date(2025, 1, 10),
+                "g6_ngay_dang_ky": date(2026, 3, 28),
                 "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
             {
@@ -498,7 +498,7 @@ def nqt_chay_seed():
                 "g6_so_dien_thoai": "0912345002",
                 "g6_email": "manh.tran@example.com",
                 "g6_dia_chi": "34 Hoàng Quốc Việt, Cầu Giấy, Hà Nội",
-                "g6_ngay_dang_ky": date(2025, 2, 1),
+                "g6_ngay_dang_ky": date(2026, 4, 1),
                 "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
             {
@@ -509,7 +509,7 @@ def nqt_chay_seed():
                 "g6_so_dien_thoai": "0912345003",
                 "g6_email": "thu.le@example.com",
                 "g6_dia_chi": "56 Nguyễn Phong Sắc, Cầu Giấy, Hà Nội",
-                "g6_ngay_dang_ky": date(2025, 3, 15),
+                "g6_ngay_dang_ky": date(2026, 4, 5),
                 "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
             {
@@ -520,7 +520,7 @@ def nqt_chay_seed():
                 "g6_so_dien_thoai": "0912345004",
                 "g6_email": "minh.pham@example.com",
                 "g6_dia_chi": "78 Dịch Vọng, Cầu Giấy, Hà Nội",
-                "g6_ngay_dang_ky": date(2025, 4, 1),
+                "g6_ngay_dang_ky": date(2026, 4, 8),
                 "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
             {
@@ -531,7 +531,7 @@ def nqt_chay_seed():
                 "g6_so_dien_thoai": "0912345005",
                 "g6_email": "lananh.hoang@example.com",
                 "g6_dia_chi": "90 Mai Dịch, Cầu Giấy, Hà Nội",
-                "g6_ngay_dang_ky": date(2025, 4, 10),
+                "g6_ngay_dang_ky": date(2026, 4, 12),
                 "g6_ma_qr": f"G6-{uuid.uuid4().hex[:10].upper()}",
             },
         ]

@@ -1,7 +1,7 @@
 ﻿import uuid
 from datetime import date, timedelta
 from flask import Blueprint, request
-from sqlalchemy import func
+from sqlalchemy import func, cast, Date
 from backend.app import db
 from backend.app.models.g6_hoi_vien import G6HoiVien, G6GoiTap, G6DangKyGoiTap, G6DiemDanh, G6ChiSoCoThe
 from backend.app.models.g6_thanh_toan import G6ThanhToan
@@ -21,15 +21,31 @@ def nqt_lay_tat_ca_hoi_vien():
     nqt_gioi_han = request.args.get('g6_gioi_han', 20, type=int)
     nqt_tim = request.args.get('g6_tim_kiem', '').strip()
     nqt_chi_nhanh = request.args.get('g6_ma_chi_nhanh', type=int)
+    nqt_trang_thai = request.args.get('g6_trang_thai', '').strip()    # 'true' / 'false'
+    nqt_sap_het_han = request.args.get('g6_sap_het_han', type=int)    # số ngày, ví dụ 7
 
     nqt_q = G6HoiVien.query
     if nqt_chi_nhanh:
         nqt_q = nqt_q.filter_by(g6_ma_chi_nhanh=nqt_chi_nhanh)
+    if nqt_trang_thai == 'true':
+        nqt_q = nqt_q.filter_by(g6_la_hoat_dong=True)
+    elif nqt_trang_thai == 'false':
+        nqt_q = nqt_q.filter_by(g6_la_hoat_dong=False)
     if nqt_tim:
         nqt_q = nqt_q.filter(
             G6HoiVien.g6_ho_ten.ilike(f'%{nqt_tim}%') |
             G6HoiVien.g6_so_dien_thoai.ilike(f'%{nqt_tim}%')
         )
+    if nqt_sap_het_han:
+        # Lọc hội viên có gói tập sắp hết hạn trong N ngày
+        nqt_han = date.today() + timedelta(days=nqt_sap_het_han)
+        nqt_ids_sq = db.session.query(G6DangKyGoiTap.g6_ma_hoi_vien).filter(
+            G6DangKyGoiTap.g6_trang_thai == 'dang_hoat_dong',
+            G6DangKyGoiTap.g6_ngay_het_han >= date.today(),
+            G6DangKyGoiTap.g6_ngay_het_han <= nqt_han,
+        ).scalar_subquery()
+        nqt_q = nqt_q.filter(G6HoiVien.g6_ma_hoi_vien.in_(nqt_ids_sq))
+
     nqt_phan_trang = nqt_q.order_by(G6HoiVien.g6_ngay_tao.desc()).paginate(
         page=nqt_trang, per_page=nqt_gioi_han, error_out=False
     )
@@ -277,11 +293,20 @@ def nqt_thong_ke_dashboard():
     # Tổng hội viên
     nqt_tong_hv = G6HoiVien.query.filter_by(g6_la_hoat_dong=True).count()
 
+    # Check-in hôm nay (tất cả lượt vào, kể cả đã ra)
+    nqt_checkin_hom_nay = G6DiemDanh.query.filter(
+        func.cast(G6DiemDanh.g6_thoi_gian_vao, db.Date) == nqt_hom_nay
+    ).count()
+
     # Đang tập luyện (check-in vào hôm nay, chưa ra)
     nqt_dang_tap = G6DiemDanh.query.filter(
         func.cast(G6DiemDanh.g6_thoi_gian_vao, db.Date) == nqt_hom_nay,
         G6DiemDanh.g6_thoi_gian_ra.is_(None)
     ).count()
+
+    # Sức chứa tối đa (lấy từ chi nhánh đầu tiên hoặc tổng)
+    from backend.app.models.g6_chi_nhanh import G6ChiNhanh
+    nqt_suc_chua = db.session.query(func.sum(G6ChiNhanh.g6_suc_chua_toi_da)).scalar() or 100
 
     # Gói tập sắp hết hạn trong 7 ngày
     nqt_sap_het_han = G6DangKyGoiTap.query.filter(
@@ -290,9 +315,9 @@ def nqt_thong_ke_dashboard():
         G6DangKyGoiTap.g6_ngay_het_han <= nqt_7_ngay_toi,
     ).count()
 
-    # Doanh thu tháng hiện tại (thanh toán đã hoàn thành)
+    # Doanh thu tháng hiện tại (trạng thái thanh_cong hoặc hoan_thanh)
     nqt_doanh_thu = db.session.query(func.sum(G6ThanhToan.g6_so_tien)).filter(
-        G6ThanhToan.g6_trang_thai == 'hoan_thanh',
+        G6ThanhToan.g6_trang_thai.in_(['thanh_cong', 'hoan_thanh']),
         func.cast(G6ThanhToan.g6_ngay_thanh_toan, db.Date) >= nqt_dau_thang,
     ).scalar() or 0
 
@@ -303,8 +328,71 @@ def nqt_thong_ke_dashboard():
 
     return nqt_ok({
         'g6_tong_hoi_vien': nqt_tong_hv,
+        'g6_checkin_hom_nay': nqt_checkin_hom_nay,
         'g6_dang_tap_luyen': nqt_dang_tap,
+        'g6_suc_chua': int(nqt_suc_chua),
         'g6_sap_het_han': nqt_sap_het_han,
         'g6_doanh_thu_thang': float(nqt_doanh_thu),
         'g6_hoi_vien_moi_thang': nqt_hv_moi,
+    })
+
+
+# ---- BIỂU ĐỒ TĂNG TRƯỞNG HỘI VIÊN ----
+
+@nqt_hoi_vien_bp.route('/nqt-thong-ke-bieu-do', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_thong_ke_bieu_do():
+    nqt_so_ngay = request.args.get('g6_so_ngay', 7, type=int)
+    nqt_so_ngay = min(max(nqt_so_ngay, 7), 90)
+
+    nqt_hom_nay = date.today()
+    nqt_ngay_bat_dau = nqt_hom_nay - timedelta(days=nqt_so_ngay - 1)
+
+    # Query số hội viên đăng ký theo ngày
+    nqt_rows = db.session.query(
+        cast(G6HoiVien.g6_ngay_dang_ky, Date).label('nqt_ngay'),
+        func.count(G6HoiVien.g6_ma_hoi_vien).label('nqt_so_luong')
+    ).filter(
+        G6HoiVien.g6_ngay_dang_ky >= nqt_ngay_bat_dau
+    ).group_by(
+        cast(G6HoiVien.g6_ngay_dang_ky, Date)
+    ).order_by(
+        cast(G6HoiVien.g6_ngay_dang_ky, Date)
+    ).all()
+
+    # Tạo map ngày → số lượng
+    nqt_map = {str(r.nqt_ngay): r.nqt_so_luong for r in nqt_rows}
+
+    nqt_nhan = []
+    nqt_gia_tri = []
+
+    nqt_thu_vn = {0:'T2', 1:'T3', 2:'T4', 3:'T5', 4:'T6', 5:'T7', 6:'CN'}
+
+    if nqt_so_ngay <= 30:
+        # Từng ngày
+        for nqt_i in range(nqt_so_ngay):
+            nqt_ngay = nqt_ngay_bat_dau + timedelta(days=nqt_i)
+            nqt_key = str(nqt_ngay)
+            nqt_label = nqt_thu_vn[nqt_ngay.weekday()] if nqt_so_ngay <= 7 else f"{nqt_ngay.day}/{nqt_ngay.month}"
+            nqt_nhan.append(nqt_label)
+            nqt_gia_tri.append(nqt_map.get(nqt_key, 0))
+    else:
+        # Gộp theo tuần (90 ngày → ~13 tuần)
+        nqt_tuan = 0
+        nqt_ngay_hien_tai = nqt_ngay_bat_dau
+        while nqt_ngay_hien_tai <= nqt_hom_nay:
+            nqt_tuan += 1
+            nqt_cuoi_tuan = min(nqt_ngay_hien_tai + timedelta(days=6), nqt_hom_nay)
+            nqt_tong = sum(
+                nqt_map.get(str(nqt_ngay_hien_tai + timedelta(days=nqt_d)), 0)
+                for nqt_d in range((nqt_cuoi_tuan - nqt_ngay_hien_tai).days + 1)
+            )
+            nqt_nhan.append(f"T{nqt_tuan}")
+            nqt_gia_tri.append(nqt_tong)
+            nqt_ngay_hien_tai = nqt_cuoi_tuan + timedelta(days=1)
+
+    return nqt_ok({
+        'g6_nhan': nqt_nhan,
+        'g6_gia_tri': nqt_gia_tri,
+        'g6_so_ngay': nqt_so_ngay,
     })

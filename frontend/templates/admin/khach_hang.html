@@ -19,7 +19,7 @@
     <div class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1 max-w-md">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-[#a3a3a3]"><i class="fas fa-search text-sm"></i></span>
-            <input type="text" id="nqtTimKiem" onkeyup="nqtXuLyTimKiem(event)" class="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-[#fafafa] text-[#191919] dark:text-[#fafafa] placeholder-[#a3a3a3]" placeholder="Tìm theo tên, email, SĐT...">
+            <input type="text" id="nqtTimKiem" onkeyup="nqtXuLyTimKiem(event)" class="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa] placeholder-[#a3a3a3]" placeholder="Tìm theo tên, email, SĐT...">
         </div>
         <button onclick="nqtTaiDanhSach()" class="px-3 py-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors">
             <i class="fas fa-sync-alt text-[#666] dark:text-[#888] text-sm"></i>
@@ -197,7 +197,10 @@
 
     document.getElementById('formThemKhachHang').onsubmit = async e => {
         e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
         const res = await nqtApi.fetch('/api/nqt-khach-hang/nqt-dang-ky', { method: 'POST', body: Object.fromEntries(new FormData(e.target)) });
+        nqtRestore();
         if (res?.nqt_thanh_cong) { nqtDongModal('modalThemKhachHang'); e.target.reset(); nqtTaiDanhSach(1); nqtToast('Thêm thành công!', 'success'); }
         else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
     };
@@ -216,9 +219,12 @@
 
     document.getElementById('formSuaKhachHang').onsubmit = async e => {
         e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
         const fd = new FormData(e.target), id = fd.get('g6_ma_khach_hang'), data = Object.fromEntries(fd);
         data.g6_la_hoat_dong = data.g6_la_hoat_dong === 'true';
         const res = await nqtApi.fetch(`/api/nqt-khach-hang/${id}`, { method: 'PUT', body: data });
+        nqtRestore();
         if (res?.nqt_thanh_cong) { nqtDongModal('modalSuaKhachHang'); nqtTaiDanhSach(nqtTrangHienTai); nqtToast('Cập nhật thành công!', 'success'); }
         else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
     };

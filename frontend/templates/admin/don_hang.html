@@ -16,7 +16,7 @@
     <div class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1 max-w-md">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-[#a3a3a3]"><i class="fas fa-search text-sm"></i></span>
-            <input type="text" id="nqtTimKiem" onkeyup="nqtXuLyTimKiem(event)" class="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-[#fafafa] text-[#191919] dark:text-[#fafafa] placeholder-[#a3a3a3]" placeholder="Tìm mã đơn, tên khách...">
+            <input type="text" id="nqtTimKiem" onkeyup="nqtXuLyTimKiem(event)" class="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa] placeholder-[#a3a3a3]" placeholder="Tìm mã đơn, tên khách...">
         </div>
         <select id="nqtLocTrangThai" onchange="nqtTaiDanhSach(1)" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
             <option value="">Tất cả trạng thái</option>
@@ -221,9 +221,12 @@
 
     window.nqtCapNhatTrangThai = async () => {
         if (!nqtDonHangHienTai) return;
+        const nqtBtn = document.querySelector('#modalChiTiet [onclick="nqtCapNhatTrangThai()"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang cập nhật...');
         const tt = document.getElementById('nqtTrangThaiMoi').value;
-        if (!tt) { nqtToast('Chọn trạng thái mới', 'warn'); return; }
+        if (!tt) { nqtRestore?.(); nqtToast('Chọn trạng thái mới', 'warn'); return; }
         const res = await nqtApi.fetch(`/api/nqt-don-hang/${nqtDonHangHienTai.g6_ma_don_hang}/nqt-cap-nhat-trang-thai`, { method: 'PUT', body: { g6_trang_thai: tt } });
+        nqtRestore?.();
         if (res?.nqt_thanh_cong) { nqtToast('Cập nhật thành công!', 'success'); nqtDongModal('modalChiTiet'); nqtTaiDanhSach(nqtTrangHienTai); }
         else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
     };

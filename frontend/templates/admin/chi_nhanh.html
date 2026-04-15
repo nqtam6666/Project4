@@ -10,7 +10,7 @@
             <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">Quản lý Chi nhánh</h1>
             <p class="text-sm text-[#666] dark:text-[#888]">Quản lý các chi nhánh phòng tập</p>
         </div>
-        <button onclick="nqtOpenModal('modalAddBranch')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">
+        <button onclick="nqtMoModal('modalAddBranch')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">
             <i class="fas fa-plus"></i>Thêm chi nhánh
         </button>
     </div>
@@ -28,10 +28,6 @@
             <table class="w-full text-sm">
                 <thead class="bg-[#fafafa] dark:bg-[#333] border-b border-[#e5e5e5] dark:border-[#404040]">
                     <tr>
-                        <th class="px-3 py-3 w-10">
-                            <input type="checkbox" id="nqtChonTatCaCheckbox" onchange="nqtChonTatCa(this.checked)"
-                                   class="w-4 h-4 rounded border-[#d4d4d4] text-[#191919] focus:ring-[#191919]">
-                        </th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Tên chi nhánh</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Địa chỉ</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Hotline</th>
@@ -43,17 +39,17 @@
                 </thead>
                 <tbody id="branchTableBody" class="divide-y divide-[#e5e5e5] dark:divide-[#404040]">
                     <tr>
-                        <td colspan="8" class="px-4 py-3">
+                        <td colspan="7" class="px-4 py-3">
                             <div class="h-4 bg-[#e5e5e5] dark:bg-[#404040] rounded animate-pulse w-full"></div>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="8" class="px-4 py-3">
+                        <td colspan="7" class="px-4 py-3">
                             <div class="h-4 bg-[#e5e5e5] dark:bg-[#404040] rounded animate-pulse w-5/6"></div>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="8" class="px-4 py-3">
+                        <td colspan="7" class="px-4 py-3">
                             <div class="h-4 bg-[#e5e5e5] dark:bg-[#404040] rounded animate-pulse w-4/6"></div>
                         </td>
                     </tr>
@@ -81,11 +77,11 @@
 </div>
 
 <!-- Modal: Bulk Action -->
-<div id="modalBulkAction" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtCloseModal('modalBulkAction')">
+<div id="modalBulkAction" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalBulkAction')">
     <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-sm shadow-lg">
         <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
             <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]" id="nqtBulkTitle">Thao tác hàng loạt</h3>
-            <button onclick="nqtCloseModal('modalBulkAction')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+            <button onclick="nqtDongModal('modalBulkAction')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
         </div>
         <div class="p-6 text-center">
             <div class="w-12 h-12 mx-auto mb-4 bg-[#f5f5f5] dark:bg-[#404040] rounded-full flex items-center justify-center">
@@ -96,18 +92,18 @@
             <p class="text-xs text-[#a3a3a3] dark:text-[#666] mt-2" id="nqtBulkMessage">Trạng thái sẽ được cập nhật.</p>
         </div>
         <div class="px-4 py-3 border-t border-[#e5e5e5] dark:border-[#404040] flex justify-end space-x-2">
-            <button onclick="nqtCloseModal('modalBulkAction')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+            <button onclick="nqtDongModal('modalBulkAction')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
             <button onclick="nqtXacNhanBulkAction()" id="nqtBulkConfirmBtn" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Xác nhận</button>
         </div>
     </div>
 </div>
 
 <!-- Modal: Add Branch -->
-<div id="modalAddBranch" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtCloseModal('modalAddBranch')">
+<div id="modalAddBranch" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalAddBranch')">
     <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
         <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
             <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]">Thêm chi nhánh mới</h3>
-            <button onclick="nqtCloseModal('modalAddBranch')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+            <button onclick="nqtDongModal('modalAddBranch')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
         </div>
         <form id="formAddBranch" class="p-4 overflow-y-auto space-y-4">
             <div>
@@ -163,7 +159,7 @@
                 </label>
             </div>
             <div class="flex justify-end space-x-2 pt-4 border-t border-[#e5e5e5] dark:border-[#404040]">
-                <button type="button" onclick="nqtCloseModal('modalAddBranch')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+                <button type="button" onclick="nqtDongModal('modalAddBranch')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
                 <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Lưu</button>
             </div>
         </form>
@@ -171,11 +167,11 @@
 </div>
 
 <!-- Modal: Edit Branch -->
-<div id="modalEditBranch" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtCloseModal('modalEditBranch')">
+<div id="modalEditBranch" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalEditBranch')">
     <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
         <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
             <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]">Chỉnh sửa chi nhánh</h3>
-            <button onclick="nqtCloseModal('modalEditBranch')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+            <button onclick="nqtDongModal('modalEditBranch')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
         </div>
         <form id="formEditBranch" class="p-4 overflow-y-auto space-y-4">
             <input type="hidden" name="g6_ma_chi_nhanh">
@@ -221,7 +217,7 @@
                 </label>
             </div>
             <div class="flex justify-end space-x-2 pt-4 border-t border-[#e5e5e5] dark:border-[#404040]">
-                <button type="button" onclick="nqtCloseModal('modalEditBranch')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+                <button type="button" onclick="nqtDongModal('modalEditBranch')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
                 <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Cập nhật</button>
             </div>
         </form>
@@ -229,11 +225,11 @@
 </div>
 
 <!-- Modal: Thiết bị -->
-<div id="modalThietBi" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtCloseModal('modalThietBi')">
+<div id="modalThietBi" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalThietBi')">
     <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
         <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
             <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]" id="thietBiTitle">Thiết bị chi nhánh</h3>
-            <button onclick="nqtCloseModal('modalThietBi')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+            <button onclick="nqtDongModal('modalThietBi')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
         </div>
         <div class="p-4 overflow-y-auto flex-1 space-y-4">
             <form id="formAddThietBi" class="bg-[#fafafa] dark:bg-[#333] rounded-md p-3 flex gap-3 border border-[#e5e5e5] dark:border-[#404040]">
@@ -252,7 +248,7 @@
 </div>
 
 <!-- Modal: Xác nhận tạm đóng -->
-<div id="modalConfirmDeactivate" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtCloseModal('modalConfirmDeactivate')">
+<div id="modalConfirmDeactivate" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalConfirmDeactivate')">
     <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-sm p-6 text-center">
         <div class="w-12 h-12 mx-auto mb-4 bg-[#fef3c7] dark:bg-[#92400e]/20 rounded-full flex items-center justify-center">
             <i class="fas fa-store-slash text-[#d97706] text-xl"></i>
@@ -261,7 +257,7 @@
         <p class="text-sm text-[#666] dark:text-[#888] mb-1">Tạm đóng chi nhánh</p>
         <p class="font-semibold text-[#d97706] mb-4" id="deactivateTargetName"></p>
         <div class="flex justify-center space-x-2">
-            <button onclick="nqtCloseModal('modalConfirmDeactivate')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+            <button onclick="nqtDongModal('modalConfirmDeactivate')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
             <button onclick="nqtConfirmDeactivate()" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#d97706] text-white text-sm font-medium rounded-md hover:bg-[#b45309] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d97706]">Tạm đóng</button>
         </div>
     </div>
@@ -276,35 +272,33 @@
     let nqtDaChon = [];
     let nqtBulkActionType = null;
 
-    window.nqtOpenModal = function(id) { document.getElementById(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
-    window.nqtCloseModal = function(id) { document.getElementById(id).classList.add('hidden'); document.body.style.overflow = ''; }
-
-    window.nqtChonTatCa = function(checked) {
-        const checkboxes = document.querySelectorAll('.nqt-row-checkbox');
-        checkboxes.forEach(cb => {
-            cb.checked = checked;
-            const id = parseInt(cb.dataset.id);
-            if (checked && !nqtDaChon.includes(id)) nqtDaChon.push(id);
-            else if (!checked) nqtDaChon = [];
+    window.nqtToggleRow = function(id, e) {
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        const idx = nqtDaChon.indexOf(id);
+        if (idx === -1) nqtDaChon.push(id);
+        else nqtDaChon.splice(idx, 1);
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            const trId = parseInt(tr.dataset.rowId);
+            const sel = nqtDaChon.includes(trId);
+            if (sel) {
+                tr.classList.remove('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+                tr.classList.add('nqt-row-selected');
+            } else {
+                tr.classList.remove('nqt-row-selected');
+                tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+            }
         });
         nqtCapNhatBulkBar();
-    }
-
-    window.nqtChonMotRecord = function(id, checked) {
-        if (checked && !nqtDaChon.includes(id)) nqtDaChon.push(id);
-        else if (!checked) nqtDaChon = nqtDaChon.filter(x => x !== id);
-        const allCheckboxes = document.querySelectorAll('.nqt-row-checkbox');
-        const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
-        document.getElementById('nqtChonTatCaCheckbox').checked = allChecked;
-        nqtCapNhatBulkBar();
-    }
+    };
 
     window.nqtBoChonTatCa = function() {
         nqtDaChon = [];
-        document.querySelectorAll('.nqt-row-checkbox').forEach(cb => cb.checked = false);
-        document.getElementById('nqtChonTatCaCheckbox').checked = false;
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            tr.classList.remove('nqt-row-selected');
+            tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+        });
         nqtCapNhatBulkBar();
-    }
+    };
 
     function nqtCapNhatBulkBar() {
         const bar = document.getElementById('nqtBulkBar');
@@ -323,14 +317,13 @@
             document.getElementById('nqtBulkTitle').textContent = 'Tạm đóng chi nhánh';
             document.getElementById('nqtBulkMessage').textContent = 'Các chi nhánh sẽ được chuyển sang trạng thái "Tạm đóng".';
         }
-        nqtOpenModal('modalBulkAction');
+        nqtMoModal('modalBulkAction');
     }
 
     window.nqtXacNhanBulkAction = async function() {
         if (nqtDaChon.length === 0) return;
         const btn = document.getElementById('nqtBulkConfirmBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang xử lý...';
+        const nqtRestoreBulk = nqtBtnLoading(btn, 'Đang xử lý...');
 
         let nqtThanhCong = 0, nqtThatBai = 0;
         const laHoatDong = nqtBulkActionType === 'kich_hoat';
@@ -340,9 +333,8 @@
             else nqtThatBai++;
         }
 
-        btn.disabled = false;
-        btn.innerHTML = 'Xác nhận';
-        nqtCloseModal('modalBulkAction');
+        nqtRestoreBulk();
+        nqtDongModal('modalBulkAction');
         nqtBoChonTatCa();
         nqtLoadChiNhanh();
 
@@ -352,14 +344,14 @@
 
     window.nqtLoadChiNhanh = async function() {
         const tbody = document.getElementById('branchTableBody');
-        tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center text-[#666] dark:text-[#888]">Đang tải...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-[#666] dark:text-[#888]">Đang tải...</td></tr>';
 
         const data = await nqtApi.fetch('/api/nqt-chi-nhanh?g6_tat_ca=1');
         if (!data || !data.nqt_thanh_cong) return;
 
         nqtAllBranches = data.nqt_du_lieu;
         if (nqtAllBranches.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-12 text-center text-[#666] dark:text-[#888]">Chưa có chi nhánh nào</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-12 text-center text-[#666] dark:text-[#888]">Chưa có chi nhánh nào</td></tr>';
             return;
         }
 
@@ -369,11 +361,7 @@
             const nqtName = b.g6_ten_chi_nhanh.replace(/'/g, "\\'");
             const isChecked = nqtDaChon.includes(b.g6_ma_chi_nhanh);
             return `
-                <tr class="hover:bg-[#fafafa] dark:hover:bg-[#333] transition-colors">
-                    <td class="px-3 py-3">
-                        <input type="checkbox" class="nqt-row-checkbox w-4 h-4 rounded border-[#d4d4d4] text-[#191919] focus:ring-[#191919]"
-                               data-id="${b.g6_ma_chi_nhanh}" ${isChecked ? 'checked' : ''} onchange="nqtChonMotRecord(${b.g6_ma_chi_nhanh}, this.checked)">
-                    </td>
+                <tr data-row-id="${b.g6_ma_chi_nhanh}" class="cursor-pointer transition-all duration-100 ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#333]'}" onclick="nqtToggleRow(${b.g6_ma_chi_nhanh}, event)">
                     <td class="px-4 py-3 font-medium text-[#191919] dark:text-[#fafafa]">${b.g6_ten_chi_nhanh}</td>
                     <td class="px-4 py-3 text-[#666] dark:text-[#888]">${b.g6_dia_chi || '—'}</td>
                     <td class="px-4 py-3 text-[#191919] dark:text-[#fafafa]">${b.g6_hotline || '—'}</td>
@@ -396,6 +384,8 @@
 
     document.getElementById('formAddBranch').onsubmit = async (e) => {
         e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
         const fd = new FormData(e.target);
         const data = Object.fromEntries(fd);
         data.g6_co_sauna = fd.has('g6_co_sauna');
@@ -403,8 +393,9 @@
         if (data.g6_suc_chua_toi_da) data.g6_suc_chua_toi_da = parseInt(data.g6_suc_chua_toi_da);
 
         const res = await nqtApi.fetch('/api/nqt-chi-nhanh', { method: 'POST', body: data });
+        nqtRestore();
         if (res && res.nqt_thanh_cong) {
-            nqtCloseModal('modalAddBranch');
+            nqtDongModal('modalAddBranch');
             e.target.reset();
             nqtLoadChiNhanh();
             nqtToast('Thêm chi nhánh thành công!', 'success');
@@ -426,11 +417,13 @@
         form.g6_la_hoat_dong.value = b.g6_la_hoat_dong.toString();
         document.getElementById('editSauna').checked = b.g6_co_sauna;
         document.getElementById('editHoBoi').checked = b.g6_co_ho_boi;
-        nqtOpenModal('modalEditBranch');
+        nqtMoModal('modalEditBranch');
     }
 
     document.getElementById('formEditBranch').onsubmit = async (e) => {
         e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
         const fd = new FormData(e.target);
         const id = fd.get('g6_ma_chi_nhanh');
         const data = {
@@ -444,8 +437,9 @@
             g6_co_ho_boi: document.getElementById('editHoBoi').checked,
         };
         const res = await nqtApi.fetch(`/api/nqt-chi-nhanh/${id}`, { method: 'PUT', body: data });
+        nqtRestore();
         if (res && res.nqt_thanh_cong) {
-            nqtCloseModal('modalEditBranch');
+            nqtDongModal('modalEditBranch');
             nqtLoadChiNhanh();
             nqtToast('Cập nhật thành công!', 'success');
         } else {
@@ -456,13 +450,13 @@
     window.nqtDeactivateBranch = function(id, name) {
         nqtDeactivateTargetId = id;
         document.getElementById('deactivateTargetName').textContent = name;
-        nqtOpenModal('modalConfirmDeactivate');
+        nqtMoModal('modalConfirmDeactivate');
     }
 
     window.nqtConfirmDeactivate = async function() {
         if (!nqtDeactivateTargetId) return;
         const res = await nqtApi.fetch(`/api/nqt-chi-nhanh/${nqtDeactivateTargetId}`, { method: 'PUT', body: { g6_la_hoat_dong: false } });
-        nqtCloseModal('modalConfirmDeactivate');
+        nqtDongModal('modalConfirmDeactivate');
         if (res && res.nqt_thanh_cong) {
             nqtLoadChiNhanh();
             nqtToast('Đã tạm đóng chi nhánh', 'warn');
@@ -477,7 +471,7 @@
         document.getElementById('thietBiChiNhanh').value = branchId;
         document.getElementById('formAddThietBi').reset();
         document.getElementById('thietBiChiNhanh').value = branchId;
-        nqtOpenModal('modalThietBi');
+        nqtMoModal('modalThietBi');
         nqtLoadThietBi(branchId);
     }
 
@@ -505,6 +499,8 @@
 
     document.getElementById('formAddThietBi').onsubmit = async (e) => {
         e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
         const fd = new FormData(e.target);
         const data = {
             g6_ma_chi_nhanh: parseInt(fd.get('g6_ma_chi_nhanh')),
@@ -512,6 +508,7 @@
             g6_thuong_hieu: fd.get('g6_thuong_hieu') || null,
         };
         const res = await nqtApi.fetch('/api/nqt-thiet-bi', { method: 'POST', body: data });
+        nqtRestore();
         if (res && res.nqt_thanh_cong) {
             document.querySelector('#formAddThietBi [name="g6_ten_thiet_bi"]').value = '';
             document.querySelector('#formAddThietBi [name="g6_thuong_hieu"]').value = '';

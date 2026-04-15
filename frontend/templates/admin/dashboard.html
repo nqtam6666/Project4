@@ -129,17 +129,21 @@
     }
 
     function nqtTaoChartData(soNgay) {
-        // Tạo dữ liệu mẫu cho đến khi API thực có sẵn
+        // Placeholder tĩnh (không random) khi API fail
         const nqtLabels = [], nqtValues = [];
         const now = new Date();
         for (let i = soNgay - 1; i >= 0; i--) {
             const d = new Date(now);
             d.setDate(d.getDate() - i);
-            if (soNgay <= 7) nqtLabels.push(d.toLocaleDateString('vi-VN', { weekday: 'short' }));
-            else if (soNgay <= 30) nqtLabels.push(`${d.getDate()}/${d.getMonth()+1}`);
-            else nqtLabels.push(`T${Math.ceil((soNgay - i) / 7)}`);
-            // Dữ liệu giả — sẽ thay bằng API sau
-            nqtValues.push(Math.floor(Math.random() * 8 + 2));
+            if (soNgay <= 7) {
+                const nqtDays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                nqtLabels.push(nqtDays[d.getDay()]);
+            } else if (soNgay <= 30) {
+                nqtLabels.push(`${d.getDate()}/${d.getMonth()+1}`);
+            } else {
+                nqtLabels.push(`T${Math.ceil((soNgay - i) / 7)}`);
+            }
+            nqtValues.push(0);
         }
         return { nqtLabels, nqtValues };
     }
@@ -235,7 +239,16 @@
     nqtSetGreeting();
     nqtUpdateClock();
     nqtLoadStats();
-    nqtVeChart(7);
+
+    // Đợi Chart.js load xong (có thể được inject async qua SPA) rồi mới vẽ
+    function nqtWaitChart(nqtRetry) {
+        if (typeof Chart !== 'undefined') {
+            nqtVeChart(7);
+        } else if (nqtRetry > 0) {
+            setTimeout(() => nqtWaitChart(nqtRetry - 1), 100);
+        }
+    }
+    nqtWaitChart(30); // thử tối đa 3 giây
 
     // Chart period switcher
     document.querySelectorAll('.nqt-chart-period').forEach(btn => {

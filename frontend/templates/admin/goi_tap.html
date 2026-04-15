@@ -45,7 +45,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Chi nhánh <span class="text-[#dc2626]">*</span></label>
-                <select name="g6_ma_chi_nhanh" required id="selectBranchAddPkg" class="flex h-9 w-full items-center justify-between rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-[#191919] dark:focus:ring-[#fafafa] dark:text-[#fafafa]">
+                <select name="g6_ma_chi_nhanh" required id="selectBranchAddPkg" class="flex h-9 w-full items-center justify-between rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] dark:text-[#fafafa]">
                     <option value="">-- Chọn --</option>
                 </select>
             </div>
@@ -87,14 +87,14 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Trạng thái</label>
-                    <select name="g6_la_hoat_dong" class="flex h-9 w-full items-center rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-[#191919] dark:focus:ring-[#fafafa] dark:text-[#fafafa]">
+                    <select name="g6_la_hoat_dong" class="flex h-9 w-full items-center rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] dark:text-[#fafafa]">
                         <option value="true">Hoạt động</option>
                         <option value="false">Tạm ẩn</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Nổi bật</label>
-                    <select name="g6_la_noi_bat" class="flex h-9 w-full items-center rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-[#191919] dark:focus:ring-[#fafafa] dark:text-[#fafafa]">
+                    <select name="g6_la_noi_bat" class="flex h-9 w-full items-center rounded-md border border-[#e5e5e5] dark:border-[#404040] bg-transparent px-3 py-2 text-sm shadow-sm focus:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] dark:text-[#fafafa]">
                         <option value="false">Không</option>
                         <option value="true">Có</option>
                     </select>
@@ -128,27 +128,27 @@
 {% block scripts %}
 <script>
 (function() {
-    let allPackages = [], deletePkgTargetId = null;
+    let nqtAllPackages = [], nqtDeletePkgTargetId = null;
 
-    async function loadBranches() {
+    async function nqtLoadBranches() {
         const data = await nqtApi.fetch('/api/nqt-chi-nhanh');
         if (data?.nqt_thanh_cong) {
             document.getElementById('selectBranchAddPkg').innerHTML = data.nqt_du_lieu.map(b => `<option value="${b.g6_ma_chi_nhanh}">${b.g6_ten_chi_nhanh}</option>`).join('');
         }
     }
 
-    async function loadPackages() {
+    async function nqtLoadPackages() {
         const grid = document.getElementById('packageGrid');
         grid.innerHTML = '<div class="col-span-full py-12 text-center text-[#666] dark:text-[#888]">Đang tải...</div>';
 
         const data = await nqtApi.fetch('/api/nqt-goi-tap');
         if (!data?.nqt_thanh_cong) return;
 
-        allPackages = data.nqt_du_lieu;
-        if (allPackages.length === 0) { grid.innerHTML = '<div class="col-span-full py-12 text-center text-[#666] dark:text-[#888]">Chưa có gói tập nào</div>'; return; }
+        nqtAllPackages = data.nqt_du_lieu;
+        if (nqtAllPackages.length === 0) { grid.innerHTML = '<div class="col-span-full py-12 text-center text-[#666] dark:text-[#888]">Chưa có gói tập nào</div>'; return; }
 
-        const fmt = n => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
-        grid.innerHTML = allPackages.map(g => `
+        const nqtFmt = n => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
+        grid.innerHTML = nqtAllPackages.map(g => `
             <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 ${g.g6_la_noi_bat ? 'border-l-4 border-l-[#f59e0b]' : ''}">
                 <div class="flex items-start justify-between mb-3">
                     <div>
@@ -161,7 +161,7 @@
                     <p><i class="fas fa-check text-[#16a34a] mr-1.5 text-xs"></i>${g.g6_co_pt ? 'Gồm PT' : 'Tập tự do'}</p>
                 </div>
                 <div class="flex items-center justify-between pt-3 border-t border-[#e5e5e5] dark:border-[#404040]">
-                    <span class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">${fmt(g.g6_gia)}</span>
+                    <span class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">${nqtFmt(g.g6_gia)}</span>
                     <div class="flex space-x-1">
                         <button onclick="nqtSuaGoiTap(${g.g6_ma_goi_tap})" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa] hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors"><i class="fas fa-edit"></i></button>
                         <button onclick="nqtXoaGoiTap(${g.g6_ma_goi_tap}, '${g.g6_ten_goi.replace(/'/g, "\\'")}')" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#451a1a] transition-colors"><i class="fas fa-trash"></i></button>
@@ -174,6 +174,8 @@
 
     document.getElementById('formAddPackage').onsubmit = async e => {
         e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
         const fd = new FormData(e.target), data = Object.fromEntries(fd);
         data.g6_gia = parseFloat(data.g6_gia);
         data.g6_so_ngay = parseInt(data.g6_so_ngay);
@@ -181,12 +183,13 @@
         data.g6_co_pt = e.target.g6_co_pt.checked;
 
         const res = await nqtApi.fetch('/api/nqt-goi-tap', { method: 'POST', body: data });
-        if (res?.nqt_thanh_cong) { nqtDongModal('modalAddPackage'); e.target.reset(); loadPackages(); nqtToast('Tạo thành công!', 'success'); }
+        nqtRestore();
+        if (res?.nqt_thanh_cong) { nqtDongModal('modalAddPackage'); e.target.reset(); nqtLoadPackages(); nqtToast('Tạo thành công!', 'success'); }
         else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
     };
 
     window.nqtSuaGoiTap = id => {
-        const g = allPackages.find(p => p.g6_ma_goi_tap === id);
+        const g = nqtAllPackages.find(p => p.g6_ma_goi_tap === id);
         if (!g) return;
         const form = document.getElementById('formEditPackage');
         form.g6_ma_goi_tap.value = g.g6_ma_goi_tap;
@@ -200,23 +203,26 @@
 
     document.getElementById('formEditPackage').onsubmit = async e => {
         e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
         const fd = new FormData(e.target), id = fd.get('g6_ma_goi_tap');
         const data = { g6_ten_goi: fd.get('g6_ten_goi'), g6_gia: parseFloat(fd.get('g6_gia')), g6_gia_khuyen_mai: fd.get('g6_gia_khuyen_mai') ? parseFloat(fd.get('g6_gia_khuyen_mai')) : null, g6_la_hoat_dong: fd.get('g6_la_hoat_dong') === 'true', g6_la_noi_bat: fd.get('g6_la_noi_bat') === 'true' };
         const res = await nqtApi.fetch(`/api/nqt-goi-tap/${id}`, { method: 'PUT', body: data });
-        if (res?.nqt_thanh_cong) { nqtDongModal('modalEditPackage'); loadPackages(); nqtToast('Cập nhật thành công!', 'success'); }
+        nqtRestore();
+        if (res?.nqt_thanh_cong) { nqtDongModal('modalEditPackage'); nqtLoadPackages(); nqtToast('Cập nhật thành công!', 'success'); }
         else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
     };
 
-    window.nqtXoaGoiTap = (id, name) => { deletePkgTargetId = id; document.getElementById('deletePkgTargetName').textContent = name; nqtMoModal('modalConfirmDeletePkg'); };
+    window.nqtXoaGoiTap = (id, name) => { nqtDeletePkgTargetId = id; document.getElementById('deletePkgTargetName').textContent = name; nqtMoModal('modalConfirmDeletePkg'); };
     window.nqtXacNhanXoaGoiTap = async () => {
-        if (!deletePkgTargetId) return;
-        const res = await nqtApi.fetch(`/api/nqt-goi-tap/${deletePkgTargetId}`, { method: 'DELETE' });
+        if (!nqtDeletePkgTargetId) return;
+        const res = await nqtApi.fetch(`/api/nqt-goi-tap/${nqtDeletePkgTargetId}`, { method: 'DELETE' });
         nqtDongModal('modalConfirmDeletePkg');
-        if (res?.nqt_thanh_cong) { loadPackages(); nqtToast('Đã ẩn gói tập!', 'success'); } else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
-        deletePkgTargetId = null;
+        if (res?.nqt_thanh_cong) { nqtLoadPackages(); nqtToast('Đã ẩn gói tập!', 'success'); } else nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
+        nqtDeletePkgTargetId = null;
     };
 
-    loadBranches(); loadPackages();
+    nqtLoadBranches(); nqtLoadPackages();
 })();
 </script>
 {% endblock %}
