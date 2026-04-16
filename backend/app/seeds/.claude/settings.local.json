@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/Project4/Project4/backend/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

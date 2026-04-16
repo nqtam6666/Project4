@@ -17,7 +17,8 @@
       "Bash(set PYTHONIOENCODING=utf-8)",
       "WebFetch(domain:ui.shadcn.com)",
       "Bash(python -c \"from backend.app import nqt_tao_app; app = nqt_tao_app\\(\\); ctx = app.app_context\\(\\); ctx.push\\(\\); print\\('OK'\\)\")",
-      "Bash(python -c ':*)"
+      "Bash(python -c ':*)",
+      "Bash(ls d:/Project4/Project4/backend/app/models/g6_*.py d:/Project4/Project4/backend/app/routes/nxv_*.py)"
     ]
   }
 }
