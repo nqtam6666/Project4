@@ -169,6 +169,8 @@
             nqtValues = fallback.nqtValues;
         }
 
+        const nqtExisting = Chart.getChart(canvas);
+        if (nqtExisting) nqtExisting.destroy();
         if (nqtChartInstance) nqtChartInstance.destroy();
 
         nqtChartInstance = new Chart(ctx, {

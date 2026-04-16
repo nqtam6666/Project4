@@ -25,6 +25,12 @@ migrate = Migrate()
 jwt = JWTManager()
 mail = Mail()
 
+try:
+    from apscheduler.schedulers.background import BackgroundScheduler
+    nqt_scheduler = BackgroundScheduler(timezone='Asia/Ho_Chi_Minh')
+except ImportError:
+    nqt_scheduler = None
+
 
 def nqt_tao_app(nqt_moi_truong: str = None):
     from backend.config import nqt_cau_hinh_map
@@ -52,6 +58,15 @@ def nqt_tao_app(nqt_moi_truong: str = None):
     # Đăng ký blueprints
     from backend.app.routes import nqt_dang_ky_routes
     nqt_dang_ky_routes(app)
+
+    # Khởi động APScheduler + đăng ký jobs
+    if nqt_scheduler is not None:
+        from backend.app.jobs.nqt_kiem_tra_het_han import nqt_dang_ky_jobs
+        nqt_dang_ky_jobs(nqt_scheduler, app)
+        if not nqt_scheduler.running:
+            nqt_scheduler.start()
+            import atexit
+            atexit.register(lambda: nqt_scheduler.shutdown(wait=False))
 
     # CLI: flask seed
     from backend.app.seeds.nqt_seed import nqt_chay_seed, nqt_chay_drop_va_seed
