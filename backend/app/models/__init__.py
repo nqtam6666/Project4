@@ -20,3 +20,14 @@ from backend.app.models.g6_van_chuyen import G6DonViVanChuyen, G6VungVanChuyen  
 from backend.app.models.g6_blog import G6DanhMucBaiViet, G6BaiViet, G6DanhGiaSanPham  # noqa: F401
 from backend.app.models.g6_thong_bao import G6ThongBao, G6LichGuiThongBao  # noqa: F401
 from backend.app.models.g6_xac_thuc import G6OtpXacThuc, G6PhienDangNhap, G6NhatKyHoatDong  # noqa: F401
+from backend.app.models.g6_huan_luyen_vien import (  # noqa: F401
+    G6HuanLuyenVien, G6GoiPT, G6DangKyGoiPT, G6BuoiTapPT,
+)
+from backend.app.models.g6_lop_hoc import G6LopHoc, G6LichLopHoc, G6DatChoLopHoc  # noqa: F401
+from backend.app.models.g6_dich_vu_phu import G6DichVuPhu, G6DatDichVu  # noqa: F401
+from backend.app.models.g6_san_pham import (  # noqa: F401
+    G6DanhMucSanPham, G6MucTieuSucKhoe, G6ThuongHieu,
+    G6SanPham, G6BienTheSanPham, G6HinhAnhSanPham,
+    G6ThanhPhanDinhDuong, G6ChungNhanSanPham,
+    G6TonKho, G6LichSuTonKho,
+)

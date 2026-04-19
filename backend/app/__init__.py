@@ -53,6 +53,7 @@ def nqt_tao_app(nqt_moi_truong: str = None):
         g6_nhan_vien, g6_hoi_vien, g6_khach_hang,
         g6_don_hang, g6_khuyen_mai, g6_thanh_toan,
         g6_van_chuyen, g6_blog, g6_thong_bao, g6_xac_thuc,
+        g6_huan_luyen_vien, g6_lop_hoc, g6_dich_vu_phu, g6_san_pham,
     )
 
     # Đăng ký blueprints
