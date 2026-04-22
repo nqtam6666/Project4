@@ -97,8 +97,8 @@ AUTHOR_PREFIX=nqt   # ← Mỗi thành viên tự đặt prefix của mình
 
 | Thành viên | AUTHOR_PREFIX | Ví dụ |
 |------------|--------------|-------|
-| Nguyễn Quốc Thắng | `nqt` | `nqt_ho_ten`, `NqtHoiVien` |
-| Nguyễn Xuân Việt | `nxv` | `nxv_ho_ten`, `NxvSanPham` |
+| Nguyễn Quang Tâm | `nqt` | `nqt_ho_ten`, `NqtHoiVien` |
+| Nguyễn Xuân Vinh | `nxv` | `nxv_ho_ten`, `NxvSanPham` |
 | (thành viên khác) | `abc` | `abc_ho_ten`, `AbcXxx` |
 
 > **Khi tạo code mới**: dùng đúng `AUTHOR_PREFIX` từ `.env`
