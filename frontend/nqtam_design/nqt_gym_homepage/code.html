@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "warning": "#F59E0B",
+                      "on-tertiary-fixed": "#001e2d",
+                      "on-secondary": "#303036",
+                      "surface-container-low": "#1a1d11",
+                      "surface-dim": "#121409",
+                      "primary": "#ffffef",
+                      "neon-dim": "#A8D120",
+                      "success": "#22C55E",
+                      "on-primary-fixed": "#171e00",
+                      "on-error-container": "#ffdad6",
+                      "on-tertiary": "#0c3447",
+                      "inverse-on-surface": "#2f3225",
+                      "surface-container-lowest": "#0d0f05",
+                      "on-primary-fixed-variant": "#3d4d00",
+                      "on-primary-container": "#566c00",
+                      "border-neon": "rgba(200, 241, 53, 0.3)",
+                      "surface-bright": "#383a2d",
+                      "on-secondary-fixed": "#1b1b20",
+                      "bg-main": "#0A0A0F",
+                      "on-tertiary-container": "#45687d",
+                      "tertiary": "#fefdff",
+                      "bg-elevated": "#1C1C28",
+                      "info": "#3B82F6",
+                      "on-background": "#e2e4d1",
+                      "primary-fixed-dim": "#aed50d",
+                      "primary-container": "#c8f135",
+                      "surface": "#121409",
+                      "error-container": "#93000a",
+                      "secondary-container": "#49484e",
+                      "text-primary": "#F5F5F0",
+                      "border-subtle": "rgba(255, 255, 255, 0.06)",
+                      "neon-glow": "rgba(200, 241, 53, 0.15)",
+                      "error": "#EF4444",
+                      "on-surface": "#e2e4d1",
+                      "surface-container-highest": "#333629",
+                      "secondary-fixed-dim": "#c8c5cd",
+                      "text-secondary": "#A1A1AA",
+                      "on-surface-variant": "#c5c9ae",
+                      "surface-tint": "#aed50d",
+                      "bg-card": "#12121A",
+                      "primary-fixed": "#c9f236",
+                      "text-muted": "#52525B",
+                      "inverse-surface": "#e2e4d1",
+                      "tertiary-fixed": "#c5e7ff",
+                      "on-secondary-container": "#bab7be",
+                      "outline": "#8f937b",
+                      "on-primary": "#293500",
+                      "tertiary-fixed-dim": "#a8cbe4",
+                      "surface-variant": "#333629",
+                      "outline-variant": "#444934",
+                      "secondary": "#c8c5cd",
+                      "surface-container": "#1e2115",
+                      "secondary-fixed": "#e4e1e9",
+                      "background": "#121409",
+                      "inverse-primary": "#526600",
+                      "surface-container-high": "#292b1f",
+                      "on-secondary-fixed-variant": "#47464c",
+                      "neon-lime": "#C8F135",
+                      "tertiary-container": "#c2e6ff",
+                      "on-tertiary-fixed-variant": "#274b5f",
+                      "on-error": "#690005"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xl": "32px",
+                      "md": "16px",
+                      "lg": "24px",
+                      "xxl": "48px",
+                      "sm": "8px",
+                      "section": "96px",
+                      "xs": "4px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-base": [
+                              "Inter"
+                      ],
+                      "numeric-data": [
+                              "JetBrains Mono"
+                      ],
+                      "hero-title": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Space Grotesk"
+                      ],
+                      "display-xl": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-base": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "numeric-data": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.0",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "hero-title": [
+                              "88px",
+                              {
+                                      "lineHeight": "0.95",
+                                      "letterSpacing": "-3px",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "display-lg": [
+                              "36px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.0",
+                                      "letterSpacing": "0.5px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-xl": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-bg-main text-text-primary font-body-base text-body-base overflow-x-hidden antialiased">
+<!-- TopNavBar Component -->
+<nav class="bg-zinc-950/80 backdrop-blur-lg fixed top-0 w-full z-50 border-b border-white/5 shadow-[0_8px_48px_rgba(0,0,0,0.6)]">
+<div class="flex justify-between items-center h-20 px-8 max-w-full">
+<div class="text-2xl font-black text-white italic">NQT GYM</div>
+<div class="hidden md:flex items-center gap-8 font-inter tracking-tight uppercase font-bold text-xs">
+<a class="text-lime-400 border-b-2 border-lime-400 pb-1 hover:text-lime-400 hover:glow-lime-400/50 transition-all duration-300 scale-105 active:scale-95 duration-200" href="#">Home</a>
+<a class="text-zinc-400 hover:text-lime-400 hover:glow-lime-400/50 transition-all duration-300 scale-105 active:scale-95 duration-200" href="#">Services</a>
+<a class="text-zinc-400 hover:text-lime-400 hover:glow-lime-400/50 transition-all duration-300 scale-105 active:scale-95 duration-200" href="#">Membership</a>
+<a class="text-zinc-400 hover:text-lime-400 hover:glow-lime-400/50 transition-all duration-300 scale-105 active:scale-95 duration-200" href="#">Trainers</a>
+<a class="text-zinc-400 hover:text-lime-400 hover:glow-lime-400/50 transition-all duration-300 scale-105 active:scale-95 duration-200" href="#">Booking</a>
+</div>
+<button class="hidden md:block bg-neon-lime text-bg-main font-label-caps text-label-caps px-lg py-sm rounded-DEFAULT hover:scale-105 transition-transform duration-300 shadow-[0_0_15px_rgba(200,241,53,0.3)]">
+                Join Now
+            </button>
+</div>
+</nav>
+<!-- Hero Section -->
+<header class="relative min-h-[1024px] flex items-center justify-center pt-20 overflow-hidden">
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-gradient-to-b from-bg-main/40 via-bg-main/80 to-bg-main z-10"></div>
+<img class="w-full h-full object-cover object-center opacity-40" data-alt="dramatic wide shot of a luxury underground gym facility with heavy black equipment illuminated by subtle cool overhead lighting and stark shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqKS1jHbe-4FkS9vXV9Y4sGKcLmEfN-Vd-CAb5tykIFdD_H66qinhhJXJWcdIU2UGQwHf37LjzIvOMxZGgFuSu3Cr4rEcgsGnRPBP2DF6NsyzFWoDVGdfRz-4CDiG3NZ1h0lxXDMRTY-sQy_Dp63xpoU4yLNmKHtm9dkw8YJ_3O7b2B6J-8p54tmlM0tvjOFzjJoR1zzcRhoR0jO3ijpiEtiMadcB7444HKipMYz_6IYzD3v7o2Cf0AfGGvNSeJhLFwxz10VhmMnJ"/>
+</div>
+<div class="relative z-10 max-w-7xl mx-auto px-lg text-center flex flex-col items-center gap-lg">
+<h1 class="font-hero-title text-hero-title text-text-primary uppercase max-w-5xl leading-tight">
+                NQT GYM <br/>
+<span class="text-neon-lime">PERFORMANCE</span>
+</h1>
+<p class="font-body-base text-body-base text-text-secondary max-w-2xl mt-md">
+                Elevate your physical limits in a facility designed for the elite. High-contrast environment, premium equipment, and uncompromising standards.
+            </p>
+<div class="mt-xl flex gap-md">
+<button class="bg-neon-lime text-bg-main font-label-caps text-label-caps px-xl py-md rounded-DEFAULT hover:scale-105 hover:shadow-[0_0_25px_rgba(200,241,53,0.4)] transition-all duration-300">
+                    BEGIN JOURNEY
+                </button>
+</div>
+</div>
+</header>
+<!-- Services Overview (Bento Grid) -->
+<section class="py-section relative bg-bg-main">
+<div class="max-w-7xl mx-auto px-lg">
+<div class="flex items-end justify-between mb-xl">
+<h2 class="font-display-xl text-display-xl text-text-primary uppercase tracking-tight">Facilities &amp;<br/><span class="text-neon-lime">Disciplines</span></h2>
+<div class="hidden md:flex items-center gap-sm text-neon-lime font-label-caps text-label-caps">
+<span>Explore All</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg auto-rows-[300px]">
+<!-- Bento Item 1 (Large) -->
+<div class="md:col-span-8 relative group rounded-xl overflow-hidden bg-surface-container-low border border-border-subtle hover:border-border-neon transition-colors duration-500">
+<img class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-50 transition-opacity duration-700" data-alt="close up of heavy matte black dumbbells lined up on a rack in a dark atmospheric gym setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9DGwqe9VRJuhoouuPIvphoP-yhtHs48oEFxtkqSRc6i2frwyYlCNAPZWondMToVWTs9jz-Pe2xzU6p-IgvWsyBGrzoAx58kYfYUt_DMC9GJ4AO-uS8Fxew-rJ7wzDSw11M4mepwAhLuMcQzuD3L7yrUiDzcW2AmwOVEUKfepjsJf_sE_DssncfYIiV3iyZfgaf-cKEl-Pj5WHf4kyRBpLQPslJVU4cMkfBx-Zi6V3OfWX0nKPi169Jf2gwQSlB4s9B3DUClI5C8u_"/>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-lg w-full">
+<div class="bg-neon-lime/10 text-neon-lime font-label-caps text-label-caps px-sm py-xs rounded inline-block mb-sm backdrop-blur-sm border border-neon-lime/20">STRENGTH</div>
+<h3 class="font-display-lg text-display-lg text-text-primary mb-xs">Free Weights Area</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Custom-machined plates and calibrated bars for serious lifting.</p>
+</div>
+</div>
+<!-- Bento Item 2 -->
+<div class="md:col-span-4 relative group rounded-xl overflow-hidden bg-surface-container-low border border-border-subtle hover:border-border-neon transition-colors duration-500">
+<div class="absolute inset-0 p-lg flex flex-col justify-between z-10">
+<span class="material-symbols-outlined text-4xl text-neon-lime">directions_run</span>
+<div>
+<h3 class="font-display-lg text-display-lg text-text-primary mb-xs">Cardio Deck</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">High-altitude simulation and precision treadmills.</p>
+</div>
+</div>
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-lowest to-surface-container-low opacity-80 z-0"></div>
+</div>
+<!-- Bento Item 3 -->
+<div class="md:col-span-4 relative group rounded-xl overflow-hidden bg-surface-container-low border border-border-subtle hover:border-border-neon transition-colors duration-500">
+<div class="absolute inset-0 p-lg flex flex-col justify-between z-10">
+<span class="material-symbols-outlined text-4xl text-neon-lime">sports_mma</span>
+<div>
+<h3 class="font-display-lg text-display-lg text-text-primary mb-xs">Combat Zone</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Professional ring and heavy bag arrays.</p>
+</div>
+</div>
+</div>
+<!-- Bento Item 4 (Medium) -->
+<div class="md:col-span-8 relative group rounded-xl overflow-hidden bg-surface-container-low border border-border-subtle hover:border-border-neon transition-colors duration-500">
+<img class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-50 transition-opacity duration-700" data-alt="wide shot of a sleek modern sauna interior with dark wood panels and subtle glowing neon light accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNaC5fRMW3mb0XkPwMop_IE00prS9ECKnf1kxUO_zaLZL_RtDL1ivJ_MgjX1sDudPFf6Piqo77pVkpVfdzm3dmz5gdZdKdJkN22W2PqO4MFExIadZJI1vI54cEJjXCEqt5ZnWJwPMxPXX0uthhIKX_35bUAQXz2CpZvPXC6FVuv7u666C2_pubzOrJl_3glVmO8q7eHHPgbz2EoCjTNWcSrFAVNB4O-g07ggQ7QxD7AcagCD6VecKi7TjxVEi7CqKQwvUCR2_IOKb6"/>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent"></div>
+<div class="absolute bottom-0 right-0 p-lg text-right w-full">
+<div class="bg-neon-lime/10 text-neon-lime font-label-caps text-label-caps px-sm py-xs rounded inline-block mb-sm backdrop-blur-sm border border-neon-lime/20">RECOVERY</div>
+<h3 class="font-display-lg text-display-lg text-text-primary mb-xs">Thermal Suites</h3>
+<p class="font-body-sm text-body-sm text-text-secondary">Infrared saunas and cold plunge therapy.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Elite Trainers Preview -->
+<section class="py-section bg-bg-card border-y border-border-subtle">
+<div class="max-w-7xl mx-auto px-lg">
+<h2 class="font-display-xl text-display-xl text-text-primary text-center uppercase tracking-tight mb-xl">Elite <span class="text-neon-lime">Coaching</span></h2>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+<!-- Trainer 1 -->
+<div class="group relative overflow-hidden rounded-lg aspect-[3/4] bg-surface-container-lowest">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="portrait of a muscular male fitness trainer standing in a dark gym environment looking intensely at camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBk5cjVHCDqnFcDL2YlE1hhWXJcnNIpKTr1vdPv8JRXSSW_O8fyxUiOecUJGpEpBUbHESYVWbRT4uGqCulIpwCnuk3gXG2Jdpc1p7C2PbjWWV-CfFX0Co-1JN2zZHpWk8rKy-krSwRL-fC4VXlzbkp7RFtQYssrugXyOTt-oOfkaQ5vg8IIVXF__a4O2Cw3BJ-1EUrqTJDIBrmhA5jizkwoHZYER9FqYNDXFgL3qO0b5aceRM64yamFU4382ZFAdutG_15_I1guIms3"/>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent opacity-80"></div>
+<div class="absolute bottom-0 left-0 p-md transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+<h4 class="font-display-lg text-display-lg text-text-primary text-[24px]">Marcus V.</h4>
+<p class="font-label-caps text-label-caps text-neon-lime">Powerlifting Specialist</p>
+</div>
+</div>
+<!-- Trainer 2 -->
+<div class="group relative overflow-hidden rounded-lg aspect-[3/4] bg-surface-container-lowest">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="athletic female trainer tying shoelaces preparing for a workout in a high end dark fitness studio" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdNZAx9cHMP1PDw1VWa_YmV-xdSQqL9jLH3oo6HPc1Fuc4WoQD5Br7bQQ8UwLYpmPH-mWohczUo72R7OAKoDuhVeUwn35e2Xyr0Wc2xRBSt40U-y-er6HokyFm5H8n4AQyd4coqwKnQ5KY9NtRK0YGZagpHcajf2TAC0sG37eAmxPE5wDoRkD9mcggh8VtdyFK7D3M8T2r_DBoXkXxVJKtjYzFiVL5tcVDCciaAKwVdQ7XLOFllXEO-WPWDlDwwZm4RPJ6VZpexaZF"/>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent opacity-80"></div>
+<div class="absolute bottom-0 left-0 p-md transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+<h4 class="font-display-lg text-display-lg text-text-primary text-[24px]">Elena R.</h4>
+<p class="font-label-caps text-label-caps text-neon-lime">Endurance &amp; Agility</p>
+</div>
+</div>
+<!-- Trainer 3 -->
+<div class="group relative overflow-hidden rounded-lg aspect-[3/4] bg-surface-container-lowest">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="intense male boxing coach wrapping hands in a moody dark room lit by a single overhead light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRb6ukFZnhpEYN51-D6pVs-q5uDrpeUevIY-ZDVPujWreS_9sDiFDYt-EOT3O6A7ZtoD9f6OFSBCmBKNtgm8wvg4d93_E6NxQpjBjoWMCF7Yj5m_VR4BobPc_1YUT1CwkxjQs8Gk9GxW5GaHEh0aa9jFzXEYoPGWiCy2wcBx9oN8OqidYKJNJfAU77saSitXp5njmqyx-SWWCT1lVwySYxBcuJCEXsJfb0mVI0nlQnkR1HATQyV53Qh0sM6e1aMmju1ZmN7mEE525_"/>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent opacity-80"></div>
+<div class="absolute bottom-0 left-0 p-md transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+<h4 class="font-display-lg text-display-lg text-text-primary text-[24px]">David K.</h4>
+<p class="font-label-caps text-label-caps text-neon-lime">Combat Athletics</p>
+</div>
+</div>
+<!-- Trainer 4 -->
+<div class="group relative overflow-hidden rounded-lg aspect-[3/4] bg-surface-container-lowest">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="female personal trainer demonstrating proper kettlebell form in a luxury minimalist gym setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAQ1wdnrLBhToMfeNgghjmODkMVnhmPYzEfkxkwwLqXvNsefP6ldegdEQLDQCEUMFH13aHMX7Yq29wNIJARboo1oXdNROuB2qKPdkUmLTbiUluXkFvOQ2MjWFUKz88cVrakMWEb5VFU-pYqh8cplxOWwTI9v-MFkyaD00Td4iVSi8c9OjshH4FOPPOBXyW3omDOkRoNfeSex0v8q1ZjDQP_l8Sq0c-qbr0BImAvcZzFYoO7VOgCmc9aGu0A6jhGrLVyUJeoye8_wPY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-transparent opacity-80"></div>
+<div class="absolute bottom-0 left-0 p-md transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+<h4 class="font-display-lg text-display-lg text-text-primary text-[24px]">Sarah T.</h4>
+<p class="font-label-caps text-label-caps text-neon-lime">Biomechanics</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials (Marquee Style Layout) -->
+<section class="py-xl bg-bg-main overflow-hidden border-b border-border-subtle relative">
+<div class="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-bg-main to-transparent z-10 pointer-events-none"></div>
+<div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-bg-main to-transparent z-10 pointer-events-none"></div>
+<div class="flex gap-lg px-lg w-[200%] max-w-none opacity-80 hover:opacity-100 transition-opacity duration-500">
+<!-- Review 1 -->
+<div class="flex-shrink-0 w-[400px] bg-surface-container-low border border-border-subtle rounded-xl p-lg flex flex-col gap-sm">
+<div class="flex text-neon-lime text-sm">★★★★★</div>
+<p class="font-body-base text-body-base text-text-primary">"The atmosphere demands excellence. You don't come here to casually work out; you come to train."</p>
+<span class="font-label-caps text-label-caps text-text-secondary mt-auto">- Alex J.</span>
+</div>
+<!-- Review 2 -->
+<div class="flex-shrink-0 w-[400px] bg-surface-container-low border border-border-subtle rounded-xl p-lg flex flex-col gap-sm">
+<div class="flex text-neon-lime text-sm">★★★★★</div>
+<p class="font-body-base text-body-base text-text-primary">"Equipment is pristine, the trainers actually know biomechanics, and the energy is unmatched."</p>
+<span class="font-label-caps text-label-caps text-text-secondary mt-auto">- Samantha W.</span>
+</div>
+<!-- Review 3 -->
+<div class="flex-shrink-0 w-[400px] bg-surface-container-low border border-border-subtle rounded-xl p-lg flex flex-col gap-sm">
+<div class="flex text-neon-lime text-sm">★★★★★</div>
+<p class="font-body-base text-body-base text-text-primary">"Finally a facility that treats strength training with the respect it deserves. Incredible space."</p>
+<span class="font-label-caps text-label-caps text-text-secondary mt-auto">- Michael R.</span>
+</div>
+<!-- Review 4 (Duplicate for flow) -->
+<div class="flex-shrink-0 w-[400px] bg-surface-container-low border border-border-subtle rounded-xl p-lg flex flex-col gap-sm">
+<div class="flex text-neon-lime text-sm">★★★★★</div>
+<p class="font-body-base text-body-base text-text-primary">"The atmosphere demands excellence. You don't come here to casually work out; you come to train."</p>
+<span class="font-label-caps text-label-caps text-text-secondary mt-auto">- Alex J.</span>
+</div>
+</div>
+</section>
+<!-- Footer Component -->
+<footer class="bg-zinc-950 w-full py-12 px-8 border-t border-zinc-900">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto border-t border-white/10 pt-10">
+<div class="text-xl font-black text-zinc-100 mb-6 md:mb-0">
+                NQT GYM
+            </div>
+<div class="flex flex-wrap justify-center gap-6 font-inter text-[10px] tracking-[0.2em] uppercase mb-6 md:mb-0">
+<a class="text-zinc-600 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="text-zinc-600 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">Terms</a>
+<a class="text-zinc-600 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">FAQ</a>
+<a class="text-zinc-600 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">Careers</a>
+</div>
+<div class="font-inter text-[10px] tracking-[0.2em] uppercase text-zinc-600">
+                © 2024 NQT GYM PERFORMANCE. ALL RIGHTS RESERVED.
+            </div>
+</div>
+</footer>
+</body></html>

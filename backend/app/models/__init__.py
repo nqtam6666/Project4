@@ -31,3 +31,8 @@ from backend.app.models.g6_san_pham import (  # noqa: F401
     G6ThanhPhanDinhDuong, G6ChungNhanSanPham,
     G6TonKho, G6LichSuTonKho,
 )
+from backend.app.models.nxv_danh_gia import NxvDanhGiaHLV, NxvDanhGiaLopHoc  # noqa: F401
+from backend.app.models.nxv_chuong_trinh_tap import NxvChuongTrinhTapLuyen, NxvBaiTapTrongNgay  # noqa: F401
+from backend.app.models.nxv_bao_tri import NxvLichSuBaoTri, NxvPhieuSuaChua  # noqa: F401
+from backend.app.models.nxv_su_kien import NxvSuKien, NxvDangKySuKien  # noqa: F401
+from backend.app.models.nqt_hoi_vien_auth import NqtHoiVienAuth  # noqa: F401

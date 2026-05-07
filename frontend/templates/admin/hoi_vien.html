@@ -269,6 +269,21 @@
 
         nqtCapNhatPhanTrang(data.nqt_du_lieu);
         document.getElementById('nqtStatTong').textContent = data.nqt_du_lieu.g6_tong || 0;
+        nqtTaiThongKe();
+    }
+
+    async function nqtTaiThongKe() {
+        const [resHD, resKhoa, resMoi] = await Promise.allSettled([
+            nqtApi.fetch('/api/nqt-hoi-vien?g6_trang_thai=true&g6_gioi_han=1'),
+            nqtApi.fetch('/api/nqt-hoi-vien?g6_trang_thai=false&g6_gioi_han=1'),
+            nqtApi.fetch('/api/nqt-thong-ke-dashboard'),
+        ]);
+        if (resHD.status === 'fulfilled' && resHD.value?.nqt_thanh_cong)
+            document.getElementById('nqtStatHoatDong').textContent = resHD.value.nqt_du_lieu.g6_tong || 0;
+        if (resKhoa.status === 'fulfilled' && resKhoa.value?.nqt_thanh_cong)
+            document.getElementById('nqtStatKhoa').textContent = resKhoa.value.nqt_du_lieu.g6_tong || 0;
+        if (resMoi.status === 'fulfilled' && resMoi.value?.nqt_thanh_cong)
+            document.getElementById('nqtStatMoi').textContent = resMoi.value.nqt_du_lieu.g6_hoi_vien_moi_thang || 0;
     }
 
     function nqtCapNhatPhanTrang(meta) {

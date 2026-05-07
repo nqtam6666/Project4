@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, request
+from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.g6_chi_nhanh import G6ChiNhanh, G6ThietBi
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
@@ -73,6 +73,13 @@ def nqt_lay_thiet_bi_chi_nhanh(nqt_id):
     return nqt_ok([t.g6_to_dict() for t in nqt_list])
 
 
+@nqt_chi_nhanh_bp.route('/nqt-thiet-bi', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_lay_tat_ca_thiet_bi():
+    nqt_list = G6ThietBi.query.filter(G6ThietBi.g6_trang_thai != 'thanh_ly').order_by(G6ThietBi.g6_ma_thiet_bi.desc()).all()
+    return nqt_ok([t.g6_to_dict() for t in nqt_list])
+
+
 @nqt_chi_nhanh_bp.route('/nqt-thiet-bi', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
 def nqt_tao_thiet_bi():
@@ -95,13 +102,41 @@ def nqt_tao_thiet_bi():
     return nqt_ok(nqt_row.g6_to_dict(), 'Tạo thiết bị thành công', 201)
 
 
+@nqt_chi_nhanh_bp.route('/nqt-chi-nhanh/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_chi_nhanh(nqt_id):
+    nqt_row = G6ChiNhanh.query.get_or_404(nqt_id)
+    nqt_row.g6_la_hoat_dong = False
+    db.session.commit()
+    return nqt_ok(None, 'Đã vô hiệu hóa chi nhánh')
+
+
+@nqt_chi_nhanh_bp.route('/nqt-thiet-bi/<int:nqt_id>', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_lay_thiet_bi(nqt_id):
+    nqt_row = G6ThietBi.query.get_or_404(nqt_id)
+    return nqt_ok(nqt_row.g6_to_dict())
+
+
 @nqt_chi_nhanh_bp.route('/nqt-thiet-bi/<int:nqt_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
 def nqt_cap_nhat_thiet_bi(nqt_id):
     nqt_row = G6ThietBi.query.get_or_404(nqt_id)
     nqt_data = request.get_json() or {}
-    for nqt_f in ['g6_ten_thiet_bi', 'g6_trang_thai', 'g6_ngay_bao_tri_tiep', 'g6_ghi_chu']:
+    for nqt_f in [
+        'g6_ten_thiet_bi', 'g6_thuong_hieu', 'g6_model', 'g6_so_serie',
+        'g6_trang_thai', 'g6_ngay_bao_tri_tiep', 'g6_ghi_chu', 'g6_hinh_anh',
+    ]:
         if nqt_f in nqt_data:
             setattr(nqt_row, nqt_f, nqt_data[nqt_f])
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict())
+
+
+@nqt_chi_nhanh_bp.route('/nqt-thiet-bi/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_thiet_bi(nqt_id):
+    nqt_row = G6ThietBi.query.get_or_404(nqt_id)
+    nqt_row.g6_trang_thai = 'thanh_ly'
+    db.session.commit()
+    return nqt_ok(None, 'Đã đánh dấu thanh lý thiết bị')

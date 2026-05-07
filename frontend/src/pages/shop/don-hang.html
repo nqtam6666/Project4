@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Đơn Hàng Của Tôi — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "success":"#22C55E","error":"#EF4444","warning":"#F59E0B",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+<div class="pt-[72px]">
+  <div class="max-w-screen-lg mx-auto px-6 py-12">
+    <div class="mb-8">
+      <h1 class="text-2xl font-black text-white mb-1">Đơn Hàng Của Tôi</h1>
+      <p class="text-text-muted text-sm">Theo dõi trạng thái và lịch sử mua hàng.</p>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+      <button onclick="nqtSetTab('')" class="nqt-tab-btn flex-shrink-0 bg-neon-lime text-bg-main px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold transition-all">Tất cả</button>
+      <button onclick="nqtSetTab('cho_xac_nhan')" class="nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Chờ xác nhận</button>
+      <button onclick="nqtSetTab('dang_giao')" class="nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Đang giao</button>
+      <button onclick="nqtSetTab('da_giao')" class="nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Đã giao</button>
+      <button onclick="nqtSetTab('da_huy')" class="nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Đã huỷ</button>
+    </div>
+
+    <div id="nqtOrderList" class="space-y-4">
+      <div class="flex justify-center py-16"><div class="w-6 h-6 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Order detail modal -->
+<div id="nqtOrderModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="bg-bg-card border border-border-subtle rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between p-6 border-b border-border-subtle sticky top-0 bg-bg-card">
+      <h3 class="text-lg font-black text-white">Chi tiết đơn hàng</h3>
+      <button onclick="document.getElementById('nqtOrderModal').classList.add('hidden')" class="text-text-muted hover:text-text-primary transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div id="nqtOrderModalBody" class="p-6"></div>
+  </div>
+</div>
+
+<script type="module">
+import { nqtRenderPublicNav, nqtFormatPrice, nqtFormatDate } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('shop');
+
+let nqtAllOrders = [];
+let nqtActiveTab = '';
+
+const ST = {
+  cho_xac_nhan: { l:'Chờ xác nhận', c:'text-warning border-warning/30 bg-warning/10' },
+  dang_xu_ly:   { l:'Đang xử lý',   c:'text-info border-info/30 bg-info/10' },
+  dang_giao:    { l:'Đang giao',     c:'text-info border-blue-400/30 bg-blue-400/10' },
+  da_giao:      { l:'Đã giao',       c:'text-success border-success/30 bg-success/10' },
+  da_huy:       { l:'Đã huỷ',        c:'text-error border-error/30 bg-error/10' },
+};
+
+window.nqtSetTab = function(tab) {
+  nqtActiveTab = tab;
+  document.querySelectorAll('.nqt-tab-btn').forEach(b => {
+    b.className = 'nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all';
+  });
+  event.target.className = 'nqt-tab-btn flex-shrink-0 bg-neon-lime text-bg-main px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold transition-all';
+  const filtered = tab ? nqtAllOrders.filter(o => o.g6_trang_thai === tab) : nqtAllOrders;
+  nqtRenderOrders(filtered);
+};
+
+window.nqtShowOrder = async function(id) {
+  const el = document.getElementById('nqtOrderModalBody');
+  el.innerHTML = '<div class="flex justify-center py-8"><div class="w-6 h-6 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>';
+  document.getElementById('nqtOrderModal').classList.remove('hidden');
+  try {
+    const token = localStorage.getItem('nqt_token');
+    const r = await fetch(`/api/nqt-don-hang/${id}`, { headers: token ? {Authorization:`Bearer ${token}`} : {} });
+    const j = await r.json();
+    const o = j.nqt_du_lieu || j.data || j;
+    const s = ST[o.g6_trang_thai] || ST.cho_xac_nhan;
+    const items = o.g6_chi_tiet || [];
+    el.innerHTML = `
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <div class="text-text-muted text-xs font-caps uppercase tracking-widest">Mã đơn hàng</div>
+          <div class="font-mono font-bold text-white">#${o.g6_ma_don_hang}</div>
+        </div>
+        <span class="border text-xs font-caps uppercase tracking-wide px-3 py-1 rounded-full ${s.c}">${s.l}</span>
+      </div>
+      <div class="space-y-2 mb-5">
+        ${items.map(i => `
+        <div class="flex justify-between text-sm">
+          <span class="text-text-secondary">${i.g6_ten_san_pham} <span class="text-text-muted">×${i.g6_so_luong}</span></span>
+          <span class="font-mono text-text-primary">${nqtFormatPrice(i.g6_thanh_tien)}</span>
+        </div>`).join('')}
+      </div>
+      <div class="border-t border-border-subtle pt-4 mb-5 space-y-2 text-sm">
+        <div class="flex justify-between text-text-secondary"><span>Phí vận chuyển</span><span class="font-mono">${nqtFormatPrice(o.g6_phi_van_chuyen||0)}</span></div>
+        <div class="flex justify-between font-bold text-white"><span>Tổng</span><span class="text-neon-lime font-mono">${nqtFormatPrice(o.g6_tong_thanh_toan)}</span></div>
+      </div>
+      <div class="text-sm text-text-secondary space-y-1">
+        <div><span class="text-text-muted">Người nhận:</span> ${o.g6_ho_ten_nguoi_nhan}</div>
+        <div><span class="text-text-muted">Địa chỉ:</span> ${o.g6_dia_chi_giao_hang || '—'}</div>
+        <div><span class="text-text-muted">Thanh toán:</span> ${o.g6_phuong_thuc_thanh_toan || '—'}</div>
+        <div><span class="text-text-muted">Ngày đặt:</span> ${nqtFormatDate(o.g6_ngay_tao)}</div>
+      </div>`;
+  } catch {
+    el.innerHTML = '<div class="text-center py-8 text-text-muted">Không thể tải chi tiết.</div>';
+  }
+};
+
+function nqtRenderOrders(orders) {
+  const el = document.getElementById('nqtOrderList');
+  if (!orders.length) {
+    el.innerHTML = `<div class="text-center py-20">
+      <span class="material-symbols-outlined text-5xl text-text-muted block mb-4">receipt_long</span>
+      <p class="text-text-secondary mb-5">Chưa có đơn hàng nào.</p>
+      <a href="/src/pages/shop.html" class="inline-block bg-neon-lime text-bg-main px-6 py-3 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Mua sắm ngay</a>
+    </div>`;
+    return;
+  }
+  el.innerHTML = orders.map(o => {
+    const s = ST[o.g6_trang_thai] || ST.cho_xac_nhan;
+    return `
+    <div class="bg-bg-card border border-border-subtle rounded-xl p-5 hover:border-border-neon transition-all">
+      <div class="flex items-start justify-between gap-3 mb-3">
+        <div>
+          <div class="text-text-muted text-[10px] font-caps uppercase tracking-widest">Đơn hàng</div>
+          <div class="font-mono font-bold text-white">#${o.g6_ma_don_hang}</div>
+        </div>
+        <span class="border text-xs font-caps uppercase tracking-wide px-3 py-1 rounded-full flex-shrink-0 ${s.c}">${s.l}</span>
+      </div>
+      <div class="flex items-center justify-between text-sm">
+        <div class="text-text-secondary">${nqtFormatDate(o.g6_ngay_tao)} · ${o.g6_phuong_thuc_thanh_toan || 'COD'}</div>
+        <div class="text-neon-lime font-mono font-bold">${nqtFormatPrice(o.g6_tong_thanh_toan)}</div>
+      </div>
+      <div class="mt-3 pt-3 border-t border-border-subtle flex gap-3">
+        <button onclick="nqtShowOrder(${o.g6_ma_don_hang})" class="text-neon-lime text-xs font-caps uppercase tracking-wide font-semibold hover:underline">Xem chi tiết</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+(async () => {
+  const token = localStorage.getItem('nqt_token');
+  if (!token) { window.location.href = '/src/pages/member/login.html'; return; }
+  try {
+    const r = await fetch('/api/nqt-don-hang', { headers: { Authorization: `Bearer ${token}` } });
+    const j = await r.json();
+    nqtAllOrders = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
+    nqtAllOrders.sort((a,b) => new Date(b.g6_ngay_tao) - new Date(a.g6_ngay_tao));
+    nqtRenderOrders(nqtAllOrders);
+  } catch {
+    document.getElementById('nqtOrderList').innerHTML = '<div class="text-center py-16 text-text-muted">Không thể tải đơn hàng.</div>';
+  }
+})();
+</script>
+</body>
+</html>

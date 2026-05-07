@@ -81,7 +81,7 @@ cp ten_file.py ten_file.py.backup
 - **Author Prefix**: đọc từ `.env` → `AUTHOR_PREFIX`
 - **Architecture**: Client-Server (RESTful API), MVC Pattern
 - **Backend**: Python Flask
-- **Frontend**: HTML5, TailwindCSS, JavaScript (ES6+), Node.js (build tools), ReUI
+- **Frontend**: Node.js + Vite, HTML5, TailwindCSS (CDN), JavaScript (ES6+ modules), Vanilla JS
 - **Database**: SQL Server
 
 ## QUY TẮC ĐẶT TÊN BẮT BUỘC (TIỀN TỐ THEO THÀNH VIÊN)
@@ -341,81 +341,220 @@ NQT_SO_NGAY_NHAC = 3  # KHÔNG LÀM THẾ NÀY
 
 ## Tech Stack Requirements
 
-### Backend (Flask API)
-- Flask-RESTful for API endpoints
+### 🏗️ Kiến trúc: Flask API + Vite SPA (tách biệt)
+
+**Backend**: Flask chỉ serve REST API (port 5000). **KHÔNG** serve HTML.
+**Frontend**: Vite dev server (port 5173) serve toàn bộ HTML/JS/CSS, proxy `/api` → Flask.
+
+```bash
+# Chạy backend (terminal 1)
+cd backend
+flask run --debug
+
+# Chạy frontend (terminal 2)
+cd frontend
+npm run dev
+```
+
+> ⚠️ **KHÔNG dùng Jinja2 templates.** Toàn bộ frontend (bao gồm Admin panel) đều là Vite static HTML. Thư mục `frontend/templates/admin/` là Jinja2 cũ — **KHÔNG SỬA, KHÔNG TẠO THÊM**. Tất cả trang admin mới phải là file `.html` trong `frontend/src/pages/admin/`.
+
+### Backend (Flask — Python)
+- Flask for REST API only (JSON responses)
 - Flask-SQLAlchemy for ORM with SQL Server
 - Flask-JWT-Extended for authentication
 - Flask-Mail for email notifications
-- APScheduler or Celery for background jobs
+- APScheduler for background jobs
+- Flask serve static files từ `frontend/static/uploads/` (uploaded images)
 
-### Frontend
-- **TailwindCSS** for responsive UI (thay thế Bootstrap 5)
-- **Node.js + npm** cho build tools (Tailwind CLI, bundler)
-- Vanilla JavaScript (ES6+)
-- Chart.js for data visualization
-- QR code library for check-in
+### Frontend (Vite + Vanilla JS)
+- **Vite** — build tool + dev server (port 5173)
+- **TailwindCSS CDN** — inline config mỗi trang (`<script src="https://cdn.tailwindcss.com?plugins=forms">`)
+- **Vanilla JavaScript (ES6+ modules)** — import/export, không dùng framework
+- **Chart.js** — data visualization (CDN)
+- **JWT** lưu trong `localStorage` (`nqt_token`, `nqt_refresh_token`, `nqt_user`)
+- Auth helpers: `nqtRequireAuth()`, `nqtApi()`, `nqtLogout()`, `nqtToast()` — từ `src/js/member/auth.js`
 
-### Node.js / Tailwind setup
-```bash
-# Khởi tạo (chạy 1 lần)
-npm init -y
-npm install -D tailwindcss
-npx tailwindcss init
+### Design System — Token chuẩn (DÙNG CHUNG CHO TẤT CẢ ZONE)
 
-# Build CSS (dev)
-npx tailwindcss -i ./frontend/static/css/input.css -o ./frontend/static/css/output.css --watch
+Token màu, font, icon được định nghĩa **một lần duy nhất** trong `frontend/src/js/nqtLayout.js` (`NQT_TW_CONFIG`).
+**KHÔNG copy-paste inline config vào từng trang** — import và gán `tailwind.config = NQT_TW_CONFIG`.
 
-# Build CSS (production)
-npx tailwindcss -i ./frontend/static/css/input.css -o ./frontend/static/css/output.css --minify
+```
+Màu nền:    bg-main #0A0A0F | bg-card #12121A | bg-elevated #1C1C28
+Accent:     neon-lime #C8F135 | neon-dim #A8D120
+Text:       text-primary #F5F5F0 | text-secondary #A1A1AA | text-muted #52525B
+Border:     border-subtle rgba(255,255,255,0.06) | border-neon rgba(200,241,53,0.3)
+Status:     success #22C55E | error #EF4444 | warning #F59E0B | info #3B82F6
+
+Font:       Inter (body, font-sans) | Space Grotesk (headings/labels, font-caps) | JetBrains Mono (số liệu, font-mono)
+Icon:       Material Symbols Outlined (Google Fonts) — KHÔNG dùng Font Awesome cho trang mới
+CDN TW:     https://cdn.tailwindcss.com?plugins=forms,container-queries (LUÔN có plugins suffix)
 ```
 
-### Cấu trúc Tailwind
+---
+
+## 🗺️ UI ZONES — Phân vùng giao diện theo người dùng
+
+Hệ thống có **5 zone** riêng biệt. Mỗi zone có layout, auth guard và sidebar khác nhau nhưng **CÙNG design token**.
+
+### ZONE 1 — Landing / Public (`/`, `/src/pages/*.html`)
+**Đối tượng:** Khách vãng lai chưa đăng nhập  
+**Mục đích:** Giới thiệu dịch vụ, thu hút đăng ký  
+**Layout:** Fixed navbar (`nqtRenderPublicNav`) + Footer (`nqtRenderFooter`) — KHÔNG có sidebar  
+**Auth:** Không yêu cầu — truy cập tự do  
+**Dark mode:** `<html class="dark">` hardcoded — luôn dark  
+**Trang hiện có:** `index.html`, `goi-tap.html`, `huan-luyen-vien.html`, `lop-hoc.html`, `blog.html`, `blog-chi-tiet.html`, `su-kien.html`, `shop.html`, `shop-chi-tiet.html`
+
+Navbar hiển thị nút **Đăng nhập** → redirect `/src/pages/member/login.html`  
+Nút **Đăng ký** → redirect `/src/pages/member/register.html`  
+Sau khi đăng nhập thành công → redirect về zone tương ứng với role.
+
+---
+
+### ZONE 2 — Auth (`/src/pages/member/login.html`, `/src/pages/member/register.html`)
+**Đối tượng:** Bất kỳ ai cần xác thực  
+**Mục đích:** Đăng nhập / Đăng ký tài khoản  
+**Layout:** Full-screen centered form — KHÔNG có navbar, KHÔNG có sidebar  
+**Auth:** Nếu đã có token hợp lệ → redirect ngay về zone đúng với role  
+**Dark mode:** `<html class="dark">` hardcoded  
+**Sau đăng nhập:** Đọc `role` trong JWT payload → redirect:
+- `NqtHoiVien` → `/src/pages/member/dashboard.html`
+- `NqtHuanLuyenVien` → `/src/pages/pt/dashboard.html` *(zone 4)*
+- `NqtQuanLy` / `NqtQuanTri` / `NqtNhanVien` → `/src/pages/admin/dashboard.html` *(zone 5)*
+
+---
+
+### ZONE 3 — Member Portal (`/src/pages/member/*.html`)
+**Đối tượng:** Hội viên đã đăng nhập  
+**Mục đích:** Quản lý cá nhân — gói tập, điểm danh, lịch tập, chỉ số cơ thể  
+**Layout:** Sidebar cố định trái (`nqtRenderSidebar`) — KHÔNG có public navbar  
+**Auth guard:** `nqtRequireAuth()` — redirect về login nếu thiếu `nqt_token`  
+**Token lưu:** `localStorage.nqt_token`, `nqt_refresh_token`, `nqt_user`  
+**Dark mode:** `<html class="dark">` hardcoded  
+**Sidebar label:** "Member Portal"  
+**Trang:** dashboard, ho_so, goi-tap, diem-danh, chi-so, lich-tap, dich-vu, (shop/don-hang)
+
+---
+
+### ZONE 4 — PT Portal (`/src/pages/pt/*.html`) *(chưa có, tạo khi cần)*
+**Đối tượng:** Huấn luyện viên (PT) đã đăng nhập  
+**Mục đích:** Xem lịch dạy, quản lý học viên được giao, ghi chú buổi tập  
+**Layout:** Sidebar riêng (tạo `nqtRenderPTSidebar`) — KHÔNG dùng sidebar của member  
+**Auth guard:** Kiểm tra `nqt_token` + role `NqtHuanLuyenVien`  
+**Token lưu:** Cùng key với member (`nqt_token`, `nqt_user`) — phân biệt qua `role` trong JWT  
+**Dark mode:** `<html class="dark">` hardcoded  
+**Sidebar label:** "PT Portal"
+
+---
+
+### ZONE 5 — Admin/Staff Panel (`/src/pages/admin/*.html`)
+**Đối tượng:** Admin (`NqtQuanTri`), Quản lý (`NqtQuanLy`), Nhân viên (`NqtNhanVien`)  
+**Mục đích:** Quản trị toàn hệ thống  
+**Layout:** Admin shell — `nqtInitAdminLayout(activePage)` từ `nqtAdminLayout.js`  
+**Auth guard:** Kiểm tra `localStorage.nqt_admin_token` + role hợp lệ  
+**Token lưu:** `localStorage.nqt_admin_token` (tách biệt với member token)  
+**Dark mode:** Toggle qua `localStorage.nqt_dark_mode`, apply class `dark` trên `<html>`  
+**Icon:** Font Awesome 6 (đã dùng trong admin — giữ nguyên để không break)  
+**Màu:** Cùng token `NQT_TW_CONFIG` nhưng light-mode-first (admin hỗ trợ cả light lẫn dark)  
+**Sidebar label:** "Admin Panel"  
+**URL:** `http://localhost:5173/src/pages/admin/dashboard.html`
+
+---
+
+### Bảng tóm tắt 5 Zone
+
+| Zone | Folder | Auth token | Layout | Dark mode | Icon |
+|------|--------|-----------|--------|-----------|------|
+| Landing/Public | `src/pages/*.html` + `index.html` | Không cần | Navbar + Footer | Forced dark | Material Symbols |
+| Auth | `src/pages/member/login.html` + `register.html` | Redirect nếu có | Full-screen form | Forced dark | Material Symbols |
+| Member Portal | `src/pages/member/` | `nqt_token` | Sidebar (Member) | Forced dark | Material Symbols |
+| PT Portal | `src/pages/pt/` | `nqt_token` + role PT | Sidebar (PT) | Forced dark | Material Symbols |
+| Admin/Staff | `src/pages/admin/` | `nqt_admin_token` | Admin shell | Toggle (light/dark) | Font Awesome 6 |
+
+---
+
+### Luồng điều hướng Auth
+
 ```
-/frontend
-  /static
-    /css
-      input.css      # @tailwind directives
-      output.css     # Generated (gitignore)
-    /js
-    /images
-  /templates
-tailwind.config.js
-package.json
+Khách vãng lai
+  → xem Landing/Public (zone 1)
+  → click "Đăng nhập" / "Đăng ký"
+  → vào trang Auth (zone 2)
+  → nhập thông tin → gọi API login
+  → nhận JWT → lưu token → đọc role
+      ├── role = HoiVien    → redirect Member Portal (zone 3)
+      ├── role = PT          → redirect PT Portal (zone 4)
+      └── role = Admin/Staff → redirect Admin Panel (zone 5)
 ```
 
-> ⚠️ `output.css` và `node_modules/` phải có trong `.gitignore`
+---
 
-## Project Structure
+### Mockup reference
+Canonical design token lấy từ `frontend/nqtam_design/` (4 file HTML) — KHÔNG sửa các file này.
+
+### Cấu trúc project thực tế
 ```
-/backend
-  /app
-    /models        # NqtHoiVien, NqtGoiTap, NqtCauHinh...
-    /routes        # nqt_hoi_vien_bp, nqt_goi_tap_bp...
-    /services      # NqtDichVuCauHinh, NqtDichVuHoiVien...
-    /utils         # nqt_xac_thuc, nqt_ma_hoa...
-    /jobs          # nqt_kiem_tra_het_han, nqt_gui_email...
-  config.py
-  run.py
+frontend/
+├── index.html                    # Landing page (Vite entry)
+├── vite.config.js                # Đăng ký tất cả entry points tại đây
+├── tailwind.config.js
+├── package.json
+├── src/
+│   ├── css/input.css             # @tailwind directives (cho build)
+│   ├── js/
+│   │   ├── landing.js            # Landing page logic
+│   │   └── member/
+│   │       └── auth.js           # Shared auth helpers
+│   └── pages/
+│       ├── member/               # Trang hội viên (cần JWT)
+│       │   ├── login.html
+│       │   ├── register.html
+│       │   ├── dashboard.html
+│       │   └── ho_so.html
+│       ├── shop/                 # Trang shop/giỏ hàng
+│       └── (public pages)        # Gói tập, HLV, blog, v.v.
+├── nqtam_design/                 # Mockup reference (KHÔNG sửa)
+│   ├── nqt_gym_homepage/code.html
+│   ├── nqt_gym_membership_plans/code.html
+│   ├── nqt_gym_trainers_classes/code.html
+│   └── nqt_gym_contact_booking/code.html
+├── templates/admin/              # Jinja2 cũ — KHÔNG SỬA, KHÔNG TẠO THÊM (đã migrate sang Vite)
+└── static/
+    └── uploads/                  # Ảnh upload (Flask serve tại /static/uploads/)
+```
 
-/frontend
-  /static
-    /css
-      input.css        # @tailwind base/components/utilities
-      output.css       # Generated - KHÔNG commit
-    /js                # nqtQuanLyCauHinh.js, nqtHoiVien.js...
-    /images
-  /templates
+### Admin Panel (Vite)
+Admin panel đã được migrate hoàn toàn sang Vite static HTML:
+- Shared layout: `frontend/src/js/admin/nqtAdminLayout.js`
+- Tất cả trang admin: `frontend/src/pages/admin/*.html`
+- URL admin: `http://localhost:5173/src/pages/admin/dashboard.html`
+- Auth guard được xử lý trong `nqtAdminLayout.js` (kiểm tra JWT `nqt_token`)
 
-tailwind.config.js
-package.json
-node_modules/          # KHÔNG commit
+### Quy tắc thêm trang mới
+Mỗi trang HTML mới **BẮT BUỘC** phải đăng ký trong `vite.config.js`:
+```js
+// vite.config.js
+rollupOptions: {
+  input: {
+    main: resolve(__dirname, 'index.html'),
+    memberLogin: resolve(__dirname, 'src/pages/member/login.html'),
+    // ← Thêm entry mới ở đây
+    goiTap: resolve(__dirname, 'src/pages/goi-tap.html'),
+  }
+}
 ```
 
 ## Role-Based Access Control (RBAC)
-- **NqtQuanTri (Admin)**: Full system access, **QUẢN LÝ TẤT CẢ CẤU HÌNH**
-- **NqtQuanLy (Manager)**: Manage members, PT, equipment, packages
-- **NqtHuanLuyenVien (PT)**: View schedule, manage assigned members
-- **NqtHoiVien (Member)**: Book sessions, track progress
+
+| Role | Tên | Zone | Quyền |
+|------|-----|------|-------|
+| `NqtQuanTri` | Admin | Zone 5 | Full system access, quản lý toàn bộ cấu hình |
+| `NqtQuanLy` | Manager | Zone 5 | Quản lý hội viên, PT, thiết bị, gói tập |
+| `NqtNhanVien` | Nhân viên (lễ tân...) | Zone 5 | Checkin, bán hàng, xem lịch |
+| `NqtHuanLuyenVien` | PT | Zone 4 | Xem lịch dạy, quản lý học viên được giao |
+| `NqtHoiVien` | Hội viên | Zone 3 | Đặt lịch, theo dõi tiến trình, mua gói |
+
+> Role được lưu trong JWT payload. Sau đăng nhập, frontend đọc role để redirect đúng zone.
 
 ## API Response Format
 ```json
@@ -482,26 +621,29 @@ def nqt_upload_hinh_anh():
 
 ## Common Commands
 ```bash
-# Run Flask server
-flask run --debug
+# Chạy backend (Flask API)
+cd backend
+pip install -r requirements.txt   # cài 1 lần
+flask run --debug                  # port 5000
+
+# Chạy frontend (Vite dev server)
+cd frontend
+npm install                        # cài 1 lần
+npm run dev                        # port 5173
+
+# Build frontend production
+cd frontend
+npm run build                      # output → frontend/dist/
 
 # Database migrations
 flask db init
 flask db migrate -m "message"
 flask db upgrade
 
+# Seed dữ liệu
+flask seed
+flask seed-fresh                   # reset + seed lại
+
 # Run tests
 pytest
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Install Node dependencies (Tailwind)
-npm install
-
-# Build Tailwind CSS (dev - watch mode)
-npm run dev
-
-# Build Tailwind CSS (production)
-npm run build
 ```

@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, request
+from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.g6_blog import G6DanhMucBaiViet, G6BaiViet, G6DanhGiaSanPham
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
@@ -13,12 +13,46 @@ def nqt_lay_danh_muc():
     return nqt_ok([d.g6_to_dict() for d in nqt_list])
 
 
+@nqt_blog_bp.route('/nqt-danh-muc-bai-viet', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_tao_danh_muc():
+    nqt_data = request.get_json() or {}
+    nqt_ten = nqt_data.get('g6_ten', '').strip()
+    nqt_slug = nqt_data.get('g6_slug', '').strip()
+    if not nqt_ten or not nqt_slug:
+        return nqt_loi('Thiếu tên hoặc slug danh mục')
+    if G6DanhMucBaiViet.query.filter_by(g6_slug=nqt_slug).first():
+        return nqt_loi('Slug đã tồn tại')
+    nqt_row = G6DanhMucBaiViet(
+        g6_ten=nqt_ten,
+        g6_slug=nqt_slug,
+        g6_ma_cha=nqt_data.get('g6_ma_cha'),
+        g6_thu_tu=nqt_data.get('g6_thu_tu', 0),
+    )
+    db.session.add(nqt_row)
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Tạo danh mục thành công', 201)
+
+
+@nqt_blog_bp.route('/nqt-danh-muc-bai-viet/<int:nqt_id>', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+def nqt_cap_nhat_danh_muc(nqt_id):
+    nqt_row = G6DanhMucBaiViet.query.get_or_404(nqt_id)
+    nqt_data = request.get_json() or {}
+    for nqt_f in ['g6_ten', 'g6_ma_cha', 'g6_thu_tu', 'g6_la_hoat_dong']:
+        if nqt_f in nqt_data:
+            setattr(nqt_row, nqt_f, nqt_data[nqt_f])
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Cập nhật danh mục thành công')
+
+
 @nqt_blog_bp.route('/nqt-bai-viet', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
 def nqt_lay_bai_viet():
     nqt_trang = request.args.get('g6_trang', 1, type=int)
     nqt_gioi_han = request.args.get('g6_gioi_han', 10, type=int)
     nqt_danh_muc = request.args.get('g6_ma_danh_muc', type=int)
-    nqt_q = G6BaiViet.query.filter_by(g6_trang_thai='xuat_ban')
+    nqt_q = G6BaiViet.query.filter(G6BaiViet.g6_trang_thai != 'an')
     if nqt_danh_muc:
         nqt_q = nqt_q.filter_by(g6_ma_danh_muc=nqt_danh_muc)
     nqt_phan_trang = nqt_q.order_by(G6BaiViet.g6_ngay_xuat_ban.desc()).paginate(

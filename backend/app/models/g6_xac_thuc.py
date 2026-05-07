@@ -42,10 +42,12 @@ class G6PhienDangNhap(db.Model):
         return {
             'g6_ma_phien': self.g6_ma_phien,
             'g6_loai_nguoi_dung': self.g6_loai_nguoi_dung,
+            'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_thiet_bi': self.g6_thiet_bi,
             'g6_dia_chi_ip': self.g6_dia_chi_ip,
-            'g6_het_han_luc': self.g6_het_han_luc.isoformat(),
+            'g6_het_han_luc': self.g6_het_han_luc.isoformat() if self.g6_het_han_luc else None,
             'g6_la_thu_hoi': self.g6_la_thu_hoi,
+            'g6_ngay_tao': self.g6_ngay_tao.isoformat() if self.g6_ngay_tao else None,
         }
 
 
@@ -65,11 +67,15 @@ class G6NhatKyHoatDong(db.Model):
     g6_ngay_tao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def g6_to_dict(self):
+        chi_tiet = f"Bảng {self.g6_ten_bang} - ID: {self.g6_ma_ban_ghi}" if self.g6_ten_bang else ""
         return {
             'g6_ma_nhat_ky': self.g6_ma_nhat_ky,
             'g6_loai_nguoi_dung': self.g6_loai_nguoi_dung,
             'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_hanh_dong': self.g6_hanh_dong,
             'g6_ten_bang': self.g6_ten_bang,
-            'g6_ngay_tao': self.g6_ngay_tao.isoformat(),
+            'g6_chi_tiet': chi_tiet,
+            'g6_dia_chi_ip': self.g6_dia_chi_ip,
+            'g6_thiet_bi': self.g6_thiet_bi,
+            'g6_ngay_tao': self.g6_ngay_tao.isoformat() if self.g6_ngay_tao else None,
         }

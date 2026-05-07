@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bài viết — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.prose h2,.prose h3{color:#F5F5F0;font-weight:700;margin-top:2rem;margin-bottom:0.75rem}
+.prose p{color:#A1A1AA;line-height:1.8;margin-bottom:1rem}
+.prose ul{color:#A1A1AA;padding-left:1.5rem;list-style:disc;margin-bottom:1rem}
+</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+<div class="pt-[72px]">
+  <div id="nqtArticle" class="max-w-3xl mx-auto px-6 py-16">
+    <div class="flex justify-center py-20"><div class="w-8 h-8 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+  </div>
+</div>
+<script type="module">
+import { nqtRenderPublicNav, nqtRenderFooter, nqtFormatDate } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('blog');
+nqtRenderFooter();
+
+const slug = new URLSearchParams(location.search).get('slug');
+const el = document.getElementById('nqtArticle');
+
+(async () => {
+  if (!slug) { el.innerHTML = '<div class="text-center py-20 text-text-muted">Không tìm thấy bài viết.</div>'; return; }
+  try {
+    const r = await fetch(`/api/nqt-bai-viet/${slug}`);
+    const j = await r.json();
+    const p = j.nqt_du_lieu || j.data || j;
+    if (!p || !p.g6_tieu_de) { el.innerHTML = '<div class="text-center py-20 text-text-muted">Bài viết không tồn tại.</div>'; return; }
+    document.title = `${p.g6_tieu_de} — NQT GYM`;
+    el.innerHTML = `
+      <a href="/src/pages/blog.html" class="inline-flex items-center gap-1 text-text-muted hover:text-neon-lime transition-colors text-sm mb-8">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Về Blog
+      </a>
+      <div class="text-neon-lime font-caps text-xs uppercase tracking-widest mb-3">${nqtFormatDate(p.g6_ngay_tao)}</div>
+      <h1 class="text-3xl md:text-4xl font-black text-white leading-tight mb-4">${p.g6_tieu_de}</h1>
+      <div class="flex items-center gap-4 text-text-muted text-sm mb-8 pb-8 border-b border-border-subtle">
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">visibility</span>${p.g6_luot_xem || 0} lượt xem</span>
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">person</span>${p.g6_tac_gia || 'Admin'}</span>
+      </div>
+      <div class="prose">${p.g6_noi_dung || '<p>Nội dung đang được cập nhật.</p>'}</div>`;
+  } catch {
+    el.innerHTML = '<div class="text-center py-20 text-text-muted">Không thể tải bài viết.</div>';
+  }
+})();
+</script>
+</body>
+</html>

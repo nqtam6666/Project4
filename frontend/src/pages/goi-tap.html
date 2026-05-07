@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gói Tập — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: { colors: {
+    "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+    "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA",
+    "text-muted":"#52525B","border-subtle":"rgba(255,255,255,0.06)",
+    "border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+    "success":"#22C55E","error":"#EF4444","warning":"#F59E0B",
+  }, fontFamily: { "sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"] } } }
+}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+
+<div class="pt-[72px]">
+
+  <!-- Hero -->
+  <section class="py-20 px-6 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(200,241,53,0.07),transparent_60%)]"></div>
+    <div class="relative max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 bg-neon-glow border border-border-neon text-neon-lime text-xs font-caps uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
+        <span class="material-symbols-outlined text-sm">card_membership</span> Bảng giá
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black text-white leading-tight mb-4">Chọn <span class="text-neon-lime">Gói Tập</span> Phù Hợp</h1>
+      <p class="text-text-secondary text-lg">Linh hoạt, minh bạch — không phí ẩn. Hủy bất cứ lúc nào.</p>
+    </div>
+  </section>
+
+  <!-- Toggle monthly/yearly -->
+  <div class="flex justify-center mb-10">
+    <div class="inline-flex bg-bg-card border border-border-subtle rounded-lg p-1">
+      <button id="nqtBtnMonth" onclick="nqtSetBilling('month')" class="px-5 py-2 rounded text-xs font-caps uppercase tracking-wide font-semibold transition-all bg-neon-lime text-bg-main">Theo tháng</button>
+      <button id="nqtBtnYear"  onclick="nqtSetBilling('year')"  class="px-5 py-2 rounded text-xs font-caps uppercase tracking-wide font-semibold transition-all text-text-secondary">Theo năm <span class="text-neon-lime">-15%</span></button>
+    </div>
+  </div>
+
+  <!-- Plans Grid -->
+  <section class="max-w-screen-xl mx-auto px-6 pb-20">
+    <div id="nqtPlansGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Loaded via JS -->
+      <div class="md:col-span-2 lg:col-span-3 flex justify-center py-20">
+        <div class="w-8 h-8 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison table -->
+  <section class="max-w-5xl mx-auto px-6 pb-24">
+    <h2 class="text-2xl font-black text-white text-center mb-10">So sánh chi tiết</h2>
+    <div class="overflow-x-auto rounded-xl border border-border-subtle">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-border-subtle">
+            <th class="text-left py-4 px-6 text-text-secondary font-caps text-xs uppercase tracking-wide">Tính năng</th>
+            <th class="text-center py-4 px-4 text-text-secondary font-caps text-xs uppercase tracking-wide">Cơ bản</th>
+            <th class="text-center py-4 px-4 text-neon-lime font-caps text-xs uppercase tracking-wide">Pro</th>
+            <th class="text-center py-4 px-4 text-text-secondary font-caps text-xs uppercase tracking-wide">Elite</th>
+          </tr>
+        </thead>
+        <tbody id="nqtCompareTable">
+          <tr class="border-b border-border-subtle hover:bg-bg-card transition-colors">
+            <td class="py-3 px-6 text-text-primary">Tập gym tự do</td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-success text-base">check_circle</span></td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-success text-base">check_circle</span></td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-success text-base">check_circle</span></td>
+          </tr>
+          <tr class="border-b border-border-subtle hover:bg-bg-card transition-colors">
+            <td class="py-3 px-6 text-text-primary">Lớp học nhóm</td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-text-muted text-base">remove</span></td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-success text-base">check_circle</span></td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-success text-base">check_circle</span></td>
+          </tr>
+          <tr class="border-b border-border-subtle hover:bg-bg-card transition-colors">
+            <td class="py-3 px-6 text-text-primary">Huấn luyện cá nhân (PT)</td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-text-muted text-base">remove</span></td>
+            <td class="py-3 px-4 text-center"><span class="text-text-secondary text-xs">4 buổi/tháng</span></td>
+            <td class="py-3 px-4 text-center"><span class="text-text-secondary text-xs">Không giới hạn</span></td>
+          </tr>
+          <tr class="border-b border-border-subtle hover:bg-bg-card transition-colors">
+            <td class="py-3 px-6 text-text-primary">Sauna / Xông hơi</td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-text-muted text-base">remove</span></td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-text-muted text-base">remove</span></td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-success text-base">check_circle</span></td>
+          </tr>
+          <tr class="hover:bg-bg-card transition-colors">
+            <td class="py-3 px-6 text-text-primary">Theo dõi chỉ số cơ thể</td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-success text-base">check_circle</span></td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-success text-base">check_circle</span></td>
+            <td class="py-3 px-4 text-center"><span class="material-symbols-outlined text-success text-base">check_circle</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<!-- Register Modal -->
+<div id="nqtRegisterModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-bg-card border border-border-subtle rounded-2xl p-8 max-w-md w-full">
+    <h3 class="text-xl font-black text-white mb-2">Đăng ký gói tập</h3>
+    <p id="nqtModalPlanName" class="text-neon-lime font-caps text-sm uppercase tracking-wide mb-6"></p>
+    <p class="text-text-secondary text-sm mb-6">Vui lòng đăng nhập hoặc tạo tài khoản để đăng ký gói tập.</p>
+    <div class="flex gap-3">
+      <a href="/src/pages/member/login.html" class="flex-1 text-center bg-neon-lime text-bg-main py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Đăng nhập</a>
+      <a href="/src/pages/member/register.html" class="flex-1 text-center border border-border-neon text-neon-lime py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-glow transition-colors">Đăng ký</a>
+    </div>
+    <button onclick="document.getElementById('nqtRegisterModal').classList.add('hidden')" class="mt-4 w-full text-text-muted text-sm hover:text-text-secondary transition-colors">Đóng</button>
+  </div>
+</div>
+
+<script type="module">
+import { nqtRenderPublicNav, nqtRenderFooter, nqtFormatPrice } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('goi-tap');
+nqtRenderFooter();
+
+let nqtBilling = 'month';
+
+window.nqtSetBilling = function(mode) {
+  nqtBilling = mode;
+  document.getElementById('nqtBtnMonth').className = `px-5 py-2 rounded text-xs font-caps uppercase tracking-wide font-semibold transition-all ${mode === 'month' ? 'bg-neon-lime text-bg-main' : 'text-text-secondary'}`;
+  document.getElementById('nqtBtnYear').className  = `px-5 py-2 rounded text-xs font-caps uppercase tracking-wide font-semibold transition-all ${mode === 'year'  ? 'bg-neon-lime text-bg-main' : 'text-text-secondary'} `;
+  nqtRenderPlans(window._nqtPlans);
+};
+
+window.nqtDangKy = function(name) {
+  document.getElementById('nqtModalPlanName').textContent = name;
+  document.getElementById('nqtRegisterModal').classList.remove('hidden');
+};
+
+async function nqtRenderPlans(plans) {
+  const grid = document.getElementById('nqtPlansGrid');
+  if (!plans || !plans.length) {
+    grid.innerHTML = `<div class="md:col-span-2 lg:col-span-3 text-center py-20 text-text-muted">Chưa có gói tập nào.</div>`;
+    return;
+  }
+  const featured = plans.findIndex(p => p.g6_co_pt);
+  grid.innerHTML = plans.map((p, i) => {
+    const price = p.g6_gia || 0;
+    const disc  = p.g6_gia_khuyen_mai || price;
+    const shown = nqtBilling === 'year' ? Math.round(disc * 12 * 0.85) : disc;
+    const isHot = i === featured;
+    return `
+    <div class="relative bg-bg-card border ${isHot ? 'border-neon-lime shadow-[0_0_40px_rgba(200,241,53,0.12)]' : 'border-border-subtle'} rounded-2xl p-8 flex flex-col transition-transform hover:-translate-y-1">
+      ${isHot ? `<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-neon-lime text-bg-main text-[10px] font-caps uppercase tracking-widest font-bold px-4 py-1 rounded-full">Phổ biến nhất</div>` : ''}
+      <div class="font-caps text-xs uppercase tracking-widest text-text-secondary mb-2">${p.g6_so_ngay} ngày</div>
+      <h3 class="text-xl font-black text-white mb-1">${p.g6_ten_goi}</h3>
+      <div class="mt-4 mb-6">
+        ${disc < price ? `<div class="text-text-muted line-through text-sm font-mono mb-1">${nqtFormatPrice(nqtBilling === 'year' ? price * 12 : price)}</div>` : ''}
+        <div class="text-3xl font-black ${isHot ? 'text-neon-lime' : 'text-white'} font-mono">${nqtFormatPrice(shown)}</div>
+        <div class="text-text-muted text-xs mt-1">${nqtBilling === 'year' ? '/ năm' : '/ tháng (gói ' + p.g6_so_ngay + ' ngày)'}</div>
+      </div>
+      <ul class="space-y-3 flex-1 mb-8">
+        <li class="flex items-center gap-2 text-sm text-text-secondary">
+          <span class="material-symbols-outlined text-success text-base">check</span>Tập gym tự do
+        </li>
+        ${p.g6_co_pt ? `<li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-success text-base">check</span>${p.g6_so_buoi_pt || ''} buổi PT</li>` : ''}
+        ${p.g6_co_sauna ? `<li class="flex items-center gap-2 text-sm text-text-secondary"><span class="material-symbols-outlined text-success text-base">check</span>Sauna / xông hơi</li>` : ''}
+        <li class="flex items-center gap-2 text-sm text-text-secondary">
+          <span class="material-symbols-outlined text-success text-base">check</span>Theo dõi chỉ số cơ thể
+        </li>
+      </ul>
+      <button onclick="nqtDangKy('${p.g6_ten_goi}')" class="w-full py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold transition-all ${isHot ? 'bg-neon-lime text-bg-main hover:bg-neon-dim' : 'border border-border-neon text-neon-lime hover:bg-neon-glow'}">
+        Đăng ký ngay
+      </button>
+    </div>`;
+  }).join('');
+}
+
+(async () => {
+  try {
+    const r = await fetch('/api/nqt-public/goi-tap');
+    const j = await r.json();
+    const plans = j.nqt_du_lieu || j.data || j || [];
+    window._nqtPlans = Array.isArray(plans) ? plans : [];
+    nqtRenderPlans(window._nqtPlans);
+  } catch {
+    document.getElementById('nqtPlansGrid').innerHTML = `<div class="md:col-span-2 lg:col-span-3 text-center py-20 text-text-muted">Không thể tải dữ liệu.</div>`;
+  }
+})();
+</script>
+</body>
+</html>

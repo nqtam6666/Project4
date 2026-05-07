@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="vi" id="nqtHtmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng quan - NQT Gym Admin</title>
+    <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="nqt-page-content" style="display:none" class="space-y-4">
+    <div class="space-y-6">
+    <!-- Welcome Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">
+                <span id="nqtGreeting">Xin chào</span>, <span id="nqtUserNameWelcome">Admin</span>
+            </h1>
+            <p class="text-sm text-[#666] dark:text-[#888] mt-0.5" id="nqtCurrentDate">...</p>
+        </div>
+        <div class="text-right">
+            <div class="text-2xl font-medium text-[#191919] dark:text-[#fafafa] tabular-nums" id="nqtCurrentTime">--:--</div>
+            <div class="text-xs text-[#666] dark:text-[#888]" id="nqtDayOfWeek">...</div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Tổng hội viên -->
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/hoi-vien.html'">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-users text-sm text-[#525252] dark:text-[#a3a3a3]"></i>
+                </div>
+                <span id="nqtBadgeHvMoi" class="text-[10px] text-[#16a34a] dark:text-[#4ade80] font-medium">+0 mới</span>
+            </div>
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Tổng hội viên</p>
+            <p id="nqtStatTongHoiVien" class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">0</p>
+        </div>
+
+        <!-- Doanh thu tháng -->
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/thanh-toan.html'">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-chart-line text-sm text-[#525252] dark:text-[#a3a3a3]"></i>
+                </div>
+                <span id="nqtBadgeDoanhThu" class="text-[10px] text-[#16a34a] dark:text-[#4ade80] font-medium">+0%</span>
+            </div>
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Doanh thu tháng</p>
+            <p id="nqtStatDoanhThu" class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">0 ₫</p>
+        </div>
+
+        <!-- Đang tập luyện -->
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-running text-sm text-[#525252] dark:text-[#a3a3a3]"></i>
+                </div>
+                <span class="text-[10px] text-[#666] dark:text-[#888] font-medium flex items-center">
+                    <span class="w-1.5 h-1.5 bg-[#16a34a] rounded-full mr-1"></span>
+                    Live
+                </span>
+            </div>
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Đang tập luyện</p>
+            <div class="flex items-baseline space-x-1">
+                <p id="nqtStatDangTap" class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">0</p>
+                <span class="text-xs text-[#a3a3a3]">/ <span id="nqtCapacityPercent">0</span>%</span>
+            </div>
+        </div>
+
+        <!-- Sắp hết hạn -->
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/hoi-vien.html'">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-[#fef2f2] dark:bg-[#451a1a] rounded-md flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-sm text-[#dc2626] dark:text-[#f87171]"></i>
+                </div>
+                <span class="text-[10px] text-[#dc2626] dark:text-[#f87171] font-medium">Cần xử lý</span>
+            </div>
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Gói sắp hết hạn</p>
+            <p id="nqtStatSapHetHan" class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">0</p>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Chart Area -->
+        <div class="lg:col-span-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md">
+            <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-medium text-[#191919] dark:text-[#fafafa]">Biểu đồ tăng trưởng</h2>
+                    <p class="text-xs text-[#666] dark:text-[#888]">Hội viên đăng ký trong 7 ngày qua</p>
+                </div>
+                <div class="flex items-center space-x-1 text-xs">
+                    <button class="nqt-chart-period px-2.5 py-1 text-[#191919] dark:text-[#fafafa] bg-[#f5f5f5] dark:bg-[#404040] rounded-md font-medium" data-period="7">7 ngày</button>
+                    <button class="nqt-chart-period px-2.5 py-1 text-[#666] dark:text-[#888] hover:bg-[#f5f5f5] dark:hover:bg-[#404040] rounded-md" data-period="30">30 ngày</button>
+                    <button class="nqt-chart-period px-2.5 py-1 text-[#666] dark:text-[#888] hover:bg-[#f5f5f5] dark:hover:bg-[#404040] rounded-md" data-period="90">90 ngày</button>
+                </div>
+            </div>
+            <div class="p-4">
+                <canvas id="nqtChartDoanhThu" height="160"></canvas>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Activity -->
+        <div class="space-y-4">
+            <!-- Quick Actions -->
+            <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md">
+                <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040]">
+                    <h2 class="text-sm font-medium text-[#191919] dark:text-[#fafafa]">Thao tác nhanh</h2>
+                </div>
+                <div class="p-3 grid grid-cols-2 gap-2">
+                    <a href="/src/pages/admin/hoi-vien.html" class="nqt-nav-link p-3 bg-[#f5f5f5] dark:bg-[#333] hover:bg-[#e5e5e5] dark:hover:bg-[#404040] rounded-md text-center transition-colors" data-page="hoi-vien" data-title="Hội viên">
+                        <i class="fas fa-user-plus text-[#525252] dark:text-[#a3a3a3] mb-1.5 block"></i>
+                        <span class="text-xs text-[#191919] dark:text-[#fafafa]">Thêm hội viên</span>
+                    </a>
+                    <a href="#" class="p-3 bg-[#f5f5f5] dark:bg-[#333] hover:bg-[#e5e5e5] dark:hover:bg-[#404040] rounded-md text-center transition-colors" onclick="nqtOpenCheckinModal(); return false;">
+                        <i class="fas fa-qrcode text-[#525252] dark:text-[#a3a3a3] mb-1.5 block"></i>
+                        <span class="text-xs text-[#191919] dark:text-[#fafafa]">Check-in</span>
+                    </a>
+                    <a href="/src/pages/admin/don-hang.html" class="nqt-nav-link p-3 bg-[#f5f5f5] dark:bg-[#333] hover:bg-[#e5e5e5] dark:hover:bg-[#404040] rounded-md text-center transition-colors" data-page="don-hang" data-title="Đơn hàng">
+                        <i class="fas fa-shopping-bag text-[#525252] dark:text-[#a3a3a3] mb-1.5 block"></i>
+                        <span class="text-xs text-[#191919] dark:text-[#fafafa]">Đơn hàng</span>
+                    </a>
+                    <a href="/src/pages/admin/thanh-toan.html" class="nqt-nav-link p-3 bg-[#f5f5f5] dark:bg-[#333] hover:bg-[#e5e5e5] dark:hover:bg-[#404040] rounded-md text-center transition-colors" data-page="thanh-toan" data-title="Thanh toán">
+                        <i class="fas fa-credit-card text-[#525252] dark:text-[#a3a3a3] mb-1.5 block"></i>
+                        <span class="text-xs text-[#191919] dark:text-[#fafafa]">Thanh toán</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md">
+                <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+                    <h2 class="text-sm font-medium text-[#191919] dark:text-[#fafafa] flex items-center">
+                        <span class="w-1.5 h-1.5 bg-[#16a34a] rounded-full mr-2"></span>
+                        Hoạt động
+                    </h2>
+                    <button class="text-xs text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa]">Xem tất cả</button>
+                </div>
+                <div class="divide-y divide-[#e5e5e5] dark:divide-[#404040] max-h-64 overflow-y-auto" id="nqtRecentActivity">
+                    <div class="p-3 text-sm text-[#666] dark:text-[#888] text-center">Đang tải...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/hoi-vien.html'">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-dumbbell text-[#525252] dark:text-[#a3a3a3]"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-[#666] dark:text-[#888]">Check-in hôm nay</p>
+                    <p class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]" id="nqtStatCheckinHomNay">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/chi-nhanh.html'">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-store text-[#525252] dark:text-[#a3a3a3]"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-[#666] dark:text-[#888]">Chi nhánh</p>
+                    <p class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]"><span id="nqtStatChiNhanh">0</span> <span class="text-xs font-normal text-[#666]" id="nqtChiNhanhThanhPho"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/goi-tap.html'">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
+                    <i class="fas fa-box text-[#525252] dark:text-[#a3a3a3]"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-[#666] dark:text-[#888]">Gói tập đang bán</p>
+                    <p class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]"><span id="nqtStatGoiTap">0</span> <span class="text-xs font-normal text-[#666]" id="nqtGoiNoiBat"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script type="module">
+import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
+nqtInitAdminLayout('dashboard');
+
+(function() {
+    // Live clock
+    function nqtUpdateClock() {
+        const now = new Date();
+        const timeEl = document.getElementById('nqtCurrentTime');
+        const dayEl = document.getElementById('nqtDayOfWeek');
+        if (timeEl) timeEl.textContent = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        if (dayEl) {
+            const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+            dayEl.textContent = days[now.getDay()];
+        }
+    }
+    setInterval(nqtUpdateClock, 1000);
+
+    function nqtSetGreeting() {
+        const hour = new Date().getHours();
+        let greeting = 'Xin chào';
+        if (hour >= 5 && hour < 12) greeting = 'Chào buổi sáng';
+        else if (hour >= 12 && hour < 18) greeting = 'Chào buổi chiều';
+        else if (hour >= 18 && hour < 22) greeting = 'Chào buổi tối';
+        else greeting = 'Làm việc khuya';
+        const greetingEl = document.getElementById('nqtGreeting');
+        if (greetingEl) greetingEl.textContent = greeting;
+        const dateEl = document.getElementById('nqtCurrentDate');
+        if (dateEl) dateEl.textContent = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        try {
+            const token = localStorage.getItem('nqt_admin_token');
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const nameEl = document.getElementById('nqtUserNameWelcome');
+                if (nameEl) nameEl.textContent = payload.g6_ho_ten || 'Admin';
+            }
+        } catch(e) {}
+    }
+
+    function nqtFormatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(amount);
+    }
+
+    async function nqtLoadStats() {
+        const data = await nqtApi.fetch('/api/nqt-thong-ke-dashboard');
+        if (data && data.nqt_thanh_cong) {
+            const s = data.nqt_du_lieu;
+            const el = (id) => document.getElementById(id);
+            if (el('nqtStatTongHoiVien')) el('nqtStatTongHoiVien').textContent = (s.g6_tong_hoi_vien || 0).toLocaleString('vi-VN');
+            if (el('nqtStatDangTap')) el('nqtStatDangTap').textContent = s.g6_dang_tap_luyen || 0;
+            if (el('nqtStatSapHetHan')) el('nqtStatSapHetHan').textContent = s.g6_sap_het_han || 0;
+            if (el('nqtStatCheckinHomNay')) el('nqtStatCheckinHomNay').textContent = s.g6_checkin_hom_nay || 0;
+            if (el('nqtStatDoanhThu')) el('nqtStatDoanhThu').textContent = nqtFormatCurrency(s.g6_doanh_thu_thang || 0);
+            if (el('nqtBadgeHvMoi')) el('nqtBadgeHvMoi').textContent = `+${s.g6_hoi_vien_moi_thang || 0} mới`;
+            const capacityPercent = el('nqtCapacityPercent');
+            if (capacityPercent) {
+                const capacity = Math.min(100, Math.round(((s.g6_dang_tap_luyen || 0) / (s.g6_suc_chua || 100)) * 100));
+                capacityPercent.textContent = capacity;
+            }
+        }
+
+        const chiNhanhData = await nqtApi.fetch('/api/nqt-chi-nhanh');
+        if (chiNhanhData && chiNhanhData.nqt_thanh_cong) {
+            const el = document.getElementById('nqtStatChiNhanh');
+            if (el) el.textContent = chiNhanhData.nqt_du_lieu.length || 0;
+            const cityEl = document.getElementById('nqtChiNhanhThanhPho');
+            if (cityEl) {
+                const cities = new Set(chiNhanhData.nqt_du_lieu.map(c => c.g6_thanh_pho).filter(Boolean));
+                cityEl.textContent = `(${cities.size} thành phố)`;
+            }
+        }
+
+        const goiTapData = await nqtApi.fetch('/api/nqt-goi-tap');
+        if (goiTapData && goiTapData.nqt_thanh_cong) {
+            const el = document.getElementById('nqtStatGoiTap');
+            if (el) el.textContent = goiTapData.nqt_du_lieu.length || 0;
+            const noiBat = goiTapData.nqt_du_lieu.filter(g => g.g6_la_noi_bat).length;
+            const noiBatEl = document.getElementById('nqtGoiNoiBat');
+            if (noiBatEl) noiBatEl.textContent = `(${noiBat} nổi bật)`;
+        }
+
+        nqtLoadRecentActivity();
+    }
+
+    async function nqtLoadRecentActivity() {
+        const activityEl = document.getElementById('nqtRecentActivity');
+        if (!activityEl) return;
+        activityEl.innerHTML = '<div class="p-4 text-center text-xs text-[#a3a3a3]"><i class="fas fa-circle-notch fa-spin mr-1"></i>Đang tải...</div>';
+
+        const [resHV, resTT] = await Promise.allSettled([
+            nqtApi.fetch('/api/nqt-hoi-vien?g6_gioi_han=3'),
+            nqtApi.fetch('/api/nqt-thanh-toan?g6_gioi_han=3'),
+        ]);
+
+        const activities = [];
+
+        if (resHV.status === 'fulfilled' && resHV.value?.nqt_thanh_cong) {
+            (resHV.value.nqt_du_lieu.g6_danh_sach || []).forEach(hv => {
+                activities.push({
+                    icon: 'fa-user-plus',
+                    title: `Hội viên mới: ${hv.g6_ho_ten || 'N/A'}`,
+                    time: hv.g6_ngay_dang_ky ? new Date(hv.g6_ngay_dang_ky).toLocaleDateString('vi-VN') : '',
+                });
+            });
+        }
+
+        if (resTT.status === 'fulfilled' && resTT.value?.nqt_thanh_cong) {
+            (resTT.value.nqt_du_lieu.g6_danh_sach || []).forEach(tt => {
+                const nqtLoaiMap = { goi_tap: 'Thanh toán gói tập', don_hang: 'Đơn hàng mới', dich_vu: 'Thanh toán dịch vụ' };
+                activities.push({
+                    icon: 'fa-credit-card',
+                    title: `${nqtLoaiMap[tt.g6_loai_giao_dich] || 'Giao dịch mới'} #${tt.g6_ma_thanh_toan}`,
+                    time: tt.g6_ngay_tao ? new Date(tt.g6_ngay_tao).toLocaleDateString('vi-VN') : '',
+                });
+            });
+        }
+
+        if (activities.length === 0) {
+            activityEl.innerHTML = '<div class="p-4 text-center text-xs text-[#a3a3a3]">Chưa có hoạt động nào</div>';
+            return;
+        }
+
+        activityEl.innerHTML = activities.slice(0, 5).map(a => `
+            <div class="p-3 flex items-center space-x-3 hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors cursor-pointer">
+                <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center flex-shrink-0">
+                    <i class="fas ${a.icon} text-xs text-[#525252] dark:text-[#a3a3a3]"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm text-[#191919] dark:text-[#fafafa] truncate">${a.title}</p>
+                    <p class="text-xs text-[#666] dark:text-[#888]">${a.time}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ========== CHART.JS REAL CHART ==========
+    let nqtChartInstance = null;
+
+    function nqtGetChartColors() {
+        const isDark = document.documentElement.classList.contains('dark');
+        return {
+            line: isDark ? '#fafafa' : '#191919',
+            fill: isDark ? 'rgba(250,250,250,0.08)' : 'rgba(25,25,25,0.06)',
+            grid: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+            text: isDark ? '#666' : '#a3a3a3',
+            point: isDark ? '#fafafa' : '#191919',
+        };
+    }
+
+    function nqtTaoChartData(soNgay) {
+        // Placeholder tĩnh (không random) khi API fail
+        const nqtLabels = [], nqtValues = [];
+        const now = new Date();
+        for (let i = soNgay - 1; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - i);
+            if (soNgay <= 7) {
+                const nqtDays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                nqtLabels.push(nqtDays[d.getDay()]);
+            } else if (soNgay <= 30) {
+                nqtLabels.push(`${d.getDate()}/${d.getMonth()+1}`);
+            } else {
+                nqtLabels.push(`T${Math.ceil((soNgay - i) / 7)}`);
+            }
+            nqtValues.push(0);
+        }
+        return { nqtLabels, nqtValues };
+    }
+
+    async function nqtVeChart(soNgay = 7) {
+        const canvas = document.getElementById('nqtChartDoanhThu');
+        if (!canvas) return;
+        if (typeof Chart === 'undefined') return;
+        const ctx = canvas.getContext('2d');
+        const colors = nqtGetChartColors();
+
+        // Thử lấy data từ API, nếu không có thì dùng placeholder
+        let nqtLabels, nqtValues;
+        try {
+            const res = await nqtApi.fetch(`/api/nqt-thong-ke-bieu-do?g6_so_ngay=${soNgay}`);
+            if (res?.nqt_thanh_cong && res.nqt_du_lieu?.g6_nhan) {
+                nqtLabels = res.nqt_du_lieu.g6_nhan;
+                nqtValues = res.nqt_du_lieu.g6_gia_tri;
+            } else { throw new Error('no data'); }
+        } catch {
+            const fallback = nqtTaoChartData(soNgay);
+            nqtLabels = fallback.nqtLabels;
+            nqtValues = fallback.nqtValues;
+        }
+
+        const nqtExisting = Chart.getChart(canvas);
+        if (nqtExisting) nqtExisting.destroy();
+        if (nqtChartInstance) nqtChartInstance.destroy();
+
+        nqtChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: nqtLabels,
+                datasets: [{
+                    label: 'Hội viên mới',
+                    data: nqtValues,
+                    borderColor: colors.line,
+                    backgroundColor: colors.fill,
+                    borderWidth: 1.5,
+                    pointBackgroundColor: colors.point,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    fill: true,
+                    tension: 0.4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.parsed.y} hội viên`
+                        },
+                        backgroundColor: document.documentElement.classList.contains('dark') ? '#262626' : '#191919',
+                        titleColor: '#fafafa',
+                        bodyColor: '#a3a3a3',
+                        borderColor: document.documentElement.classList.contains('dark') ? '#404040' : '#333',
+                        borderWidth: 1,
+                        padding: 10,
+                        cornerRadius: 6,
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: colors.grid },
+                        ticks: { color: colors.text, font: { size: 11, family: 'Inter' } },
+                        border: { display: false }
+                    },
+                    y: {
+                        grid: { color: colors.grid },
+                        ticks: { color: colors.text, font: { size: 11, family: 'Inter' }, stepSize: 1 },
+                        border: { display: false },
+                        beginAtZero: true,
+                    }
+                },
+                interaction: { intersect: false, mode: 'index' }
+            }
+        });
+    }
+
+    window.nqtNavigateTo = function(page, title) {
+        const pageMap = {
+            'hoi-vien': '/src/pages/admin/hoi-vien.html',
+            'thanh-toan': '/src/pages/admin/thanh-toan.html',
+            'chi-nhanh': '/src/pages/admin/chi-nhanh.html',
+            'goi-tap': '/src/pages/admin/goi-tap.html',
+            'don-hang': '/src/pages/admin/don-hang.html',
+            'khach-hang': '/src/pages/admin/khach-hang.html',
+            'dashboard': '/src/pages/admin/dashboard.html',
+        };
+        if (page && page.startsWith('/')) {
+            window.location.href = page;
+        } else if (pageMap[page]) {
+            window.location.href = pageMap[page];
+        } else {
+            window.location.href = `/src/pages/admin/${page}.html`;
+        }
+    };
+
+    window.nqtOpenCheckinModal = function() {
+        if (typeof nqtToast === 'function') nqtToast('Tính năng Check-in QR đang phát triển', 'info');
+    };
+
+    nqtSetGreeting();
+    nqtUpdateClock();
+    nqtLoadStats();
+
+    // Đợi Chart.js load xong (có thể được inject async qua SPA) rồi mới vẽ
+    function nqtWaitChart(nqtRetry) {
+        if (typeof Chart !== 'undefined') {
+            nqtVeChart(7);
+        } else if (nqtRetry > 0) {
+            setTimeout(() => nqtWaitChart(nqtRetry - 1), 100);
+        }
+    }
+    nqtWaitChart(30); // thử tối đa 3 giây
+
+    // Chart period switcher
+    document.querySelectorAll('.nqt-chart-period').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nqt-chart-period').forEach(b => {
+                b.classList.remove('text-[#191919]', 'dark:text-[#fafafa]', 'bg-[#f5f5f5]', 'dark:bg-[#404040]', 'font-medium');
+                b.classList.add('text-[#666]', 'dark:text-[#888]');
+            });
+            btn.classList.add('text-[#191919]', 'dark:text-[#fafafa]', 'bg-[#f5f5f5]', 'dark:bg-[#404040]', 'font-medium');
+            btn.classList.remove('text-[#666]', 'dark:text-[#888]');
+            nqtVeChart(parseInt(btn.dataset.period));
+        });
+    });
+
+    // Re-render chart when dark mode changes
+    const nqtDarkBtn = document.getElementById('nqtDarkModeBtn');
+    if (nqtDarkBtn) {
+        nqtDarkBtn.addEventListener('click', () => {
+            setTimeout(() => {
+                const activePeriod = document.querySelector('.nqt-chart-period.font-medium');
+                nqtVeChart(parseInt(activePeriod?.dataset.period || '7'));
+            }, 50);
+        });
+    }
+})();
+</script>
+</body>
+</html>

@@ -303,11 +303,70 @@ def nqt_tong_hop_bao_cao():
         G6ThanhToan.g6_ngay_thanh_toan >= nqt_dau_thang,
     ).scalar() or 0
 
+    # Tổng đơn hàng tháng này
+    nqt_tong_don_hang = G6ThanhToan.query.filter(
+        G6ThanhToan.g6_ngay_tao >= datetime(nqt_dau_thang.year, nqt_dau_thang.month, nqt_dau_thang.day),
+    ).count()
+
+    # Chart doanh thu 7 ngày gần nhất
+    nqt_bieu_do_dt = []
+    for nqt_i in range(6, -1, -1):
+        nqt_ngay = nqt_hom_nay - timedelta(days=nqt_i)
+        nqt_dt_ngay = db.session.query(func.sum(G6ThanhToan.g6_so_tien)).filter(
+            G6ThanhToan.g6_trang_thai == 'da_thanh_toan',
+            func.cast(G6ThanhToan.g6_ngay_thanh_toan, db.Date) == nqt_ngay,
+        ).scalar() or 0
+        nqt_bieu_do_dt.append({'g6_ngay': nqt_ngay.strftime('%d/%m'), 'g6_gia_tri': float(nqt_dt_ngay)})
+
+    # Chart hội viên mới 7 ngày gần nhất
+    nqt_bieu_do_hv = []
+    for nqt_i in range(6, -1, -1):
+        nqt_ngay = nqt_hom_nay - timedelta(days=nqt_i)
+        nqt_so_moi = G6HoiVien.query.filter(
+            G6HoiVien.g6_ngay_dang_ky == nqt_ngay,
+        ).count()
+        nqt_bieu_do_hv.append({'g6_ngay': nqt_ngay.strftime('%d/%m'), 'g6_gia_tri': nqt_so_moi})
+
     return nqt_ok({
-        'nqt_tong_hoi_vien': nqt_tong_hoi_vien,
-        'nqt_hoi_vien_moi_thang': nqt_moi_thang,
-        'nqt_goi_sap_het_han_7_ngay': nqt_goi_sap_het,
-        'nqt_doanh_thu_thang_nay': float(nqt_doanh_thu_thang),
-        'nqt_thang': nqt_hom_nay.month,
-        'nqt_nam': nqt_hom_nay.year,
+        'g6_tong_doanh_thu': float(nqt_doanh_thu_thang),
+        'g6_tang_truong_dt': 0,
+        'g6_hoi_vien_moi': nqt_moi_thang,
+        'g6_tong_don_hang': nqt_tong_don_hang,
+        'g6_sap_het_han': nqt_goi_sap_het,
+        'g6_bieu_do_doanh_thu': nqt_bieu_do_dt,
+        'g6_bieu_do_hoi_vien': nqt_bieu_do_hv,
     })
+
+
+# ── 5. Danh sách hết hạn JSON ─────────────────────────────────────────────────
+
+@nqt_bao_cao_bp.route('/api/nqt-bao-cao/het-han', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_bao_cao_het_han():
+    nqt_so_ngay = request.args.get('g6_so_ngay', 30, type=int)
+    nqt_hom_nay = date.today()
+    nqt_ngay_cuoi = nqt_hom_nay + timedelta(days=nqt_so_ngay)
+
+    nqt_danh_sach = (
+        db.session.query(G6DangKyGoiTap, G6HoiVien)
+        .join(G6HoiVien, G6DangKyGoiTap.g6_ma_hoi_vien == G6HoiVien.g6_ma_hoi_vien)
+        .filter(
+            G6DangKyGoiTap.g6_trang_thai == 'dang_hoat_dong',
+            G6DangKyGoiTap.g6_ngay_het_han >= nqt_hom_nay,
+            G6DangKyGoiTap.g6_ngay_het_han <= nqt_ngay_cuoi,
+        )
+        .order_by(G6DangKyGoiTap.g6_ngay_het_han)
+        .all()
+    )
+
+    nqt_rows = []
+    for nqt_dk, nqt_hv in nqt_danh_sach:
+        nqt_ten_goi = nqt_dk.g6_goi_tap.g6_ten_goi if nqt_dk.g6_goi_tap else f'Gói #{nqt_dk.g6_ma_goi_tap}'
+        nqt_rows.append({
+            'g6_ho_ten': nqt_hv.g6_ho_ten,
+            'g6_so_dien_thoai': nqt_hv.g6_so_dien_thoai,
+            'g6_ten_goi': nqt_ten_goi,
+            'g6_ngay_het_han': str(nqt_dk.g6_ngay_het_han),
+        })
+
+    return nqt_ok({'g6_danh_sach': nqt_rows, 'g6_tong': len(nqt_rows)})

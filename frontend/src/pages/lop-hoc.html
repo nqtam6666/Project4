@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lớp Học — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: { colors: {
+    "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+    "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA",
+    "text-muted":"#52525B","border-subtle":"rgba(255,255,255,0.06)",
+    "border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+    "success":"#22C55E","error":"#EF4444",
+  }, fontFamily: { "sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"] } } }
+}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+<div class="pt-[72px]">
+
+  <!-- Hero -->
+  <section class="py-16 px-6 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(200,241,53,0.07),transparent_60%)]"></div>
+    <div class="relative max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 bg-neon-glow border border-border-neon text-neon-lime text-xs font-caps uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
+        <span class="material-symbols-outlined text-sm">event</span> Lịch học tuần này
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black text-white leading-tight mb-4">Lớp Học <span class="text-neon-lime">Nhóm</span></h1>
+      <p class="text-text-secondary text-lg">Yoga, Boxing, Zumba, HIIT — hơn 20 lớp học mỗi tuần. Đặt chỗ dễ dàng.</p>
+    </div>
+  </section>
+
+  <!-- Day tabs -->
+  <div class="max-w-screen-xl mx-auto px-6 mb-6">
+    <div class="flex overflow-x-auto gap-2 pb-2 scrollbar-hide" id="nqtDayTabs">
+    </div>
+  </div>
+
+  <!-- Schedule grid -->
+  <section class="max-w-screen-xl mx-auto px-6 pb-10">
+    <div id="nqtScheduleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="md:col-span-2 lg:col-span-3 flex justify-center py-20">
+        <div class="w-8 h-8 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Classes list -->
+  <section class="max-w-screen-xl mx-auto px-6 pb-24">
+    <h2 class="text-2xl font-black text-white mb-8">Tất cả các lớp học</h2>
+    <div id="nqtClassesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </section>
+
+</div>
+
+<!-- Booking Modal -->
+<div id="nqtBookModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="bg-bg-card border border-border-subtle rounded-2xl max-w-md w-full p-8">
+    <h3 class="text-xl font-black text-white mb-2">Đặt chỗ lớp học</h3>
+    <p id="nqtBookClassName" class="text-neon-lime font-caps text-sm uppercase tracking-wide mb-6"></p>
+    <p class="text-text-secondary text-sm mb-6">Đăng nhập để đặt chỗ và nhận xác nhận qua email.</p>
+    <div class="flex gap-3">
+      <a href="/src/pages/member/login.html" class="flex-1 text-center bg-neon-lime text-bg-main py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Đăng nhập</a>
+      <button onclick="document.getElementById('nqtBookModal').classList.add('hidden')" class="flex-1 border border-border-subtle text-text-secondary py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:text-text-primary transition-colors">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { nqtRenderPublicNav, nqtRenderFooter } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('lop-hoc');
+nqtRenderFooter();
+
+const DAYS = ['CN','T2','T3','T4','T5','T6','T7'];
+const DAYS_FULL = ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+let nqtLichLop = [];
+let nqtSelectedDay = new Date().getDay();
+
+window.nqtBook = function(name) {
+  document.getElementById('nqtBookClassName').textContent = name;
+  document.getElementById('nqtBookModal').classList.remove('hidden');
+};
+
+function nqtRenderDayTabs() {
+  const tabs = document.getElementById('nqtDayTabs');
+  tabs.innerHTML = DAYS.map((d, i) => `
+    <button onclick="nqtSelectDay(${i})" data-day="${i}" class="nqt-day-tab flex-shrink-0 px-5 py-2.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold transition-all ${i === nqtSelectedDay ? 'bg-neon-lime text-bg-main' : 'bg-bg-card border border-border-subtle text-text-secondary hover:border-border-neon hover:text-neon-lime'}">
+      ${d}
+    </button>`).join('');
+}
+
+window.nqtSelectDay = function(day) {
+  nqtSelectedDay = day;
+  document.querySelectorAll('.nqt-day-tab').forEach((b, i) => {
+    b.className = `nqt-day-tab flex-shrink-0 px-5 py-2.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold transition-all ${i === day ? 'bg-neon-lime text-bg-main' : 'bg-bg-card border border-border-subtle text-text-secondary hover:border-border-neon hover:text-neon-lime'}`;
+  });
+  nqtRenderSchedule();
+};
+
+function nqtRenderSchedule() {
+  const grid = document.getElementById('nqtScheduleGrid');
+  const dayItems = nqtLichLop.filter(l => l.g6_thu_trong_tuan === nqtSelectedDay);
+  if (!dayItems.length) {
+    grid.innerHTML = `<div class="md:col-span-2 lg:col-span-3 text-center py-12 text-text-muted">
+      <span class="material-symbols-outlined text-4xl block mb-3">event_busy</span>
+      Không có lớp học vào ${DAYS_FULL[nqtSelectedDay]}.</div>`;
+    return;
+  }
+  grid.innerHTML = dayItems.map(l => `
+  <div class="bg-bg-card border border-border-subtle rounded-xl p-5 hover:border-border-neon transition-all">
+    <div class="flex items-start justify-between mb-3">
+      <div>
+        <div class="text-white font-bold text-base">${l.g6_ten_lop || 'Lớp học'}</div>
+        <div class="text-text-muted text-xs mt-0.5 font-caps uppercase tracking-wide">${l.g6_loai_lop || ''}</div>
+      </div>
+      <div class="bg-neon-glow border border-border-neon text-neon-lime text-[10px] font-caps uppercase tracking-widest px-2.5 py-1 rounded-full flex-shrink-0">
+        ${l.g6_do_kho || 'Vừa'}
+      </div>
+    </div>
+    <div class="flex items-center gap-4 text-sm text-text-secondary mb-4">
+      <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span>${l.g6_gio_bat_dau || ''}</span>
+      <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">timer</span>${l.g6_thoi_luong || 60} phút</span>
+      <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">group</span>${l.g6_suc_chua_toi_da || '?'} chỗ</span>
+    </div>
+    <button onclick="nqtBook('${l.g6_ten_lop || 'Lớp học'}')" class="w-full py-2.5 border border-border-neon text-neon-lime rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:bg-neon-glow transition-colors">
+      Đặt chỗ
+    </button>
+  </div>`).join('');
+}
+
+function nqtRenderClasses(classes) {
+  const grid = document.getElementById('nqtClassesGrid');
+  if (!classes.length) { grid.innerHTML = '<div class="sm:col-span-2 lg:col-span-3 text-center py-10 text-text-muted">Chưa có lớp học.</div>'; return; }
+  grid.innerHTML = classes.map(c => `
+  <div class="bg-bg-card border border-border-subtle rounded-2xl overflow-hidden hover:border-border-neon transition-all">
+    <div class="h-36 bg-bg-elevated flex items-center justify-center">
+      <span class="material-symbols-outlined text-5xl text-text-muted">fitness_center</span>
+    </div>
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-black text-white">${c.g6_ten_lop}</h3>
+        <span class="bg-neon-glow border border-border-neon text-neon-lime text-[10px] font-caps uppercase tracking-widest px-2 py-0.5 rounded-full">${c.g6_do_kho || 'Vừa'}</span>
+      </div>
+      <div class="text-text-muted text-xs font-caps uppercase tracking-wide mb-3">${c.g6_loai_lop || 'Đa thể loại'}</div>
+      <button onclick="nqtBook('${c.g6_ten_lop}')" class="w-full py-2.5 border border-border-neon text-neon-lime rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:bg-neon-glow transition-colors">
+        Đặt chỗ
+      </button>
+    </div>
+  </div>`).join('');
+}
+
+(async () => {
+  nqtRenderDayTabs();
+  try {
+    const [r1, r2] = await Promise.all([
+      fetch('/api/nxv-lich-lop-hoc'),
+      fetch('/api/nxv-lop-hoc'),
+    ]);
+    const j1 = await r1.json();
+    const j2 = await r2.json();
+    nqtLichLop = Array.isArray(j1.nqt_du_lieu) ? j1.nqt_du_lieu : (Array.isArray(j1) ? j1 : []);
+    const classes = Array.isArray(j2.nqt_du_lieu) ? j2.nqt_du_lieu : (Array.isArray(j2) ? j2 : []);
+    nqtRenderSchedule();
+    nqtRenderClasses(classes);
+  } catch {
+    document.getElementById('nqtScheduleGrid').innerHTML = '<div class="md:col-span-2 lg:col-span-3 text-center py-10 text-text-muted">Không thể tải dữ liệu.</div>';
+  }
+})();
+</script>
+</body>
+</html>

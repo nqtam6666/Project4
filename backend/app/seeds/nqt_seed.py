@@ -262,11 +262,35 @@ def nqt_chay_seed():
         g6_cn_1 = G6ChiNhanh.query.first()
         g6_danh_sach_nguoi_dung = [
             {
-                "g6_ten_dang_nhap": "admin",
-                "g6_mat_khau": bcrypt.hashpw("Admin@123".encode(), bcrypt.gensalt()).decode(),
-                "g6_ho_ten": "Quản Trị Viên",
-                "g6_email": "admin@g6gym.vn",
-                "g6_so_dien_thoai": "0901000001",
+                "g6_ten_dang_nhap": "quangtam",
+                "g6_mat_khau": bcrypt.hashpw("123456".encode(), bcrypt.gensalt()).decode(),
+                "g6_ho_ten": "Nguyễn Quang Tâm",
+                "g6_email": "nguyenquangtam6666@gmail.com",
+                "g6_so_dien_thoai": "0961138440",
+                "g6_ma_chi_nhanh": g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else None,
+            },
+            {
+                "g6_ten_dang_nhap": "xuanvinh",
+                "g6_mat_khau": bcrypt.hashpw("123456".encode(), bcrypt.gensalt()).decode(),
+                "g6_ho_ten": "Nguyễn Xuân Vinh",
+                "g6_email": "realsteelworld2k5@gmail.com",
+                "g6_so_dien_thoai": "0961138441",
+                "g6_ma_chi_nhanh": g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else None,
+            },
+            {
+                "g6_ten_dang_nhap": "hoainam",
+                "g6_mat_khau": bcrypt.hashpw("123456".encode(), bcrypt.gensalt()).decode(),
+                "g6_ho_ten": "Nguyễn Hoài Nam",
+                "g6_email": "siver1856@gmail.com",
+                "g6_so_dien_thoai": "0961138442",
+                "g6_ma_chi_nhanh": g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else None,
+            },
+            {
+                "g6_ten_dang_nhap": "doanquan",
+                "g6_mat_khau": bcrypt.hashpw("123456".encode(), bcrypt.gensalt()).decode(),
+                "g6_ho_ten": "Đoàn Anh Quân",
+                "g6_email": "doanqu4n6805@gmail.com",
+                "g6_so_dien_thoai": "0961138443",
                 "g6_ma_chi_nhanh": g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else None,
             },
             {
@@ -285,39 +309,57 @@ def nqt_chay_seed():
                 "g6_so_dien_thoai": "0901000003",
                 "g6_ma_chi_nhanh": g6_cn_1.g6_ma_chi_nhanh if g6_cn_1 else None,
             },
+            
         ]
         for g6_nd in g6_danh_sach_nguoi_dung:
             db.session.add(G6NguoiDung(**g6_nd))
         db.session.commit()
         print(f"[OK] G6NguoiDung — đã seed {len(g6_danh_sach_nguoi_dung)} rows")
+        # ------------------------------------------------------------------
+        # 7. G6NguoiDungVaiTro (gán role)
+        # ------------------------------------------------------------------
+        if G6NguoiDungVaiTro.query.first():
+            print("[SKIP] G6NguoiDungVaiTro — đã có dữ liệu")
+        else:
+            g6_nd_map = {u.g6_ten_dang_nhap: u.g6_ma_nguoi_dung for u in G6NguoiDung.query.all()}
+            g6_vt_map = {v.g6_ten_vai_tro:   v.g6_ma_vai_tro    for v in G6VaiTro.query.all()}
 
-    # ------------------------------------------------------------------
-    # 7. G6NguoiDungVaiTro (gán role)
-    # ------------------------------------------------------------------
-    if G6NguoiDungVaiTro.query.first():
-        print("[SKIP] G6NguoiDungVaiTro — đã có dữ liệu")
-    else:
-        g6_nd_map = {u.g6_ten_dang_nhap: u.g6_ma_nguoi_dung for u in G6NguoiDung.query.all()}
-        g6_vt_map = {v.g6_ten_vai_tro:   v.g6_ma_vai_tro    for v in G6VaiTro.query.all()}
+            g6_gan_vai_tro = [
+                # ADMIN
+                ("quangtam",        "G6QuanTri"),
 
-        g6_gan_vai_tro = [
-            ("admin",            "G6QuanTri"),
-            ("manager_caugiay",  "G6QuanLy"),
-            ("letan_01",         "G6LeTan"),
-        ]
-        g6_dem = 0
-        for g6_ten_dang_nhap, g6_ten_vai_tro in g6_gan_vai_tro:
-            g6_ma_nd = g6_nd_map.get(g6_ten_dang_nhap)
-            g6_ma_vt = g6_vt_map.get(g6_ten_vai_tro)
-            if g6_ma_nd and g6_ma_vt:
+                # MANAGER
+                ("manager_caugiay", "G6QuanLy"),
+
+                # LỄ TÂN
+                ("letan_01",        "G6LeTan"),
+
+                # NHÂN VIÊN / STAFF
+                ("xuanvinh",        "G6QuanTri"),
+                ("hoainam",         "G6NhanVien"),
+                ("doanquan",        "G6QuanTri"),
+            ]
+
+            g6_dem = 0
+            for g6_ten_dang_nhap, g6_ten_vai_tro in g6_gan_vai_tro:
+                g6_ma_nd = g6_nd_map.get(g6_ten_dang_nhap)
+                g6_ma_vt = g6_vt_map.get(g6_ten_vai_tro)
+
+                if not g6_ma_nd:
+                    print(f"[WARN] Không tìm thấy user: {g6_ten_dang_nhap}")
+                    continue
+                if not g6_ma_vt:
+                    print(f"[WARN] Không tìm thấy role: {g6_ten_vai_tro}")
+                    continue
+
                 db.session.add(G6NguoiDungVaiTro(
                     g6_ma_nguoi_dung=g6_ma_nd,
                     g6_ma_vai_tro=g6_ma_vt,
                 ))
                 g6_dem += 1
-        db.session.commit()
-        print(f"[OK] G6NguoiDungVaiTro — đã seed {g6_dem} rows")
 
+            db.session.commit()
+            print(f"[OK] G6NguoiDungVaiTro — đã seed {g6_dem} rows")
     # ------------------------------------------------------------------
     # 8. G6NhanVien
     # ------------------------------------------------------------------

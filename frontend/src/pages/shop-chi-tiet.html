@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sản phẩm — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://cdn.tail.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "success":"#22C55E","warning":"#F59E0B","error":"#EF4444",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL'0,'wght'400,'GRAD'0,'opsz'24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+<div class="pt-[72px]">
+  <div id="nqtProductDetail" class="max-w-screen-xl mx-auto px-6 py-10">
+    <div class="flex justify-center py-20"><div class="w-8 h-8 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+  </div>
+</div>
+<div id="nqtCartToast" class="hidden fixed bottom-6 right-6 z-50 bg-neon-lime text-bg-main px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 font-caps text-sm font-semibold">
+  <span class="material-symbols-outlined text-base">check_circle</span> Đã thêm vào giỏ hàng
+</div>
+<script type="module">
+import { nqtRenderPublicNav, nqtRenderFooter, nqtFormatPrice, nqtGetCart, nqtSaveCart } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('shop');
+nqtRenderFooter();
+
+const id = new URLSearchParams(location.search).get('id');
+const el = document.getElementById('nqtProductDetail');
+
+function nqtShowToast() {
+  const t = document.getElementById('nqtCartToast');
+  t.classList.remove('hidden'); t.classList.add('flex');
+  setTimeout(() => { t.classList.add('hidden'); t.classList.remove('flex'); }, 2000);
+}
+
+window.nqtAddToCart = function(id, name, price, variantId) {
+  const cart = nqtGetCart();
+  const key = variantId || id;
+  const idx = cart.findIndex(i => i.id === key);
+  if (idx >= 0) cart[idx].qty = (cart[idx].qty||1) + 1;
+  else cart.push({ id: key, name, price, qty: 1, variantId });
+  nqtSaveCart(cart);
+  nqtShowToast();
+};
+
+(async () => {
+  if (!id) { el.innerHTML = '<div class="text-center py-20 text-text-muted">Không tìm thấy sản phẩm.</div>'; return; }
+  try {
+    const r = await fetch(`/api/nxv-san-pham/${id}`);
+    const j = await r.json();
+    const p = j.nqt_du_lieu || j.data || j;
+    if (!p || !p.g6_ten_san_pham) { el.innerHTML = '<div class="text-center py-20 text-text-muted">Sản phẩm không tồn tại.</div>'; return; }
+    document.title = `${p.g6_ten_san_pham} — NQT GYM`;
+    const btList = p.g6_bien_the || [];
+    const defaultBt = btList.find(b => b.g6_la_mac_dinh) || btList[0];
+    const price = defaultBt?.g6_gia || 0;
+    const dnld = p.g6_thanh_phan_dinh_duong || {};
+    el.innerHTML = `
+    <div class="flex items-center gap-2 text-text-muted text-sm mb-8">
+      <a href="/src/pages/shop.html" class="hover:text-neon-lime transition-colors">Shop</a>
+      <span class="material-symbols-outlined text-sm">chevron_right</span>
+      <span class="text-text-primary">${p.g6_ten_san_pham}</span>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+      <div class="bg-bg-card border border-border-subtle rounded-2xl overflow-hidden aspect-square flex items-center justify-center">
+        <span class="material-symbols-outlined text-8xl text-text-muted">inventory_2</span>
+      </div>
+      <div class="flex flex-col">
+        <div class="text-text-muted text-xs font-caps uppercase tracking-widest mb-2">${p.g6_thuong_hieu?.g6_ten_thuong_hieu || 'Thương hiệu'}</div>
+        <h1 class="text-3xl font-black text-white mb-4">${p.g6_ten_san_pham}</h1>
+        ${p.g6_doi_tuong_dung ? `<div class="text-text-secondary text-sm mb-4">Phù hợp: ${p.g6_doi_tuong_dung}</div>` : ''}
+        <div class="text-3xl font-black text-neon-lime font-mono mb-6">${nqtFormatPrice(price)}</div>
+        ${btList.length > 1 ? `
+        <div class="mb-5">
+          <div class="text-text-secondary text-xs font-caps uppercase tracking-widest mb-2">Chọn loại:</div>
+          <div class="flex flex-wrap gap-2">
+            ${btList.map((bt, i) => `
+            <button onclick="document.querySelectorAll('[data-variant]').forEach(b=>b.classList.remove('border-neon-lime','bg-neon-glow'));this.classList.add('border-neon-lime','bg-neon-glow');document.getElementById('nqtPrice').textContent='${nqtFormatPrice(bt.g6_gia)}';window._nqtSelBt=${i};window._nqtSelPrice=${bt.g6_gia};document.getElementById('nqtAddBtn').onclick=()=>nqtAddToCart(${id},'${p.g6_ten_san_pham}',${bt.g6_gia},${bt.g6_ma_bien_the})"
+              data-variant class="border ${i===0?'border-neon-lime bg-neon-glow':'border-border-subtle'} text-text-secondary px-4 py-2 rounded-xl text-sm hover:border-border-neon transition-all">
+              ${bt.g6_ten_bien_the || ('Loại '+(i+1))} — ${nqtFormatPrice(bt.g6_gia)}
+            </button>`).join('')}
+          </div>
+        </div>` : ''}
+        <div class="flex gap-3 mb-6">
+          <button id="nqtAddBtn" onclick="nqtAddToCart(${id},'${p.g6_ten_san_pham}',${price},${defaultBt?.g6_ma_bien_the || 'null'})" class="flex-1 bg-neon-lime text-bg-main py-4 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Thêm vào giỏ hàng
+          </button>
+          <a href="/src/pages/shop/gio-hang.html" class="border border-border-neon text-neon-lime px-5 py-4 rounded-xl hover:bg-neon-glow transition-colors flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">shopping_cart</span>
+          </a>
+        </div>
+        <div class="flex items-center gap-4 text-sm text-text-secondary">
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base text-success">check_circle</span> Còn hàng</span>
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base text-success">verified</span> Chính hãng 100%</span>
+        </div>
+      </div>
+    </div>
+    ${Object.keys(dnld).length ? `
+    <section class="mb-12">
+      <h2 class="text-xl font-black text-white mb-6">Thành phần dinh dưỡng</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        ${[{k:'protein',l:'Protein'},{k:'calo',l:'Calo'},{k:'tinh_bot',l:'Tinh bột'},{k:'chat_beo',l:'Chất béo'},{k:'bcaa',l:'BCAA'},{k:'creatine',l:'Creatine'}].filter(x=>dnld['g6_'+k]).map(x=>`
+        <div class="bg-bg-card border border-border-subtle rounded-xl p-4 text-center">
+          <div class="text-neon-lime font-mono text-2xl font-bold">${dnld['g6_'+x.k]}</div>
+          <div class="text-text-muted text-xs font-caps uppercase tracking-wide mt-1">${x.l}</div>
+        </div>`).join('')}
+      </div>
+    </section>` : ''}
+    <section>
+      <h2 class="text-xl font-black text-white mb-6">Sản phẩm liên quan</h2>
+      <div id="nqtRelatedGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+    </section>`;
+    // Load related products
+    try {
+      const r2 = await fetch('/api/nxv-san-pham');
+      const j2 = await r2.json();
+      const all = Array.isArray(j2.nqt_du_lieu) ? j2.nqt_du_lieu : (Array.isArray(j2) ? j2 : []);
+      const related = all.filter(x => x.g6_ma_san_pham !== Number(id)).slice(0, 4);
+      document.getElementById('nqtRelatedGrid').innerHTML = related.map(rp => {
+        const rpBt = rp.g6_bien_the?.[0] || {};
+        return `<div class="bg-bg-card border border-border-subtle rounded-xl overflow-hidden hover:border-border-neon transition-all cursor-pointer" onclick="location.href='/src/pages/shop-chi-tiet.html?id=${rp.g6_ma_san_pham}'">
+          <div class="aspect-square bg-bg-elevated flex items-center justify-center">
+            <span class="material-symbols-outlined text-4xl text-text-muted">inventory_2</span>
+          </div>
+          <div class="p-3">
+            <div class="text-white text-xs font-semibold line-clamp-2 mb-1">${rp.g6_ten_san_pham}</div>
+            <div class="text-neon-lime font-mono text-sm font-bold">${nqtFormatPrice(rpBt.g6_gia)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch {}
+  } catch {
+    el.innerHTML = '<div class="text-center py-20 text-text-muted">Không thể tải sản phẩm.</div>';
+  }
+})();
+</script>
+</body>
+</html>

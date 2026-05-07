@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi" id="nqtHtmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - NQT Gym Admin</title>
+    <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div id="nqt-page-content" style="display:none" class="space-y-4">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">Blog</h1>
+            <p class="text-sm text-[#666] dark:text-[#888]">Quản lý bài viết và danh mục blog</p>
+        </div>
+        <button id="nqtBtnThem" onclick="nqtMoModal('nqtModalThemBV')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors">
+            <i class="fas fa-plus"></i>Thêm bài viết
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex space-x-1 border-b border-[#e5e5e5] dark:border-[#404040]">
+        <button onclick="nqtChuyenTab('baiviet')" id="nqtTabBaiviet" class="px-4 py-2 text-sm font-medium border-b-2 border-[#191919] dark:border-[#fafafa] text-[#191919] dark:text-[#fafafa] -mb-px">Bài viết</button>
+        <button onclick="nqtChuyenTab('danhmuc')" id="nqtTabDanhmuc" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] -mb-px">Danh mục</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex gap-3">
+        <div class="relative flex-1 max-w-md">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-[#a3a3a3]"><i class="fas fa-search text-sm"></i></span>
+            <input type="text" id="nqtTimKiem" oninput="nqtXuLyTimKiem()" placeholder="Tìm bài viết..."
+                class="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa] placeholder-[#a3a3a3]">
+        </div>
+        <button onclick="nqtTaiDuLieu()" class="px-3 py-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors">
+            <i class="fas fa-sync-alt text-[#666] dark:text-[#888] text-sm"></i>
+        </button>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead id="nqtTableHead" class="bg-[#fafafa] dark:bg-[#333] border-b border-[#e5e5e5] dark:border-[#404040]"></thead>
+                <tbody id="nqtTableBody" class="divide-y divide-[#e5e5e5] dark:divide-[#404040]">
+                    <tr><td colspan="5" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]"><i class="fas fa-circle-notch fa-spin mr-2"></i>Đang tải...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Bài viết -->
+<div id="nqtModalThemBV" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)nqtDongModal('nqtModalThemBV')">
+    <div class="bg-white dark:bg-[#262626] rounded-lg w-full max-w-2xl border border-[#e5e5e5] dark:border-[#404040] max-h-[90vh] overflow-y-auto">
+        <div class="px-6 py-4 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between sticky top-0 bg-white dark:bg-[#262626]">
+            <h3 id="nqtModalBVTitle" class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">Thêm bài viết</h3>
+            <button onclick="nqtDongModal('nqtModalThemBV')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="nqtFormBV" onsubmit="nqtLuuBV(event)" class="p-6 space-y-4">
+            <input type="hidden" id="nqtBVId">
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Tiêu đề *</label>
+                <input type="text" id="nqtTieuDe" required placeholder="Tiêu đề bài viết"
+                    class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Slug URL</label>
+                <input type="text" id="nqtSlug" placeholder="tieu-de-bai-viet"
+                    class="w-full px-3 py-2 text-sm font-mono bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Tóm tắt</label>
+                <textarea id="nqtTomTat" rows="2" placeholder="Tóm tắt ngắn gọn..."
+                    class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Nội dung</label>
+                <textarea id="nqtNoiDung" rows="6" placeholder="Nội dung bài viết..."
+                    class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]"></textarea>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="nqtDaXuatBan" class="rounded">
+                <label for="nqtDaXuatBan" class="text-sm text-[#666] dark:text-[#888]">Xuất bản ngay</label>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="nqtDongModal('nqtModalThemBV')" class="px-4 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333]">Huỷ</button>
+                <button type="submit" id="nqtBtnLuuBV" class="px-4 py-2 text-sm bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5]">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Thêm Danh mục -->
+<div id="nqtModalThemDM" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)nqtDongModal('nqtModalThemDM')">
+    <div class="bg-white dark:bg-[#262626] rounded-lg w-full max-w-md border border-[#e5e5e5] dark:border-[#404040]">
+        <div class="px-6 py-4 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between sticky top-0 bg-white dark:bg-[#262626]">
+            <h3 id="nqtModalDMTitle" class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">Thêm danh mục</h3>
+            <button onclick="nqtDongModal('nqtModalThemDM')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="nqtFormDM" onsubmit="nqtLuuDM(event)" class="p-6 space-y-4">
+            <input type="hidden" id="nqtDMId">
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Tên danh mục *</label>
+                <input type="text" id="nqtTenDM" required placeholder="Ví dụ: Tin tức" oninput="nqtTaoSlug(this.value, 'nqtSlugDM')"
+                    class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Slug URL *</label>
+                <input type="text" id="nqtSlugDM" required placeholder="tin-tuc"
+                    class="w-full px-3 py-2 text-sm font-mono bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="nqtDongModal('nqtModalThemDM')" class="px-4 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333]">Huỷ</button>
+                <button type="submit" id="nqtBtnLuuDM" class="px-4 py-2 text-sm bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5]">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
+nqtInitAdminLayout('blog');
+
+let nqtTabHienTai = 'baiviet';
+let nqtTimKiemTimer = null;
+const nqtTabCfg = {
+    baiviet: { api: '/api/nqt-bai-viet', cols: ['Tiêu đề','Danh mục','Tác giả','Ngày đăng','Trạng thái','Thao tác'] },
+    danhmuc: { api: '/api/nqt-danh-muc-bai-viet', cols: ['Tên danh mục','Slug','Thao tác'] },
+};
+
+function nqtChuyenTab(tab) {
+    nqtTabHienTai = tab;
+    document.querySelectorAll('[id^=nqtTab]').forEach(b => b.className = 'px-4 py-2 text-sm font-medium border-b-2 border-transparent text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] -mb-px');
+    const map = {baiviet:'Baiviet',danhmuc:'Danhmuc'};
+    const btn = document.getElementById('nqtTab'+map[tab]);
+    if (btn) btn.className = 'px-4 py-2 text-sm font-medium border-b-2 border-[#191919] dark:border-[#fafafa] text-[#191919] dark:text-[#fafafa] -mb-px';
+    const btnThem = document.getElementById('nqtBtnThem');
+    if (btnThem) {
+        btnThem.style.display = 'inline-flex';
+        if (tab === 'baiviet') {
+            btnThem.innerHTML = '<i class="fas fa-plus"></i>Thêm bài viết';
+            btnThem.onclick = () => { document.getElementById('nqtFormBV').reset(); document.getElementById('nqtBVId').value=''; document.getElementById('nqtModalBVTitle').textContent='Thêm bài viết'; nqtMoModal('nqtModalThemBV'); };
+        } else {
+            btnThem.innerHTML = '<i class="fas fa-plus"></i>Thêm danh mục';
+            btnThem.onclick = () => { document.getElementById('nqtFormDM').reset(); document.getElementById('nqtDMId').value=''; document.getElementById('nqtModalDMTitle').textContent='Thêm danh mục'; nqtMoModal('nqtModalThemDM'); };
+        }
+    }
+    nqtRenderHead(); nqtTaiDuLieu();
+}
+
+function nqtRenderHead() {
+    document.getElementById('nqtTableHead').innerHTML = `<tr>${nqtTabCfg[nqtTabHienTai].cols.map(c=>`<th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">${c}</th>`).join('')}</tr>`;
+}
+
+async function nqtTaiDuLieu() {
+    const q = document.getElementById('nqtTimKiem')?.value.trim()||'';
+    const cfg = nqtTabCfg[nqtTabHienTai];
+    const url = cfg.api + (q?`?g6_tim_kiem=${encodeURIComponent(q)}`:'');
+    const tbody = document.getElementById('nqtTableBody');
+    const nc = cfg.cols.length;
+    tbody.innerHTML = `<tr><td colspan="${nc}" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]"><i class="fas fa-circle-notch fa-spin mr-2"></i>Đang tải...</td></tr>`;
+    const res = await nqtApi.fetch(url);
+    if (!res?.nqt_thanh_cong) { tbody.innerHTML = `<tr><td colspan="${nc}" class="px-4 py-8 text-center text-sm text-[#dc2626]">Không thể tải dữ liệu</td></tr>`; return; }
+    const list = res.nqt_du_lieu?.g6_danh_sach || res.nqt_du_lieu || [];
+    if (!list.length) { tbody.innerHTML = `<tr><td colspan="${nc}" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]">Không có dữ liệu</td></tr>`; return; }
+    tbody.innerHTML = list.map(r => nqtRenderRow(r)).join('');
+}
+
+function nqtRenderRow(r) {
+    const del = (id,api) => `<button onclick="nqtXoa(${id},'${api}')" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button>`;
+    const t = nqtTabHienTai;
+    if (t === 'baiviet') return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
+        <td class="px-4 py-3"><p class="font-medium text-sm text-[#191919] dark:text-[#fafafa] line-clamp-1">${r.g6_tieu_de||'—'}</p><p class="text-xs font-mono text-[#666] dark:text-[#888]">${r.g6_slug||''}</p></td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_danh_muc||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_tac_gia||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ngay_xuat_ban?.slice(0,10)||'—'}</td>
+        <td class="px-4 py-3">${r.g6_da_xuat_ban?'<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#dcfce7] dark:bg-[#16a34a]/20 text-[#16a34a]">Đã đăng</span>':'<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#f5f5f5] dark:bg-[#333] text-[#666] dark:text-[#888]">Nháp</span>'}</td>
+        <td class="px-4 py-3 text-right"><button onclick="nqtSuaBV(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="text-xs px-2 py-1 rounded border border-[#e5e5e5] dark:border-[#404040] hover:bg-[#f5f5f5] dark:hover:bg-[#333] text-[#666] dark:text-[#888] mr-1">Sửa</button>${del(r.g6_ma_bai_viet,'nqt-bai-viet')}</td></tr>`;
+    return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
+        <td class="px-4 py-3 font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten||'—'}</td>
+        <td class="px-4 py-3 text-xs font-mono text-[#666] dark:text-[#888]">${r.g6_slug||'—'}</td>
+        <td class="px-4 py-3 text-right"><button onclick="nqtSuaDM(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="text-xs px-2 py-1 rounded border border-[#e5e5e5] dark:border-[#404040] hover:bg-[#f5f5f5] dark:hover:bg-[#333] text-[#666] dark:text-[#888] mr-1">Sửa</button>${del(r.g6_ma_danh_muc,'nqt-danh-muc-bai-viet')}</td></tr>`;
+}
+
+function nqtXuLyTimKiem() { clearTimeout(nqtTimKiemTimer); nqtTimKiemTimer = setTimeout(nqtTaiDuLieu, 400); }
+
+function nqtSuaBV(r) {
+    document.getElementById('nqtModalBVTitle').textContent = 'Cập nhật bài viết';
+    document.getElementById('nqtBVId').value = r.g6_ma_bai_viet||'';
+    document.getElementById('nqtTieuDe').value = r.g6_tieu_de||'';
+    document.getElementById('nqtSlug').value = r.g6_slug||'';
+    document.getElementById('nqtTomTat').value = r.g6_tom_tat||'';
+    document.getElementById('nqtNoiDung').value = r.g6_noi_dung||'';
+    document.getElementById('nqtDaXuatBan').checked = !!r.g6_da_xuat_ban;
+    nqtMoModal('nqtModalThemBV');
+}
+
+async function nqtLuuBV(e) {
+    e.preventDefault();
+    const id = document.getElementById('nqtBVId').value;
+    const btn = document.getElementById('nqtBtnLuuBV');
+    const nqtRestore = nqtBtnLoading(btn,'Đang lưu...');
+    const payload = {
+        g6_tieu_de: document.getElementById('nqtTieuDe').value.trim(),
+        g6_slug: document.getElementById('nqtSlug').value.trim(),
+        g6_tom_tat: document.getElementById('nqtTomTat').value.trim(),
+        g6_noi_dung: document.getElementById('nqtNoiDung').value.trim(),
+        g6_trang_thai: document.getElementById('nqtDaXuatBan').checked ? 'xuat_ban' : 'nhap',
+        g6_ma_danh_muc: 1
+    };
+    const res = await nqtApi.fetch(id ? `/api/nqt-bai-viet/${id}` : '/api/nqt-bai-viet', { method: id ? 'PUT' : 'POST', body: payload });
+    nqtRestore();
+    if (res?.nqt_thanh_cong) { nqtToast('Lưu thành công'); nqtDongModal('nqtModalThemBV'); nqtTaiDuLieu(); }
+    else nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+}
+
+window.nqtSuaDM = function(r) {
+    document.getElementById('nqtModalDMTitle').textContent = 'Cập nhật danh mục';
+    document.getElementById('nqtDMId').value = r.g6_ma_danh_muc;
+    document.getElementById('nqtTenDM').value = r.g6_ten || '';
+    document.getElementById('nqtSlugDM').value = r.g6_slug || '';
+    nqtMoModal('nqtModalThemDM');
+};
+
+async function nqtLuuDM(e) {
+    e.preventDefault();
+    const id = document.getElementById('nqtDMId').value;
+    const btn = document.getElementById('nqtBtnLuuDM');
+    const nqtRestore = nqtBtnLoading(btn,'Đang lưu...');
+    const payload = {
+        g6_ten: document.getElementById('nqtTenDM').value.trim(),
+        g6_slug: document.getElementById('nqtSlugDM').value.trim()
+    };
+    const res = await nqtApi.fetch(id ? `/api/nqt-danh-muc-bai-viet/${id}` : '/api/nqt-danh-muc-bai-viet', { method: id ? 'PUT' : 'POST', body: payload });
+    nqtRestore();
+    if (res?.nqt_thanh_cong) { nqtToast('Lưu thành công'); nqtDongModal('nqtModalThemDM'); nqtTaiDuLieu(); }
+    else nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+}
+
+async function nqtXoa(id,api) {
+    if (!confirm('Xoá bản ghi này?')) return;
+    const res = await nqtApi.fetch(`/api/${api}/${id}`,{method:'DELETE'});
+    res?.nqt_thanh_cong?(nqtToast('Đã xoá'),nqtTaiDuLieu()):nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+}
+
+window.nqtChuyenTab = nqtChuyenTab;
+window.nqtTaiDuLieu = nqtTaiDuLieu;
+window.nqtXuLyTimKiem = nqtXuLyTimKiem;
+window.nqtSuaBV = nqtSuaBV;
+window.nqtLuuBV = nqtLuuBV;
+window.nqtSuaDM = nqtSuaDM;
+window.nqtLuuDM = nqtLuuDM;
+window.nqtXoa = nqtXoa;
+
+window.nqtTaoSlug = function(str, targetId) {
+    let slug = str.toLowerCase().replace(/đ/g, 'd').replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    document.getElementById(targetId).value = slug;
+};
+
+nqtRenderHead();
+nqtTaiDuLieu();
+</script>
+</body>
+</html>

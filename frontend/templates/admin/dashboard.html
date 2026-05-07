@@ -95,13 +95,42 @@
     async function nqtLoadRecentActivity() {
         const activityEl = document.getElementById('nqtRecentActivity');
         if (!activityEl) return;
-        const activities = [
-            { icon: 'fa-user-plus', title: 'Hội viên mới đăng ký', time: '2 phút trước' },
-            { icon: 'fa-check-circle', title: 'Check-in thành công', time: '5 phút trước' },
-            { icon: 'fa-credit-card', title: 'Thanh toán gói VIP', time: '15 phút trước' },
-            { icon: 'fa-shopping-bag', title: 'Đơn hàng mới #1234', time: '32 phút trước' },
-        ];
-        activityEl.innerHTML = activities.map(a => `
+        activityEl.innerHTML = '<div class="p-4 text-center text-xs text-[#a3a3a3]"><i class="fas fa-circle-notch fa-spin mr-1"></i>Đang tải...</div>';
+
+        const [resHV, resTT] = await Promise.allSettled([
+            nqtApi.fetch('/api/nqt-hoi-vien?g6_gioi_han=3'),
+            nqtApi.fetch('/api/nqt-thanh-toan?g6_gioi_han=3'),
+        ]);
+
+        const activities = [];
+
+        if (resHV.status === 'fulfilled' && resHV.value?.nqt_thanh_cong) {
+            (resHV.value.nqt_du_lieu.g6_danh_sach || []).forEach(hv => {
+                activities.push({
+                    icon: 'fa-user-plus',
+                    title: `Hội viên mới: ${hv.g6_ho_ten || 'N/A'}`,
+                    time: hv.g6_ngay_dang_ky ? new Date(hv.g6_ngay_dang_ky).toLocaleDateString('vi-VN') : '',
+                });
+            });
+        }
+
+        if (resTT.status === 'fulfilled' && resTT.value?.nqt_thanh_cong) {
+            (resTT.value.nqt_du_lieu.g6_danh_sach || []).forEach(tt => {
+                const nqtLoaiMap = { goi_tap: 'Thanh toán gói tập', don_hang: 'Đơn hàng mới', dich_vu: 'Thanh toán dịch vụ' };
+                activities.push({
+                    icon: 'fa-credit-card',
+                    title: `${nqtLoaiMap[tt.g6_loai_giao_dich] || 'Giao dịch mới'} #${tt.g6_ma_thanh_toan}`,
+                    time: tt.g6_ngay_tao ? new Date(tt.g6_ngay_tao).toLocaleDateString('vi-VN') : '',
+                });
+            });
+        }
+
+        if (activities.length === 0) {
+            activityEl.innerHTML = '<div class="p-4 text-center text-xs text-[#a3a3a3]">Chưa có hoạt động nào</div>';
+            return;
+        }
+
+        activityEl.innerHTML = activities.slice(0, 5).map(a => `
             <div class="p-3 flex items-center space-x-3 hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors cursor-pointer">
                 <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center flex-shrink-0">
                     <i class="fas ${a.icon} text-xs text-[#525252] dark:text-[#a3a3a3]"></i>

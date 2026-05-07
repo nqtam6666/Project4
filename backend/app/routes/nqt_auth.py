@@ -21,7 +21,11 @@ def nqt_dang_nhap():
     if not nqt_ten or not nqt_mk:
         return nqt_loi('Thiếu tên đăng nhập hoặc mật khẩu')
 
-    nqt_user = G6NguoiDung.query.filter_by(g6_ten_dang_nhap=nqt_ten).first()
+    nqt_user = G6NguoiDung.query.filter(
+        (G6NguoiDung.g6_ten_dang_nhap == nqt_ten) |
+        (G6NguoiDung.g6_so_dien_thoai == nqt_ten) |
+        (G6NguoiDung.g6_email == nqt_ten)
+    ).first()
     if not nqt_user:
         return nqt_loi('Tên đăng nhập hoặc mật khẩu không đúng', nqt_ma_trang=401)
 

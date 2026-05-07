@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="vi" id="nqtHtmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cấu hình - NQT Gym Admin</title>
+    <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div id="nqt-page-content" style="display:none" class="space-y-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-2">
+        <div>
+            <h1 class="text-xl font-bold text-on-surface">Cấu hình hệ thống</h1>
+            <p class="text-sm text-on-surface-variant mt-1">Quản lý tất cả cài đặt của hệ thống NQT Gym</p>
+        </div>
+        <div class="flex items-center space-x-2 px-3 py-1.5 bg-secondary/10 rounded-md border border-secondary/20">
+            <span class="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
+            <span class="text-xs font-medium text-secondary">Hệ thống hoạt động</span>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="bg-surface-container border border-outline-variant rounded-xl p-1.5 shadow-sm">
+        <div class="flex flex-wrap gap-1" id="nqtTabBar">
+            <button data-tab="website" onclick="nqtSwitchTab('website')" class="nqt-tab-pill px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-bright flex items-center space-x-2 transition-colors">
+                <i class="fas fa-globe text-xs"></i><span>Website</span>
+            </button>
+            <button data-tab="business" onclick="nqtSwitchTab('business')" class="nqt-tab-pill px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-bright flex items-center space-x-2 transition-colors">
+                <i class="fas fa-dumbbell text-xs"></i><span>Kinh doanh</span>
+            </button>
+            <button data-tab="email" onclick="nqtSwitchTab('email')" class="nqt-tab-pill px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-bright flex items-center space-x-2 transition-colors">
+                <i class="fas fa-envelope text-xs"></i><span>Email SMTP</span>
+            </button>
+            <button data-tab="payment" onclick="nqtSwitchTab('payment')" class="nqt-tab-pill px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-bright flex items-center space-x-2 transition-colors">
+                <i class="fas fa-credit-card text-xs"></i><span>Thanh toán</span>
+            </button>
+            <button data-tab="security" onclick="nqtSwitchTab('security')" class="nqt-tab-pill px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-bright flex items-center space-x-2 transition-colors">
+                <i class="fas fa-shield-alt text-xs"></i><span>Bảo mật</span>
+            </button>
+            <button data-tab="loyalty" onclick="nqtSwitchTab('loyalty')" class="nqt-tab-pill px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-bright flex items-center space-x-2 transition-colors">
+                <i class="fas fa-star text-xs"></i><span>Tích điểm</span>
+            </button>
+            <button data-tab="theme" onclick="nqtSwitchTab('theme')" class="nqt-tab-pill px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-bright flex items-center space-x-2 transition-colors">
+                <i class="fas fa-palette text-xs"></i><span>Giao diện</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div id="nqtTabContent">
+        <div class="flex items-center justify-center py-16 text-[#666] dark:text-[#888]">
+            <div class="text-center">
+                <i class="fas fa-circle-notch fa-spin text-2xl text-[#191919] dark:text-[#fafafa] mb-3"></i>
+                <p class="text-sm">Đang tải cấu hình...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
+nqtInitAdminLayout('cau-hinh');
+
+(function() {
+    let nqtCauHinhData = {};
+    let nqtActiveTab = localStorage.getItem('nqt_cau_hinh_tab') || 'website';
+
+    const nqtTabDefs = {
+        website: {
+            label: 'Thông tin Website',
+            description: 'Cấu hình thông tin cơ bản hiển thị trên website',
+            icon: 'fas fa-globe',
+            groups: [
+                {
+                    title: 'Thông tin cơ bản',
+                    description: 'Tên và mô tả website',
+                    fields: [
+                        { key: 'ten_website', label: 'Tên website', type: 'text', placeholder: 'VD: NQT Gym', hint: 'Hiển thị trên tiêu đề trang' },
+                        { key: 'mo_ta_website', label: 'Mô tả ngắn', type: 'textarea', placeholder: 'Mô tả về gym của bạn...', hint: 'SEO meta description' },
+                    ]
+                },
+                {
+                    title: 'Hình ảnh thương hiệu',
+                    description: 'Logo và favicon',
+                    fields: [
+                        { key: 'logo_url', label: 'Logo website', type: 'image', hint: 'Khuyến nghị: 200x60px, PNG/SVG' },
+                        { key: 'favicon_url', label: 'Favicon', type: 'image', hint: 'Khuyến nghị: 32x32px, ICO/PNG' },
+                    ]
+                },
+                {
+                    title: 'Thông tin liên hệ',
+                    description: 'Hiển thị ở footer và trang liên hệ',
+                    fields: [
+                        { key: 'email_lien_he', label: 'Email liên hệ', type: 'email', placeholder: 'contact@example.com' },
+                        { key: 'so_dien_thoai_hotline', label: 'Hotline', type: 'text', placeholder: '1900 1234' },
+                        { key: 'dia_chi_tru_so', label: 'Địa chỉ trụ sở', type: 'text', placeholder: '123 Đường ABC, Quận XYZ' },
+                    ]
+                },
+                {
+                    title: 'Mạng xã hội',
+                    description: 'Liên kết đến các trang mạng xã hội',
+                    fields: [
+                        { key: 'facebook_url', label: 'Facebook', type: 'text', placeholder: 'https://facebook.com/...' },
+                        { key: 'zalo_url', label: 'Zalo', type: 'text', placeholder: 'https://zalo.me/...' },
+                    ]
+                }
+            ]
+        },
+        business: {
+            label: 'Cài đặt Kinh doanh',
+            description: 'Cấu hình giờ hoạt động, check-in và các quy tắc nghiệp vụ',
+            icon: 'fas fa-dumbbell',
+            groups: [
+                {
+                    title: 'Giờ hoạt động',
+                    description: 'Giờ mở cửa và đóng cửa mặc định',
+                    fields: [
+                        { key: 'gio_mo_cua', label: 'Giờ mở cửa', type: 'time' },
+                        { key: 'gio_dong_cua', label: 'Giờ đóng cửa', type: 'time' },
+                    ]
+                },
+                {
+                    title: 'Quy tắc Check-in',
+                    description: 'Cấu hình điểm danh hội viên',
+                    fields: [
+                        { key: 'so_luot_checkin_ngay_mac_dinh', label: 'Lượt check-in/ngày', type: 'number', hint: 'Số lần được check-in mỗi ngày' },
+                        { key: 'cho_phep_checkin_truoc_phut', label: 'Check-in sớm (phút)', type: 'number', hint: 'Cho phép check-in trước buổi tập' },
+                        { key: 'suc_chua_mac_dinh', label: 'Sức chứa mặc định', type: 'number', hint: 'Số người tối đa mỗi chi nhánh' },
+                    ]
+                },
+                {
+                    title: 'Nhắc nhở hết hạn',
+                    description: 'Thông báo trước khi gói tập hết hạn',
+                    fields: [
+                        { key: 'so_ngay_nhac_het_han', label: 'Nhắc lần 1 (ngày)', type: 'number', hint: 'Số ngày trước khi hết hạn' },
+                        { key: 'so_ngay_nhac_lan_2', label: 'Nhắc lần 2 (ngày)', type: 'number', hint: 'Nhắc lại lần 2' },
+                    ]
+                }
+            ]
+        },
+        email: {
+            label: 'Cấu hình Email SMTP',
+            description: 'Thiết lập máy chủ gửi email cho hệ thống',
+            icon: 'fas fa-envelope',
+            groups: [
+                {
+                    title: 'Máy chủ SMTP',
+                    description: 'Cấu hình kết nối đến mail server',
+                    fields: [
+                        { key: 'smtp_host', label: 'SMTP Host', type: 'text', placeholder: 'smtp.gmail.com', hint: 'Địa chỉ máy chủ SMTP' },
+                        { key: 'smtp_port', label: 'SMTP Port', type: 'number', placeholder: '587', hint: '587 (TLS) hoặc 465 (SSL)' },
+                        { key: 'smtp_bao_mat', label: 'Bảo mật', type: 'select', options: [
+                            { value: 'none', label: 'Không bảo mật' },
+                            { value: 'ssl', label: 'SSL (Port 465)' },
+                            { value: 'tls', label: 'TLS/STARTTLS (Port 587)' },
+                        ], hint: 'Phương thức mã hóa kết nối' },
+                    ]
+                },
+                {
+                    title: 'Xác thực SMTP',
+                    description: 'Thông tin đăng nhập email gửi đi',
+                    fields: [
+                        { key: 'smtp_email', label: 'Email đăng nhập', type: 'email', placeholder: 'your-email@gmail.com', hint: 'Email dùng để đăng nhập SMTP' },
+                        { key: 'smtp_mat_khau', label: 'Mật khẩu ứng dụng', type: 'password', placeholder: '••••••••••••', hint: 'Với Gmail: dùng App Password' },
+                    ]
+                },
+                {
+                    title: 'Thông tin người gửi',
+                    description: 'Hiển thị khi gửi email đến khách hàng',
+                    fields: [
+                        { key: 'email_gui_tu', label: 'Email hiển thị (From)', type: 'email', placeholder: 'no-reply@example.com' },
+                        { key: 'ten_nguoi_gui_email', label: 'Tên hiển thị', type: 'text', placeholder: 'NQT Gym' },
+                    ]
+                }
+            ],
+            actions: [
+                { id: 'testEmail', label: 'Gửi email test', icon: 'fas fa-paper-plane' }
+            ]
+        },
+        security: {
+            label: 'Bảo mật',
+            description: 'Cấu hình xác thực và bảo vệ tài khoản',
+            icon: 'fas fa-shield-alt',
+            groups: [
+                {
+                    title: 'Token & Phiên',
+                    description: 'Cấu hình JWT và session',
+                    fields: [
+                        { key: 'jwt_expiry_giay', label: 'JWT hết hạn (giây)', type: 'number', hint: '3600 = 1 giờ, 86400 = 1 ngày' },
+                    ]
+                },
+                {
+                    title: 'Khóa tài khoản',
+                    description: 'Bảo vệ khỏi tấn công brute-force',
+                    fields: [
+                        { key: 'so_lan_sai_mat_khau', label: 'Số lần sai tối đa', type: 'number', hint: 'Khóa sau N lần sai mật khẩu' },
+                        { key: 'thoi_gian_khoa_phut', label: 'Thời gian khóa (phút)', type: 'number', hint: 'Khóa tài khoản trong N phút' },
+                    ]
+                },
+                {
+                    title: 'OTP',
+                    description: 'Xác thực 2 yếu tố',
+                    fields: [
+                        { key: 'otp_het_han_phut', label: 'OTP hết hạn (phút)', type: 'number', hint: 'Mã OTP có hiệu lực trong N phút' },
+                    ]
+                }
+            ]
+        },
+        payment: {
+            label: 'Thanh toán',
+            description: 'Cấu hình tiền tệ, thuế và phí',
+            icon: 'fas fa-credit-card',
+            groups: [
+                {
+                    title: 'Tiền tệ & Thuế',
+                    description: 'Cấu hình đơn vị tiền và thuế VAT',
+                    fields: [
+                        { key: 'tien_te', label: 'Đơn vị tiền tệ', type: 'text', hint: 'VND, USD, EUR...' },
+                        { key: 'thue_vat_phan_tram', label: 'Thuế VAT (%)', type: 'number', hint: 'Áp dụng cho tất cả giao dịch' },
+                    ]
+                },
+                {
+                    title: 'Phí vận chuyển',
+                    description: 'Cấu hình phí ship cho đơn hàng',
+                    fields: [
+                        { key: 'phi_giao_hang_mac_dinh', label: 'Phí ship mặc định', type: 'number', hint: 'Đơn vị: VND' },
+                        { key: 'mien_phi_giao_hang_tu', label: 'Miễn phí ship từ', type: 'number', hint: 'Miễn phí khi đơn hàng >= N VND' },
+                    ]
+                }
+            ]
+        },
+        loyalty: {
+            label: 'Chương trình Tích điểm',
+            description: 'Cấu hình quy tắc tích và đổi điểm',
+            icon: 'fas fa-star',
+            groups: [
+                {
+                    title: 'Quy tắc tích điểm',
+                    description: 'Cách thức tích lũy điểm thưởng',
+                    fields: [
+                        { key: 'diem_tren_moi_1000_dong', label: 'Mỗi bao nhiêu VND = 1 điểm', type: 'number', hint: 'VD: 100.000 = mỗi 100k được 1 điểm' },
+                        { key: '1_diem_bang_dong', label: '1 điểm = bao nhiêu VND', type: 'number', hint: 'Giá trị khi quy đổi điểm thành tiền' },
+                    ]
+                }
+            ]
+        },
+        theme: {
+            label: 'Giao diện',
+            description: 'Tùy chỉnh màu sắc thương hiệu',
+            icon: 'fas fa-palette',
+            groups: [
+                {
+                    title: 'Màu sắc chính',
+                    description: 'Màu thương hiệu hiển thị trên toàn hệ thống',
+                    fields: [
+                        { key: 'mau_chu_dao', label: 'Màu chủ đạo', type: 'color', hint: 'Màu nền buttons, links...' },
+                        { key: 'mau_phu', label: 'Màu phụ', type: 'color', hint: 'Màu accent, hover...' },
+                    ]
+                }
+            ]
+        }
+    };
+
+    async function nqtLoadCauHinh() {
+        const groups = ['website', 'business', 'security', 'email', 'payment', 'loyalty', 'theme'];
+        const results = await Promise.all(groups.map(g => nqtApi.fetch(`/api/nqt-cau-hinh?g6_nhom=${g}`)));
+        groups.forEach((g, i) => {
+            nqtCauHinhData[g] = {};
+            if (results[i] && results[i].nqt_thanh_cong) {
+                results[i].nqt_du_lieu.forEach(row => {
+                    nqtCauHinhData[g][row.g6_khoa] = row.g6_gia_tri;
+                });
+            }
+        });
+        nqtSwitchTab(nqtActiveTab);
+    }
+
+    window.nqtSwitchTab = function(tab) {
+        nqtActiveTab = tab;
+        localStorage.setItem('nqt_cau_hinh_tab', tab);
+        document.querySelectorAll('.nqt-tab-pill').forEach(btn => {
+            const isActive = btn.dataset.tab === tab;
+            if (isActive) {
+                btn.classList.add('bg-primary', 'text-white', 'shadow-md', 'neon-button');
+                btn.classList.remove('text-on-surface-variant', 'hover:bg-surface-bright');
+            } else {
+                btn.classList.remove('bg-primary', 'text-white', 'shadow-md', 'neon-button');
+                btn.classList.add('text-on-surface-variant', 'hover:bg-surface-bright');
+            }
+        });
+        nqtRenderTab(tab);
+    }
+
+    function nqtRenderTab(tab) {
+        const def = nqtTabDefs[tab];
+        const groupData = nqtCauHinhData[tab] || {};
+        const content = document.getElementById('nqtTabContent');
+
+        let groupsHtml = def.groups.map(grp => {
+            let fieldsHtml = grp.fields.map(f => nqtRenderField(f, groupData['g6_' + f.key])).join('');
+            return `
+                <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary/50 transition-all shadow-sm">
+                    <div class="px-5 py-4 border-b border-outline-variant bg-surface-container-high">
+                        <h3 class="font-bold text-on-surface text-sm">${grp.title}</h3>
+                        <p class="text-xs text-on-surface-variant mt-1">${grp.description}</p>
+                    </div>
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                        ${fieldsHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        let actionsHtml = '';
+        if (def.actions) {
+            actionsHtml = def.actions.map(a => `
+                <button type="button" onclick="nqtRunAction('${a.id}')" class="px-4 py-2.5 bg-surface-container border border-outline-variant text-on-surface text-sm font-medium rounded-lg hover:bg-surface-bright transition-colors flex items-center space-x-2">
+                    <i class="${a.icon}"></i><span>${a.label}</span>
+                </button>
+            `).join('');
+        }
+
+        content.innerHTML = `
+            <form id="formCauHinh" onsubmit="nqtSaveCauHinh(event, '${tab}')">
+                <div class="flex items-center justify-between mb-5 mt-2">
+                    <div>
+                        <h2 class="text-base font-bold text-on-surface">${def.label}</h2>
+                        <p class="text-sm text-on-surface-variant mt-1">${def.description}</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        ${actionsHtml}
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 transition-all neon-button flex items-center space-x-2 active:scale-95 duration-100">
+                            <i class="fas fa-save"></i><span>Lưu thay đổi</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    ${groupsHtml}
+                </div>
+            </form>
+        `;
+
+        content.querySelectorAll('input[type="color"]').forEach(picker => {
+            picker.addEventListener('input', () => {
+                const textInput = picker.parentElement.querySelector('input[type="text"]');
+                if (textInput) textInput.value = picker.value;
+            });
+        });
+    }
+
+    function nqtRenderField(f, val) {
+        val = val !== undefined ? val : '';
+        let inputHtml = '';
+        const baseClass = 'w-full px-4 py-2.5 text-sm bg-background border border-outline-variant rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary text-on-surface placeholder-outline transition-colors';
+
+        if (f.type === 'textarea') {
+            inputHtml = `<textarea name="${f.key}" rows="3" placeholder="${f.placeholder || ''}" class="${baseClass} resize-none">${nqtEscape(val)}</textarea>`;
+        } else if (f.type === 'select') {
+            const options = f.options.map(o => `<option value="${o.value}" ${val === o.value ? 'selected' : ''}>${o.label}</option>`).join('');
+            inputHtml = `<select name="${f.key}" class="${baseClass}">${options}</select>`;
+        } else if (f.type === 'color') {
+            inputHtml = `
+                <div class="flex items-center space-x-3">
+                    <input type="color" name="${f.key}" value="${nqtEscape(val) || '#191919'}" class="w-11 h-11 rounded-lg border border-outline-variant cursor-pointer p-1 bg-background shadow-sm hover:border-primary transition-colors">
+                    <input type="text" name="${f.key}_text" value="${nqtEscape(val) || '#191919'}" class="flex-1 px-4 py-2.5 text-sm bg-background border border-outline-variant rounded-lg font-mono uppercase text-on-surface shadow-sm focus-visible:outline-none focus-visible:border-primary" oninput="this.previousElementSibling.value = this.value" maxlength="7">
+                </div>`;
+        } else if (f.type === 'image') {
+            const nqtHasImage = val && val.length > 0;
+            inputHtml = `
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-4">
+                        <div id="preview_${f.key}" class="w-20 h-20 rounded-lg border-2 border-dashed border-outline-variant flex items-center justify-center overflow-hidden bg-surface-bright hover:border-primary transition-colors">
+                            ${nqtHasImage ? `<img src="${nqtEscape(val)}" class="w-full h-full object-contain" alt="">` : `<i class="fas fa-cloud-upload-alt text-outline text-xl"></i>`}
+                        </div>
+                        <div class="space-y-2">
+                            <input type="file" id="file_${f.key}" accept="image/*" class="hidden" onchange="nqtPreviewImage('${f.key}', this)">
+                            <button type="button" onclick="document.getElementById('file_${f.key}').click()" class="px-4 py-2 bg-surface-bright text-on-surface text-xs font-medium rounded-lg border border-outline-variant hover:border-primary transition-colors">
+                                <i class="fas fa-upload mr-1.5"></i>Tải lên ảnh mới
+                            </button>
+                            ${nqtHasImage ? `<button type="button" onclick="nqtClearImage('${f.key}')" class="px-4 py-2 text-error text-xs font-medium rounded-lg hover:bg-error/10 transition-colors ml-1"><i class="fas fa-trash mr-1.5"></i>Xóa</button>` : ''}
+                        </div>
+                    </div>
+                    <input type="hidden" name="${f.key}" value="${nqtEscape(val)}">
+                </div>`;
+        } else if (f.type === 'password') {
+            inputHtml = `
+                <div class="relative">
+                    <input type="password" name="${f.key}" value="${nqtEscape(val)}" placeholder="${f.placeholder || ''}" class="${baseClass} pr-10" id="input_${f.key}">
+                    <button type="button" onclick="nqtTogglePassword('${f.key}')" class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors">
+                        <i class="fas fa-eye" id="icon_${f.key}"></i>
+                    </button>
+                </div>`;
+        } else {
+            inputHtml = `<input type="${f.type}" name="${f.key}" value="${nqtEscape(val)}" placeholder="${f.placeholder || ''}" class="${baseClass}">`;
+        }
+
+        const hint = f.hint ? `<p class="text-xs text-on-surface-variant mt-1.5"><i class="fas fa-info-circle mr-1"></i>${f.hint}</p>` : '';
+
+        return `
+            <div class="${f.type === 'textarea' ? 'md:col-span-2' : ''}">
+                <label class="block text-sm font-semibold text-on-surface mb-2">${f.label}</label>
+                ${inputHtml}
+                ${hint}
+            </div>
+        `;
+    }
+
+    window.nqtTogglePassword = function(key) {
+        const input = document.getElementById(`input_${key}`);
+        const icon = document.getElementById(`icon_${key}`);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    window.nqtSaveCauHinh = async function(e, tab) {
+        e.preventDefault();
+        const nqtSaveBtn = document.querySelector('#formCauHinh [type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtSaveBtn, 'Đang lưu...');
+        const form = document.getElementById('formCauHinh');
+        const def = nqtTabDefs[tab];
+        const payload = {};
+
+        def.groups.forEach(grp => {
+            grp.fields.forEach(f => {
+                if (f.type === 'color') {
+                    const textInput = form.querySelector(`[name="${f.key}_text"]`);
+                    payload['g6_' + f.key] = textInput ? textInput.value.trim() : form.querySelector(`[name="${f.key}"]`).value;
+                } else {
+                    const el = form.querySelector(`[name="${f.key}"]`);
+                    if (el) payload['g6_' + f.key] = el.value;
+                }
+            });
+        });
+        payload['g6_nhom'] = tab;
+
+        const res = await nqtApi.fetch('/api/nqt-cau-hinh', { method: 'PUT', body: payload });
+        nqtRestore();
+        if (res && res.nqt_thanh_cong) {
+            if (!nqtCauHinhData[tab]) nqtCauHinhData[tab] = {};
+            Object.assign(nqtCauHinhData[tab], payload);
+            nqtToast('Đã lưu cấu hình!', 'success');
+            
+            // Immediately apply if it's the theme tab
+            if (tab === 'theme') {
+                const newP = payload['g6_mau_chu_dao'];
+                const newS = payload['g6_mau_phu'];
+                
+                function hexToRgb(hex) {
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? parseInt(result[1], 16) + ', ' + parseInt(result[2], 16) + ', ' + parseInt(result[3], 16) : null;
+                }
+
+                if (newP) {
+                    document.documentElement.style.setProperty('--primary-color', newP);
+                    localStorage.setItem('ic-primary-color', newP);
+                    const rgb = hexToRgb(newP);
+                    if (rgb) document.documentElement.style.setProperty('--primary-rgb', rgb);
+                }
+                if (newS) {
+                    document.documentElement.style.setProperty('--secondary-color', newS);
+                    localStorage.setItem('ic-secondary-color', newS);
+                    const rgb = hexToRgb(newS);
+                    if (rgb) document.documentElement.style.setProperty('--secondary-rgb', rgb);
+                }
+            } else if (tab === 'website' || tab === 'business') {
+                const cStr = localStorage.getItem('ic-site-config') || '{}';
+                try {
+                    const cfg = JSON.parse(cStr);
+                    Object.assign(cfg, payload);
+                    localStorage.setItem('ic-site-config', JSON.stringify(cfg));
+                    
+                    if (cfg['g6_ten_website']) {
+                        const brandEl = document.getElementById('ic-admin-brand');
+                        if (brandEl) brandEl.textContent = cfg['g6_ten_website'];
+                        const activeItem = document.querySelector('.nqt-sidebar-item.active');
+                        if (activeItem) {
+                            document.title = activeItem.querySelector('span').textContent + ' - ' + cfg['g6_ten_website'] + ' Admin';
+                        }
+                    }
+                    if (cfg['g6_favicon_url']) {
+                        let link = document.querySelector("link[rel~='icon']");
+                        if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+                        link.href = cfg['g6_favicon_url'];
+                    }
+                } catch(e) {}
+            }
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi khi lưu', 'error');
+        }
+    }
+
+    window.nqtRunAction = async function(actionId) {
+        if (actionId === 'testEmail') {
+            const email = prompt('Nhập email nhận test:', '');
+            if (!email) return;
+            nqtToast('Đang gửi email test...', 'info');
+            const res = await nqtApi.fetch('/api/nqt-email/test', { method: 'POST', body: { g6_email_nhan: email } });
+            if (res && res.nqt_thanh_cong) {
+                nqtToast('Gửi email test thành công!', 'success');
+            } else {
+                nqtToast(res?.nqt_thong_diep || 'Gửi email thất bại', 'error');
+            }
+        }
+    }
+
+    function nqtEscape(str) {
+        if (str === null || str === undefined) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    window.nqtPreviewImage = async function(key, input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+            nqtToast('File quá lớn. Tối đa 5MB', 'error');
+            input.value = '';
+            return;
+        }
+
+        const preview = document.getElementById(`preview_${key}`);
+        preview.innerHTML = '<i class="fas fa-spinner fa-spin text-[#191919] dark:text-[#fafafa]"></i>';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/nqt-upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('nqt_admin_token')}` },
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.nqt_thanh_cong) {
+                const url = data.nqt_du_lieu.g6_url;
+                preview.innerHTML = `<img src="${url}" class="w-full h-full object-contain" alt="">`;
+                document.querySelector(`[name="${key}"]`).value = url;
+                nqtToast('Upload thành công!', 'success');
+            } else {
+                preview.innerHTML = '<i class="fas fa-cloud-upload-alt text-[#a3a3a3]"></i>';
+                nqtToast(data.nqt_thong_diep || 'Lỗi upload', 'error');
+            }
+        } catch (err) {
+            preview.innerHTML = '<i class="fas fa-cloud-upload-alt text-[#a3a3a3]"></i>';
+            nqtToast('Lỗi kết nối', 'error');
+        }
+        input.value = '';
+    }
+
+    window.nqtClearImage = function(key) {
+        document.getElementById(`preview_${key}`).innerHTML = '<i class="fas fa-cloud-upload-alt text-[#a3a3a3]"></i>';
+        document.querySelector(`[name="${key}"]`).value = '';
+    }
+
+    nqtLoadCauHinh();
+})();
+</script>
+</body>
+</html>

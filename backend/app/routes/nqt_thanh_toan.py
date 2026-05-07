@@ -99,6 +99,34 @@ def nqt_lay_thanh_toan(nqt_id):
     return nqt_ok(nqt_result)
 
 
+@nqt_thanh_toan_bp.route('/nqt-thanh-toan/<int:nqt_id>/nqt-huy', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+def nqt_huy_thanh_toan(nqt_id):
+    nqt_row = G6ThanhToan.query.get_or_404(nqt_id)
+    if nqt_row.g6_trang_thai == 'thanh_cong':
+        return nqt_loi('Không thể huỷ thanh toán đã hoàn thành', nqt_ma_trang=400)
+    if nqt_row.g6_trang_thai == 'da_huy':
+        return nqt_loi('Thanh toán đã bị huỷ trước đó', nqt_ma_trang=400)
+    nqt_data = request.get_json() or {}
+    nqt_row.g6_trang_thai = 'da_huy'
+    nqt_row.g6_ghi_chu = nqt_data.get('g6_ly_do_huy') or nqt_row.g6_ghi_chu
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Đã huỷ thanh toán')
+
+
+@nqt_thanh_toan_bp.route('/nqt-thanh-toan/<int:nqt_id>/nqt-hoan-tien', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+def nqt_hoan_tien(nqt_id):
+    nqt_row = G6ThanhToan.query.get_or_404(nqt_id)
+    if nqt_row.g6_trang_thai != 'thanh_cong':
+        return nqt_loi('Chỉ hoàn tiền được cho thanh toán đã thành công', nqt_ma_trang=400)
+    nqt_data = request.get_json() or {}
+    nqt_row.g6_trang_thai = 'hoan_tien'
+    nqt_row.g6_ghi_chu = nqt_data.get('g6_ly_do_hoan') or nqt_row.g6_ghi_chu
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Đã ghi nhận hoàn tiền')
+
+
 @nqt_thanh_toan_bp.route('/nqt-thanh-toan/<int:nqt_id>/nqt-xac-nhan', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
 def nqt_xac_nhan_thanh_toan(nqt_id):

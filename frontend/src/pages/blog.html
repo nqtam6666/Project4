@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Blog — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode:"class",
+  theme:{ extend:{ colors:{
+    "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+    "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA",
+    "text-muted":"#52525B","border-subtle":"rgba(255,255,255,0.06)",
+    "border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  }, fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]} } }
+}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+<div class="pt-[72px]">
+
+  <section class="py-16 px-6 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(200,241,53,0.07),transparent_60%)]"></div>
+    <div class="relative max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 bg-neon-glow border border-border-neon text-neon-lime text-xs font-caps uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
+        <span class="material-symbols-outlined text-sm">article</span> Kiến thức gym
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black text-white leading-tight mb-4">Blog <span class="text-neon-lime">Sức Khoẻ</span></h1>
+      <p class="text-text-secondary text-lg">Bài viết chất lượng về dinh dưỡng, tập luyện và phong cách sống khoẻ mạnh.</p>
+    </div>
+  </section>
+
+  <!-- Search -->
+  <div class="max-w-screen-xl mx-auto px-6 mb-10">
+    <div class="relative max-w-lg mx-auto">
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-muted text-lg">search</span>
+      <input id="nqtSearch" type="text" placeholder="Tìm bài viết..." oninput="nqtSearch_fn(this.value)"
+        class="w-full bg-bg-card border border-border-subtle rounded-xl pl-12 pr-4 py-3 text-text-primary placeholder:text-text-muted focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+    </div>
+  </div>
+
+  <!-- Blog Grid -->
+  <section class="max-w-screen-xl mx-auto px-6 pb-24">
+    <div id="nqtBlogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="md:col-span-2 lg:col-span-3 flex justify-center py-20">
+        <div class="w-8 h-8 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </div>
+    <div id="nqtNoResult" class="hidden text-center py-16 text-text-muted">
+      <span class="material-symbols-outlined text-4xl block mb-3">search_off</span>
+      Không tìm thấy bài viết nào.
+    </div>
+  </section>
+
+</div>
+<script type="module">
+import { nqtRenderPublicNav, nqtRenderFooter, nqtFormatDate } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('blog');
+nqtRenderFooter();
+
+let nqtAllPosts = [];
+
+window.nqtSearch_fn = function(q) {
+  const filtered = q ? nqtAllPosts.filter(p => (p.g6_tieu_de || '').toLowerCase().includes(q.toLowerCase())) : nqtAllPosts;
+  nqtRenderBlog(filtered);
+  document.getElementById('nqtNoResult').classList.toggle('hidden', filtered.length > 0);
+};
+
+function nqtRenderBlog(posts) {
+  const grid = document.getElementById('nqtBlogGrid');
+  if (!posts.length) { grid.innerHTML = ''; return; }
+  // First post featured
+  const [first, ...rest] = posts;
+  grid.innerHTML = `
+    <div class="md:col-span-2 lg:col-span-2 bg-bg-card border border-border-subtle rounded-2xl overflow-hidden hover:border-border-neon transition-all group">
+      <div class="h-56 bg-bg-elevated flex items-center justify-center">
+        <span class="material-symbols-outlined text-6xl text-text-muted group-hover:text-neon-lime transition-colors">article</span>
+      </div>
+      <div class="p-6">
+        <div class="text-neon-lime font-caps text-[10px] uppercase tracking-widest mb-2">${nqtFormatDate(first.g6_ngay_tao)}</div>
+        <h2 class="text-xl font-black text-white mb-3 group-hover:text-neon-lime transition-colors">${first.g6_tieu_de || 'Bài viết'}</h2>
+        <p class="text-text-secondary text-sm line-clamp-3 mb-4">${first.g6_mo_ta || first.g6_tieu_de || ''}</p>
+        <a href="/src/pages/blog-chi-tiet.html?slug=${first.g6_slug}" class="inline-flex items-center gap-1 text-neon-lime font-caps text-xs uppercase tracking-wide font-semibold hover:gap-2 transition-all">
+          Đọc tiếp <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+    </div>
+    ${rest.map(p => `
+    <div class="bg-bg-card border border-border-subtle rounded-2xl overflow-hidden hover:border-border-neon transition-all group cursor-pointer" onclick="location.href='/src/pages/blog-chi-tiet.html?slug=${p.g6_slug}'">
+      <div class="h-40 bg-bg-elevated flex items-center justify-center">
+        <span class="material-symbols-outlined text-4xl text-text-muted group-hover:text-neon-lime transition-colors">article</span>
+      </div>
+      <div class="p-5">
+        <div class="text-neon-lime font-caps text-[10px] uppercase tracking-widest mb-2">${nqtFormatDate(p.g6_ngay_tao)}</div>
+        <h3 class="font-bold text-white text-sm mb-2 group-hover:text-neon-lime transition-colors line-clamp-2">${p.g6_tieu_de || 'Bài viết'}</h3>
+        <div class="flex items-center gap-1 text-text-muted text-xs">
+          <span class="material-symbols-outlined text-sm">visibility</span> ${p.g6_luot_xem || 0} lượt xem
+        </div>
+      </div>
+    </div>`).join('')}`;
+}
+
+(async () => {
+  try {
+    const r = await fetch('/api/nqt-public/blog');
+    const j = await r.json();
+    nqtAllPosts = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
+    nqtRenderBlog(nqtAllPosts);
+  } catch {
+    document.getElementById('nqtBlogGrid').innerHTML = '<div class="md:col-span-2 lg:col-span-3 text-center py-20 text-text-muted">Không thể tải bài viết.</div>';
+  }
+})();
+</script>
+</body>
+</html>

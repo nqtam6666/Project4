@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Đăng ký — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "neon-lime": "#C8F135",
+        "neon-dim":  "#A8D120",
+        "bg-main":   "#0A0A0F",
+        "bg-card":   "#12121A",
+        "bg-elevated": "#1C1C28",
+        "text-primary":   "#F5F5F0",
+        "text-secondary": "#A1A1AA",
+        "text-muted":     "#52525B",
+        "border-subtle":  "rgba(255,255,255,0.06)",
+        "border-neon":    "rgba(200,241,53,0.3)",
+        "neon-glow":      "rgba(200,241,53,0.15)",
+        "surface-container-low": "#1a1d11",
+      },
+      fontFamily: {
+        "sans": ["Inter", "sans-serif"],
+        "mono": ["JetBrains Mono", "monospace"],
+        "caps": ["Space Grotesk", "sans-serif"],
+      },
+      fontSize: {
+        "d-xl":  ["36px", { lineHeight: "1.1", fontWeight: "700" }],
+        "d-md":  ["24px", { lineHeight: "1.3", fontWeight: "700" }],
+        "label": ["12px", { lineHeight: "1.0", letterSpacing: "0.5px", fontWeight: "600" }],
+      },
+    }
+  }
+}
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .nqt-step { display: none; }
+  .nqt-step.active { display: block; }
+</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased min-h-screen flex">
+
+<!-- ── LEFT: Form Panel ──────────────────────────────────────────────── -->
+<div class="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-20 py-12 overflow-y-auto">
+
+  <!-- Logo -->
+  <a href="/" class="flex items-center gap-3 mb-10">
+    <div class="w-10 h-10 bg-neon-lime rounded-lg flex items-center justify-center">
+      <span class="material-symbols-outlined text-bg-main text-xl font-bold">fitness_center</span>
+    </div>
+    <span class="text-xl font-black text-white italic tracking-tight">NQT GYM</span>
+  </a>
+
+  <!-- Heading -->
+  <div class="mb-8">
+    <div class="inline-flex items-center gap-2 mb-4">
+      <div class="h-px w-6 bg-neon-lime/50"></div>
+      <span class="font-caps text-label text-neon-lime uppercase tracking-widest">Đăng ký mới</span>
+    </div>
+    <h1 class="text-d-xl text-text-primary mb-3">
+      Bắt đầu<br/><span class="text-neon-lime">hành trình</span>
+    </h1>
+    <p class="text-text-secondary text-sm leading-relaxed max-w-xs">
+      Tạo tài khoản để quản lý gói tập, đặt buổi PT và theo dõi tiến trình.
+    </p>
+  </div>
+
+  <!-- Progress steps -->
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center gap-2">
+      <div id="nqtStep1Dot" class="w-7 h-7 rounded-full bg-neon-lime flex items-center justify-center">
+        <span class="font-caps text-[10px] text-bg-main font-bold">1</span>
+      </div>
+      <span id="nqtStep1Label" class="font-caps text-label text-neon-lime uppercase tracking-widest">Thông tin</span>
+    </div>
+    <div class="flex-1 h-px bg-border-subtle" id="nqtLineDot"></div>
+    <div class="flex items-center gap-2">
+      <div id="nqtStep2Dot" class="w-7 h-7 rounded-full border border-border-subtle flex items-center justify-center">
+        <span class="font-caps text-[10px] text-text-muted font-bold">2</span>
+      </div>
+      <span id="nqtStep2Label" class="font-caps text-label text-text-muted uppercase tracking-widest">Bảo mật</span>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form id="nqtRegisterForm" novalidate>
+
+    <!-- Step 1: Thông tin cá nhân -->
+    <div id="nqtStep1" class="nqt-step active space-y-5">
+      <div>
+        <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Họ và tên *</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-muted text-xl">person</span>
+          <input type="text" id="nqtHoTen" autocomplete="name" placeholder="Nguyễn Văn A"
+            class="w-full bg-bg-elevated border border-border-subtle rounded-lg py-3.5 pl-12 pr-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 focus:shadow-[0_0_0_3px_rgba(200,241,53,0.1)] transition-all duration-200"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Số điện thoại *</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-muted text-xl">call</span>
+          <input type="tel" id="nqtSdt" autocomplete="tel" placeholder="0901234567"
+            class="w-full bg-bg-elevated border border-border-subtle rounded-lg py-3.5 pl-12 pr-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 focus:shadow-[0_0_0_3px_rgba(200,241,53,0.1)] transition-all duration-200"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Email</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-muted text-xl">mail</span>
+          <input type="email" id="nqtEmail" autocomplete="email" placeholder="ten@email.com"
+            class="w-full bg-bg-elevated border border-border-subtle rounded-lg py-3.5 pl-12 pr-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 focus:shadow-[0_0_0_3px_rgba(200,241,53,0.1)] transition-all duration-200"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Giới tính</label>
+          <select id="nqtGioiTinh"
+            class="w-full bg-bg-elevated border border-border-subtle rounded-lg py-3.5 px-4 text-text-primary focus:outline-none focus:border-neon-lime/50 transition-all duration-200">
+            <option value="" class="bg-bg-elevated">Chọn giới tính</option>
+            <option value="Nam" class="bg-bg-elevated">Nam</option>
+            <option value="Nữ" class="bg-bg-elevated">Nữ</option>
+            <option value="Khác" class="bg-bg-elevated">Khác</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Ngày sinh</label>
+          <input type="date" id="nqtNgaySinh"
+            class="w-full bg-bg-elevated border border-border-subtle rounded-lg py-3.5 px-4 text-text-primary focus:outline-none focus:border-neon-lime/50 transition-all duration-200"/>
+        </div>
+      </div>
+
+      <!-- Error Step 1 -->
+      <div id="nqtErr1" class="hidden bg-red-950/40 border border-red-500/20 rounded-lg px-4 py-3 flex items-center gap-3">
+        <span class="material-symbols-outlined text-red-400 text-xl flex-shrink-0">error</span>
+        <p class="text-red-300 text-sm" id="nqtErr1Text"></p>
+      </div>
+
+      <button type="button" id="nqtNextBtn"
+        class="w-full bg-neon-lime text-bg-main font-caps text-[11px] uppercase tracking-widest py-4 rounded-lg hover:scale-[1.01] hover:shadow-[0_0_25px_rgba(200,241,53,0.35)] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2">
+        Tiếp theo
+        <span class="material-symbols-outlined text-xl">arrow_forward</span>
+      </button>
+    </div>
+
+    <!-- Step 2: Bảo mật -->
+    <div id="nqtStep2" class="nqt-step space-y-5">
+      <div>
+        <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Mật khẩu *</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-muted text-xl">lock</span>
+          <input type="password" id="nqtMk" autocomplete="new-password" placeholder="Ít nhất 6 ký tự"
+            class="w-full bg-bg-elevated border border-border-subtle rounded-lg py-3.5 pl-12 pr-12 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 focus:shadow-[0_0_0_3px_rgba(200,241,53,0.1)] transition-all duration-200"/>
+          <button type="button" id="nqtToggleMk1" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors">
+            <span class="material-symbols-outlined text-xl">visibility</span>
+          </button>
+        </div>
+        <!-- Password strength -->
+        <div id="nqtPwStrength" class="mt-2 h-1 rounded-full bg-border-subtle overflow-hidden">
+          <div id="nqtPwBar" class="h-full rounded-full transition-all duration-300 w-0"></div>
+        </div>
+        <p id="nqtPwLabel" class="font-caps text-[10px] text-text-muted mt-1 uppercase tracking-widest"></p>
+      </div>
+
+      <div>
+        <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Xác nhận mật khẩu *</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-muted text-xl">lock_reset</span>
+          <input type="password" id="nqtMkXn" autocomplete="new-password" placeholder="Nhập lại mật khẩu"
+            class="w-full bg-bg-elevated border border-border-subtle rounded-lg py-3.5 pl-12 pr-12 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 focus:shadow-[0_0_0_3px_rgba(200,241,53,0.1)] transition-all duration-200"/>
+          <button type="button" id="nqtToggleMk2" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors">
+            <span class="material-symbols-outlined text-xl">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input type="checkbox" id="nqtTerms"
+          class="mt-1 w-4 h-4 accent-[#C8F135] cursor-pointer"/>
+        <span class="text-text-secondary text-sm leading-relaxed">
+          Tôi đồng ý với
+          <a href="#" class="text-neon-lime hover:underline">Điều khoản sử dụng</a>
+          và
+          <a href="#" class="text-neon-lime hover:underline">Chính sách bảo mật</a>
+          của NQT Gym
+        </span>
+      </label>
+
+      <!-- Error Step 2 -->
+      <div id="nqtErr2" class="hidden bg-red-950/40 border border-red-500/20 rounded-lg px-4 py-3 flex items-center gap-3">
+        <span class="material-symbols-outlined text-red-400 text-xl flex-shrink-0">error</span>
+        <p class="text-red-300 text-sm" id="nqtErr2Text"></p>
+      </div>
+
+      <div class="flex gap-3">
+        <button type="button" id="nqtBackBtn"
+          class="flex-none border border-border-subtle text-text-secondary font-caps text-[11px] uppercase tracking-widest px-6 py-4 rounded-lg hover:border-border-neon hover:text-text-primary transition-all duration-200 flex items-center gap-2">
+          <span class="material-symbols-outlined text-xl">arrow_back</span>
+        </button>
+
+        <button type="submit" id="nqtSubmitBtn"
+          class="flex-1 bg-neon-lime text-bg-main font-caps text-[11px] uppercase tracking-widest py-4 rounded-lg hover:scale-[1.01] hover:shadow-[0_0_25px_rgba(200,241,53,0.35)] active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:scale-100">
+          <span id="nqtBtnText">Tạo tài khoản</span>
+          <span id="nqtBtnSpinner" class="hidden material-symbols-outlined text-xl animate-spin">progress_activity</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Success -->
+    <div id="nqtStep3" class="nqt-step text-center py-4">
+      <div class="w-20 h-20 bg-neon-lime/10 border border-neon-lime/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <span class="material-symbols-outlined text-neon-lime text-4xl" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">check_circle</span>
+      </div>
+      <h2 class="text-d-xl text-text-primary mb-3">Chào mừng!</h2>
+      <p class="text-text-secondary text-sm leading-relaxed mb-8 max-w-xs mx-auto">
+        Tài khoản đã được tạo thành công. Đang chuyển đến dashboard...
+      </p>
+      <div class="bg-bg-elevated border border-border-subtle rounded-xl p-5 text-left space-y-2 max-w-xs mx-auto">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-neon-lime text-base">person</span>
+          <span class="text-text-secondary text-sm" id="nqtSuccessName"></span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-neon-lime text-base">call</span>
+          <span class="text-text-secondary text-sm" id="nqtSuccessSdt"></span>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Login link -->
+  <p class="text-center text-text-muted text-sm mt-6" id="nqtLoginLink">
+    Đã có tài khoản?
+    <a href="/src/pages/member/login.html" class="text-neon-lime hover:text-neon-dim transition-colors font-medium">Đăng nhập</a>
+  </p>
+</div>
+
+<!-- ── RIGHT: Branding ─────────────────────────────────────────────────── -->
+<div class="hidden lg:flex w-1/2 relative items-center justify-center overflow-hidden">
+  <div class="absolute inset-0 bg-[#08080D]">
+    <div class="absolute top-1/3 left-1/3 w-80 h-80 bg-neon-lime/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-1/3 right-1/3 w-64 h-64 bg-neon-lime/3 rounded-full blur-3xl"></div>
+  </div>
+  <div class="absolute inset-0 opacity-5"
+    style="background-image: linear-gradient(rgba(200,241,53,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(200,241,53,0.3) 1px, transparent 1px); background-size: 60px 60px;">
+  </div>
+
+  <div class="relative text-center px-12 max-w-md">
+    <div class="grid grid-cols-2 gap-4 mb-8">
+      <!-- Feature cards -->
+      <div class="bg-white/5 border border-white/5 rounded-xl p-5 text-left">
+        <span class="material-symbols-outlined text-neon-lime text-3xl mb-3 block">fitness_center</span>
+        <h4 class="text-text-primary font-semibold text-sm mb-1">Thiết bị hiện đại</h4>
+        <p class="text-text-muted text-xs leading-relaxed">Máy móc nhập khẩu, bảo trì định kỳ</p>
+      </div>
+      <div class="bg-white/5 border border-white/5 rounded-xl p-5 text-left">
+        <span class="material-symbols-outlined text-neon-lime text-3xl mb-3 block">support_agent</span>
+        <h4 class="text-text-primary font-semibold text-sm mb-1">HLV chuyên nghiệp</h4>
+        <p class="text-text-muted text-xs leading-relaxed">Chứng nhận quốc tế, tận tâm</p>
+      </div>
+      <div class="bg-white/5 border border-white/5 rounded-xl p-5 text-left">
+        <span class="material-symbols-outlined text-neon-lime text-3xl mb-3 block">schedule</span>
+        <h4 class="text-text-primary font-semibold text-sm mb-1">Mở cửa 5–23h</h4>
+        <p class="text-text-muted text-xs leading-relaxed">Thu xếp mọi lịch trình</p>
+      </div>
+      <div class="bg-white/5 border border-white/5 rounded-xl p-5 text-left">
+        <span class="material-symbols-outlined text-neon-lime text-3xl mb-3 block">monitor_heart</span>
+        <h4 class="text-text-primary font-semibold text-sm mb-1">Theo dõi tiến trình</h4>
+        <p class="text-text-muted text-xs leading-relaxed">Chỉ số cơ thể, lịch sử tập</p>
+      </div>
+    </div>
+
+    <p class="font-caps text-label text-text-muted uppercase tracking-widest">
+      NQT GYM PERFORMANCE — SINCE 2020
+    </p>
+  </div>
+</div>
+
+<script>
+  let nqtCurrentStep = 1;
+
+  function nqtGoToStep(step) {
+    document.querySelectorAll('.nqt-step').forEach(el => el.classList.remove('active'));
+    document.getElementById(`nqtStep${step}`).classList.add('active');
+    nqtCurrentStep = step;
+
+    // Update progress dots
+    if (step === 2) {
+      document.getElementById('nqtStep1Dot').innerHTML = '<span class="material-symbols-outlined text-bg-main text-sm" style="font-variation-settings:\'FILL\' 1,\'wght\' 400,\'GRAD\' 0,\'opsz\' 24">check</span>';
+      document.getElementById('nqtStep1Dot').classList.add('bg-neon-lime');
+      document.getElementById('nqtStep1Label').classList.replace('text-neon-lime', 'text-text-muted');
+      document.getElementById('nqtStep2Dot').classList.replace('border-border-subtle', 'bg-neon-lime');
+      document.getElementById('nqtStep2Dot').querySelector('span').classList.replace('text-text-muted', 'text-bg-main');
+      document.getElementById('nqtStep2Label').classList.replace('text-text-muted', 'text-neon-lime');
+      document.getElementById('nqtLineDot').classList.add('bg-neon-lime/30');
+    }
+
+    if (step === 3) {
+      document.getElementById('nqtLoginLink').classList.add('hidden');
+    }
+  }
+
+  // ── Toggle passwords ─────────────────────────────────────────────────
+  function nqtTogglePass(inputId, btnId) {
+    document.getElementById(btnId).addEventListener('click', function () {
+      const inp = document.getElementById(inputId);
+      const icon = this.querySelector('.material-symbols-outlined');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        inp.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    });
+  }
+  nqtTogglePass('nqtMk', 'nqtToggleMk1');
+  nqtTogglePass('nqtMkXn', 'nqtToggleMk2');
+
+  // ── Password strength ───────────────────────────────────────────────
+  document.getElementById('nqtMk').addEventListener('input', function () {
+    const v = this.value;
+    const bar = document.getElementById('nqtPwBar');
+    const label = document.getElementById('nqtPwLabel');
+    let score = 0;
+    if (v.length >= 6) score++;
+    if (v.length >= 10) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+
+    const levels = [
+      { w: '0%', color: '', text: '' },
+      { w: '25%', color: 'bg-red-500', text: 'Yếu' },
+      { w: '50%', color: 'bg-orange-400', text: 'Trung bình' },
+      { w: '75%', color: 'bg-yellow-400', text: 'Khá' },
+      { w: '100%', color: 'bg-neon-lime', text: 'Mạnh' },
+      { w: '100%', color: 'bg-neon-lime', text: 'Rất mạnh' },
+    ];
+    const lv = levels[Math.min(score, 5)];
+    bar.style.width = lv.w;
+    bar.className = `h-full rounded-full transition-all duration-300 ${lv.color}`;
+    label.textContent = lv.text;
+  });
+
+  // ── Step 1 validation → Next ──────────────────────────────────────
+  document.getElementById('nqtNextBtn').addEventListener('click', function () {
+    const err = document.getElementById('nqtErr1');
+    const errText = document.getElementById('nqtErr1Text');
+    const hoTen = document.getElementById('nqtHoTen').value.trim();
+    const sdt = document.getElementById('nqtSdt').value.trim();
+
+    err.classList.add('hidden');
+
+    if (!hoTen || hoTen.length < 2) {
+      errText.textContent = 'Họ và tên phải có ít nhất 2 ký tự';
+      err.classList.remove('hidden');
+      return;
+    }
+    if (!/^0\d{9,10}$/.test(sdt)) {
+      errText.textContent = 'Số điện thoại không hợp lệ (bắt đầu bằng 0, 10-11 số)';
+      err.classList.remove('hidden');
+      return;
+    }
+
+    nqtGoToStep(2);
+  });
+
+  // ── Back ──────────────────────────────────────────────────────────
+  document.getElementById('nqtBackBtn').addEventListener('click', function () {
+    nqtGoToStep(1);
+    document.getElementById('nqtStep1Dot').innerHTML = '<span class="font-caps text-[10px] text-bg-main font-bold">1</span>';
+  });
+
+  // ── Submit ────────────────────────────────────────────────────────
+  document.getElementById('nqtRegisterForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const err = document.getElementById('nqtErr2');
+    const errText = document.getElementById('nqtErr2Text');
+    err.classList.add('hidden');
+
+    const mk = document.getElementById('nqtMk').value;
+    const mkXn = document.getElementById('nqtMkXn').value;
+    const terms = document.getElementById('nqtTerms').checked;
+
+    if (mk.length < 6) {
+      errText.textContent = 'Mật khẩu phải có ít nhất 6 ký tự';
+      err.classList.remove('hidden');
+      return;
+    }
+    if (mk !== mkXn) {
+      errText.textContent = 'Mật khẩu xác nhận không khớp';
+      err.classList.remove('hidden');
+      return;
+    }
+    if (!terms) {
+      errText.textContent = 'Bạn cần đồng ý với điều khoản để tiếp tục';
+      err.classList.remove('hidden');
+      return;
+    }
+
+    const btn = document.getElementById('nqtSubmitBtn');
+    const btnText = document.getElementById('nqtBtnText');
+    const btnSpinner = document.getElementById('nqtBtnSpinner');
+    btn.disabled = true;
+    btnText.textContent = 'Đang xử lý…';
+    btnSpinner.classList.remove('hidden');
+
+    const payload = {
+      nqt_ho_ten: document.getElementById('nqtHoTen').value.trim(),
+      nqt_so_dien_thoai: document.getElementById('nqtSdt').value.trim(),
+      nqt_email: document.getElementById('nqtEmail').value.trim() || null,
+      nqt_gioi_tinh: document.getElementById('nqtGioiTinh').value || null,
+      nqt_ngay_sinh: document.getElementById('nqtNgaySinh').value || null,
+      nqt_mat_khau: mk,
+    };
+
+    try {
+      const res = await fetch('/api/nqt-hoi-vien/dang-ky', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (data.nqt_thanh_cong) {
+        localStorage.setItem('nqt_token', data.nqt_du_lieu.nqt_access_token);
+        localStorage.setItem('nqt_refresh_token', data.nqt_du_lieu.nqt_refresh_token);
+        if (data.nqt_du_lieu.nqt_hoi_vien) {
+          localStorage.setItem('nqt_user', JSON.stringify(data.nqt_du_lieu.nqt_hoi_vien));
+        }
+
+        document.getElementById('nqtSuccessName').textContent = payload.nqt_ho_ten;
+        document.getElementById('nqtSuccessSdt').textContent = payload.nqt_so_dien_thoai;
+        nqtGoToStep(3);
+        setTimeout(() => { window.location.href = '/src/pages/member/dashboard.html'; }, 2000);
+      } else {
+        errText.textContent = data.nqt_thong_diep || 'Đăng ký thất bại';
+        err.classList.remove('hidden');
+        btn.disabled = false;
+        btnText.textContent = 'Tạo tài khoản';
+        btnSpinner.classList.add('hidden');
+      }
+    } catch (ex) {
+      errText.textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại.';
+      err.classList.remove('hidden');
+      btn.disabled = false;
+      btnText.textContent = 'Tạo tài khoản';
+      btnSpinner.classList.add('hidden');
+    }
+  });
+
+  // ── Auto redirect if already logged in ──────────────────────────
+  if (localStorage.getItem('nqt_token')) {
+    window.location.href = '/src/pages/member/dashboard.html';
+  }
+</script>
+</body>
+</html>

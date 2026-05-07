@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Shop Thực Phẩm Chức Năng — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "success":"#22C55E","warning":"#F59E0B","error":"#EF4444",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+<div class="pt-[72px]">
+
+  <!-- Hero -->
+  <section class="py-14 px-6 relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(200,241,53,0.07),transparent_60%)]"></div>
+    <div class="relative max-w-screen-xl mx-auto flex flex-col md:flex-row items-center gap-8">
+      <div class="flex-1">
+        <div class="inline-flex items-center gap-2 bg-neon-glow border border-border-neon text-neon-lime text-xs font-caps uppercase tracking-widest px-4 py-1.5 rounded-full mb-5">
+          <span class="material-symbols-outlined text-sm">storefront</span> Cửa hàng
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black text-white leading-tight mb-4">Supplement &<br><span class="text-neon-lime">Thực Phẩm Chức Năng</span></h1>
+        <p class="text-text-secondary text-lg max-w-xl">Whey protein, BCAA, Creatine, Pre-workout — nguồn gốc rõ ràng, chứng nhận an toàn.</p>
+      </div>
+      <div class="flex gap-4">
+        <div class="bg-bg-card border border-border-subtle rounded-2xl p-6 text-center">
+          <div class="text-neon-lime font-mono text-2xl font-bold mb-1" id="nqtTotalProducts">—</div>
+          <div class="text-text-muted text-xs font-caps uppercase tracking-wide">Sản phẩm</div>
+        </div>
+        <div class="bg-bg-card border border-border-subtle rounded-2xl p-6 text-center">
+          <div class="text-neon-lime font-mono text-2xl font-bold mb-1">100%</div>
+          <div class="text-text-muted text-xs font-caps uppercase tracking-wide">Chính hãng</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters & Sort -->
+  <div class="max-w-screen-xl mx-auto px-6 mb-6 flex flex-wrap items-center gap-3">
+    <div class="relative flex-1 min-w-48 max-w-sm">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-muted text-base">search</span>
+      <input id="nqtShopSearch" type="text" placeholder="Tìm sản phẩm..." oninput="nqtApplyFilters()"
+        class="w-full bg-bg-card border border-border-subtle rounded-xl pl-9 pr-3 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-border-neon focus:outline-none transition-colors"/>
+    </div>
+    <select id="nqtSortBy" onchange="nqtApplyFilters()" class="bg-bg-card border border-border-subtle rounded-xl px-4 py-2.5 text-sm text-text-secondary focus:border-border-neon focus:outline-none transition-colors">
+      <option value="">Sắp xếp</option>
+      <option value="price_asc">Giá thấp → cao</option>
+      <option value="price_desc">Giá cao → thấp</option>
+      <option value="name">Tên A→Z</option>
+    </select>
+    <div id="nqtCategoryFilters" class="flex flex-wrap gap-2"></div>
+  </div>
+
+  <!-- Grid -->
+  <section class="max-w-screen-xl mx-auto px-6 pb-24">
+    <div id="nqtShopGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div class="col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5 flex justify-center py-20">
+        <div class="w-8 h-8 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Add to cart toast -->
+<div id="nqtCartToast" class="hidden fixed bottom-6 right-6 z-50 bg-neon-lime text-bg-main px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 font-caps text-sm font-semibold">
+  <span class="material-symbols-outlined text-base">check_circle</span> Đã thêm vào giỏ hàng
+</div>
+
+<script type="module">
+import { nqtRenderPublicNav, nqtRenderFooter, nqtFormatPrice, nqtGetCart, nqtSaveCart } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('shop');
+nqtRenderFooter();
+
+let nqtAllProducts = [];
+let nqtActiveCategory = '';
+
+window.nqtApplyFilters = function() {
+  const q = document.getElementById('nqtShopSearch').value.toLowerCase();
+  const sort = document.getElementById('nqtSortBy').value;
+  let filtered = nqtAllProducts.filter(p =>
+    (!q || (p.g6_ten_san_pham || '').toLowerCase().includes(q)) &&
+    (!nqtActiveCategory || p.g6_ma_danh_muc === nqtActiveCategory)
+  );
+  if (sort === 'price_asc') filtered.sort((a,b) => (a._gia||0) - (b._gia||0));
+  else if (sort === 'price_desc') filtered.sort((a,b) => (b._gia||0) - (a._gia||0));
+  else if (sort === 'name') filtered.sort((a,b) => (a.g6_ten_san_pham||'').localeCompare(b.g6_ten_san_pham||''));
+  nqtRenderShop(filtered);
+};
+
+window.nqtSetCategory = function(catId, el) {
+  nqtActiveCategory = catId;
+  document.querySelectorAll('.nqt-cat-btn').forEach(b => {
+    b.className = 'nqt-cat-btn border border-border-subtle text-text-secondary px-3 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all';
+  });
+  el.className = 'nqt-cat-btn bg-neon-lime text-bg-main px-3 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold';
+  nqtApplyFilters();
+};
+
+window.nqtAddToCart = function(id, name, price, e) {
+  e.preventDefault(); e.stopPropagation();
+  const cart = nqtGetCart();
+  const idx = cart.findIndex(i => i.id === id);
+  if (idx >= 0) cart[idx].qty = (cart[idx].qty || 1) + 1;
+  else cart.push({ id, name, price, qty: 1 });
+  nqtSaveCart(cart);
+  const toast = document.getElementById('nqtCartToast');
+  toast.classList.remove('hidden'); toast.classList.add('flex');
+  setTimeout(() => { toast.classList.add('hidden'); toast.classList.remove('flex'); }, 2000);
+};
+
+function nqtRenderShop(products) {
+  const grid = document.getElementById('nqtShopGrid');
+  if (!products.length) {
+    grid.innerHTML = '<div class="col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5 text-center py-16 text-text-muted"><span class="material-symbols-outlined text-4xl block mb-3">search_off</span>Không tìm thấy sản phẩm.</div>';
+    return;
+  }
+  grid.innerHTML = products.map(p => {
+    const bien_the = p.g6_bien_the?.[0] || {};
+    const price = bien_the.g6_gia || p._gia || 0;
+    return `
+    <div class="bg-bg-card border border-border-subtle rounded-2xl overflow-hidden hover:border-border-neon transition-all group cursor-pointer" onclick="location.href='/src/pages/shop-chi-tiet.html?id=${p.g6_ma_san_pham}'">
+      <div class="aspect-square bg-bg-elevated flex items-center justify-center relative">
+        <span class="material-symbols-outlined text-5xl text-text-muted group-hover:text-neon-lime transition-colors">inventory_2</span>
+        ${p.g6_la_ban_chay ? `<div class="absolute top-2 left-2 bg-warning text-bg-main text-[9px] font-caps uppercase tracking-widest font-bold px-2 py-0.5 rounded-full">Hot</div>` : ''}
+        ${p.g6_la_noi_bat ? `<div class="absolute top-2 right-2 bg-neon-lime text-bg-main text-[9px] font-caps uppercase tracking-widest font-bold px-2 py-0.5 rounded-full">Nổi bật</div>` : ''}
+      </div>
+      <div class="p-4">
+        <div class="text-text-muted text-[10px] font-caps uppercase tracking-widest mb-1">${p.g6_thuong_hieu?.g6_ten_thuong_hieu || ''}</div>
+        <h3 class="font-bold text-white text-sm mb-2 line-clamp-2 group-hover:text-neon-lime transition-colors">${p.g6_ten_san_pham}</h3>
+        <div class="text-neon-lime font-mono font-bold text-base mb-3">${nqtFormatPrice(price)}</div>
+        <button onclick="nqtAddToCart(${p.g6_ma_san_pham},'${p.g6_ten_san_pham}',${price},event)" class="w-full py-2 border border-border-neon text-neon-lime rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:bg-neon-glow transition-colors flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-sm">add_shopping_cart</span> Thêm vào giỏ
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+(async () => {
+  try {
+    const r = await fetch('/api/nxv-san-pham');
+    const j = await r.json();
+    nqtAllProducts = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
+    nqtAllProducts.forEach(p => { p._gia = p.g6_bien_the?.[0]?.g6_gia || 0; });
+    document.getElementById('nqtTotalProducts').textContent = nqtAllProducts.length;
+
+    // Category buttons
+    const cats = [...new Map(nqtAllProducts.filter(p=>p.g6_danh_muc).map(p=>[p.g6_ma_danh_muc, p.g6_danh_muc])).entries()];
+    const catDiv = document.getElementById('nqtCategoryFilters');
+    catDiv.innerHTML = `<button onclick="nqtSetCategory('',this)" class="nqt-cat-btn bg-neon-lime text-bg-main px-3 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold">Tất cả</button>
+    ${cats.map(([id,cat])=>`<button onclick="nqtSetCategory(${id},this)" class="nqt-cat-btn border border-border-subtle text-text-secondary px-3 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">${cat?.g6_ten_danh_muc||'Khác'}</button>`).join('')}`;
+    nqtRenderShop(nqtAllProducts);
+  } catch {
+    document.getElementById('nqtShopGrid').innerHTML = '<div class="col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5 text-center py-20 text-text-muted">Không thể tải sản phẩm.</div>';
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gói Tập Của Tôi — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "success":"#22C55E","warning":"#F59E0B","error":"#EF4444",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+
+<main class="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+  <div class="p-6 md:p-10 max-w-5xl">
+    <div class="mb-8">
+      <h1 class="text-2xl font-black text-white mb-1">Gói Tập Của Tôi</h1>
+      <p class="text-text-muted text-sm">Xem trạng thái và lịch sử đăng ký gói tập.</p>
+    </div>
+
+    <!-- Active package banner -->
+    <div id="nqtActivePkg" class="mb-8 bg-neon-glow border border-border-neon rounded-2xl p-6">
+      <div class="flex justify-center py-4"><div class="w-6 h-6 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+    </div>
+
+    <!-- History -->
+    <section>
+      <h2 class="text-lg font-bold text-white mb-4">Lịch sử đăng ký</h2>
+      <div id="nqtPkgHistory" class="space-y-3">
+        <div class="flex justify-center py-10"><div class="w-6 h-6 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+      </div>
+    </section>
+
+    <!-- Buy new package -->
+    <section class="mt-10 p-6 bg-bg-card border border-border-subtle rounded-2xl text-center">
+      <span class="material-symbols-outlined text-3xl text-text-muted mb-3 block">add_card</span>
+      <h3 class="font-bold text-white mb-2">Muốn đăng ký thêm gói?</h3>
+      <p class="text-text-secondary text-sm mb-5">Khám phá các gói tập phù hợp với mục tiêu của bạn.</p>
+      <a href="/src/pages/goi-tap.html" class="inline-block bg-neon-lime text-bg-main px-6 py-3 rounded-xl font-caps text-xs uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Xem gói tập</a>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+import { nqtRequireAuth, nqtApi } from '/src/js/member/auth.js';
+import { nqtRenderSidebar, nqtFormatDate } from '/src/js/nqtLayout.js';
+if (!nqtRequireAuth()) throw new Error('unauth');
+nqtRenderSidebar('goi-tap');
+
+const STATUS_MAP = {
+  hoat_dong: { label: 'Đang hoạt động', cls: 'text-success bg-success/10 border-success/30' },
+  het_han:   { label: 'Đã hết hạn',     cls: 'text-error bg-error/10 border-error/30' },
+  tam_dung:  { label: 'Tạm dừng',        cls: 'text-warning bg-warning/10 border-warning/30' },
+  da_huy:    { label: 'Đã huỷ',          cls: 'text-text-muted bg-bg-elevated border-border-subtle' },
+};
+
+function nqtDaysLeft(dateStr) {
+  const diff = new Date(dateStr) - new Date();
+  return Math.max(0, Math.ceil(diff / 86400000));
+}
+
+(async () => {
+  try {
+    const r = await nqtApi('/api/nqt-dang-ky-goi-tap');
+    const j = await r.json();
+    const pkgs = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
+
+    const active = pkgs.find(p => p.g6_trang_thai === 'hoat_dong');
+    const activeBanner = document.getElementById('nqtActivePkg');
+    if (active) {
+      const days = nqtDaysLeft(active.g6_ngay_het_han);
+      activeBanner.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-neon-lime rounded-xl flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-bg-main text-2xl">card_membership</span>
+            </div>
+            <div>
+              <div class="text-neon-lime font-caps text-xs uppercase tracking-widest mb-1">Gói đang hoạt động</div>
+              <div class="text-white font-black text-lg">${active.g6_ten_goi || 'Gói tập'}</div>
+              <div class="text-text-secondary text-sm mt-0.5">${nqtFormatDate(active.g6_ngay_bat_dau)} → ${nqtFormatDate(active.g6_ngay_het_han)}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-3xl font-black text-white font-mono">${days}</div>
+            <div class="text-text-secondary text-xs font-caps uppercase tracking-wide">ngày còn lại</div>
+            ${days <= 7 ? `<div class="text-warning text-xs mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">warning</span> Sắp hết hạn!</div>` : ''}
+          </div>
+        </div>`;
+    } else {
+      activeBanner.className = 'mb-8 bg-bg-card border border-border-subtle rounded-2xl p-6 text-center';
+      activeBanner.innerHTML = `
+        <span class="material-symbols-outlined text-3xl text-text-muted block mb-2">card_membership</span>
+        <p class="text-text-secondary">Bạn chưa có gói tập nào đang hoạt động.</p>`;
+    }
+
+    const histEl = document.getElementById('nqtPkgHistory');
+    if (!pkgs.length) {
+      histEl.innerHTML = '<div class="text-center py-10 text-text-muted">Chưa có lịch sử đăng ký.</div>';
+      return;
+    }
+    const ST = STATUS_MAP;
+    histEl.innerHTML = pkgs.map(p => {
+      const s = ST[p.g6_trang_thai] || ST.da_huy;
+      return `
+      <div class="bg-bg-card border border-border-subtle rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="font-bold text-white">${p.g6_ten_goi || 'Gói tập'}</div>
+          <div class="text-text-muted text-xs mt-0.5">${nqtFormatDate(p.g6_ngay_bat_dau)} — ${nqtFormatDate(p.g6_ngay_het_han)}</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-neon-lime font-mono text-sm font-semibold">${Number(p.g6_gia_thuc_te||0).toLocaleString('vi-VN')}₫</div>
+          <span class="border text-xs font-caps uppercase tracking-wide px-3 py-1 rounded-full ${s.cls}">${s.label}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch {
+    document.getElementById('nqtActivePkg').innerHTML = '<div class="text-text-muted text-sm">Không thể tải dữ liệu.</div>';
+    document.getElementById('nqtPkgHistory').innerHTML = '';
+  }
+})();
+</script>
+</body>
+</html>

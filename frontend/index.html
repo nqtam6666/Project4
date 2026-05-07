@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="vi" id="icHtmlRoot">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title id="ic-page-title">IRON COMMAND — Sức mạnh và Hiệu suất</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lexend:wght@600&display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+<link rel="stylesheet" href="/src/css/input.css" />
+
+<!-- Toggle Script -->
+<script>
+(function(){
+  var saved = localStorage.getItem('ic-theme');
+  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'dark' || (!saved && prefersDark)) {
+    document.documentElement.classList.add('dark');
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    var toggleBtn = document.createElement('button');
+    toggleBtn.id = 'ic-theme-toggle';
+    toggleBtn.title = 'Toggle light/dark mode';
+    toggleBtn.className = 'material-symbols-outlined hover:text-blue-400 transition-colors cursor-pointer';
+    toggleBtn.textContent = 'contrast';
+    toggleBtn.style.cssText = 'background:none;border:none;padding:0;font-size:24px;color:var(--nav-text-muted)';
+    toggleBtn.addEventListener('click', function() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('ic-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+    var header = document.querySelector('header');
+    if (header) {
+      var notifBtn = header.querySelector('.ic-actions');
+      if (notifBtn) {
+        notifBtn.insertBefore(toggleBtn, notifBtn.firstChild);
+      } else { header.appendChild(toggleBtn); }
+  // Dynamic Theme Loader
+  (async function() {
+    function hexToRgb(hex) {
+      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? parseInt(result[1], 16) + ', ' + parseInt(result[2], 16) + ', ' + parseInt(result[3], 16) : null;
+    }
+    
+    function applyColor(type, hex) {
+      if (!hex) return;
+      document.documentElement.style.setProperty('--' + type + '-color', hex);
+      var rgb = hexToRgb(hex);
+      if (rgb) document.documentElement.style.setProperty('--' + type + '-rgb', rgb);
+    }
+
+    var cachedPrimary = localStorage.getItem('ic-primary-color');
+    var cachedSecondary = localStorage.getItem('ic-secondary-color');
+    if (cachedPrimary) applyColor('primary', cachedPrimary);
+    if (cachedSecondary) applyColor('secondary', cachedSecondary);
+
+    try {
+      // Fetch both theme and website/business configuration
+      var res = await fetch('/api/nqt-cau-hinh');
+      var data = await res.json();
+      if (data && data.nqt_thanh_cong) {
+        var pColor = null, sColor = null;
+        var pData = {};
+        data.nqt_du_lieu.forEach(function(row) {
+          if (row.g6_khoa === 'g6_mau_chu_dao' && row.g6_gia_tri) pColor = row.g6_gia_tri;
+          if (row.g6_khoa === 'g6_mau_phu' && row.g6_gia_tri) sColor = row.g6_gia_tri;
+          pData[row.g6_khoa] = row.g6_gia_tri;
+        });
+        
+        // Cache general config
+        localStorage.setItem('ic-site-config', JSON.stringify(pData));
+
+        if (pColor && pColor !== cachedPrimary) {
+          applyColor('primary', pColor);
+          localStorage.setItem('ic-primary-color', pColor);
+        }
+        if (sColor && sColor !== cachedSecondary) {
+          applyColor('secondary', sColor);
+          localStorage.setItem('ic-secondary-color', sColor);
+        }
+        
+        applyConfigToDOM(pData);
+      }
+    } catch(e) { console.error('Lỗi tải cấu hình:', e); }
+
+    function applyConfigToDOM(configData) {
+      document.querySelectorAll('[data-config]').forEach(function(el) {
+        var key = 'g6_' + el.getAttribute('data-config');
+        if (configData[key]) {
+          var type = el.getAttribute('data-config-type');
+          if (type === 'href') el.href = configData[key];
+          else if (type === 'tel') el.href = 'tel:' + configData[key].replace(/\\D/g,'');
+          else if (type === 'mailto') el.href = 'mailto:' + configData[key];
+          else if (type === 'src') el.src = configData[key];
+          else el.textContent = configData[key];
+        }
+      });
+      if (configData['g6_ten_website']) {
+        var t = document.getElementById('ic-page-title');
+        if (t) t.textContent = configData['g6_ten_website'] + ' — Sức mạnh và Hiệu suất';
+      }
+      if (configData['g6_favicon_url']) {
+        var link = document.querySelector("link[rel~='icon']");
+        if (!link) {
+          link = document.createElement('link');
+          link.rel = 'icon';
+          document.head.appendChild(link);
+        }
+        link.href = configData['g6_favicon_url'];
+      }
+    }
+
+    // Apply cached config immediately to prevent FOUC
+    var cachedConfigStr = localStorage.getItem('ic-site-config');
+    if (cachedConfigStr) {
+      try { applyConfigToDOM(JSON.parse(cachedConfigStr)); } catch(e){}
+    }
+  })();
+})();
+</script>
+</head>
+<body class="bg-background text-on-surface font-sans overflow-x-hidden antialiased transition-colors duration-250">
+
+<!-- NAV -->
+<header class="bg-black/95 backdrop-blur h-16 border-b border-gray-800 fixed top-0 w-full z-40 flex items-center px-6 md:px-margin">
+    <div class="flex-1 flex items-center">
+        <a href="/" class="text-primary text-xl font-black italic tracking-tighter" data-config="ten_website">IRON COMMAND</a>
+    </div>
+    
+    <div class="hidden md:flex gap-6 items-center flex-1 justify-center">
+        <a href="#co-so" class="font-label-caps text-gray-400 hover:text-blue-400 transition-colors">Cơ sở & Dịch vụ</a>
+        <a href="#goi-tap" class="font-label-caps text-gray-400 hover:text-blue-400 transition-colors">Gói tập</a>
+        <a href="#hlv" class="font-label-caps text-gray-400 hover:text-blue-400 transition-colors">Huấn luyện viên</a>
+        <a href="#lop-hoc" class="font-label-caps text-gray-400 hover:text-blue-400 transition-colors">Lớp học</a>
+    </div>
+
+    <div class="flex-1 flex items-center justify-end gap-4 ic-actions">
+        <a href="#lien-he" class="hidden md:block font-label-caps text-gray-400 hover:text-blue-400 transition-colors">Liên hệ</a>
+        <a href="/login" class="bg-primary text-white px-4 py-2 rounded-lg font-bold active:scale-95 duration-100 font-label-caps hidden md:block">Tham gia</a>
+        <a href="/login" class="hidden md:block font-label-caps text-gray-400 hover:text-blue-400 transition-colors">Đăng nhập</a>
+    </div>
+</header>
+
+<!-- HERO -->
+<section id="home" class="hero-gradient min-h-[85vh] flex items-center justify-center pt-16 relative">
+    <div class="max-w-4xl mx-auto px-6 text-center flex flex-col items-center gap-6 z-10 relative">
+        <h1 class="text-[48px] md:text-[72px] font-black italic leading-tight tracking-tighter text-white">
+            <span data-config="ten_website">IRON COMMAND</span><br>
+            <span class="text-primary neon-text">HIỆU SUẤT TỐI ĐA</span>
+        </h1>
+        <p class="text-gray-300 font-body-base max-w-xl mx-auto" data-config="mo_ta_website">
+            Không gian dành riêng cho tập luyện nghiêm túc. Thiết bị chuẩn quốc tế, huấn luyện viên chuyên nghiệp, kết quả có thể đong đếm.
+        </p>
+        <div class="flex gap-4 mt-4">
+            <a href="#goi-tap" class="bg-primary/90 hover:bg-primary px-8 py-4 rounded-xl font-headline-lg neon-button text-white transition-all duration-200">
+                BẮT ĐẦU NGAY
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CƠ SỞ & DỊCH VỤ (G6ChiNhanh & G6DichVuPhu) -->
+<section id="co-so" class="py-xl bg-surface-container-lowest">
+    <div class="max-w-7xl mx-auto px-6 md:px-margin">
+        <h2 class="font-display-xl text-on-surface mb-lg text-center">CƠ SỞ & <span class="text-primary">DỊCH VỤ</span></h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter" id="branches-container">
+            <!-- Data binding: G6ChiNhanh (g6_ten_chi_nhanh, g6_dia_chi, g6_co_sauna) -->
+            <div class="lg:col-span-8 bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all min-h-[300px] flex flex-col justify-end p-md relative group">
+                <div class="absolute inset-0 bg-surface-bright/20 group-hover:bg-surface-bright/40 transition-colors"></div>
+                <div class="relative z-10">
+                    <span class="font-label-caps text-[10px] text-outline uppercase">IRON COMMAND FLAGSHIP</span>
+                    <h3 class="font-headline-md text-primary mt-1" data-field="g6_ten_chi_nhanh">Quận 1, TP.HCM</h3>
+                    <p class="font-body-sm text-on-surface-variant mt-2" data-field="g6_dia_chi">Tầng 3, Bitexco Financial Tower, Quận 1.</p>
+                    <div class="flex gap-2 mt-3">
+                        <span class="bg-secondary/10 text-secondary px-2 py-1 rounded-sm text-[10px] font-black uppercase border border-secondary/20" data-field="g6_co_sauna">Phòng Sauna</span>
+                        <span class="bg-primary/90/10 text-primary px-2 py-1 rounded-sm text-[10px] font-black uppercase border border-primary/20" data-field="g6_co_ho_boi">Hồ bơi</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lg:col-span-4 flex flex-col gap-gutter" id="services-container">
+                <!-- Data binding: G6DichVuPhu -->
+                <div class="flex-1 bg-surface-container border border-outline-variant rounded-xl p-md hover:border-primary transition-all">
+                    <span class="font-label-caps text-[10px] text-outline uppercase" data-field="g6_loai_dich_vu">PHỤC HỒI</span>
+                    <h3 class="font-headline-md text-secondary mt-1" data-field="g6_ten_dich_vu">Sauna Hồng Ngoại</h3>
+                    <p class="font-body-sm text-on-surface-variant mt-2" data-field="g6_mo_ta">Trải nghiệm phục hồi cơ bắp toàn diện với hệ thống Sauna đạt chuẩn.</p>
+                </div>
+                <div class="flex-1 bg-surface-container border border-outline-variant rounded-xl p-md hover:border-primary transition-all">
+                    <span class="font-label-caps text-[10px] text-outline uppercase" data-field="g6_loai_dich_vu">THƯ GIÃN</span>
+                    <h3 class="font-headline-md text-tertiary mt-1" data-field="g6_ten_dich_vu">Massage Thể Thao</h3>
+                    <p class="font-body-sm text-on-surface-variant mt-2" data-field="g6_mo_ta">Giải tỏa căng thẳng, giãn cơ sâu bởi kỹ thuật viên chuyên nghiệp.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GÓI TẬP (G6GoiTap) -->
+<section id="goi-tap" class="py-xl bg-background border-y border-outline-variant">
+    <div class="max-w-7xl mx-auto px-6 md:px-margin">
+        <h2 class="font-display-xl text-on-surface mb-lg text-center">BẢNG GIÁ <span class="text-primary">ĐỘC QUYỀN</span></h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="packages-container">
+            <!-- Package 1 -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all flex flex-col" data-id="1">
+                <div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-highest/20">
+                    <h3 class="font-headline-md text-on-surface" data-field="g6_ten_goi">STANDARD (1 Tháng)</h3>
+                </div>
+                <div class="p-md flex-1">
+                    <p class="font-display-xl text-primary mb-4" data-field="g6_gia">500,000đ<span class="font-body-sm text-outline" data-field="g6_so_ngay">/30 ngày</span></p>
+                    <ul class="space-y-2 mb-6 font-body-sm text-on-surface-variant">
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-secondary">check</span>Toàn quyền khu tập</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-secondary">check</span>Gửi xe miễn phí</li>
+                        <li class="flex items-center gap-2 opacity-50" data-field="g6_co_sauna"><span class="material-symbols-outlined text-[16px] text-outline">close</span>Không gồm Sauna</li>
+                        <li class="flex items-center gap-2 opacity-50" data-field="g6_co_pt"><span class="material-symbols-outlined text-[16px] text-outline">close</span>Không gồm PT</li>
+                    </ul>
+                </div>
+                <div class="p-md pt-0">
+                    <button class="w-full border border-primary text-primary rounded-lg py-2 font-bold hover:bg-primary/10 transition-colors active:scale-95 duration-100">CHỌN GÓI</button>
+                </div>
+            </div>
+
+            <!-- Package 2 - Featured (g6_la_noi_bat = 1) -->
+            <div class="bg-surface-container-high border-2 border-primary rounded-xl overflow-hidden scale-105 shadow-2xl neon-border relative flex flex-col z-10" data-id="2">
+                <div class="absolute top-4 right-4 bg-primary text-white px-4 py-1 rounded-full text-[10px] font-label-caps">POPULAR</div>
+                <div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-highest/40">
+                    <h3 class="font-headline-md text-on-surface" data-field="g6_ten_goi">PREMIUM (3 Tháng)</h3>
+                </div>
+                <div class="p-md flex-1">
+                    <p class="font-display-xl text-primary mb-4" data-field="g6_gia">1,200,000đ<span class="font-body-sm text-outline" data-field="g6_so_ngay">/90 ngày</span></p>
+                    <ul class="space-y-2 mb-6 font-body-sm text-on-surface-variant">
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-secondary">check</span>Toàn quyền khu tập</li>
+                        <li class="flex items-center gap-2" data-field="g6_co_sauna"><span class="material-symbols-outlined text-[16px] text-secondary">check</span>Sử dụng Sauna miễn phí</li>
+                        <li class="flex items-center gap-2" data-field="g6_duoc_dua_khach"><span class="material-symbols-outlined text-[16px] text-secondary">check</span>Được đưa 1 khách đi kèm</li>
+                        <li class="flex items-center gap-2" data-field="g6_co_pt"><span class="material-symbols-outlined text-[16px] text-secondary">check</span>Tặng 1 buổi PT định hướng</li>
+                    </ul>
+                </div>
+                <div class="p-md pt-0">
+                    <button class="w-full bg-primary text-white rounded-lg py-2 font-bold active:scale-95 duration-100 hover:bg-primary/90 transition-colors neon-button">ĐĂNG KÝ NGAY</button>
+                </div>
+            </div>
+
+            <!-- Package 3 -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all flex flex-col" data-id="3">
+                <div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-highest/20">
+                    <h3 class="font-headline-md text-on-surface" data-field="g6_ten_goi">VIP (1 Năm)</h3>
+                </div>
+                <div class="p-md flex-1">
+                    <p class="font-display-xl text-primary mb-4" data-field="g6_gia">4,500,000đ<span class="font-body-sm text-outline" data-field="g6_so_ngay">/365 ngày</span></p>
+                    <ul class="space-y-2 mb-6 font-body-sm text-on-surface-variant">
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-secondary">check</span>Tất cả quyền lợi Premium</li>
+                        <li class="flex items-center gap-2" data-field="g6_duoc_dua_khach"><span class="material-symbols-outlined text-[16px] text-secondary">check</span>Đưa 2 khách đi kèm / lần</li>
+                        <li class="flex items-center gap-2" data-field="g6_co_pt"><span class="material-symbols-outlined text-[16px] text-secondary">check</span>Tặng 5 buổi PT 1-1</li>
+                    </ul>
+                </div>
+                <div class="p-md pt-0">
+                    <button class="w-full bg-surface-container border border-outline-variant hover:bg-surface-variant rounded-lg py-2 font-bold transition-colors active:scale-95 duration-100 text-on-surface">CHỌN GÓI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HUẤN LUYỆN VIÊN (G6HuanLuyenVien) - Drag Scroll -->
+<section id="hlv" class="py-xl bg-surface-container-lowest">
+    <div class="max-w-7xl mx-auto px-6 md:px-margin">
+        <h2 class="font-display-xl text-on-surface mb-lg">ĐỘI NGŨ <span class="text-primary">HUẤN LUYỆN VIÊN</span></h2>
+        
+        <!-- Drag Scroll Container -->
+        <div class="flex gap-6 drag-scroll-container pb-6" id="trainers-container">
+            <!-- Trainer 1 -->
+            <div class="min-w-[280px] bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all flex-shrink-0">
+                <div class="h-[300px] bg-gray-800 relative overflow-hidden group">
+                    <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&auto=format&fit=crop&q=60" alt="Trainer" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-700" data-field="g6_hinh_anh">
+                    <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
+                        <span class="material-symbols-outlined text-[14px] text-tertiary" style="font-variation-settings:'FILL' 1">star</span>
+                        <span class="text-white text-xs font-bold" data-field="g6_thu_hang">5.0</span>
+                    </div>
+                </div>
+                <div class="p-md">
+                    <h3 class="font-headline-md text-on-surface">Nguyễn Văn A</h3>
+                    <div class="flex flex-wrap gap-2 mt-2" data-field="g6_chuyen_mon">
+                        <span class="bg-primary/10 text-primary border border-primary/50 rounded-sm text-[10px] font-bold px-2 py-1">Tăng cơ</span>
+                        <span class="bg-primary/10 text-primary border border-primary/50 rounded-sm text-[10px] font-bold px-2 py-1">Giảm mỡ</span>
+                    </div>
+                    <p class="font-body-sm text-on-surface-variant mt-3" data-field="g6_so_nam_kinh_nghiem">Kinh nghiệm: 5 năm</p>
+                    <p class="font-label-caps text-[10px] text-outline mt-1" data-field="g6_cap_chung_chi">Chứng chỉ: NASM, ACE</p>
+                </div>
+            </div>
+
+            <!-- Trainer 2 -->
+            <div class="min-w-[280px] bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all flex-shrink-0">
+                <div class="h-[300px] bg-gray-800 relative overflow-hidden group">
+                    <img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?w=500&auto=format&fit=crop&q=60" alt="Trainer" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-700" data-field="g6_hinh_anh">
+                    <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
+                        <span class="material-symbols-outlined text-[14px] text-tertiary" style="font-variation-settings:'FILL' 1">star</span>
+                        <span class="text-white text-xs font-bold" data-field="g6_thu_hang">4.9</span>
+                    </div>
+                </div>
+                <div class="p-md">
+                    <h3 class="font-headline-md text-on-surface">Trần Thị B</h3>
+                    <div class="flex flex-wrap gap-2 mt-2" data-field="g6_chuyen_mon">
+                        <span class="bg-primary/10 text-primary border border-primary/50 rounded-sm text-[10px] font-bold px-2 py-1">Yoga</span>
+                        <span class="bg-primary/10 text-primary border border-primary/50 rounded-sm text-[10px] font-bold px-2 py-1">Pilates</span>
+                    </div>
+                    <p class="font-body-sm text-on-surface-variant mt-3" data-field="g6_so_nam_kinh_nghiem">Kinh nghiệm: 7 năm</p>
+                    <p class="font-label-caps text-[10px] text-outline mt-1" data-field="g6_cap_chung_chi">Chứng chỉ: REPs</p>
+                </div>
+            </div>
+            
+            <!-- Trainer 3 -->
+            <div class="min-w-[280px] bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-all flex-shrink-0">
+                <div class="h-[300px] bg-gray-800 relative overflow-hidden group">
+                    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500&auto=format&fit=crop&q=60" alt="Trainer" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-700" data-field="g6_hinh_anh">
+                    <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
+                        <span class="material-symbols-outlined text-[14px] text-tertiary" style="font-variation-settings:'FILL' 1">star</span>
+                        <span class="text-white text-xs font-bold" data-field="g6_thu_hang">4.8</span>
+                    </div>
+                </div>
+                <div class="p-md">
+                    <h3 class="font-headline-md text-on-surface">Lê Văn C</h3>
+                    <div class="flex flex-wrap gap-2 mt-2" data-field="g6_chuyen_mon">
+                        <span class="bg-primary/10 text-primary border border-primary/50 rounded-sm text-[10px] font-bold px-2 py-1">Boxing</span>
+                        <span class="bg-primary/10 text-primary border border-primary/50 rounded-sm text-[10px] font-bold px-2 py-1">Cardio</span>
+                    </div>
+                    <p class="font-body-sm text-on-surface-variant mt-3" data-field="g6_so_nam_kinh_nghiem">Kinh nghiệm: 3 năm</p>
+                    <p class="font-label-caps text-[10px] text-outline mt-1" data-field="g6_cap_chung_chi">Chứng chỉ: ISSA</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- LỚP HỌC NHÓM (G6LopHoc) -->
+<section id="lop-hoc" class="py-xl bg-background border-y border-outline-variant">
+    <div class="max-w-7xl mx-auto px-6 md:px-margin">
+        <div class="flex justify-between items-end mb-lg">
+            <h2 class="font-display-xl text-on-surface">LỚP HỌC <span class="text-blue-500">NHÓM</span></h2>
+            <a href="#" class="font-label-caps text-blue-500 hover:text-blue-400 transition-colors hidden sm:block">Xem thời khóa biểu &rarr;</a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter" id="classes-container">
+            <!-- Class 1 -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-blue-500 transition-all group">
+                <div class="p-md border-b border-outline-variant flex justify-between items-center relative">
+                    <h3 class="font-headline-md text-on-surface" data-field="g6_ten_lop">Power Yoga</h3>
+                    <span class="bg-secondary/10 text-secondary border border-secondary/20 px-2 py-1 rounded-sm text-[10px] font-black uppercase" data-field="g6_do_kho">Cơ bản</span>
+                </div>
+                <div class="p-md">
+                    <p class="font-body-sm text-on-surface-variant mb-4" data-field="g6_mo_ta">Tăng cường sự dẻo dai và sức mạnh cốt lõi qua các bài tập Yoga cường độ trung bình.</p>
+                    <div class="flex items-center justify-between text-xs font-bold">
+                        <span class="text-outline uppercase" data-field="g6_loai_lop">Loại: Yoga</span>
+                        <a href="#" class="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">Đặt chỗ</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Class 2 -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-blue-500 transition-all group">
+                <div class="p-md border-b border-outline-variant flex justify-between items-center relative">
+                    <h3 class="font-headline-md text-on-surface" data-field="g6_ten_lop">HIIT Combat</h3>
+                    <span class="bg-tertiary/10 text-tertiary border border-tertiary/20 px-2 py-1 rounded-sm text-[10px] font-black uppercase" data-field="g6_do_kho">Nâng cao</span>
+                </div>
+                <div class="p-md">
+                    <p class="font-body-sm text-on-surface-variant mb-4" data-field="g6_mo_ta">Đốt cháy mỡ thừa với các bài võ thuật kết hợp HIIT trong 45 phút đầy thử thách.</p>
+                    <div class="flex items-center justify-between text-xs font-bold">
+                        <span class="text-outline uppercase" data-field="g6_loai_lop">Loại: Boxing</span>
+                        <a href="#" class="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">Đặt chỗ</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class 3 -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden hover:border-blue-500 transition-all group">
+                <div class="p-md border-b border-outline-variant flex justify-between items-center relative">
+                    <h3 class="font-headline-md text-on-surface" data-field="g6_ten_lop">Spinning Rhythm</h3>
+                    <span class="bg-primary-container/20 text-primary border border-primary/20 px-2 py-1 rounded-sm text-[10px] font-black uppercase" data-field="g6_do_kho">Trung bình</span>
+                </div>
+                <div class="p-md">
+                    <p class="font-body-sm text-on-surface-variant mb-4" data-field="g6_mo_ta">Đạp xe trong phòng tối theo nhịp điệu âm nhạc sôi động, cải thiện tim mạch tối đa.</p>
+                    <div class="flex items-center justify-between text-xs font-bold">
+                        <span class="text-outline uppercase" data-field="g6_loai_lop">Loại: Spinning</span>
+                        <a href="#" class="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">Đặt chỗ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- LIÊN HỆ -->
+<section id="lien-he" class="py-xl bg-surface-container-lowest">
+    <div class="max-w-4xl mx-auto px-6 md:px-margin">
+        <div class="bg-surface-container border border-outline-variant rounded-3xl p-8 md:p-16 relative overflow-hidden shadow-2xl">
+            <h2 class="font-display-xl text-on-surface mb-2 text-center">BẮT ĐẦU <span class="text-blue-500">HÀNH TRÌNH</span></h2>
+            <p class="text-on-surface-variant text-center mb-8 font-body-base">Để lại thông tin để nhận tư vấn và một ngày trải nghiệm miễn phí.</p>
+            
+            <form class="flex flex-col gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="relative">
+                        <input type="text" id="txtName" class="floating-input" placeholder=" " required>
+                        <label for="txtName" class="floating-label">Họ và Tên</label>
+                    </div>
+                    <div class="relative">
+                        <input type="tel" id="txtPhone" class="floating-input" placeholder=" " required>
+                        <label for="txtPhone" class="floating-label">Số điện thoại</label>
+                    </div>
+                </div>
+                <div class="relative">
+                    <input type="email" id="txtEmail" class="floating-input" placeholder=" ">
+                    <label for="txtEmail" class="floating-label">Email (Không bắt buộc)</label>
+                </div>
+                
+                <div class="relative mt-2">
+                    <select id="selBranch" class="floating-input appearance-none cursor-pointer text-text-muted pb-2" required>
+                        <option value="" disabled selected hidden></option>
+                        <option value="1">IRON COMMAND Quận 1</option>
+                        <option value="2">IRON COMMAND Quận 7</option>
+                    </select>
+                    <label for="selBranch" class="floating-label !top-0 !text-[0.75rem] !text-primary-color !tracking-[0.5px]">Chọn Cơ sở</label>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pt-2">
+                        <span class="material-symbols-outlined text-outline">expand_more</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-headline-md neon-button transition-all duration-200 active:scale-95">GỬI YÊU CẦU</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-black border-t border-gray-900 py-12 px-6 md:px-margin">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="md:col-span-2">
+                <div class="text-blue-500 font-black italic tracking-tighter text-2xl mb-4" data-config="ten_website">IRON COMMAND</div>
+                <p class="text-gray-500 text-sm max-w-xs" data-config="mo_ta_website">Nơi kỷ luật tạo nên kết quả. Thiết lập chuẩn mực tập luyện mới.</p>
+                <div class="mt-4 flex gap-4">
+                    <a href="#" class="text-gray-500 hover:text-white" data-config="facebook_url" data-config-type="href"><i class="fab fa-facebook text-xl"></i></a>
+                    <a href="#" class="text-gray-500 hover:text-white" data-config="zalo_url" data-config-type="href"><i class="fas fa-comment text-xl"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-label-caps text-gray-400 mb-4">LIÊN HỆ</h4>
+                <ul class="space-y-2">
+                    <li class="flex items-center gap-2"><i class="fas fa-phone text-gray-500 w-4"></i> <a href="#" data-config="so_dien_thoai_hotline" data-config-type="tel" class="text-gray-500 hover:text-white transition-colors text-sm font-bold">1900 1234</a></li>
+                    <li class="flex items-center gap-2"><i class="fas fa-envelope text-gray-500 w-4"></i> <a href="#" data-config="email_lien_he" data-config-type="mailto" class="text-gray-500 hover:text-white transition-colors text-sm">contact@ironcommand.vn</a></li>
+                    <li class="flex items-start gap-2"><i class="fas fa-map-marker-alt text-gray-500 mt-1 w-4"></i> <span data-config="dia_chi_tru_so" class="text-gray-500 text-sm">123 Đường Sức Mạnh, Quận 1</span></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-label-caps text-gray-400 mb-4">SẢN PHẨM</h4>
+                <ul class="space-y-2">
+                    <li><a href="#goi-tap" class="text-gray-500 hover:text-white transition-colors text-sm">Gói tập</a></li>
+                    <li><a href="#hlv" class="text-gray-500 hover:text-white transition-colors text-sm">Huấn luyện cá nhân</a></li>
+                    <li><a href="#lop-hoc" class="text-gray-500 hover:text-white transition-colors text-sm">Lớp học nhóm</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-12 pt-8 border-t border-gray-900 flex justify-between items-center">
+            <p class="text-gray-600 text-xs uppercase tracking-widest">© 2026 <span data-config="ten_website">IRON COMMAND</span>. ALL RIGHTS RESERVED.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Drag Scroll Logic Script -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const slider = document.getElementById('trainers-container');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    if (slider) {
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            slider.classList.add('active');
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+            slider.classList.remove('active');
+        });
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+            slider.classList.remove('active');
+        });
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 2; // Tốc độ scroll
+            slider.scrollLeft = scrollLeft - walk;
+        });
+    }
+});
+</script>
+<script type="module" src="./src/js/landing.js"></script>
+</body>
+</html>

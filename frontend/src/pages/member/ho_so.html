@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hồ sơ — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "neon-lime": "#C8F135",
+        "neon-dim":  "#A8D120",
+        "bg-main":   "#0A0A0F",
+        "bg-card":   "#12121A",
+        "bg-elevated": "#1C1C28",
+        "text-primary":   "#F5F5F0",
+        "text-secondary": "#A1A1AA",
+        "text-muted":     "#52525B",
+        "border-subtle":  "rgba(255,255,255,0.06)",
+        "border-neon":    "rgba(200,241,53,0.3)",
+        "neon-glow":      "rgba(200,241,53,0.15)",
+        "surface-container-low": "#1a1d11",
+        "surface-container-lowest": "#0d0f05",
+        "surface-container": "#1e2115",
+        "error":   "#EF4444",
+        "warning": "#F59E0B",
+        "success": "#22C55E",
+      },
+      fontFamily: {
+        "sans": ["Inter", "sans-serif"],
+        "mono": ["JetBrains Mono", "monospace"],
+        "caps": ["Space Grotesk", "sans-serif"],
+      },
+      fontSize: {
+        "d-xl":  ["36px", { lineHeight: "1.1", fontWeight: "700" }],
+        "d-md":  ["24px", { lineHeight: "1.3", fontWeight: "700" }],
+        "d-sm":  ["18px", { lineHeight: "1.4", fontWeight: "700" }],
+        "label": ["12px", { lineHeight: "1.0", letterSpacing: "0.5px", fontWeight: "600" }],
+      },
+    }
+  }
+}
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+
+<!-- ── Sidebar (same as dashboard) ─────────────────────────────────────── -->
+<aside class="fixed top-0 left-0 w-64 h-screen bg-zinc-950 border-r border-white/5 flex flex-col z-40 hidden lg:flex">
+  <div class="flex items-center gap-3 px-6 h-20 border-b border-white/5">
+    <div class="w-9 h-9 bg-neon-lime rounded-lg flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined text-bg-main text-lg font-bold">fitness_center</span>
+    </div>
+    <div>
+      <div class="text-white font-black italic text-base leading-none">NQT GYM</div>
+      <div class="font-caps text-[9px] text-text-muted uppercase tracking-widest mt-0.5">Performance</div>
+    </div>
+  </div>
+
+  <div class="px-4 py-5 border-b border-white/5">
+    <div class="flex items-center gap-3">
+      <div id="nqtAvatar" class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center flex-shrink-0">
+        <span class="font-mono text-sm font-bold text-neon-lime">?</span>
+      </div>
+      <div class="min-w-0">
+        <div id="nqtUserName" class="font-semibold text-sm text-text-primary truncate">…</div>
+        <div id="nqtUserPhone" class="font-caps text-[10px] text-text-muted uppercase tracking-widest truncate">…</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="flex-1 px-3 py-4 space-y-1">
+    <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-white/5 hover:text-text-primary transition-all duration-150">
+      <span class="material-symbols-outlined text-xl">dashboard</span>
+      <span class="font-caps text-[11px] uppercase tracking-widest">Tổng quan</span>
+    </a>
+    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-neon-lime/10 text-neon-lime border border-neon-lime/20">
+      <span class="material-symbols-outlined text-xl">person</span>
+      <span class="font-caps text-[11px] uppercase tracking-widest">Hồ sơ</span>
+    </a>
+    <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-white/5 hover:text-text-primary transition-all duration-150">
+      <span class="material-symbols-outlined text-xl">home</span>
+      <span class="font-caps text-[11px] uppercase tracking-widest">Trang chủ</span>
+    </a>
+  </nav>
+
+  <div class="px-3 py-4 border-t border-white/5">
+    <button id="nqtLogoutBtn" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-muted hover:bg-white/5 hover:text-red-400 transition-all duration-150 w-full">
+      <span class="material-symbols-outlined text-xl">logout</span>
+      <span class="font-caps text-[11px] uppercase tracking-widest">Đăng xuất</span>
+    </button>
+  </div>
+</aside>
+
+<!-- ── Mobile header ─────────────────────────────────────────────────────── -->
+<header class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur-lg border-b border-white/5 h-16 flex items-center justify-between px-4">
+  <a href="/" class="flex items-center gap-2">
+    <div class="w-8 h-8 bg-neon-lime rounded-lg flex items-center justify-center">
+      <span class="material-symbols-outlined text-bg-main text-base font-bold">fitness_center</span>
+    </div>
+    <span class="text-white font-black italic">NQT GYM</span>
+  </a>
+  <div class="flex items-center gap-2">
+    <button id="nqtMobileMenuBtn" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-text-secondary transition-colors">
+      <span class="material-symbols-outlined text-xl">menu</span>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile menu -->
+<div id="nqtMobileMenu" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/60" id="nqtMobileMenuOverlay"></div>
+  <div class="absolute right-0 top-0 bottom-0 w-64 bg-zinc-950 border-l border-white/5 flex flex-col">
+    <div class="flex items-center justify-between px-5 h-16 border-b border-white/5">
+      <span class="text-white font-black italic">NQT GYM</span>
+      <button id="nqtMobileMenuClose" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-text-secondary">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-white/5 hover:text-text-primary">
+        <span class="material-symbols-outlined text-xl">dashboard</span>
+        <span class="font-caps text-[11px] uppercase tracking-widest">Tổng quan</span>
+      </a>
+      <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-neon-lime/10 text-neon-lime border border-neon-lime/20">
+        <span class="material-symbols-outlined text-xl">person</span>
+        <span class="font-caps text-[11px] uppercase tracking-widest">Hồ sơ</span>
+      </a>
+      <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-white/5 hover:text-text-primary">
+        <span class="material-symbols-outlined text-xl">home</span>
+        <span class="font-caps text-[11px] uppercase tracking-widest">Trang chủ</span>
+      </a>
+    </nav>
+    <div class="px-3 py-4 border-t border-white/5">
+      <button id="nqtLogoutBtnMobile" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-muted hover:bg-white/5 hover:text-red-400 transition-all w-full">
+        <span class="material-symbols-outlined text-xl">logout</span>
+        <span class="font-caps text-[11px] uppercase tracking-widest">Đăng xuất</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main Content ─────────────────────────────────────────────────── -->
+<main class="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+
+  <!-- Page header -->
+  <div class="bg-zinc-950/50 border-b border-white/5 px-6 py-6 lg:py-8">
+    <div class="max-w-4xl mx-auto flex items-end justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="material-symbols-outlined text-text-muted text-lg">person</span>
+          <span class="font-caps text-label text-text-muted uppercase tracking-widest">Hồ sơ</span>
+        </div>
+        <h1 class="text-d-md text-text-primary">Thông tin <span class="text-neon-lime">cá nhân</span></h1>
+      </div>
+      <a href="dashboard.html" class="flex items-center gap-2 text-text-muted hover:text-neon-lime transition-colors font-caps text-label uppercase tracking-widest">
+        <span class="material-symbols-outlined text-lg">arrow_back</span>
+        Tổng quan
+      </a>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 md:px-6 py-8 space-y-6">
+
+    <!-- Profile card -->
+    <div class="bg-bg-elevated border border-border-subtle rounded-xl overflow-hidden">
+      <!-- Avatar + name header -->
+      <div class="flex items-center gap-5 px-6 py-6 border-b border-border-subtle">
+        <div id="nqtAvatarLarge" class="w-20 h-20 rounded-2xl bg-surface-container-lowest flex items-center justify-center flex-shrink-0">
+          <span class="font-mono text-2xl font-bold text-neon-lime">?</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h2 id="nqtProfileName" class="text-d-sm text-text-primary mb-1">—</h2>
+          <div class="flex items-center gap-3 flex-wrap">
+            <span class="font-caps text-label text-text-muted uppercase tracking-widest">Hội viên</span>
+            <span class="flex items-center gap-1 font-caps text-[10px] text-neon-lime uppercase tracking-widest">
+              <span class="material-symbols-outlined text-[12px]">verified</span>
+              Đã xác minh
+            </span>
+          </div>
+        </div>
+        <button id="nqtEditProfileBtn" class="flex items-center gap-2 border border-border-subtle text-text-secondary font-caps text-[11px] uppercase tracking-widest px-4 py-2.5 rounded-lg hover:border-border-neon hover:text-neon-lime transition-all duration-200">
+          <span class="material-symbols-outlined text-lg">edit</span>
+          Chỉnh sửa
+        </button>
+      </div>
+
+      <!-- Info grid -->
+      <div id="nqtProfileInfo" class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-0">
+        <div class="flex justify-center items-center py-12">
+          <span class="material-symbols-outlined text-text-muted text-3xl animate-pulse">progress_activity</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chỉ số cơ thể -->
+    <div class="bg-bg-elevated border border-border-subtle rounded-xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-text-muted text-xl">monitor_heart</span>
+          <h2 class="font-caps text-label text-text-secondary uppercase tracking-widest">Chỉ số cơ thể</h2>
+        </div>
+        <span class="font-caps text-[10px] text-text-muted uppercase tracking-widest" id="nqtChiSoDate">Cập nhật: —</span>
+      </div>
+      <div id="nqtChiSoArea" class="p-6">
+        <div class="flex justify-center items-center py-12">
+          <span class="material-symbols-outlined text-text-muted text-3xl animate-pulse">progress_activity</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gói tập -->
+    <div class="bg-bg-elevated border border-border-subtle rounded-xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-text-muted text-xl">card_membership</span>
+          <h2 class="font-caps text-label text-text-secondary uppercase tracking-widest">Gói tập của tôi</h2>
+        </div>
+        <a href="/" class="flex items-center gap-1 font-caps text-[10px] text-neon-lime uppercase tracking-widest hover:text-neon-dim transition-colors">
+          <span>Đăng ký thêm</span>
+          <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+        </a>
+      </div>
+      <div id="nqtGoiTapArea" class="p-6">
+        <div class="flex justify-center items-center py-12">
+          <span class="material-symbols-outlined text-text-muted text-3xl animate-pulse">progress_activity</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Đổi mật khẩu -->
+    <div class="bg-bg-elevated border border-border-subtle rounded-xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-text-muted text-xl">lock_reset</span>
+          <h2 class="font-caps text-label text-text-secondary uppercase tracking-widest">Bảo mật</h2>
+        </div>
+      </div>
+      <div class="p-6">
+        <p class="text-text-muted text-sm mb-4">Đổi mật khẩu để bảo vệ tài khoản của bạn.</p>
+        <button id="nqtChangePassBtn" class="flex items-center gap-2 border border-border-subtle text-text-secondary font-caps text-[11px] uppercase tracking-widest px-5 py-2.5 rounded-lg hover:border-border-neon hover:text-neon-lime transition-all duration-200">
+          <span class="material-symbols-outlined text-lg">lock</span>
+          Đổi mật khẩu
+        </button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── Change Password Modal ──────────────────────────────────────────── -->
+<div id="nqtPassModal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="nqtPassModalOverlay"></div>
+  <div class="relative flex items-center justify-center min-h-screen p-4">
+    <div class="bg-bg-elevated border border-border-subtle rounded-2xl w-full max-w-md shadow-2xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+        <h3 class="text-d-sm text-text-primary">Đổi mật khẩu</h3>
+        <button id="nqtPassModalClose" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-text-muted hover:text-text-primary transition-colors">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <form id="nqtPassForm" class="p-6 space-y-4">
+        <div>
+          <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Mật khẩu hiện tại</label>
+          <input type="password" id="nqtPassOld" autocomplete="current-password" placeholder="••••••••"
+            class="w-full bg-bg-card border border-border-subtle rounded-lg py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 transition-colors"/>
+        </div>
+        <div>
+          <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Mật khẩu mới</label>
+          <input type="password" id="nqtPassNew" autocomplete="new-password" placeholder="Ít nhất 6 ký tự"
+            class="w-full bg-bg-card border border-border-subtle rounded-lg py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 transition-colors"/>
+        </div>
+        <div>
+          <label class="block font-caps text-label text-text-secondary uppercase tracking-widest mb-2">Xác nhận mật khẩu mới</label>
+          <input type="password" id="nqtPassNewConfirm" autocomplete="new-password" placeholder="Nhập lại mật khẩu mới"
+            class="w-full bg-bg-card border border-border-subtle rounded-lg py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 transition-colors"/>
+        </div>
+        <div id="nqtPassErr" class="hidden bg-red-950/40 border border-red-500/20 rounded-lg px-4 py-3 flex items-center gap-3">
+          <span class="material-symbols-outlined text-red-400 text-xl flex-shrink-0">error</span>
+          <p class="text-red-300 text-sm" id="nqtPassErrText"></p>
+        </div>
+        <button type="submit" id="nqtPassSubmit"
+          class="w-full bg-neon-lime text-bg-main font-caps text-[11px] uppercase tracking-widest py-3.5 rounded-lg hover:scale-[1.01] hover:shadow-[0_0_20px_rgba(200,241,53,0.3)] transition-all duration-200">
+          Xác nhận đổi mật khẩu
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { nqtApi, nqtLogout } from '../../js/member/auth.js';
+
+  // ── Auth guard ─────────────────────────────────────────────────────────
+  if (!localStorage.getItem('nqt_token')) {
+    window.location.href = '/src/pages/member/login.html';
+  }
+
+  // ── Mobile menu ──────────────────────────────────────────────────────
+  const mm = document.getElementById('nqtMobileMenu');
+  document.getElementById('nqtMobileMenuBtn').addEventListener('click', () => mm.classList.remove('hidden'));
+  document.getElementById('nqtMobileMenuClose').addEventListener('click', () => mm.classList.add('hidden'));
+  document.getElementById('nqtMobileMenuOverlay').addEventListener('click', () => mm.classList.add('hidden'));
+
+  // ── Logout ───────────────────────────────────────────────────────────
+  document.getElementById('nqtLogoutBtn').addEventListener('click', nqtLogout);
+  document.getElementById('nqtLogoutBtnMobile')?.addEventListener('click', nqtLogout);
+
+  // ── Helpers ─────────────────────────────────────────────────────────
+  function nqtInitials(name) {
+    return (name || '?').split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+  }
+
+  // ── Load profile ─────────────────────────────────────────────────────
+  async function nqtLoadProfile() {
+    try {
+      const res = await nqtApi('/api/nqt-hoi-vien/toi');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!data.nqt_thanh_cong) throw new Error();
+
+      const hv = data.nqt_du_lieu.nqt_hoi_vien;
+      if (!hv) throw new Error();
+
+      // Update avatar & name
+      document.getElementById('nqtAvatarLarge').innerHTML = `<span class="font-mono text-2xl font-bold text-neon-lime">${nqtInitials(hv.g6_ho_ten)}</span>`;
+      document.getElementById('nqtAvatar').innerHTML = `<span class="font-mono text-sm font-bold text-neon-lime">${nqtInitials(hv.g6_ho_ten)}</span>`;
+      document.getElementById('nqtProfileName').textContent = hv.g6_ho_ten || '—';
+      document.getElementById('nqtUserName').textContent = hv.g6_ho_ten || '—';
+      document.getElementById('nqtUserPhone').textContent = hv.g6_so_dien_thoai || '';
+      localStorage.setItem('nqt_user', JSON.stringify(hv));
+
+      // Info grid
+      const infoItems = [
+        { icon: 'person', label: 'Họ và tên', value: hv.g6_ho_ten || '—' },
+        { icon: 'call', label: 'Số điện thoại', value: hv.g6_so_dien_thoai || '—' },
+        { icon: 'mail', label: 'Email', value: hv.g6_email || '—' },
+        { icon: 'cake', label: 'Ngày sinh', value: hv.g6_ngay_sinh ? new Date(hv.g6_ngay_sinh).toLocaleDateString('vi-VN') : '—' },
+        { icon: 'wc', label: 'Giới tính', value: hv.g6_gioi_tinh || '—' },
+        { icon: 'location_on', label: 'Địa chỉ', value: hv.g6_dia_chi || '—' },
+        { icon: 'badge', label: 'CCCD', value: hv.g6_so_cccd || '—' },
+        { icon: 'calendar_month', label: 'Ngày đăng ký', value: hv.g6_ngay_dang_ky ? new Date(hv.g6_ngay_dang_ky).toLocaleDateString('vi-VN') : '—' },
+      ];
+
+      document.getElementById('nqtProfileInfo').innerHTML = infoItems.map(item => `
+        <div class="flex items-start gap-3 px-4 py-4 ${item.value !== '—' ? 'border-b border-border-subtle' : ''} sm:last:border-0">
+          <div class="w-9 h-9 bg-surface-container-low border border-border-subtle rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="material-symbols-outlined text-text-muted text-base">${item.icon}</span>
+          </div>
+          <div>
+            <div class="font-caps text-[10px] text-text-muted uppercase tracking-widest mb-1">${item.label}</div>
+            <div class="text-sm text-text-primary">${item.value}</div>
+          </div>
+        </div>`).join('');
+    } catch {
+      document.getElementById('nqtProfileInfo').innerHTML = `<p class="text-center py-8 text-text-muted text-sm">Không tải được thông tin.</p>`;
+    }
+  }
+
+  // ── Load chỉ số cơ thể ──────────────────────────────────────────────
+  async function nqtLoadChiSo() {
+    const area = document.getElementById('nqtChiSoArea');
+    const dateEl = document.getElementById('nqtChiSoDate');
+    try {
+      const res = await nqtApi('/api/nqt-hoi-vien/toi/nqt-chi-so');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const list = data.nqt_du_lieu || [];
+      const chiSo = list[0];
+
+      if (!chiSo) {
+        area.innerHTML = `<div class="text-center py-8">
+          <span class="material-symbols-outlined text-text-muted text-4xl mb-3 block">monitor_heart</span>
+          <p class="text-text-secondary text-sm mb-1">Chưa có dữ liệu chỉ số</p>
+          <p class="text-text-muted text-xs">Liên hệ HLV để được đo và cập nhật.</p>
+        </div>`;
+        dateEl.textContent = 'Cập nhật: —';
+        return;
+      }
+
+      dateEl.textContent = `Cập nhật: ${chiSo.g6_ngay_do ? new Date(chiSo.g6_ngay_do).toLocaleDateString('vi-VN') : '—'}`;
+
+      const metrics = [
+        { label: 'Cân nặng', value: chiSo.g6_can_nang, unit: 'kg', icon: 'monitor_weight' },
+        { label: 'Chiều cao', value: chiSo.g6_chieu_cao, unit: 'cm', icon: 'straighten' },
+        { label: 'BMI', value: chiSo.g6_chi_so_bmi, unit: '', icon: 'speed' },
+        { label: 'Tỉ lệ mỡ', value: chiSo.g6_ti_le_mo, unit: '%', icon: 'percent' },
+        { label: 'Tỉ lệ cơ', value: chiSo.g6_ti_le_co, unit: '%', icon: 'fitness_center' },
+        { label: 'Vòng eo', value: chiSo.g6_vong_eo, unit: 'cm', icon: 'straighten' },
+      ];
+
+      area.innerHTML = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        ${metrics.filter(m => m.value != null).map(m => `
+          <div class="bg-surface-container-low border border-border-subtle rounded-xl p-4 text-center hover:border-border-neon transition-colors duration-200">
+            <div class="w-10 h-10 bg-neon-glow border border-neon-lime/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <span class="material-symbols-outlined text-neon-lime text-xl">${m.icon}</span>
+            </div>
+            <div class="font-mono text-2xl font-bold text-text-primary">${m.value}${m.unit}</div>
+            <div class="font-caps text-[10px] text-text-muted uppercase tracking-widest mt-1">${m.label}</div>
+          </div>`).join('')}
+      </div>`;
+    } catch {
+      area.innerHTML = `<p class="text-center py-8 text-text-muted text-sm">Không tải được dữ liệu.</p>`;
+    }
+  }
+
+  // ── Load gói tập ────────────────────────────────────────────────────
+  async function nqtLoadGoiTap() {
+    const area = document.getElementById('nqtGoiTapArea');
+    try {
+      const res = await nqtApi('/api/nqt-dang-ky-goi-tap');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const items = data.nqt_du_lieu || [];
+
+      if (items.length === 0) {
+        area.innerHTML = `<div class="text-center py-8">
+          <span class="material-symbols-outlined text-text-muted text-4xl mb-3 block">card_membership</span>
+          <p class="text-text-secondary text-sm mb-1">Bạn chưa đăng ký gói tập nào</p>
+          <a href="/" class="inline-flex items-center gap-2 bg-neon-lime text-bg-main font-caps text-[11px] uppercase tracking-widest px-5 py-2.5 rounded-lg mt-3 hover:scale-105 transition-transform">Khám phá gói tập</a>
+        </div>`;
+        return;
+      }
+
+      area.innerHTML = items.map(dk => {
+        const isActive = dk.g6_trang_thai === 'dang_hoat_dong';
+        const isExpired = dk.g6_ngay_het_han && new Date(dk.g6_ngay_het_han) < new Date();
+        const statusColor = isExpired ? 'text-red-400 bg-red-950/40 border-red-500/20' : isActive ? 'text-neon-lime bg-neon-glow border-neon-lime/20' : 'text-text-muted bg-surface-container-low border-border-subtle';
+        const statusText = isExpired ? 'Đã hết hạn' : isActive ? 'Đang hoạt động' : dk.g6_trang_thai;
+
+        return `
+        <div class="flex items-start justify-between gap-4 p-4 bg-surface-container-low border border-border-subtle rounded-xl mb-3 last:mb-0 hover:border-border-neon transition-colors duration-200">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-neon-glow border border-neon-lime/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-neon-lime text-xl">${isActive ? 'check_circle' : 'cancel'}</span>
+            </div>
+            <div>
+              <h4 class="text-sm font-semibold text-text-primary mb-1">${dk.g6_ten_goi || dk.g6_ten || 'Gói tập'}</h4>
+              <div class="space-y-0.5">
+                <p class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Bắt đầu: <span class="text-text-secondary">${dk.g6_ngay_bat_dau ? new Date(dk.g6_ngay_bat_dau).toLocaleDateString('vi-VN') : '—'}</span></p>
+                <p class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Hết hạn: <span class="text-text-secondary">${dk.g6_ngay_het_han ? new Date(dk.g6_ngay_het_han).toLocaleDateString('vi-VN') : '—'}</span></p>
+              </div>
+            </div>
+          </div>
+          <span class="font-caps text-[10px] uppercase tracking-widest px-3 py-1 rounded-full border flex-shrink-0 ${statusColor}">${statusText}</span>
+        </div>`;
+      }).join('');
+    } catch {
+      area.innerHTML = `<p class="text-center py-8 text-text-muted text-sm">Không tải được dữ liệu.</p>`;
+    }
+  }
+
+  // ── Change password modal ─────────────────────────────────────────────
+  const passModal = document.getElementById('nqtPassModal');
+  document.getElementById('nqtChangePassBtn').addEventListener('click', () => passModal.classList.remove('hidden'));
+  document.getElementById('nqtPassModalClose').addEventListener('click', () => passModal.classList.add('hidden'));
+  document.getElementById('nqtPassModalOverlay').addEventListener('click', () => passModal.classList.add('hidden'));
+
+  document.getElementById('nqtPassForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const errBox = document.getElementById('nqtPassErr');
+    const errText = document.getElementById('nqtPassErrText');
+    const mkCu = document.getElementById('nqtPassOld').value;
+    const mkMoi = document.getElementById('nqtPassNew').value;
+    const mkMoiXn = document.getElementById('nqtPassNewConfirm').value;
+
+    errBox.classList.add('hidden');
+
+    if (mkMoi.length < 6) {
+      errText.textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự';
+      errBox.classList.remove('hidden');
+      return;
+    }
+    if (mkMoi !== mkMoiXn) {
+      errText.textContent = 'Mật khẩu xác nhận không khớp';
+      errBox.classList.remove('hidden');
+      return;
+    }
+
+    const btn = document.getElementById('nqtPassSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Đang xử lý…';
+
+    try {
+      const res = await nqtApi('/api/nqt-hoi-vien/doi-mat-khau', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nqt_mat_khau_cu: mkCu, nqt_mat_khau_moi: mkMoi }),
+      });
+      const data = await res.json();
+      if (data.nqt_thanh_cong) {
+        passModal.classList.add('hidden');
+        // Clear form
+        document.getElementById('nqtPassOld').value = '';
+        document.getElementById('nqtPassNew').value = '';
+        document.getElementById('nqtPassNewConfirm').value = '';
+        // Show success (could use toast)
+        document.getElementById('nqtPassForm').innerHTML = `<div class="text-center py-6">
+          <div class="w-16 h-16 bg-neon-glow border border-neon-lime/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span class="material-symbols-outlined text-neon-lime text-4xl" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">check_circle</span>
+          </div>
+          <h4 class="text-d-sm text-text-primary mb-2">Thành công!</h4>
+          <p class="text-text-secondary text-sm">Mật khẩu đã được thay đổi.</p>
+        </div>`;
+      } else {
+        errText.textContent = data.nqt_thong_diep || 'Đổi mật khẩu thất bại';
+        errBox.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Xác nhận đổi mật khẩu';
+      }
+    } catch {
+      errText.textContent = 'Lỗi kết nối máy chủ';
+      errBox.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Xác nhận đổi mật khẩu';
+    }
+  });
+
+  nqtLoadProfile();
+  nqtLoadChiSo();
+  nqtLoadGoiTap();
+
+  // ── Edit profile ─────────────────────────────────────────────────────
+  document.getElementById('nqtEditProfileBtn').addEventListener('click', () => {
+    const hv = JSON.parse(localStorage.getItem('nqt_user') || '{}');
+    document.getElementById('nqtEditHoTen').value = hv.g6_ho_ten || '';
+    document.getElementById('nqtEditEmail').value = hv.g6_email || '';
+    document.getElementById('nqtEditDiaChi').value = hv.g6_dia_chi || '';
+    document.getElementById('nqtEditNgaySinh').value = hv.g6_ngay_sinh || '';
+    document.getElementById('nqtEditGioiTinh').value = hv.g6_gioi_tinh || '';
+    document.getElementById('nqtEditProfileModal').classList.remove('hidden');
+  });
+
+  document.getElementById('nqtEditProfileModalClose').addEventListener('click', () => {
+    document.getElementById('nqtEditProfileModal').classList.add('hidden');
+  });
+
+  document.getElementById('nqtEditProfileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('nqtEditProfileSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Đang lưu...';
+    const payload = {
+      g6_ho_ten: document.getElementById('nqtEditHoTen').value.trim(),
+      g6_email: document.getElementById('nqtEditEmail').value.trim() || null,
+      g6_dia_chi: document.getElementById('nqtEditDiaChi').value.trim() || null,
+      g6_ngay_sinh: document.getElementById('nqtEditNgaySinh').value || null,
+      g6_gioi_tinh: document.getElementById('nqtEditGioiTinh').value || null,
+    };
+    try {
+      const res = await nqtApi('/api/nqt-hoi-vien/toi', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (data.nqt_thanh_cong) {
+        document.getElementById('nqtEditProfileModal').classList.add('hidden');
+        await nqtLoadProfile();
+      } else {
+        alert(data.nqt_thong_diep || 'Cập nhật thất bại');
+      }
+    } catch {
+      alert('Lỗi kết nối máy chủ');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Lưu thay đổi';
+    }
+  });
+</script>
+
+<!-- Modal chỉnh sửa hồ sơ -->
+<div id="nqtEditProfileModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+  <div class="bg-bg-elevated border border-border-subtle rounded-2xl w-full max-w-md shadow-2xl">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+      <h3 class="font-caps text-label text-text-secondary uppercase tracking-widest">Chỉnh sửa hồ sơ</h3>
+      <button id="nqtEditProfileModalClose" class="text-text-muted hover:text-text-primary transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="nqtEditProfileForm" class="p-6 space-y-4">
+      <div>
+        <label class="block font-caps text-[10px] text-text-muted uppercase tracking-widest mb-2">Họ và tên</label>
+        <input type="text" id="nqtEditHoTen" required class="w-full bg-bg-card border border-border-subtle rounded-lg py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 transition-colors"/>
+      </div>
+      <div>
+        <label class="block font-caps text-[10px] text-text-muted uppercase tracking-widest mb-2">Email</label>
+        <input type="email" id="nqtEditEmail" class="w-full bg-bg-card border border-border-subtle rounded-lg py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 transition-colors" placeholder="email@example.com"/>
+      </div>
+      <div>
+        <label class="block font-caps text-[10px] text-text-muted uppercase tracking-widest mb-2">Địa chỉ</label>
+        <input type="text" id="nqtEditDiaChi" class="w-full bg-bg-card border border-border-subtle rounded-lg py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-neon-lime/50 transition-colors"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block font-caps text-[10px] text-text-muted uppercase tracking-widest mb-2">Ngày sinh</label>
+          <input type="date" id="nqtEditNgaySinh" class="w-full bg-bg-card border border-border-subtle rounded-lg py-3 px-4 text-text-primary focus:outline-none focus:border-neon-lime/50 transition-colors"/>
+        </div>
+        <div>
+          <label class="block font-caps text-[10px] text-text-muted uppercase tracking-widest mb-2">Giới tính</label>
+          <select id="nqtEditGioiTinh" class="w-full bg-bg-card border border-border-subtle rounded-lg py-3 px-4 text-text-primary focus:outline-none focus:border-neon-lime/50 transition-colors">
+            <option value="">— Chọn —</option>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+      </div>
+      <button id="nqtEditProfileSubmit" type="submit" class="w-full bg-neon-lime text-bg-base font-caps text-[11px] uppercase tracking-widest py-3 rounded-lg hover:bg-neon-lime/90 transition-colors">Lưu thay đổi</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

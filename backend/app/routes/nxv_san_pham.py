@@ -275,6 +275,20 @@ def nxv_tao_san_pham():
         g6_seo_mo_ta=nxv_data.get('g6_seo_mo_ta'),
     )
     db.session.add(nxv_row)
+    db.session.flush()
+
+    nxv_gia = nxv_data.get('g6_gia_ban')
+    if nxv_gia is not None:
+        nxv_bt = G6BienTheSanPham(
+            g6_ma_san_pham=nxv_row.g6_ma_san_pham,
+            g6_sku=f"{nxv_slug}-default",
+            g6_ten_bien_the="Mặc định",
+            g6_gia=nxv_gia,
+            g6_gia_so_sanh=nxv_data.get('g6_gia_goc'),
+            g6_la_mac_dinh=True
+        )
+        db.session.add(nxv_bt)
+
     db.session.commit()
     return nqt_ok(nxv_row.g6_to_dict(), 'Tạo sản phẩm thành công', 201)
 
@@ -296,6 +310,24 @@ def nxv_cap_nhat_sp(nxv_id):
     if nxv_mt_ids is not None:
         nxv_mts = G6MucTieuSucKhoe.query.filter(G6MucTieuSucKhoe.g6_ma_muc_tieu.in_(nxv_mt_ids)).all()
         nxv_row.g6_muc_tieu = nxv_mts
+
+    if 'g6_gia_ban' in nxv_data or 'g6_gia_goc' in nxv_data:
+        nxv_bt = G6BienTheSanPham.query.filter_by(g6_ma_san_pham=nxv_id, g6_la_mac_dinh=True).first()
+        if not nxv_bt:
+            nxv_bt = G6BienTheSanPham.query.filter_by(g6_ma_san_pham=nxv_id).first()
+        if nxv_bt:
+            if 'g6_gia_ban' in nxv_data: nxv_bt.g6_gia = nxv_data['g6_gia_ban']
+            if 'g6_gia_goc' in nxv_data: nxv_bt.g6_gia_so_sanh = nxv_data['g6_gia_goc']
+        elif 'g6_gia_ban' in nxv_data:
+            nxv_bt = G6BienTheSanPham(
+                g6_ma_san_pham=nxv_id,
+                g6_sku=f"sp-{nxv_id}-default",
+                g6_ten_bien_the="Mặc định",
+                g6_gia=nxv_data['g6_gia_ban'],
+                g6_gia_so_sanh=nxv_data.get('g6_gia_goc'),
+                g6_la_mac_dinh=True
+            )
+            db.session.add(nxv_bt)
 
     db.session.commit()
     return nqt_ok(nxv_row.g6_to_dict())

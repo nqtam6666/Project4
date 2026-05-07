@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tổng quan — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "neon-lime": "#C8F135",
+        "neon-dim":  "#A8D120",
+        "bg-main":   "#0A0A0F",
+        "bg-card":   "#12121A",
+        "bg-elevated": "#1C1C28",
+        "text-primary":   "#F5F5F0",
+        "text-secondary": "#A1A1AA",
+        "text-muted":     "#52525B",
+        "border-subtle":  "rgba(255,255,255,0.06)",
+        "border-neon":    "rgba(200,241,53,0.3)",
+        "neon-glow":      "rgba(200,241,53,0.15)",
+        "surface-container-low": "#1a1d11",
+        "surface-container-lowest": "#0d0f05",
+        "surface-container": "#1e2115",
+      },
+      fontFamily: {
+        "sans": ["Inter", "sans-serif"],
+        "mono": ["JetBrains Mono", "monospace"],
+        "caps": ["Space Grotesk", "sans-serif"],
+      },
+      fontSize: {
+        "d-xl":  ["36px", { lineHeight: "1.1", fontWeight: "700" }],
+        "d-md":  ["24px", { lineHeight: "1.3", fontWeight: "700" }],
+        "d-sm":  ["18px", { lineHeight: "1.4", fontWeight: "700" }],
+        "label": ["12px", { lineHeight: "1.0", letterSpacing: "0.5px", fontWeight: "600" }],
+        "num":   ["16px", { lineHeight: "1.0", fontWeight: "500" }],
+      },
+    }
+  }
+}
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .material-symbols-filled   { font-variation-settings: 'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+
+<!-- ── Sidebar Nav ─────────────────────────────────────────────────────── -->
+<aside class="fixed top-0 left-0 w-64 h-screen bg-zinc-950 border-r border-white/5 flex flex-col z-40 hidden lg:flex">
+
+  <!-- Logo -->
+  <div class="flex items-center gap-3 px-6 h-20 border-b border-white/5">
+    <div class="w-9 h-9 bg-neon-lime rounded-lg flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined text-bg-main text-lg font-bold">fitness_center</span>
+    </div>
+    <div>
+      <div class="text-white font-black italic text-base leading-none">NQT GYM</div>
+      <div class="font-caps text-[9px] text-text-muted uppercase tracking-widest mt-0.5">Performance</div>
+    </div>
+  </div>
+
+  <!-- User info -->
+  <div class="px-4 py-5 border-b border-white/5" id="nqtUserInfo">
+    <div class="flex items-center gap-3">
+      <div id="nqtAvatar" class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-lowest flex items-center justify-center flex-shrink-0">
+        <span class="font-mono text-sm font-bold text-neon-lime">?</span>
+      </div>
+      <div class="min-w-0">
+        <div id="nqtUserName" class="font-semibold text-sm text-text-primary truncate">…</div>
+        <div id="nqtUserPhone" class="font-caps text-[10px] text-text-muted uppercase tracking-widest truncate">…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav links -->
+  <nav class="flex-1 px-3 py-4 space-y-1">
+    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-neon-lime/10 text-neon-lime border border-neon-lime/20">
+      <span class="material-symbols-outlined text-xl">dashboard</span>
+      <span class="font-caps text-[11px] uppercase tracking-widest">Tổng quan</span>
+    </a>
+    <a href="ho_so.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-white/5 hover:text-text-primary transition-all duration-150">
+      <span class="material-symbols-outlined text-xl">person</span>
+      <span class="font-caps text-[11px] uppercase tracking-widest">Hồ sơ</span>
+    </a>
+    <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-white/5 hover:text-text-primary transition-all duration-150">
+      <span class="material-symbols-outlined text-xl">home</span>
+      <span class="font-caps text-[11px] uppercase tracking-widest">Trang chủ</span>
+    </a>
+  </nav>
+
+  <!-- Bottom -->
+  <div class="px-3 py-4 border-t border-white/5">
+    <button id="nqtLogoutBtn" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-muted hover:bg-white/5 hover:text-red-400 transition-all duration-150 w-full">
+      <span class="material-symbols-outlined text-xl">logout</span>
+      <span class="font-caps text-[11px] uppercase tracking-widest">Đăng xuất</span>
+    </button>
+  </div>
+</aside>
+
+<!-- ── Mobile top bar ─────────────────────────────────────────────────── -->
+<header class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur-lg border-b border-white/5 h-16 flex items-center justify-between px-4">
+  <a href="/" class="flex items-center gap-2">
+    <div class="w-8 h-8 bg-neon-lime rounded-lg flex items-center justify-center">
+      <span class="material-symbols-outlined text-bg-main text-base font-bold">fitness_center</span>
+    </div>
+    <span class="text-white font-black italic">NQT GYM</span>
+  </a>
+  <div class="flex items-center gap-2">
+    <button id="nqtMobileMenuBtn" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-text-secondary transition-colors">
+      <span class="material-symbols-outlined text-xl">menu</span>
+    </button>
+    <button id="nqtLogoutBtnMobile" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-text-muted transition-colors">
+      <span class="material-symbols-outlined text-xl">logout</span>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile menu overlay -->
+<div id="nqtMobileMenu" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/60" id="nqtMobileMenuOverlay"></div>
+  <div class="absolute right-0 top-0 bottom-0 w-64 bg-zinc-950 border-l border-white/5 flex flex-col">
+    <div class="flex items-center justify-between px-5 h-16 border-b border-white/5">
+      <span class="text-white font-black italic">NQT GYM</span>
+      <button id="nqtMobileMenuClose" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-text-secondary">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-neon-lime/10 text-neon-lime border border-neon-lime/20">
+        <span class="material-symbols-outlined text-xl">dashboard</span>
+        <span class="font-caps text-[11px] uppercase tracking-widest">Tổng quan</span>
+      </a>
+      <a href="ho_so.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-white/5 hover:text-text-primary transition-all">
+        <span class="material-symbols-outlined text-xl">person</span>
+        <span class="font-caps text-[11px] uppercase tracking-widest">Hồ sơ</span>
+      </a>
+      <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-white/5 hover:text-text-primary transition-all">
+        <span class="material-symbols-outlined text-xl">home</span>
+        <span class="font-caps text-[11px] uppercase tracking-widest">Trang chủ</span>
+      </a>
+    </nav>
+  </div>
+</div>
+
+<!-- ── Main Content ──────────────────────────────────────────────────── -->
+<main class="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+
+  <!-- Greeting bar -->
+  <div class="bg-zinc-950/50 border-b border-white/5 px-6 py-6 lg:py-8">
+    <div class="max-w-5xl mx-auto flex items-end justify-between gap-4">
+      <div>
+        <p class="font-caps text-label text-text-muted uppercase tracking-widest mb-2" id="nqtTodayDate">…</p>
+        <h1 class="text-d-md text-text-primary" id="nqtGreeting">Xin chào!</h1>
+      </div>
+      <a href="/" class="flex items-center gap-2 text-text-muted hover:text-neon-lime transition-colors font-caps text-label uppercase tracking-widest">
+        <span class="material-symbols-outlined text-lg">arrow_back</span>
+        Trang chủ
+      </a>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-4 md:px-6 py-8 space-y-6">
+
+    <!-- Stat cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+      <!-- Gói tập -->
+      <div class="bg-bg-elevated border border-border-subtle rounded-xl p-5 hover:border-border-neon transition-colors duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <span class="material-symbols-outlined text-neon-lime text-2xl">card_membership</span>
+          <span class="font-caps text-label text-text-muted uppercase tracking-widest">Gói tập</span>
+        </div>
+        <div id="nqtCardGoiTap" class="text-d-sm text-text-primary mb-1">—</div>
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-neon-lime animate-pulse"></span>
+          <span id="nqtCardGoiTapStatus" class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Đang tải…</span>
+        </div>
+      </div>
+
+      <!-- Ngày hết hạn -->
+      <div class="bg-bg-elevated border border-border-subtle rounded-xl p-5 hover:border-border-neon transition-colors duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <span class="material-symbols-outlined text-neon-lime text-2xl">event_available</span>
+          <span class="font-caps text-label text-text-muted uppercase tracking-widest">Ngày hết hạn</span>
+        </div>
+        <div id="nqtCardHetHan" class="text-d-sm text-text-primary mb-1">—</div>
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
+          <span class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Thời hạn gói</span>
+        </div>
+      </div>
+
+      <!-- Buổi tập hôm nay -->
+      <div class="bg-bg-elevated border border-border-subtle rounded-xl p-5 hover:border-border-neon transition-colors duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <span class="material-symbols-outlined text-neon-lime text-2xl">directions_run</span>
+          <span class="font-caps text-label text-text-muted uppercase tracking-widest">Hôm nay</span>
+        </div>
+        <div id="nqtCardBuoiTap" class="font-mono text-4xl font-bold text-neon-lime mb-1">—</div>
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
+          <span class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Buổi tập PT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2-col: Gói tập + Thông báo -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Gói tập chi tiết -->
+      <div class="bg-bg-elevated border border-border-subtle rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
+          <h2 class="font-caps text-label text-text-secondary uppercase tracking-widest">Gói tập hiện tại</h2>
+          <span class="material-symbols-outlined text-text-muted text-xl">card_membership</span>
+        </div>
+        <div id="nqtGoiTapDetail" class="p-5">
+          <div class="flex justify-center items-center py-12">
+            <span class="material-symbols-outlined text-text-muted text-3xl animate-pulse">progress_activity</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thông báo -->
+      <div class="bg-bg-elevated border border-border-subtle rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
+          <div class="flex items-center gap-2">
+            <h2 class="font-caps text-label text-text-secondary uppercase tracking-widest">Thông báo</h2>
+            <span id="nqtNotifBadge" class="hidden w-5 h-5 bg-neon-lime text-bg-main font-mono text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+          </div>
+          <span class="material-symbols-outlined text-text-muted text-xl">notifications</span>
+        </div>
+        <div id="nqtNotifList" class="p-5 space-y-3 max-h-72 overflow-y-auto">
+          <div class="flex justify-center items-center py-12">
+            <span class="material-symbols-outlined text-text-muted text-3xl animate-pulse">progress_activity</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="bg-bg-elevated border border-border-subtle rounded-xl overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
+        <h2 class="font-caps text-label text-text-secondary uppercase tracking-widest">Thao tác nhanh</h2>
+        <span class="material-symbols-outlined text-text-muted text-xl">bolt</span>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-border-subtle">
+        <a href="ho_so.html" class="flex flex-col items-center gap-3 px-5 py-6 bg-bg-elevated hover:bg-surface-container transition-colors duration-150">
+          <div class="w-12 h-12 bg-neon-glow border border-neon-lime/20 rounded-xl flex items-center justify-center">
+            <span class="material-symbols-outlined text-neon-lime text-2xl">person</span>
+          </div>
+          <span class="font-caps text-label text-text-secondary uppercase tracking-widest">Hồ sơ</span>
+        </a>
+        <a href="ho_so.html" class="flex flex-col items-center gap-3 px-5 py-6 bg-bg-elevated hover:bg-surface-container transition-colors duration-150">
+          <div class="w-12 h-12 bg-neon-glow border border-neon-lime/20 rounded-xl flex items-center justify-center">
+            <span class="material-symbols-outlined text-neon-lime text-2xl">calendar_month</span>
+          </div>
+          <span class="font-caps text-label text-text-secondary uppercase tracking-widest">Lịch tập</span>
+        </a>
+        <a href="/" class="flex flex-col items-center gap-3 px-5 py-6 bg-bg-elevated hover:bg-surface-container transition-colors duration-150">
+          <div class="w-12 h-12 bg-neon-glow border border-neon-lime/20 rounded-xl flex items-center justify-center">
+            <span class="material-symbols-outlined text-neon-lime text-2xl">home</span>
+          </div>
+          <span class="font-caps text-label text-text-secondary uppercase tracking-widest">Trang chủ</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-3 px-5 py-6 bg-bg-elevated hover:bg-surface-container transition-colors duration-150">
+          <div class="w-12 h-12 bg-neon-glow border border-neon-lime/20 rounded-xl flex items-center justify-center">
+            <span class="material-symbols-outlined text-neon-lime text-2xl">support_agent</span>
+          </div>
+          <span class="font-caps text-label text-text-secondary uppercase tracking-widest">Hỗ trợ</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Check-in hôm nay -->
+    <div class="bg-bg-elevated border border-border-subtle rounded-xl overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
+        <h2 class="font-caps text-label text-text-secondary uppercase tracking-widest">Điểm danh hôm nay</h2>
+        <span class="material-symbols-outlined text-text-muted text-xl">qr_code_scanner</span>
+      </div>
+      <div id="nqtDiemDanh" class="p-5">
+        <div class="flex justify-center items-center py-10">
+          <span class="material-symbols-outlined text-text-muted text-3xl animate-pulse">progress_activity</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script type="module">
+  import { nqtApi, nqtLogout } from '../../js/member/auth.js';
+
+  // ── Auth guard ─────────────────────────────────────────────────────────
+  if (!localStorage.getItem('nqt_token')) {
+    window.location.href = '/src/pages/member/login.html';
+  }
+
+  // ── Mobile menu ──────────────────────────────────────────────────────
+  const mm = document.getElementById('nqtMobileMenu');
+  document.getElementById('nqtMobileMenuBtn').addEventListener('click', () => mm.classList.remove('hidden'));
+  document.getElementById('nqtMobileMenuClose').addEventListener('click', () => mm.classList.add('hidden'));
+  document.getElementById('nqtMobileMenuOverlay').addEventListener('click', () => mm.classList.add('hidden'));
+
+  // ── Logout ───────────────────────────────────────────────────────────
+  document.getElementById('nqtLogoutBtn').addEventListener('click', nqtLogout);
+  document.getElementById('nqtLogoutBtnMobile').addEventListener('click', nqtLogout);
+
+  // ── User info from localStorage ─────────────────────────────────────
+  const nqtUser = JSON.parse(localStorage.getItem('nqt_user') || '{}');
+
+  function nqtInitials(name) {
+    return (name || '?').split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+  }
+
+  if (nqtUser.g6_ho_ten) {
+    document.getElementById('nqtUserName').textContent = nqtUser.g6_ho_ten;
+    document.getElementById('nqtUserPhone').textContent = nqtUser.g6_so_dien_thoai || '';
+    document.getElementById('nqtAvatar').innerHTML = `<span class="font-mono text-sm font-bold text-neon-lime">${nqtInitials(nqtUser.g6_ho_ten)}</span>`;
+  }
+
+  // ── Greeting ────────────────────────────────────────────────────────
+  const now = new Date();
+  document.getElementById('nqtTodayDate').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const h = now.getHours();
+  const greetMap = { morning: 'Chào buổi sáng', afternoon: 'Chào buổi chiều', evening: 'Chào buổi tối' };
+  let greetKey = 'morning';
+  if (h >= 12) greetKey = 'afternoon';
+  if (h >= 17) greetKey = 'evening';
+  document.getElementById('nqtGreeting').textContent = `${greetMap[greetKey]}, ${nqtUser.g6_ho_ten || 'Hội viên'}!`;
+
+  // ── Load profile + package ───────────────────────────────────────────
+  async function nqtLoadProfile() {
+    try {
+      const res = await nqtApi('/api/nqt-hoi-vien/toi');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!data.nqt_thanh_cong) throw new Error();
+
+      const hv = data.nqt_du_lieu.nqt_hoi_vien;
+      const dk = data.nqt_du_lieu.nqt_goi_hien_tai;
+
+      if (hv) {
+        // Update user info if not set from localStorage
+        if (!nqtUser.g6_ho_ten) {
+          document.getElementById('nqtUserName').textContent = hv.g6_ho_ten;
+          document.getElementById('nqtUserPhone').textContent = hv.g6_so_dien_thoai || '';
+          document.getElementById('nqtAvatar').innerHTML = `<span class="font-mono text-sm font-bold text-neon-lime">${nqtInitials(hv.g6_ho_ten)}</span>`;
+        }
+      }
+
+      if (dk) {
+        document.getElementById('nqtCardGoiTap').textContent = dk.g6_ten_goi || dk.g6_goi_tap || 'Gói tập';
+        if (dk.g6_ngay_het_han) {
+          const d = new Date(dk.g6_ngay_het_han);
+          const daysLeft = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+          document.getElementById('nqtCardHetHan').textContent = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          const statusEl = document.getElementById('nqtCardGoiTapStatus');
+          if (daysLeft < 0) {
+            statusEl.textContent = 'Đã hết hạn';
+            statusEl.className = 'font-caps text-[10px] text-red-400 uppercase tracking-widest';
+          } else if (daysLeft <= 7) {
+            statusEl.textContent = `Còn ${daysLeft} ngày`;
+            statusEl.className = 'font-caps text-[10px] text-warning uppercase tracking-widest';
+          } else {
+            statusEl.textContent = `Còn ${daysLeft} ngày`;
+          }
+        }
+
+        // Gói tập detail
+        document.getElementById('nqtGoiTapDetail').innerHTML = `
+          <div class="space-y-3">
+            <div class="flex justify-between items-center py-2 border-b border-border-subtle">
+              <span class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Tên gói</span>
+              <span class="text-sm text-text-primary font-medium">${dk.g6_ten_goi || dk.g6_goi_tap || '—'}</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-border-subtle">
+              <span class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Ngày bắt đầu</span>
+              <span class="text-sm text-text-secondary">${dk.g6_ngay_bat_dau ? new Date(dk.g6_ngay_bat_dau).toLocaleDateString('vi-VN') : '—'}</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-border-subtle">
+              <span class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Ngày hết hạn</span>
+              <span class="text-sm text-text-secondary">${dk.g6_ngay_het_han ? new Date(dk.g6_ngay_het_han).toLocaleDateString('vi-VN') : '—'}</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-border-subtle">
+              <span class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Giá thực tế</span>
+              <span class="font-mono text-sm text-neon-lime font-bold">${Number(dk.g6_gia_thuc_te || 0).toLocaleString('vi-VN')}đ</span>
+            </div>
+            <div class="flex justify-between items-center py-2">
+              <span class="font-caps text-[10px] text-text-muted uppercase tracking-widest">Trạng thái</span>
+              <span class="font-caps text-[10px] text-neon-lime uppercase tracking-widest bg-neon-glow px-3 py-1 rounded-full">Đang hoạt động</span>
+            </div>
+          </div>`;
+      } else {
+        document.getElementById('nqtCardGoiTap').textContent = 'Chưa đăng ký';
+        document.getElementById('nqtCardGoiTapStatus').textContent = 'Không có gói';
+        document.getElementById('nqtCardHetHan').textContent = '—';
+        document.getElementById('nqtGoiTapDetail').innerHTML = `
+          <div class="text-center py-8">
+            <span class="material-symbols-outlined text-text-muted text-4xl mb-3 block">info</span>
+            <p class="text-text-secondary text-sm mb-4">Bạn chưa đăng ký gói tập nào.</p>
+            <a href="/" class="inline-flex items-center gap-2 bg-neon-lime text-bg-main font-caps text-[11px] uppercase tracking-widest px-6 py-3 rounded-lg hover:scale-105 transition-transform">Khám phá gói tập</a>
+          </div>`;
+      }
+    } catch {
+      document.getElementById('nqtCardGoiTap').textContent = '—';
+      document.getElementById('nqtCardGoiTapStatus').textContent = 'Không tải được';
+    }
+  }
+
+  // ── Load buổi tập hôm nay ───────────────────────────────────────────
+  async function nqtLoadBuoiTap() {
+    const todayStr = now.toISOString().split('T')[0];
+    try {
+      const res = await nqtApi(`/api/nxv-buoi-tap-pt?g6_ngay=${todayStr}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const count = (data.nqt_du_lieu || []).length;
+      document.getElementById('nqtCardBuoiTap').textContent = count;
+    } catch {
+      document.getElementById('nqtCardBuoiTap').textContent = '0';
+    }
+  }
+
+  // ── Load thông báo ──────────────────────────────────────────────────
+  async function nqtLoadThongBao() {
+    const container = document.getElementById('nqtNotifList');
+    const badge = document.getElementById('nqtNotifBadge');
+    try {
+      const res = await nqtApi('/api/nqt-thong-bao');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const items = (data.nqt_du_lieu || []).slice(0, 6);
+      if (items.length === 0) {
+        container.innerHTML = `<div class="text-center py-8">
+          <span class="material-symbols-outlined text-text-muted text-4xl mb-3 block">notifications_off</span>
+          <p class="text-text-muted text-sm">Không có thông báo nào</p>
+        </div>`;
+        return;
+      }
+      badge.classList.remove('hidden');
+      badge.textContent = items.length;
+      container.innerHTML = items.map(nb => `
+        <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-surface-container-low transition-colors duration-150">
+          <div class="w-8 h-8 bg-neon-glow border border-neon-lime/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="material-symbols-outlined text-neon-lime text-base">notifications</span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm text-text-primary font-medium truncate">${nb.g6_tieu_de || 'Thông báo'}</p>
+            <p class="text-xs text-text-muted mt-0.5 line-clamp-2">${nb.g6_noi_dung || ''}</p>
+          </div>
+        </div>`).join('');
+    } catch {
+      container.innerHTML = `<p class="text-center py-6 text-text-muted text-sm">Không tải được thông báo.</p>`;
+    }
+  }
+
+  // ── Load điểm danh ──────────────────────────────────────────────────
+  async function nqtLoadDiemDanh() {
+    const container = document.getElementById('nqtDiemDanh');
+    try {
+      const res = await nqtApi('/api/nqt-hoi-vien/diem-danh');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const items = (data.nqt_du_lieu || []).filter(d => d.g6_thoi_gian_vao && d.g6_thoi_gian_vao.startsWith(now.toISOString().split('T')[0]));
+      if (items.length === 0) {
+        container.innerHTML = `<div class="flex flex-col items-center gap-4 py-8">
+          <div class="w-16 h-16 border-2 border-dashed border-border-subtle rounded-2xl flex items-center justify-center">
+            <span class="material-symbols-outlined text-text-muted text-3xl">qr_code_scanner</span>
+          </div>
+          <div class="text-center">
+            <p class="text-text-secondary text-sm mb-1">Chưa điểm danh hôm nay</p>
+            <p class="text-text-muted text-xs">Quét mã QR tại quầy để bắt đầu buổi tập</p>
+          </div>
+        </div>`;
+      } else {
+        container.innerHTML = items.map(d => `
+          <div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl border border-border-subtle">
+            <div class="w-10 h-10 bg-neon-glow border border-neon-lime/20 rounded-xl flex items-center justify-center">
+              <span class="material-symbols-outlined text-neon-lime text-xl" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">check_circle</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-text-primary">Đã điểm danh</p>
+              <p class="text-xs text-text-muted font-mono">${new Date(d.g6_thoi_gian_vao).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</p>
+            </div>
+            <span class="font-caps text-[10px] text-neon-lime uppercase tracking-widest bg-neon-glow px-3 py-1 rounded-full">Thành công</span>
+          </div>`).join('');
+      }
+    } catch {
+      container.innerHTML = `<p class="text-center py-6 text-text-muted text-sm">Không tải được dữ liệu điểm danh.</p>`;
+    }
+  }
+
+  nqtLoadProfile();
+  nqtLoadBuoiTap();
+  nqtLoadThongBao();
+  nqtLoadDiemDanh();
+</script>
+</body>
+</html>

@@ -31,6 +31,74 @@
         /* Notification dropdown */
         #nqtNotifPanel { animation: nqtSlideDown 0.15s ease; }
         @keyframes nqtSlideDown { from { opacity:0; transform: translateY(-6px) scale(0.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+
+        /* Harmonious Aesthetics & Neon Buttons */
+        body { background: linear-gradient(135deg, #FAFAF9 0%, #f3f4f6 100%); }
+        .dark body { background: linear-gradient(135deg, #1a1a1a 0%, #121212 100%); }
+        aside, header {
+            background: rgba(255, 255, 255, 0.85) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border-color: rgba(229, 229, 229, 0.5) !important;
+        }
+        .dark aside, .dark header {
+            background: rgba(38, 38, 38, 0.85) !important;
+            border-color: rgba(64, 64, 64, 0.5) !important;
+        }
+
+        /* Neon Glow Primary Buttons */
+        button[class*="bg-[#191919]"][class*="text-white"], 
+        a[class*="bg-[#191919]"][class*="text-white"],
+        button[type="submit"] {
+            background: linear-gradient(135deg, #4f46e5, #a855f7) !important;
+            color: #ffffff !important;
+            border: none !important;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        button[class*="bg-[#191919]"][class*="text-white"]::after, 
+        a[class*="bg-[#191919]"][class*="text-white"]::after,
+        button[type="submit"]::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: all 0.5s ease;
+            z-index: -1;
+        }
+        button[class*="bg-[#191919]"][class*="text-white"]:hover::after, 
+        a[class*="bg-[#191919]"][class*="text-white"]:hover::after,
+        button[type="submit"]:hover::after {
+            left: 100%;
+        }
+        button[class*="bg-[#191919]"][class*="text-white"]:hover, 
+        a[class*="bg-[#191919]"][class*="text-white"]:hover,
+        button[type="submit"]:hover {
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.8), 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+            transform: translateY(-2px) !important;
+        }
+        .dark button[class*="bg-[#191919]"][class*="text-white"], 
+        .dark a[class*="bg-[#191919]"][class*="text-white"],
+        .dark button[type="submit"] {
+            color: #ffffff !important;
+        }
+        
+        /* Interactive Cards */
+        .grid > div.bg-white, .grid > div[class*="dark:bg-[#262626]"] {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .grid > div.bg-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border-color: #cbd5e1 !important;
+        }
+        .grid > div[class*="dark:bg-[#262626]"]:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border-color: #525252 !important;
+        }
     </style>
     {% block head %}{% endblock %}
 </head>
@@ -66,6 +134,14 @@
                 <i class="fas fa-box w-4 text-center"></i>
                 <span>Gói tập</span>
             </a>
+            <a href="/admin/huan-luyen-vien" data-page="huan-luyen-vien" data-title="Huấn luyện viên" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-person-running w-4 text-center"></i>
+                <span>Huấn luyện viên</span>
+            </a>
+            <a href="/admin/lop-hoc" data-page="lop-hoc" data-title="Lớp học" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-calendar-check w-4 text-center"></i>
+                <span>Lớp học</span>
+            </a>
 
             <div class="pt-4 pb-1.5 px-3 text-[11px] font-medium text-[#a3a3a3] dark:text-[#666] uppercase tracking-wide">Kinh doanh</div>
             <a href="/admin/don-hang" data-page="don-hang" data-title="Đơn hàng" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
@@ -75,6 +151,18 @@
             <a href="/admin/thanh-toan" data-page="thanh-toan" data-title="Thanh toán" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
                 <i class="fas fa-credit-card w-4 text-center"></i>
                 <span>Thanh toán</span>
+            </a>
+            <a href="/admin/san-pham" data-page="san-pham" data-title="Sản phẩm" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-tag w-4 text-center"></i>
+                <span>Sản phẩm</span>
+            </a>
+            <a href="/admin/khuyen-mai" data-page="khuyen-mai" data-title="Khuyến mãi" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-percent w-4 text-center"></i>
+                <span>Khuyến mãi</span>
+            </a>
+            <a href="/admin/su-kien" data-page="su-kien" data-title="Sự kiện" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-bolt w-4 text-center"></i>
+                <span>Sự kiện</span>
             </a>
 
             <div class="pt-4 pb-1.5 px-3 text-[11px] font-medium text-[#a3a3a3] dark:text-[#666] uppercase tracking-wide">Vận hành</div>
@@ -86,8 +174,32 @@
                 <i class="fas fa-id-badge w-4 text-center"></i>
                 <span>Nhân viên</span>
             </a>
+            <a href="/admin/bao-tri" data-page="bao-tri" data-title="Bảo trì" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-wrench w-4 text-center"></i>
+                <span>Bảo trì thiết bị</span>
+            </a>
+            <a href="/admin/van-chuyen" data-page="van-chuyen" data-title="Vận chuyển" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-truck w-4 text-center"></i>
+                <span>Vận chuyển</span>
+            </a>
+            <a href="/admin/blog" data-page="blog" data-title="Blog" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-newspaper w-4 text-center"></i>
+                <span>Blog</span>
+            </a>
 
             <div class="pt-4 pb-1.5 px-3 text-[11px] font-medium text-[#a3a3a3] dark:text-[#666] uppercase tracking-wide">Hệ thống</div>
+            <a href="/admin/bao-cao" data-page="bao-cao" data-title="Báo cáo" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-chart-bar w-4 text-center"></i>
+                <span>Báo cáo</span>
+            </a>
+            <a href="/admin/quan-tri" data-page="quan-tri" data-title="Quản trị" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-shield w-4 text-center"></i>
+                <span>Quản trị</span>
+            </a>
+            <a href="/admin/phan-quyen" data-page="phan-quyen" data-title="Phân quyền" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
+                <i class="fas fa-user-shield w-4 text-center"></i>
+                <span>Phân quyền</span>
+            </a>
             <a href="/admin/cau-hinh" data-page="cau-hinh" data-title="Cấu hình" class="nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-3 py-2 rounded-md text-sm text-[#525252] dark:text-[#a3a3a3] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] [&.active]:bg-black/[0.06] dark:[&.active]:bg-white/[0.08] [&.active]:text-[#191919] dark:[&.active]:text-[#fafafa] [&.active]:font-medium">
                 <i class="fas fa-cog w-4 text-center"></i>
                 <span>Cấu hình</span>
@@ -462,6 +574,7 @@
             { label: 'Chi nhánh', sub: 'Vận hành', icon: 'fa-store', url: '/admin/chi-nhanh' },
             { label: 'Nhân viên', sub: 'Vận hành', icon: 'fa-id-badge', url: '/admin/nhan-vien' },
             { label: 'Cấu hình', sub: 'Hệ thống', icon: 'fa-cog', url: '/admin/cau-hinh' },
+            { label: 'Phân quyền', sub: 'Hệ thống', icon: 'fa-user-shield', url: '/admin/phan-quyen' },
             { label: 'Đăng xuất', sub: 'Tài khoản', icon: 'fa-sign-out-alt', action: 'nqtLogout()' },
         ];
         let nqtCmdActive = 0;

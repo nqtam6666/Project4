@@ -1,4 +1,4 @@
-﻿import uuid
+import uuid
 from datetime import date, timedelta
 from flask import Blueprint, request
 from sqlalchemy import func, cast, Date
@@ -125,7 +125,13 @@ def nqt_xoa_hoi_vien(nqt_id):
 @nqt_hoi_vien_bp.route('/nqt-goi-tap', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
 def nqt_lay_goi_tap():
-    nqt_list = G6GoiTap.query.filter_by(g6_la_hoat_dong=True).order_by(G6GoiTap.g6_thu_tu_hien_thi).all()
+    nqt_trang_thai = request.args.get('g6_trang_thai', 'hoat_dong')
+    nqt_q = G6GoiTap.query
+    if nqt_trang_thai == 'hoat_dong':
+        nqt_q = nqt_q.filter_by(g6_la_hoat_dong=True)
+    elif nqt_trang_thai == 'an':
+        nqt_q = nqt_q.filter_by(g6_la_hoat_dong=False)
+    nqt_list = nqt_q.order_by(G6GoiTap.g6_thu_tu_hien_thi).all()
     return nqt_ok([g.g6_to_dict() for g in nqt_list])
 
 
