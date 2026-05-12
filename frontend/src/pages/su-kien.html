@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sự Kiện — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "success":"#22C55E","warning":"#F59E0B",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+<div class="pt-[72px]">
+
+  <section class="py-16 px-6 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(200,241,53,0.07),transparent_60%)]"></div>
+    <div class="relative max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 bg-neon-glow border border-border-neon text-neon-lime text-xs font-caps uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
+        <span class="material-symbols-outlined text-sm">celebration</span> Sắp diễn ra
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black text-white leading-tight mb-4">Sự Kiện <span class="text-neon-lime">Gym</span></h1>
+      <p class="text-text-secondary text-lg">Cuộc thi, hội thảo, workshop — tham gia và trải nghiệm cùng cộng đồng NQT GYM.</p>
+    </div>
+  </section>
+
+  <section class="max-w-screen-xl mx-auto px-6 pb-24">
+    <div id="nqtEventsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="md:col-span-2 lg:col-span-3 flex justify-center py-20">
+        <div class="w-8 h-8 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Register Modal -->
+<div id="nqtEventModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="bg-bg-card border border-border-subtle rounded-2xl max-w-md w-full p-8">
+    <h3 class="text-xl font-black text-white mb-2">Đăng ký sự kiện</h3>
+    <p id="nqtEventName" class="text-neon-lime font-caps text-sm uppercase tracking-wide mb-6"></p>
+    <p class="text-text-secondary text-sm mb-6">Đăng nhập để đăng ký và nhận vé xác nhận qua email.</p>
+    <div class="flex gap-3">
+      <a href="/src/pages/member/login.html" class="flex-1 text-center bg-neon-lime text-bg-main py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Đăng nhập</a>
+      <button onclick="document.getElementById('nqtEventModal').classList.add('hidden')" class="flex-1 border border-border-subtle text-text-secondary py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:text-text-primary transition-colors">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { nqtRenderPublicNav, nqtRenderFooter, nqtFormatDate, nqtFormatPrice } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('su-kien');
+nqtRenderFooter();
+
+window.nqtRegEvent = function(name) {
+  document.getElementById('nqtEventName').textContent = name;
+  document.getElementById('nqtEventModal').classList.remove('hidden');
+};
+
+const LOAI_ICON = { thi_dau:'emoji_events', hoi_thao:'groups', workshop:'school', giao_luu:'handshake' };
+
+(async () => {
+  try {
+    const r = await fetch('/api/nxv-su-kien');
+    const j = await r.json();
+    const events = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
+    const grid = document.getElementById('nqtEventsGrid');
+    if (!events.length) {
+      grid.innerHTML = '<div class="md:col-span-2 lg:col-span-3 text-center py-20 text-text-muted"><span class="material-symbols-outlined text-4xl block mb-3">event_busy</span>Chưa có sự kiện nào.</div>';
+      return;
+    }
+    const now = new Date();
+    grid.innerHTML = events.map(e => {
+      const start = new Date(e.nxv_ngay_bat_dau);
+      const upcoming = start >= now;
+      return `
+      <div class="bg-bg-card border ${upcoming ? 'border-border-neon' : 'border-border-subtle'} rounded-2xl overflow-hidden hover:border-neon-lime transition-all">
+        <div class="h-44 bg-bg-elevated flex items-center justify-center relative">
+          <span class="material-symbols-outlined text-5xl text-text-muted">${LOAI_ICON[e.nxv_loai] || 'event'}</span>
+          ${upcoming ? `<div class="absolute top-3 left-3 bg-neon-lime text-bg-main text-[10px] font-caps uppercase tracking-widest font-bold px-3 py-1 rounded-full">Sắp diễn ra</div>` : `<div class="absolute top-3 left-3 bg-bg-card border border-border-subtle text-text-muted text-[10px] font-caps uppercase tracking-widest px-3 py-1 rounded-full">Đã kết thúc</div>`}
+        </div>
+        <div class="p-6">
+          <h3 class="font-black text-white text-lg mb-2">${e.nxv_ten || 'Sự kiện'}</h3>
+          <div class="space-y-1.5 text-sm text-text-secondary mb-5">
+            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-neon-lime">calendar_today</span>${nqtFormatDate(e.nxv_ngay_bat_dau)}</div>
+            ${e.nxv_ngay_ket_thuc ? `<div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-neon-lime">event</span>Kết thúc: ${nqtFormatDate(e.nxv_ngay_ket_thuc)}</div>` : ''}
+            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-neon-lime">sell</span>${e.nxv_gia_ve ? nqtFormatPrice(e.nxv_gia_ve) + '/vé' : 'Miễn phí'}</div>
+          </div>
+          ${upcoming
+            ? `<button onclick="nqtRegEvent('${e.nxv_ten}')" class="w-full py-2.5 bg-neon-lime text-bg-main rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Đăng ký</button>`
+            : `<button disabled class="w-full py-2.5 bg-bg-elevated text-text-muted rounded-lg font-caps text-xs uppercase tracking-wide font-semibold cursor-not-allowed">Đã kết thúc</button>`}
+        </div>
+      </div>`;
+    }).join('');
+  } catch {
+    document.getElementById('nqtEventsGrid').innerHTML = '<div class="md:col-span-2 lg:col-span-3 text-center py-20 text-text-muted">Không thể tải dữ liệu.</div>';
+  }
+})();
+</script>
+</body>
+</html>

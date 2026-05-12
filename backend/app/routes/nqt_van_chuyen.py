@@ -9,8 +9,21 @@ nqt_van_chuyen_bp = Blueprint('g6_van_chuyen', __name__, url_prefix='/api')
 
 @nqt_van_chuyen_bp.route('/nqt-van-chuyen', methods=['GET'])
 def nqt_lay_don_vi_van_chuyen():
-    nqt_list = G6DonViVanChuyen.query.filter_by(g6_la_hoat_dong=True).all()
+    nqt_tat_ca = request.args.get('g6_tat_ca', '0') == '1'
+    nqt_q = G6DonViVanChuyen.query
+    if not nqt_tat_ca:
+        nqt_q = nqt_q.filter_by(g6_la_hoat_dong=True)
+    nqt_list = nqt_q.all()
     return nqt_ok([d.g6_to_dict() for d in nqt_list])
+
+
+@nqt_van_chuyen_bp.route('/nqt-van-chuyen/<int:nqt_id>', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_lay_don_vi(nqt_id):
+    nqt_row = G6DonViVanChuyen.query.get_or_404(nqt_id)
+    nqt_result = nqt_row.g6_to_dict()
+    nqt_result['g6_vung'] = [v.g6_to_dict() for v in nqt_row.g6_vung]
+    return nqt_ok(nqt_result)
 
 
 @nqt_van_chuyen_bp.route('/nqt-van-chuyen/nqt-tinh-phi', methods=['POST'])
@@ -43,14 +56,47 @@ def nqt_tinh_phi_van_chuyen():
 @nqt_yeu_cau_dang_nhap
 def nqt_tao_don_vi():
     nqt_data = request.get_json() or {}
+    nqt_ten = nqt_data.get('g6_ten', '').strip()
+    nqt_ma = nqt_data.get('g6_ma', '').strip().upper()
+    if not nqt_ten or not nqt_ma:
+        return nqt_loi('Thiếu tên hoặc mã đơn vị vận chuyển')
     nqt_row = G6DonViVanChuyen(
-        g6_ten=nqt_data.get('g6_ten', ''),
-        g6_ma=nqt_data.get('g6_ma', ''),
+        g6_ten=nqt_ten,
+        g6_ma=nqt_ma,
         g6_logo=nqt_data.get('g6_logo'),
     )
     db.session.add(nqt_row)
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict(), 'Tạo thành công', 201)
+
+
+@nqt_van_chuyen_bp.route('/nqt-van-chuyen/<int:nqt_id>', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+def nqt_cap_nhat_don_vi(nqt_id):
+    nqt_row = G6DonViVanChuyen.query.get_or_404(nqt_id)
+    nqt_data = request.get_json() or {}
+    for nqt_f in ['g6_ten', 'g6_logo', 'g6_la_hoat_dong']:
+        if nqt_f in nqt_data:
+            setattr(nqt_row, nqt_f, nqt_data[nqt_f])
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Cập nhật thành công')
+
+
+@nqt_van_chuyen_bp.route('/nqt-van-chuyen/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_don_vi(nqt_id):
+    nqt_row = G6DonViVanChuyen.query.get_or_404(nqt_id)
+    nqt_row.g6_la_hoat_dong = False
+    db.session.commit()
+    return nqt_ok(None, 'Đã vô hiệu hóa đơn vị vận chuyển')
+
+
+@nqt_van_chuyen_bp.route('/nqt-van-chuyen/<int:nqt_id>/nqt-vung', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_lay_vung_van_chuyen(nqt_id):
+    G6DonViVanChuyen.query.get_or_404(nqt_id)
+    nqt_list = G6VungVanChuyen.query.filter_by(g6_ma_don_vi=nqt_id).all()
+    return nqt_ok([v.g6_to_dict() for v in nqt_list])
 
 
 @nqt_van_chuyen_bp.route('/nqt-van-chuyen/<int:nqt_id>/nqt-vung', methods=['POST'])
@@ -69,3 +115,25 @@ def nqt_them_vung(nqt_id):
     db.session.add(nqt_row)
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict(), 'Thêm vùng thành công', 201)
+
+
+@nqt_van_chuyen_bp.route('/nqt-vung-van-chuyen/<int:nqt_id>', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+def nqt_cap_nhat_vung(nqt_id):
+    nqt_row = G6VungVanChuyen.query.get_or_404(nqt_id)
+    nqt_data = request.get_json() or {}
+    for nqt_f in ['g6_tinh_thanh', 'g6_phi_co_ban', 'g6_phi_theo_kg', 'g6_mien_phi_tu', 'g6_thoi_gian_du_kien']:
+        if nqt_f in nqt_data:
+            setattr(nqt_row, nqt_f, nqt_data[nqt_f])
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Cập nhật vùng thành công')
+
+
+@nqt_van_chuyen_bp.route('/nqt-vung-van-chuyen/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nqt_xoa_vung(nqt_id):
+    nqt_row = G6VungVanChuyen.query.get_or_404(nqt_id)
+    db.session.delete(nqt_row)
+    db.session.commit()
+    return nqt_ok(None, 'Đã xoá vùng vận chuyển')
+

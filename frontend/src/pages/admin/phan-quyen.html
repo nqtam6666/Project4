@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi" id="nqtHtmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân quyền - NQT Gym Admin</title>
+    <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Premium custom styles for Permissions */
+        .nqt-role-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .dark .nqt-role-card {
+            background: rgba(38, 38, 38, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .nqt-role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(var(--primary-rgb, 59, 130, 246), 0.15);
+            border-color: rgba(var(--primary-rgb, 59, 130, 246), 0.3);
+        }
+        
+        .nqt-role-icon-box {
+            background: linear-gradient(135deg, rgba(var(--primary-rgb, 59, 130, 246), 0.1), rgba(var(--primary-rgb, 59, 130, 246), 0.2));
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5);
+        }
+        .dark .nqt-role-icon-box {
+            background: linear-gradient(135deg, rgba(var(--primary-rgb, 59, 130, 246), 0.15), rgba(var(--primary-rgb, 59, 130, 246), 0.3));
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Sleek Checkbox Toggle */
+        .nqt-toggle-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 20px;
+        }
+        .nqt-toggle-wrapper input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .nqt-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #e5e5e5;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .dark .nqt-toggle-slider { background-color: #404040; }
+        .nqt-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 2px; bottom: 2px;
+            background-color: white;
+            transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input:checked + .nqt-toggle-slider {
+            background-color: var(--primary-color, #3b82f6);
+            box-shadow: 0 0 10px rgba(var(--primary-rgb, 59, 130, 246), 0.5);
+        }
+        input:checked + .nqt-toggle-slider:before {
+            transform: translateX(18px);
+        }
+        
+        /* Permission Group Card */
+        .nqt-perm-group {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .nqt-perm-group:hover {
+            background: rgba(var(--primary-rgb, 59, 130, 246), 0.03);
+            border-color: rgba(var(--primary-rgb, 59, 130, 246), 0.15);
+            transform: translateY(-2px);
+        }
+        .dark .nqt-perm-group:hover {
+            background: rgba(var(--primary-rgb, 59, 130, 246), 0.05);
+            border-color: rgba(var(--primary-rgb, 59, 130, 246), 0.2);
+        }
+    </style>
+</head>
+<body>
+<div id="nqt-page-content" style="display:none" class="space-y-8">
+
+    <!-- Header Actions -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 relative z-10">
+        <div>
+            <h2 class="text-2xl font-bold text-[#191919] dark:text-[#fafafa] tracking-tight">Quản lý Vai Trò</h2>
+            <p class="text-sm text-[#666] dark:text-[#a3a3a3] mt-1.5 font-medium">Thiết lập ma trận phân quyền và truy cập cho hệ thống.</p>
+        </div>
+        <button onclick="nqtMoModalRole()" class="bg-[#191919] text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <i class="fas fa-plus mr-2 opacity-80"></i>Thêm Vai Trò
+        </button>
+    </div>
+
+    <!-- Roles Grid -->
+    <div id="nqtRolesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
+        <div class="col-span-full py-12 text-center text-[#666] dark:text-[#888]"><i class="fas fa-circle-notch fa-spin mr-2"></i> Đang tải...</div>
+    </div>
+
+</div>
+
+<!-- Modal: Role (Add/Edit) -->
+<div id="nqtModalRole" class="nqt-modal-backdrop hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onclick="if(event.target===this) nqtDongModal('nqtModalRole')">
+    <div class="nqt-modal-panel bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-[#e5e5e5] dark:border-[#333]">
+        <div class="px-6 py-5 border-b border-[#e5e5e5] dark:border-[#333] flex justify-between items-center bg-gradient-to-r from-transparent to-gray-50 dark:to-[#222]">
+            <h3 id="nqtRoleModalTitle" class="text-lg font-bold text-[#191919] dark:text-[#fafafa] tracking-tight">Thêm Vai Trò Mới</h3>
+            <button onclick="nqtDongModal('nqtModalRole')" class="text-[#a3a3a3] hover:text-red-500 bg-gray-100 dark:bg-[#333] hover:bg-red-50 dark:hover:bg-red-900/30 w-8 h-8 rounded-full flex items-center justify-center transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="nqtRoleForm" onsubmit="nqtSaveRole(event)" class="p-6 space-y-5">
+            <input type="hidden" id="nqtRoleId" value="">
+            <div>
+                <label class="block text-sm font-semibold text-[#191919] dark:text-[#fafafa] mb-2">Tên Vai Trò <span class="text-red-500">*</span></label>
+                <input type="text" id="nqtRoleName" required class="w-full px-4 py-2.5 bg-[#f9fafb] dark:bg-[#262626] border border-[#e5e7eb] dark:border-[#404040] rounded-xl text-sm text-[#191919] dark:text-[#fafafa] focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-[#a3a3a3] dark:placeholder-[#666]" placeholder="VD: Nhân viên CSKH">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-[#191919] dark:text-[#fafafa] mb-2">Mô tả</label>
+                <textarea id="nqtRoleDesc" rows="3" class="w-full px-4 py-2.5 bg-[#f9fafb] dark:bg-[#262626] border border-[#e5e7eb] dark:border-[#404040] rounded-xl text-sm text-[#191919] dark:text-[#fafafa] focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-[#a3a3a3] dark:placeholder-[#666]" placeholder="Mô tả chức năng của vai trò này..."></textarea>
+            </div>
+            <div class="pt-4 flex justify-end space-x-3">
+                <button type="button" onclick="nqtDongModal('nqtModalRole')" class="px-5 py-2.5 text-sm font-semibold text-[#666] dark:text-[#a3a3a3] hover:bg-gray-100 dark:hover:bg-[#333] rounded-xl transition-colors">Hủy</button>
+                <button type="submit" id="nqtRoleSubmitBtn" class="bg-[#191919] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg hover:-translate-y-0.5">
+                    Lưu Vai Trò
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Assign Permissions -->
+<div id="nqtModalPermissions" class="nqt-modal-backdrop hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onclick="if(event.target===this) nqtDongModal('nqtModalPermissions')">
+    <div class="nqt-modal-panel bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col border border-[#e5e5e5] dark:border-[#333]">
+        <div class="px-8 py-6 border-b border-[#e5e5e5] dark:border-[#333] flex justify-between items-center relative overflow-hidden">
+            <!-- Decorative gradient -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <h3 class="text-xl font-bold text-[#191919] dark:text-[#fafafa] tracking-tight flex items-center">
+                    <i class="fas fa-shield-alt text-blue-500 mr-3"></i> Ma Trận Phân Quyền
+                </h3>
+                <p id="nqtPermRoleName" class="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1"></p>
+            </div>
+            <button onclick="nqtDongModal('nqtModalPermissions')" class="relative z-10 text-[#a3a3a3] hover:text-red-500 bg-gray-100 dark:bg-[#333] hover:bg-red-50 dark:hover:bg-red-900/30 w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-sm">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+        
+        <div class="p-8 flex-1 overflow-y-auto bg-[#fdfdfc] dark:bg-[#141414]">
+            <div class="mb-6 flex items-center justify-between bg-white dark:bg-[#222] p-4 rounded-xl border border-gray-100 dark:border-[#333] shadow-sm">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center mr-4">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <div class="text-base text-[#191919] dark:text-[#fafafa] font-bold">Danh sách Module Hệ thống</div>
+                        <div class="text-xs text-[#666] dark:text-[#a3a3a3] mt-0.5">Bật/tắt các quyền truy cập tương ứng</div>
+                    </div>
+                </div>
+                <button type="button" onclick="nqtSelectAllPerms()" class="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold text-sm rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center">
+                    <i class="fas fa-check-double mr-2"></i> Chọn tất cả
+                </button>
+            </div>
+            <!-- Permissions Grid -->
+            <div id="nqtPermissionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Grouped permissions will be rendered here -->
+            </div>
+        </div>
+
+        <div class="px-8 py-5 border-t border-[#e5e5e5] dark:border-[#333] flex justify-between items-center bg-white dark:bg-[#1a1a1a]">
+            <div class="text-xs font-medium text-[#888]">
+                <i class="fas fa-info-circle mr-1"></i> Các thay đổi sẽ có hiệu lực ngay lập tức.
+            </div>
+            <div class="flex space-x-3">
+                <input type="hidden" id="nqtPermRoleId" value="">
+                <button type="button" onclick="nqtDongModal('nqtModalPermissions')" class="px-6 py-2.5 text-sm font-semibold text-[#666] dark:text-[#a3a3a3] hover:bg-gray-100 dark:hover:bg-[#333] rounded-xl transition-colors">Hủy</button>
+                <button type="button" onclick="nqtSavePermissions()" id="nqtPermSubmitBtn" class="bg-[#191919] text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg hover:-translate-y-1">
+                    Cập Nhật Quyền
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
+nqtInitAdminLayout('phan-quyen');
+
+let nqtRoles = [];
+let nqtAllPermissions = {}; 
+
+async function nqtLoadData() {
+    // Load Roles
+    const resRoles = await nqtApi.fetch('/api/nqt-vai-tro');
+    if (resRoles && resRoles.nqt_thanh_cong) {
+        nqtRoles = resRoles.nqt_du_lieu;
+        nqtRenderRoles();
+    }
+
+    // Load Permissions
+    const resPerms = await window.nqtApi.fetch('/api/nqt-quyen-han');
+    if (resPerms && resPerms.nqt_thanh_cong) {
+        nqtAllPermissions = resPerms.nqt_du_lieu?.g6_danh_sach_nhom || resPerms.nqt_du_lieu || {};
+    }
+}
+
+function nqtRenderRoles() {
+    const grid = document.getElementById('nqtRolesGrid');
+    if (!nqtRoles || nqtRoles.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-12 text-center text-[#666] dark:text-[#888]">Chưa có vai trò nào được tạo.</div>`;
+        return;
+    }
+
+    grid.innerHTML = nqtRoles.map(r => `
+        <div class="nqt-role-card rounded-2xl flex flex-col relative overflow-hidden group">
+            <!-- Decorative Glow -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+            ${r.g6_ten_vai_tro === 'G6QuanTri' ? '<div class="absolute top-0 right-0 w-20 h-20 overflow-hidden z-10"><div class="absolute top-4 -right-8 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] font-extrabold py-1 w-32 text-center transform rotate-45 shadow-md tracking-wider">SYSTEM</div></div>' : ''}
+            
+            <div class="p-6 flex-1 relative z-10">
+                <div class="nqt-role-icon-box w-12 h-12 rounded-2xl text-blue-600 dark:text-blue-400 flex items-center justify-center mb-5">
+                    <i class="fas ${r.g6_ten_vai_tro === 'G6QuanTri' ? 'fa-crown' : 'fa-user-shield'} text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-[#191919] dark:text-[#fafafa] mb-2 pr-6">${r.g6_ten_vai_tro}</h3>
+                <p class="text-sm text-[#666] dark:text-[#a3a3a3] line-clamp-2 font-medium leading-relaxed">${r.g6_mo_ta || 'Không có mô tả cho vai trò này.'}</p>
+            </div>
+            
+            <div class="border-t border-[#e5e5e5] dark:border-[#333] bg-white/50 dark:bg-black/20 p-4 flex justify-between items-center relative z-10">
+                <button onclick="nqtOpenPermissions(${r.g6_ma_vai_tro})" class="px-3 py-1.5 rounded-lg text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors flex items-center">
+                    <i class="fas fa-sliders-h mr-2"></i> Cấu hình
+                </button>
+                ${r.g6_ten_vai_tro !== 'G6QuanTri' ? `
+                <div class="flex space-x-2">
+                    <button onclick="nqtEditRole(${r.g6_ma_vai_tro})" class="nqt-action-btn nqt-action-edit w-8 h-8 rounded-lg flex items-center justify-center transition-all bg-white dark:bg-[#333]" title="Sửa">
+                        <i class="fas fa-pen text-xs"></i>
+                    </button>
+                    <button onclick="nqtDeleteRole(${r.g6_ma_vai_tro}, '${r.g6_ten_vai_tro}')" class="nqt-action-btn nqt-action-delete w-8 h-8 rounded-lg flex items-center justify-center transition-all bg-white dark:bg-[#333]" title="Xóa">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                </div>
+                ` : '<span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-[#333] text-[10px] text-[#666] dark:text-[#a3a3a3] font-bold uppercase tracking-wider">Mặc định</span>'}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Global functions for inline handlers
+window.nqtMoModalRole = function() {
+    document.getElementById('nqtRoleModalTitle').textContent = 'Thêm Vai Trò Mới';
+    document.getElementById('nqtRoleId').value = '';
+    document.getElementById('nqtRoleForm').reset();
+    document.getElementById('nqtModalRole').classList.remove('hidden');
+    // Trigger animation
+    setTimeout(() => {
+        document.getElementById('nqtModalRole').classList.remove('nqt-modal-hidden');
+    }, 10);
+};
+
+window.nqtDongModal = function(id) {
+    const modal = document.getElementById(id);
+    modal.classList.add('nqt-modal-hidden');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+};
+
+window.nqtEditRole = function(id) {
+    const role = nqtRoles.find(r => r.g6_ma_vai_tro === id);
+    if (!role) return;
+    document.getElementById('nqtRoleModalTitle').textContent = 'Chỉnh Sửa Vai Trò';
+    document.getElementById('nqtRoleId').value = role.g6_ma_vai_tro;
+    document.getElementById('nqtRoleName').value = role.g6_ten_vai_tro;
+    document.getElementById('nqtRoleDesc').value = role.g6_mo_ta || '';
+    
+    document.getElementById('nqtModalRole').classList.remove('hidden');
+    setTimeout(() => {
+        document.getElementById('nqtModalRole').classList.remove('nqt-modal-hidden');
+    }, 10);
+};
+
+window.nqtSaveRole = async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('nqtRoleId').value;
+    const name = document.getElementById('nqtRoleName').value.trim();
+    const desc = document.getElementById('nqtRoleDesc').value.trim();
+
+    const btn = document.getElementById('nqtRoleSubmitBtn');
+    const restore = window.nqtBtnLoading(btn);
+
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/nqt-vai-tro/${id}` : '/api/nqt-vai-tro';
+
+    const res = await window.nqtApi.fetch(url, {
+        method,
+        body: { g6_ten_vai_tro: name, g6_mo_ta: desc }
+    });
+
+    restore();
+
+    if (res && res.nqt_thanh_cong) {
+        window.nqtToast(res.nqt_thong_diep, 'success');
+        window.nqtDongModal('nqtModalRole');
+        nqtLoadData();
+    } else {
+        window.nqtToast(res?.nqt_thong_diep || 'Lỗi hệ thống', 'error');
+    }
+};
+
+window.nqtDeleteRole = async function(id, name) {
+    if (!confirm(`Bạn có chắc chắn muốn xóa vai trò "${name}" không? Hành động này không thể hoàn tác.`)) return;
+    
+    const res = await window.nqtApi.fetch(`/api/nqt-vai-tro/${id}`, { method: 'DELETE' });
+    if (res && res.nqt_thanh_cong) {
+        window.nqtToast(res.nqt_thong_diep, 'success');
+        nqtLoadData();
+    } else {
+        window.nqtToast(res?.nqt_thong_diep || 'Lỗi hệ thống', 'error');
+    }
+};
+
+window.nqtOpenPermissions = async function(roleId) {
+    const role = nqtRoles.find(r => r.g6_ma_vai_tro === roleId);
+    if (!role) return;
+
+    document.getElementById('nqtPermRoleName').innerHTML = `Đang cấu hình: <span class="font-bold text-blue-600 dark:text-blue-400">${role.g6_ten_vai_tro}</span>`;
+    document.getElementById('nqtPermRoleId').value = roleId;
+
+    if (role.g6_ten_vai_tro === 'G6QuanTri') {
+        window.nqtToast('Vai trò G6QuanTri mặc định có toàn quyền hệ thống.', 'info');
+        return;
+    }
+
+    const res = await window.nqtApi.fetch(`/api/nqt-vai-tro/${roleId}/nqt-quyen`);
+    let currentPerms = [];
+    if (res && res.nqt_thanh_cong) {
+        currentPerms = res.nqt_du_lieu.g6_danh_sach_quyen_id || [];
+    }
+
+    const container = document.getElementById('nqtPermissionsContainer');
+    let html = '';
+    
+    const permsGroupsData = nqtAllPermissions || {};
+    
+    let groupedPerms = {};
+    if (Array.isArray(permsGroupsData)) {
+        permsGroupsData.forEach(p => {
+            const groupName = p.g6_nhom_quyen || 'Khác';
+            if (!groupedPerms[groupName]) groupedPerms[groupName] = [];
+            groupedPerms[groupName].push(p);
+        });
+    } else {
+        groupedPerms = permsGroupsData;
+    }
+
+    if (Object.keys(groupedPerms).length === 0) {
+        html = '<div class="col-span-full py-8 text-center text-[#666] dark:text-[#a3a3a3] bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-700/30 font-medium">Không có dữ liệu quyền hạn. Vui lòng tải lại trang hoặc kiểm tra Server.</div>';
+    } else {
+        for (const [group, perms] of Object.entries(groupedPerms)) {
+            if (!Array.isArray(perms)) continue;
+            
+            // Icon mapping
+            const iconMap = {'Hội viên':'fa-users','Đơn hàng':'fa-shopping-cart','Gói tập':'fa-dumbbell','Sản phẩm':'fa-box','Hệ thống':'fa-cogs'};
+            const groupIcon = iconMap[group] || 'fa-folder';
+
+            html += `
+                <div class="nqt-perm-group bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-[#333] rounded-2xl p-5 shadow-sm">
+                    <h4 class="text-base font-bold text-[#191919] dark:text-[#fafafa] border-b border-gray-100 dark:border-[#333] pb-3 mb-4 flex justify-between items-center">
+                        <span class="flex items-center"><i class="fas ${groupIcon} text-blue-500 mr-2"></i> ${group}</span>
+                        <label class="inline-flex items-center space-x-2 text-xs font-semibold text-blue-600 dark:text-blue-400 cursor-pointer bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
+                            <input type="checkbox" class="nqt-group-check rounded text-blue-600 focus:ring-blue-500" onchange="nqtToggleGroup(this, '${group}')">
+                            <span>Bật hết</span>
+                        </label>
+                    </h4>
+                    <div class="space-y-3 group-container-${group.replace(/\s+/g, '-')}">
+            `;
+            
+            perms.forEach(p => {
+                const checked = currentPerms.includes(p.g6_ma_quyen) ? 'checked' : '';
+                html += `
+                        <label class="flex items-center justify-between cursor-pointer group hover:bg-gray-50 dark:hover:bg-[#262626] p-2 -mx-2 rounded-xl transition-colors">
+                            <div class="flex-1 pr-4">
+                                <p class="text-sm text-[#191919] dark:text-[#fafafa] font-semibold">${p.g6_ten_quyen}</p>
+                            </div>
+                            <div class="nqt-toggle-wrapper">
+                                <input type="checkbox" name="permissions[]" value="${p.g6_ma_quyen}" class="nqt-perm-cb" ${checked}>
+                                <span class="nqt-toggle-slider"></span>
+                            </div>
+                        </label>
+                `;
+            });
+            html += `</div></div>`;
+        }
+    }
+    
+    container.innerHTML = html;
+    
+    document.getElementById('nqtModalPermissions').classList.remove('hidden');
+    setTimeout(() => {
+        document.getElementById('nqtModalPermissions').classList.remove('nqt-modal-hidden');
+    }, 10);
+};
+
+window.nqtSelectAllPerms = function() {
+    const isAllChecked = document.querySelectorAll('.nqt-perm-cb:not(:checked)').length === 0;
+    const targetState = !isAllChecked; // Toggle all
+    document.querySelectorAll('.nqt-perm-cb').forEach(cb => cb.checked = targetState);
+    document.querySelectorAll('.nqt-group-check').forEach(cb => cb.checked = targetState);
+};
+
+window.nqtToggleGroup = function(cb, group) {
+    const container = document.querySelector(`.group-container-${group.replace(/\s+/g, '-')}`);
+    if (container) {
+        container.querySelectorAll('.nqt-perm-cb').forEach(c => c.checked = cb.checked);
+    }
+};
+
+window.nqtSavePermissions = async function() {
+    const roleId = document.getElementById('nqtPermRoleId').value;
+    const checkboxes = document.querySelectorAll('.nqt-perm-cb:checked');
+    const selectedPerms = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+    const btn = document.getElementById('nqtPermSubmitBtn');
+    const restore = window.nqtBtnLoading(btn);
+
+    const res = await window.nqtApi.fetch(`/api/nqt-vai-tro/${roleId}/nqt-phan-quyen`, {
+        method: 'POST',
+        body: { danh_sach_quyen: selectedPerms }
+    });
+
+    restore();
+
+    if (res && res.nqt_thanh_cong) {
+        window.nqtToast(res.nqt_thong_diep, 'success');
+        window.nqtDongModal('nqtModalPermissions');
+    } else {
+        window.nqtToast(res?.nqt_thong_diep || 'Lỗi hệ thống', 'error');
+    }
+};
+
+nqtLoadData();
+</script>
+</body>
+</html>

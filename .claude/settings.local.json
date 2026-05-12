@@ -18,7 +18,20 @@
       "WebFetch(domain:ui.shadcn.com)",
       "Bash(python -c \"from backend.app import nqt_tao_app; app = nqt_tao_app\\(\\); ctx = app.app_context\\(\\); ctx.push\\(\\); print\\('OK'\\)\")",
       "Bash(python -c ':*)",
-      "Bash(ls d:/Project4/Project4/backend/app/models/g6_*.py d:/Project4/Project4/backend/app/routes/nxv_*.py)"
+      "Bash(ls d:/Project4/Project4/backend/app/models/g6_*.py d:/Project4/Project4/backend/app/routes/nxv_*.py)",
+      "Bash(rtk git *)",
+      "Bash(rtk read *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk find *)",
+      "Bash(rtk grep *)",
+      "Bash(python -c ' *)",
+      "Bash(npm install *)",
+      "Bash(rtk npm *)",
+      "WebFetch(domain:github.com)",
+      "Bash(wsl --status)",
+      "Bash(cargo --version)",
+      "Bash(curl --version)",
+      "Bash(rtk *)"
     ]
   }
 }

@@ -1,5 +1,5 @@
 from backend.app import db
-from datetime import datetime
+from datetime import datetime, date
 
 
 class G6NhanVien(db.Model):
@@ -15,7 +15,7 @@ class G6NhanVien(db.Model):
     g6_email = db.Column(db.String(100))
     g6_dia_chi = db.Column(db.String(255))
     g6_so_cccd = db.Column(db.String(20))
-    g6_ngay_vao_lam = db.Column(db.Date, nullable=False)
+    g6_ngay_vao_lam = db.Column(db.Date, nullable=False, default=date.today)
     g6_ngay_nghi_viec = db.Column(db.Date)
     g6_luong_co_ban = db.Column(db.Numeric(15, 0), nullable=False, default=0)
     g6_trang_thai = db.Column(db.String(20), nullable=False, default='dang_lam')
@@ -27,7 +27,7 @@ class G6NhanVien(db.Model):
     g6_lich_lam_viec = db.relationship('G6LichLamViec', back_populates='g6_nhan_vien', cascade='all, delete-orphan')
 
     def g6_to_dict(self):
-        return {
+        res = {
             'g6_ma_nhan_vien': self.g6_ma_nhan_vien,
             'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_ma_chi_nhanh': self.g6_ma_chi_nhanh,
@@ -40,6 +40,13 @@ class G6NhanVien(db.Model):
             'g6_trang_thai': self.g6_trang_thai,
             'g6_luong_co_ban': float(self.g6_luong_co_ban) if self.g6_luong_co_ban else 0,
         }
+        if self.g6_nguoi_dung:
+            res['g6_ten_dang_nhap'] = self.g6_nguoi_dung.g6_ten_dang_nhap
+            res['g6_vai_tro'] = [vt.g6_vai_tro.g6_ten_vai_tro for vt in self.g6_nguoi_dung.g6_vai_tro]
+        else:
+            res['g6_ten_dang_nhap'] = '—'
+            res['g6_vai_tro'] = []
+        return res
 
 
 class G6LichLamViec(db.Model):

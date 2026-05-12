@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request
 from bs4 import BeautifulSoup
 import re
 
@@ -99,3 +99,47 @@ def nqt_view_nhan_vien():
 @nqt_admin_views_bp.route('/admin/cau-hinh')
 def nqt_view_cau_hinh():
     return nqt_render_admin_template('admin/cau_hinh.html')
+
+@nqt_admin_views_bp.route('/admin/huan-luyen-vien')
+def nqt_view_huan_luyen_vien():
+    return nqt_render_admin_template('admin/huan_luyen_vien.html')
+
+@nqt_admin_views_bp.route('/admin/lop-hoc')
+def nqt_view_lop_hoc():
+    return nqt_render_admin_template('admin/lop_hoc.html')
+
+@nqt_admin_views_bp.route('/admin/san-pham')
+def nqt_view_san_pham():
+    return nqt_render_admin_template('admin/san_pham.html')
+
+@nqt_admin_views_bp.route('/admin/khuyen-mai')
+def nqt_view_khuyen_mai():
+    return nqt_render_admin_template('admin/khuyen_mai.html')
+
+@nqt_admin_views_bp.route('/admin/blog')
+def nqt_view_blog():
+    return nqt_render_admin_template('admin/blog.html')
+
+@nqt_admin_views_bp.route('/admin/van-chuyen')
+def nqt_view_van_chuyen():
+    return nqt_render_admin_template('admin/van_chuyen.html')
+
+@nqt_admin_views_bp.route('/admin/quan-tri')
+def nqt_view_quan_tri():
+    return nqt_render_admin_template('admin/quan_tri.html')
+
+@nqt_admin_views_bp.route('/admin/su-kien')
+def nqt_view_su_kien():
+    return nqt_render_admin_template('admin/su_kien.html')
+
+@nqt_admin_views_bp.route('/admin/bao-tri')
+def nqt_view_bao_tri():
+    return nqt_render_admin_template('admin/bao_tri.html')
+
+@nqt_admin_views_bp.route('/admin/bao-cao')
+def nqt_view_bao_cao():
+    return nqt_render_admin_template('admin/bao_cao.html')
+
+@nqt_admin_views_bp.route('/admin/phan-quyen')
+def nqt_view_phan_quyen():
+    return nqt_render_admin_template('admin/phan_quyen.html')

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lịch Sử Điểm Danh — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "success":"#22C55E",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+
+<main class="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+  <div class="p-6 md:p-10 max-w-4xl">
+    <div class="mb-8">
+      <h1 class="text-2xl font-black text-white mb-1">Lịch Sử Điểm Danh</h1>
+      <p class="text-text-muted text-sm">Theo dõi số buổi tập và thói quen tập luyện của bạn.</p>
+    </div>
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-bg-card border border-border-subtle rounded-xl p-4 text-center">
+        <div id="nqtStatMonth" class="text-neon-lime font-mono text-2xl font-bold">—</div>
+        <div class="text-text-muted text-xs font-caps uppercase tracking-wide mt-1">Tháng này</div>
+      </div>
+      <div class="bg-bg-card border border-border-subtle rounded-xl p-4 text-center">
+        <div id="nqtStatTotal" class="text-neon-lime font-mono text-2xl font-bold">—</div>
+        <div class="text-text-muted text-xs font-caps uppercase tracking-wide mt-1">Tổng buổi</div>
+      </div>
+      <div class="bg-bg-card border border-border-subtle rounded-xl p-4 text-center">
+        <div id="nqtStatWeek" class="text-neon-lime font-mono text-2xl font-bold">—</div>
+        <div class="text-text-muted text-xs font-caps uppercase tracking-wide mt-1">Tuần này</div>
+      </div>
+      <div class="bg-bg-card border border-border-subtle rounded-xl p-4 text-center">
+        <div id="nqtStatAvg" class="text-neon-lime font-mono text-2xl font-bold">—</div>
+        <div class="text-text-muted text-xs font-caps uppercase tracking-wide mt-1">Phút TB/buổi</div>
+      </div>
+    </div>
+
+    <!-- Month calendar heat dots -->
+    <div class="bg-bg-card border border-border-subtle rounded-2xl p-6 mb-8">
+      <h2 class="font-bold text-white mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-neon-lime">calendar_month</span>
+        Hoạt động tháng này
+      </h2>
+      <div id="nqtCalendar" class="grid grid-cols-7 gap-1.5"></div>
+      <div class="flex items-center gap-3 mt-4 text-xs text-text-muted">
+        <span class="w-3 h-3 rounded-sm bg-bg-elevated inline-block"></span> Không tập
+        <span class="w-3 h-3 rounded-sm bg-neon-lime/40 inline-block"></span> Có tập
+      </div>
+    </div>
+
+    <!-- History list -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-white">Chi tiết các buổi tập</h2>
+        <select onchange="nqtFilterDd(this.value)" class="bg-bg-card border border-border-subtle rounded-lg px-3 py-1.5 text-sm text-text-secondary focus:outline-none focus:border-border-neon">
+          <option value="30">30 ngày qua</option>
+          <option value="60">60 ngày qua</option>
+          <option value="90">90 ngày qua</option>
+          <option value="0">Tất cả</option>
+        </select>
+      </div>
+      <div id="nqtDdList" class="space-y-2">
+        <div class="flex justify-center py-10"><div class="w-6 h-6 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+import { nqtRequireAuth, nqtApi } from '/src/js/member/auth.js';
+import { nqtRenderSidebar, nqtFormatDate } from '/src/js/nqtLayout.js';
+if (!nqtRequireAuth()) throw new Error('unauth');
+nqtRenderSidebar('diem-danh');
+
+let nqtAllDd = [];
+
+function nqtFormatTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+}
+function nqtDuration(vao, ra) {
+  if (!vao || !ra) return null;
+  return Math.round((new Date(ra) - new Date(vao)) / 60000);
+}
+
+window.nqtFilterDd = function(days) {
+  const cutoff = days > 0 ? new Date(Date.now() - days * 86400000) : null;
+  const filtered = cutoff ? nqtAllDd.filter(d => new Date(d.g6_thoi_gian_vao) >= cutoff) : nqtAllDd;
+  nqtRenderList(filtered);
+};
+
+function nqtRenderList(list) {
+  const el = document.getElementById('nqtDdList');
+  if (!list.length) {
+    el.innerHTML = '<div class="text-center py-10 text-text-muted">Không có dữ liệu trong khoảng thời gian này.</div>';
+    return;
+  }
+  el.innerHTML = list.map(d => {
+    const dur = nqtDuration(d.g6_thoi_gian_vao, d.g6_thoi_gian_ra);
+    return `
+    <div class="bg-bg-card border border-border-subtle rounded-xl p-4 flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-neon-glow border border-border-neon flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-neon-lime text-lg">fitness_center</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-white font-semibold text-sm">${nqtFormatDate(d.g6_thoi_gian_vao)}</div>
+        <div class="text-text-muted text-xs mt-0.5">
+          Vào: ${nqtFormatTime(d.g6_thoi_gian_vao)}
+          ${d.g6_thoi_gian_ra ? ` — Ra: ${nqtFormatTime(d.g6_thoi_gian_ra)}` : ' — Chưa ra'}
+          <span class="ml-2 text-text-secondary capitalize">${d.g6_phuong_thuc || 'qr'}</span>
+        </div>
+      </div>
+      ${dur ? `<div class="text-right flex-shrink-0"><div class="text-neon-lime font-mono font-bold">${dur}'</div><div class="text-text-muted text-[10px] font-caps uppercase">phút</div></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function nqtRenderCalendar(list) {
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+  const trainDays = new Set(list.map(d => new Date(d.g6_thoi_gian_vao).getDate()));
+  const cal = document.getElementById('nqtCalendar');
+  const dayLabels = ['CN','T2','T3','T4','T5','T6','T7'];
+  cal.innerHTML = dayLabels.map(d => `<div class="text-text-muted text-[10px] font-caps uppercase tracking-wide text-center">${d}</div>`).join('')
+    + Array(firstDay).fill('<div></div>').join('')
+    + Array.from({length: daysInMonth}, (_, i) => {
+        const day = i + 1;
+        const trained = trainDays.has(day);
+        const isToday = day === now.getDate();
+        return `<div class="aspect-square rounded-sm flex items-center justify-center text-[10px] font-mono cursor-default ${trained ? 'bg-neon-lime/40 text-neon-lime font-bold' : 'bg-bg-elevated text-text-muted'} ${isToday ? 'ring-1 ring-neon-lime' : ''}">${day}</div>`;
+      }).join('');
+}
+
+(async () => {
+  try {
+    const r = await nqtApi('/api/nqt-hoi-vien/diem-danh');
+    const j = await r.json();
+    nqtAllDd = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
+    nqtAllDd.sort((a, b) => new Date(b.g6_thoi_gian_vao) - new Date(a.g6_thoi_gian_vao));
+
+    const now = new Date();
+    const thisMonth = nqtAllDd.filter(d => {
+      const dt = new Date(d.g6_thoi_gian_vao);
+      return dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear();
+    });
+    const thisWeek = nqtAllDd.filter(d => (now - new Date(d.g6_thoi_gian_vao)) < 7 * 86400000);
+    const durations = nqtAllDd.map(d => nqtDuration(d.g6_thoi_gian_vao, d.g6_thoi_gian_ra)).filter(Boolean);
+    const avgDur = durations.length ? Math.round(durations.reduce((s,v)=>s+v,0)/durations.length) : 0;
+
+    document.getElementById('nqtStatMonth').textContent = thisMonth.length;
+    document.getElementById('nqtStatTotal').textContent = nqtAllDd.length;
+    document.getElementById('nqtStatWeek').textContent = thisWeek.length;
+    document.getElementById('nqtStatAvg').textContent = avgDur || '—';
+
+    nqtRenderCalendar(thisMonth);
+    const cutoff = new Date(Date.now() - 30 * 86400000);
+    nqtRenderList(nqtAllDd.filter(d => new Date(d.g6_thoi_gian_vao) >= cutoff));
+  } catch {
+    document.getElementById('nqtDdList').innerHTML = '<div class="text-center py-10 text-text-muted">Không thể tải dữ liệu.</div>';
+  }
+})();
+</script>
+</body>
+</html>

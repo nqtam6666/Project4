@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="vi" id="nqtHtmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi nhánh - NQT Gym Admin</title>
+    <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div id="nqt-page-content" style="display:none" class="space-y-4">
+    <div class="space-y-4">
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">Quản lý Chi nhánh</h1>
+                <p class="text-sm text-[#666] dark:text-[#888]">Quản lý các chi nhánh phòng tập</p>
+            </div>
+            <button onclick="nqtMoModal('modalAddBranch')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">
+                <i class="fas fa-plus"></i>Thêm chi nhánh
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-col sm:flex-row gap-3">
+            <button onclick="nqtLoadChiNhanh()" class="px-3 py-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors" title="Làm mới">
+                <i class="fas fa-sync-alt text-[#666] dark:text-[#888] text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-[#fafafa] dark:bg-[#333] border-b border-[#e5e5e5] dark:border-[#404040]">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Tên chi nhánh</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Địa chỉ</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Hotline</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Giờ mở cửa</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-[#666] dark:text-[#888] uppercase">Tiện ích</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-[#666] dark:text-[#888] uppercase">Trạng thái</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-[#666] dark:text-[#888] uppercase">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="branchTableBody" class="divide-y divide-[#e5e5e5] dark:divide-[#404040]">
+                        <tr>
+                            <td colspan="7" class="px-4 py-3">
+                                <div class="h-4 bg-[#e5e5e5] dark:bg-[#404040] rounded animate-pulse w-full"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" class="px-4 py-3">
+                                <div class="h-4 bg-[#e5e5e5] dark:bg-[#404040] rounded animate-pulse w-5/6"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" class="px-4 py-3">
+                                <div class="h-4 bg-[#e5e5e5] dark:bg-[#404040] rounded animate-pulse w-4/6"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Action Bar -->
+    <div id="nqtBulkBar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
+        <div class="bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] px-4 py-2.5 rounded-md shadow-lg flex items-center space-x-3">
+            <span class="text-sm">Đã chọn <strong id="nqtSoDaChon">0</strong> chi nhánh</span>
+            <div class="w-px h-5 bg-white/20 dark:bg-[#191919]/20"></div>
+            <button onclick="nqtMoBulkModal('kich_hoat')" class="px-3 py-1.5 bg-[#16a34a] hover:bg-[#15803d] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+                <i class="fas fa-store"></i><span>Mở cửa</span>
+            </button>
+            <button onclick="nqtMoBulkModal('tam_dong')" class="px-3 py-1.5 bg-[#d97706] hover:bg-[#b45309] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+                <i class="fas fa-store-slash"></i><span>Tạm đóng</span>
+            </button>
+            <button onclick="nqtBoChonTatCa()" class="p-1.5 hover:bg-white/10 dark:hover:bg-[#191919]/10 rounded-md transition-colors" title="Bỏ chọn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Bulk Action -->
+    <div id="modalBulkAction" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalBulkAction')">
+        <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-sm shadow-lg">
+            <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+                <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]" id="nqtBulkTitle">Thao tác hàng loạt</h3>
+                <button onclick="nqtDongModal('modalBulkAction')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 text-center">
+                <div class="w-12 h-12 mx-auto mb-4 bg-[#f5f5f5] dark:bg-[#404040] rounded-full flex items-center justify-center">
+                    <i class="fas fa-building text-[#525252] dark:text-[#a3a3a3] text-xl" id="nqtBulkIcon"></i>
+                </div>
+                <p class="text-sm text-[#666] dark:text-[#888] mb-1">Bạn đang thực hiện thao tác cho</p>
+                <p class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]"><span id="nqtBulkCount">0</span> chi nhánh</p>
+                <p class="text-xs text-[#a3a3a3] dark:text-[#666] mt-2" id="nqtBulkMessage">Trạng thái sẽ được cập nhật.</p>
+            </div>
+            <div class="px-4 py-3 border-t border-[#e5e5e5] dark:border-[#404040] flex justify-end space-x-2">
+                <button onclick="nqtDongModal('modalBulkAction')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+                <button onclick="nqtXacNhanBulkAction()" id="nqtBulkConfirmBtn" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Branch -->
+    <div id="modalAddBranch" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalAddBranch')">
+        <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+                <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]">Thêm chi nhánh mới</h3>
+                <button onclick="nqtDongModal('modalAddBranch')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formAddBranch" class="p-4 overflow-y-auto space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Tên chi nhánh <span class="text-[#dc2626]">*</span></label>
+                    <input type="text" name="g6_ten_chi_nhanh" required class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Địa chỉ</label>
+                    <input type="text" name="g6_dia_chi" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Thành phố</label>
+                        <input type="text" name="g6_thanh_pho" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Tỉnh</label>
+                        <input type="text" name="g6_tinh" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Hotline</label>
+                        <input type="text" name="g6_hotline" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Email</label>
+                        <input type="email" name="g6_email" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Giờ mở cửa</label>
+                        <input type="time" name="g6_gio_mo_cua" value="05:00" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Giờ đóng cửa</label>
+                        <input type="time" name="g6_gio_dong_cua" value="23:00" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Sức chứa tối đa</label>
+                    <input type="number" name="g6_suc_chua_toi_da" value="100" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                </div>
+                <div class="flex items-center space-x-6">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" name="g6_co_sauna" class="w-4 h-4 rounded border-[#d4d4d4] text-[#191919]">
+                        <span class="text-sm text-[#191919] dark:text-[#fafafa]">Có xông hơi</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" name="g6_co_ho_boi" class="w-4 h-4 rounded border-[#d4d4d4] text-[#191919]">
+                        <span class="text-sm text-[#191919] dark:text-[#fafafa]">Có hồ bơi</span>
+                    </label>
+                </div>
+                <div class="flex justify-end space-x-2 pt-4 border-t border-[#e5e5e5] dark:border-[#404040]">
+                    <button type="button" onclick="nqtDongModal('modalAddBranch')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Branch -->
+    <div id="modalEditBranch" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalEditBranch')">
+        <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+                <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]">Chỉnh sửa chi nhánh</h3>
+                <button onclick="nqtDongModal('modalEditBranch')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formEditBranch" class="p-4 overflow-y-auto space-y-4">
+                <input type="hidden" name="g6_ma_chi_nhanh">
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Tên chi nhánh <span class="text-[#dc2626]">*</span></label>
+                    <input type="text" name="g6_ten_chi_nhanh" required class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Địa chỉ</label>
+                    <input type="text" name="g6_dia_chi" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Hotline</label>
+                        <input type="text" name="g6_hotline" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Email</label>
+                        <input type="email" name="g6_email" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Sức chứa tối đa</label>
+                        <input type="number" name="g6_suc_chua_toi_da" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Trạng thái</label>
+                        <select name="g6_la_hoat_dong" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                            <option value="true">Đang hoạt động</option>
+                            <option value="false">Tạm đóng</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" name="g6_co_sauna" id="editSauna" class="w-4 h-4 rounded border-[#d4d4d4] text-[#191919]">
+                        <span class="text-sm text-[#191919] dark:text-[#fafafa]">Có xông hơi</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" name="g6_co_ho_boi" id="editHoBoi" class="w-4 h-4 rounded border-[#d4d4d4] text-[#191919]">
+                        <span class="text-sm text-[#191919] dark:text-[#fafafa]">Có hồ bơi</span>
+                    </label>
+                </div>
+                <div class="flex justify-end space-x-2 pt-4 border-t border-[#e5e5e5] dark:border-[#404040]">
+                    <button type="button" onclick="nqtDongModal('modalEditBranch')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Thiết bị -->
+    <div id="modalThietBi" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalThietBi')">
+        <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+                <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]" id="thietBiTitle">Thiết bị chi nhánh</h3>
+                <button onclick="nqtDongModal('modalThietBi')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1 space-y-4">
+                <form id="formAddThietBi" class="bg-[#fafafa] dark:bg-[#333] rounded-md p-3 flex gap-3 border border-[#e5e5e5] dark:border-[#404040]">
+                    <input type="hidden" name="g6_ma_chi_nhanh" id="thietBiChiNhanh">
+                    <input type="text" name="g6_ten_thiet_bi" required placeholder="Tên thiết bị *" class="flex-1 px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    <input type="text" name="g6_thuong_hieu" placeholder="Thương hiệu" class="flex-1 px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-3 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </form>
+                <div id="thietBiList" class="space-y-2">
+                    <div class="text-center text-[#666] dark:text-[#888] py-8">Đang tải...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Xác nhận tạm đóng -->
+    <div id="modalConfirmDeactivate" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalConfirmDeactivate')">
+        <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-sm p-6 text-center">
+            <div class="w-12 h-12 mx-auto mb-4 bg-[#fef3c7] dark:bg-[#92400e]/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-store-slash text-[#d97706] text-xl"></i>
+            </div>
+            <h3 class="font-semibold text-[#191919] dark:text-[#fafafa] mb-2">Xác nhận tạm đóng</h3>
+            <p class="text-sm text-[#666] dark:text-[#888] mb-1">Tạm đóng chi nhánh</p>
+            <p class="font-semibold text-[#d97706] mb-4" id="deactivateTargetName"></p>
+            <div class="flex justify-center space-x-2">
+                <button onclick="nqtDongModal('modalConfirmDeactivate')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+                <button onclick="nqtConfirmDeactivate()" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#d97706] text-white text-sm font-medium rounded-md hover:bg-[#b45309] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d97706]">Tạm đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="module">
+import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
+nqtInitAdminLayout('chi-nhanh');
+
+(function() {
+    let nqtAllBranches = [];
+    let nqtDeactivateTargetId = null;
+    let nqtDaChon = [];
+    let nqtBulkActionType = null;
+
+    window.nqtToggleRow = function(id, e) {
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        const idx = nqtDaChon.indexOf(id);
+        if (idx === -1) nqtDaChon.push(id);
+        else nqtDaChon.splice(idx, 1);
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            const trId = parseInt(tr.dataset.rowId);
+            const sel = nqtDaChon.includes(trId);
+            if (sel) {
+                tr.classList.remove('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+                tr.classList.add('nqt-row-selected');
+            } else {
+                tr.classList.remove('nqt-row-selected');
+                tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+            }
+        });
+        nqtCapNhatBulkBar();
+    };
+
+    window.nqtBoChonTatCa = function() {
+        nqtDaChon = [];
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            tr.classList.remove('nqt-row-selected');
+            tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+        });
+        nqtCapNhatBulkBar();
+    };
+
+    function nqtCapNhatBulkBar() {
+        const bar = document.getElementById('nqtBulkBar');
+        document.getElementById('nqtSoDaChon').textContent = nqtDaChon.length;
+        if (nqtDaChon.length > 0) bar.classList.remove('hidden');
+        else bar.classList.add('hidden');
+    }
+
+    window.nqtMoBulkModal = function(action) {
+        nqtBulkActionType = action;
+        document.getElementById('nqtBulkCount').textContent = nqtDaChon.length;
+        if (action === 'kich_hoat') {
+            document.getElementById('nqtBulkTitle').textContent = 'Mở cửa chi nhánh';
+            document.getElementById('nqtBulkMessage').textContent = 'Các chi nhánh sẽ được chuyển sang trạng thái "Hoạt động".';
+        } else {
+            document.getElementById('nqtBulkTitle').textContent = 'Tạm đóng chi nhánh';
+            document.getElementById('nqtBulkMessage').textContent = 'Các chi nhánh sẽ được chuyển sang trạng thái "Tạm đóng".';
+        }
+        nqtMoModal('modalBulkAction');
+    }
+
+    window.nqtXacNhanBulkAction = async function() {
+        if (nqtDaChon.length === 0) return;
+        const btn = document.getElementById('nqtBulkConfirmBtn');
+        const nqtRestoreBulk = nqtBtnLoading(btn, 'Đang xử lý...');
+
+        let nqtThanhCong = 0, nqtThatBai = 0;
+        const laHoatDong = nqtBulkActionType === 'kich_hoat';
+        for (const id of nqtDaChon) {
+            const res = await nqtApi.fetch(`/api/nqt-chi-nhanh/${id}`, { method: 'PUT', body: { g6_la_hoat_dong: laHoatDong } });
+            if (res && res.nqt_thanh_cong) nqtThanhCong++;
+            else nqtThatBai++;
+        }
+
+        nqtRestoreBulk();
+        nqtDongModal('modalBulkAction');
+        nqtBoChonTatCa();
+        nqtLoadChiNhanh();
+
+        if (nqtThatBai === 0) nqtToast(`Đã cập nhật ${nqtThanhCong} chi nhánh!`, 'success');
+        else nqtToast(`Thành công: ${nqtThanhCong}, Thất bại: ${nqtThatBai}`, 'warn');
+    }
+
+    window.nqtLoadChiNhanh = async function() {
+        const tbody = document.getElementById('branchTableBody');
+        tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-[#666] dark:text-[#888]">Đang tải...</td></tr>';
+
+        const data = await nqtApi.fetch('/api/nqt-chi-nhanh?g6_tat_ca=1');
+        if (!data || !data.nqt_thanh_cong) return;
+
+        nqtAllBranches = data.nqt_du_lieu;
+        if (nqtAllBranches.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-12 text-center text-[#666] dark:text-[#888]">Chưa có chi nhánh nào</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = nqtAllBranches.map(b => {
+            const cls = b.g6_la_hoat_dong ? 'bg-[#dcfce7] text-[#16a34a] dark:bg-[#166534]/20 dark:text-[#4ade80]' : 'bg-[#f5f5f5] text-[#525252] dark:bg-[#404040] dark:text-[#a3a3a3]';
+            const txt = b.g6_la_hoat_dong ? 'Hoạt động' : 'Tạm đóng';
+            const nqtName = b.g6_ten_chi_nhanh.replace(/'/g, "\\'");
+            const isChecked = nqtDaChon.includes(b.g6_ma_chi_nhanh);
+            return `
+                <tr data-row-id="${b.g6_ma_chi_nhanh}" class="cursor-pointer transition-all duration-100 ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#333]'}" onclick="nqtToggleRow(${b.g6_ma_chi_nhanh}, event)">
+                    <td class="px-4 py-3 font-medium text-[#191919] dark:text-[#fafafa]">${b.g6_ten_chi_nhanh}</td>
+                    <td class="px-4 py-3 text-[#666] dark:text-[#888]">${b.g6_dia_chi || '—'}</td>
+                    <td class="px-4 py-3 text-[#191919] dark:text-[#fafafa]">${b.g6_hotline || '—'}</td>
+                    <td class="px-4 py-3 text-[#666] dark:text-[#888]">${b.g6_gio_mo_cua || '—'} – ${b.g6_gio_dong_cua || '—'}</td>
+                    <td class="px-4 py-3 text-center space-x-1">
+                        ${b.g6_co_sauna ? '<span class="px-1.5 py-0.5 bg-[#ffedd5] text-[#ea580c] text-xs font-medium rounded-md">Sauna</span>' : ''}
+                        ${b.g6_co_ho_boi ? '<span class="px-1.5 py-0.5 bg-[#dbeafe] text-[#2563eb] text-xs font-medium rounded-md">Hồ bơi</span>' : ''}
+                        ${!b.g6_co_sauna && !b.g6_co_ho_boi ? '<span class="text-[#a3a3a3]">—</span>' : ''}
+                    </td>
+                    <td class="px-4 py-3 text-center"><span class="px-2 py-0.5 text-xs font-medium rounded-md ${cls}">${txt}</span></td>
+                    <td class="px-4 py-3 text-right">
+                        <button onclick="nqtOpenThietBi(${b.g6_ma_chi_nhanh}, '${nqtName}')" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#7c3aed] hover:bg-[#f3e8ff] dark:hover:bg-[#5b21b6]/20 transition-colors" title="Thiết bị"><i class="fas fa-cogs"></i></button>
+                        <button onclick="nqtEditBranch(${b.g6_ma_chi_nhanh})" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa] hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors" title="Sửa"><i class="fas fa-edit"></i></button>
+                        ${b.g6_la_hoat_dong ? `<button onclick="nqtDeactivateBranch(${b.g6_ma_chi_nhanh}, '${nqtName}')" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#d97706] hover:bg-[#fef3c7] dark:hover:bg-[#92400e]/20 transition-colors" title="Tạm đóng"><i class="fas fa-store-slash"></i></button>` : ''}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    document.getElementById('formAddBranch').onsubmit = async (e) => {
+        e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
+        const fd = new FormData(e.target);
+        const data = Object.fromEntries(fd);
+        data.g6_co_sauna = fd.has('g6_co_sauna');
+        data.g6_co_ho_boi = fd.has('g6_co_ho_boi');
+        if (data.g6_suc_chua_toi_da) data.g6_suc_chua_toi_da = parseInt(data.g6_suc_chua_toi_da);
+
+        const res = await nqtApi.fetch('/api/nqt-chi-nhanh', { method: 'POST', body: data });
+        nqtRestore();
+        if (res && res.nqt_thanh_cong) {
+            nqtDongModal('modalAddBranch');
+            e.target.reset();
+            nqtLoadChiNhanh();
+            nqtToast('Thêm chi nhánh thành công!', 'success');
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
+        }
+    };
+
+    window.nqtEditBranch = function(id) {
+        const b = nqtAllBranches.find(x => x.g6_ma_chi_nhanh === id);
+        if (!b) return;
+        const form = document.getElementById('formEditBranch');
+        form.g6_ma_chi_nhanh.value = b.g6_ma_chi_nhanh;
+        form.g6_ten_chi_nhanh.value = b.g6_ten_chi_nhanh;
+        form.g6_dia_chi.value = b.g6_dia_chi || '';
+        form.g6_hotline.value = b.g6_hotline || '';
+        form.g6_email.value = b.g6_email || '';
+        form.g6_suc_chua_toi_da.value = b.g6_suc_chua_toi_da || '';
+        form.g6_la_hoat_dong.value = b.g6_la_hoat_dong.toString();
+        document.getElementById('editSauna').checked = b.g6_co_sauna;
+        document.getElementById('editHoBoi').checked = b.g6_co_ho_boi;
+        nqtMoModal('modalEditBranch');
+    }
+
+    document.getElementById('formEditBranch').onsubmit = async (e) => {
+        e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
+        const fd = new FormData(e.target);
+        const id = fd.get('g6_ma_chi_nhanh');
+        const data = {
+            g6_ten_chi_nhanh: fd.get('g6_ten_chi_nhanh'),
+            g6_dia_chi: fd.get('g6_dia_chi'),
+            g6_hotline: fd.get('g6_hotline'),
+            g6_email: fd.get('g6_email'),
+            g6_suc_chua_toi_da: parseInt(fd.get('g6_suc_chua_toi_da')) || null,
+            g6_la_hoat_dong: fd.get('g6_la_hoat_dong') === 'true',
+            g6_co_sauna: document.getElementById('editSauna').checked,
+            g6_co_ho_boi: document.getElementById('editHoBoi').checked,
+        };
+        const res = await nqtApi.fetch(`/api/nqt-chi-nhanh/${id}`, { method: 'PUT', body: data });
+        nqtRestore();
+        if (res && res.nqt_thanh_cong) {
+            nqtDongModal('modalEditBranch');
+            nqtLoadChiNhanh();
+            nqtToast('Cập nhật thành công!', 'success');
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
+        }
+    };
+
+    window.nqtDeactivateBranch = function(id, name) {
+        nqtDeactivateTargetId = id;
+        document.getElementById('deactivateTargetName').textContent = name;
+        nqtMoModal('modalConfirmDeactivate');
+    }
+
+    window.nqtConfirmDeactivate = async function() {
+        if (!nqtDeactivateTargetId) return;
+        const res = await nqtApi.fetch(`/api/nqt-chi-nhanh/${nqtDeactivateTargetId}`, { method: 'PUT', body: { g6_la_hoat_dong: false } });
+        nqtDongModal('modalConfirmDeactivate');
+        if (res && res.nqt_thanh_cong) {
+            nqtLoadChiNhanh();
+            nqtToast('Đã tạm đóng chi nhánh', 'warn');
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
+        }
+        nqtDeactivateTargetId = null;
+    }
+
+    window.nqtOpenThietBi = async function(branchId, branchName) {
+        document.getElementById('thietBiTitle').textContent = `Thiết bị — ${branchName}`;
+        document.getElementById('thietBiChiNhanh').value = branchId;
+        document.getElementById('formAddThietBi').reset();
+        document.getElementById('thietBiChiNhanh').value = branchId;
+        nqtMoModal('modalThietBi');
+        nqtLoadThietBi(branchId);
+    }
+
+    async function nqtLoadThietBi(branchId) {
+        const el = document.getElementById('thietBiList');
+        el.innerHTML = '<div class="text-center py-8 text-[#666] dark:text-[#888]">Đang tải...</div>';
+        const data = await nqtApi.fetch(`/api/nqt-chi-nhanh/${branchId}/nqt-thiet-bi`);
+        if (!data || !data.nqt_thanh_cong) return;
+        const list = data.nqt_du_lieu;
+        if (list.length === 0) {
+            el.innerHTML = '<p class="text-center text-[#666] dark:text-[#888] py-8">Chưa có thiết bị nào.</p>';
+            return;
+        }
+        const nqtStatusColors = { hoat_dong: 'bg-[#dcfce7] text-[#16a34a]', bao_tri: 'bg-[#fef3c7] text-[#d97706]', hong: 'bg-[#fef2f2] text-[#dc2626]' };
+        el.innerHTML = list.map(t => `
+            <div class="flex items-center justify-between p-3 bg-[#fafafa] dark:bg-[#333] rounded-md border border-[#e5e5e5] dark:border-[#404040]">
+                <div>
+                    <p class="font-medium text-[#191919] dark:text-[#fafafa] text-sm">${t.g6_ten_thiet_bi}</p>
+                    ${t.g6_thuong_hieu ? `<p class="text-xs text-[#666] dark:text-[#888]">${t.g6_thuong_hieu}</p>` : ''}
+                </div>
+                <span class="px-2 py-0.5 text-xs font-medium rounded-md ${nqtStatusColors[t.g6_trang_thai] || 'bg-[#f5f5f5] text-[#525252]'}">${t.g6_trang_thai}</span>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('formAddThietBi').onsubmit = async (e) => {
+        e.preventDefault();
+        const nqtBtn = e.target.querySelector('[type="submit"]');
+        const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
+        const fd = new FormData(e.target);
+        const data = {
+            g6_ma_chi_nhanh: parseInt(fd.get('g6_ma_chi_nhanh')),
+            g6_ten_thiet_bi: fd.get('g6_ten_thiet_bi'),
+            g6_thuong_hieu: fd.get('g6_thuong_hieu') || null,
+        };
+        const res = await nqtApi.fetch('/api/nqt-thiet-bi', { method: 'POST', body: data });
+        nqtRestore();
+        if (res && res.nqt_thanh_cong) {
+            document.querySelector('#formAddThietBi [name="g6_ten_thiet_bi"]').value = '';
+            document.querySelector('#formAddThietBi [name="g6_thuong_hieu"]').value = '';
+            nqtLoadThietBi(data.g6_ma_chi_nhanh);
+            nqtToast('Thêm thiết bị thành công!', 'success');
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi', 'error');
+        }
+    };
+
+    nqtLoadChiNhanh();
+})();
+</script>
+</body>
+</html>

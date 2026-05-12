@@ -2,7 +2,7 @@
 from flask import Blueprint, request
 from flask_jwt_extended import get_jwt_identity
 from backend.app import db
-from backend.app.models.g6_nguoi_dung import G6NguoiDung, G6VaiTro, G6NguoiDungVaiTro
+from backend.app.models.g6_nguoi_dung import G6NguoiDung, G6VaiTro, G6NguoiDungVaiTro, G6QuyenHan, G6VaiTroQuyen
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
 from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
 
@@ -91,6 +91,129 @@ def nqt_cap_nhat_nguoi_dung(nqt_id):
 def nqt_lay_vai_tro():
     nqt_list = G6VaiTro.query.all()
     return nqt_ok([v.g6_to_dict() for v in nqt_list])
+
+
+@nqt_nguoi_dung_bp.route('/nqt-vai-tro/<int:nqt_id>', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_lay_vai_tro_chi_tiet(nqt_id):
+    nqt_row = G6VaiTro.query.get_or_404(nqt_id)
+    nqt_result = nqt_row.g6_to_dict()
+    nqt_result['g6_quyen'] = [
+        vtq.g6_quyen.g6_to_dict() for vtq in nqt_row.g6_quyen
+    ]
+    return nqt_ok(nqt_result)
+
+
+@nqt_nguoi_dung_bp.route('/nqt-vai-tro', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_quan_ly_nhan_vien')
+def nqt_tao_vai_tro():
+    nqt_data = request.get_json() or {}
+    nqt_ten = nqt_data.get('g6_ten_vai_tro', '').strip()
+    if not nqt_ten:
+        return nqt_loi('Tên vai trò không được để trống')
+    nqt_row = G6VaiTro(
+        g6_ten_vai_tro=nqt_ten,
+        g6_mo_ta=nqt_data.get('g6_mo_ta'),
+    )
+    db.session.add(nqt_row)
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Tạo vai trò thành công', 201)
+
+
+@nqt_nguoi_dung_bp.route('/nqt-vai-tro/<int:nqt_id>', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_quan_ly_nhan_vien')
+def nqt_cap_nhat_vai_tro(nqt_id):
+    nqt_row = G6VaiTro.query.get_or_404(nqt_id)
+    nqt_data = request.get_json() or {}
+    for nqt_f in ['g6_ten_vai_tro', 'g6_mo_ta']:
+        if nqt_f in nqt_data:
+            setattr(nqt_row, nqt_f, nqt_data[nqt_f])
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Cập nhật vai trò thành công')
+
+
+@nqt_nguoi_dung_bp.route('/nqt-vai-tro/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_quan_ly_nhan_vien')
+def nqt_xoa_vai_tro(nqt_id):
+    nqt_row = G6VaiTro.query.get_or_404(nqt_id)
+    db.session.delete(nqt_row)
+    db.session.commit()
+    return nqt_ok(None, 'Đã xoá vai trò')
+
+
+@nqt_nguoi_dung_bp.route('/nqt-vai-tro/<int:nqt_id>/nqt-quyen', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_quan_ly_nhan_vien')
+def nqt_gan_quyen_cho_vai_tro(nqt_id):
+    nqt_row = G6VaiTro.query.get_or_404(nqt_id)
+    nqt_data = request.get_json() or {}
+    nqt_quyen_ids = nqt_data.get('g6_quyen_ids', [])
+    G6VaiTroQuyen.query.filter_by(g6_ma_vai_tro=nqt_id).delete()
+    for nqt_q_id in nqt_quyen_ids:
+        if G6QuyenHan.query.get(nqt_q_id):
+            db.session.add(G6VaiTroQuyen(
+                g6_ma_vai_tro=nqt_id,
+                g6_ma_quyen=nqt_q_id,
+            ))
+    db.session.commit()
+    return nqt_ok(None, 'Đã cập nhật quyền cho vai trò')
+
+
+# ---- QUYỀN HẠN ----
+
+@nqt_nguoi_dung_bp.route('/nqt-quyen-han', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_lay_quyen_han():
+    nqt_nhom = request.args.get('g6_nhom_quyen')
+    nqt_q = G6QuyenHan.query
+    if nqt_nhom:
+        nqt_q = nqt_q.filter_by(g6_nhom_quyen=nqt_nhom)
+    nqt_list = nqt_q.order_by(G6QuyenHan.g6_nhom_quyen, G6QuyenHan.g6_ten_quyen).all()
+    return nqt_ok([q.g6_to_dict() for q in nqt_list])
+
+
+@nqt_nguoi_dung_bp.route('/nqt-quyen-han', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_quan_ly_nhan_vien')
+def nqt_tao_quyen_han():
+    nqt_data = request.get_json() or {}
+    nqt_ten = nqt_data.get('g6_ten_quyen', '').strip()
+    nqt_nhom = nqt_data.get('g6_nhom_quyen', '').strip()
+    if not nqt_ten or not nqt_nhom:
+        return nqt_loi('Thiếu tên quyền hoặc nhóm quyền')
+    nqt_row = G6QuyenHan(
+        g6_ten_quyen=nqt_ten,
+        g6_nhom_quyen=nqt_nhom,
+    )
+    db.session.add(nqt_row)
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Tạo quyền thành công', 201)
+
+
+@nqt_nguoi_dung_bp.route('/nqt-quyen-han/<int:nqt_id>', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_quan_ly_nhan_vien')
+def nqt_cap_nhat_quyen_han(nqt_id):
+    nqt_row = G6QuyenHan.query.get_or_404(nqt_id)
+    nqt_data = request.get_json() or {}
+    for nqt_f in ['g6_ten_quyen', 'g6_nhom_quyen']:
+        if nqt_f in nqt_data:
+            setattr(nqt_row, nqt_f, nqt_data[nqt_f])
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict())
+
+
+@nqt_nguoi_dung_bp.route('/nqt-quyen-han/<int:nqt_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_quan_ly_nhan_vien')
+def nqt_xoa_quyen_han(nqt_id):
+    nqt_row = G6QuyenHan.query.get_or_404(nqt_id)
+    db.session.delete(nqt_row)
+    db.session.commit()
+    return nqt_ok(None, 'Đã xoá quyền hạn')
 
 
 @nqt_nguoi_dung_bp.route('/nqt-nguoi-dung/<int:nqt_id>', methods=['DELETE'])

@@ -134,6 +134,10 @@ class G6SanPham(db.Model):
     g6_muc_tieu = db.relationship('G6MucTieuSucKhoe', secondary=g6_san_pham_muc_tieu)
 
     def g6_to_dict(self):
+        bt_mac_dinh = next((b for b in self.g6_bien_the if b.g6_la_mac_dinh), None)
+        if not bt_mac_dinh and self.g6_bien_the:
+            bt_mac_dinh = self.g6_bien_the[0]
+            
         return {
             'g6_ma_san_pham': self.g6_ma_san_pham,
             'g6_ma_danh_muc': self.g6_ma_danh_muc,
@@ -150,6 +154,11 @@ class G6SanPham(db.Model):
             'g6_la_hang_moi': self.g6_la_hang_moi,
             'g6_la_hoat_dong': self.g6_la_hoat_dong,
             'g6_ngay_tao': self.g6_ngay_tao.isoformat() if self.g6_ngay_tao else None,
+            'g6_gia_ban': float(bt_mac_dinh.g6_gia) if bt_mac_dinh else 0,
+            'g6_gia_goc': float(bt_mac_dinh.g6_gia_so_sanh) if bt_mac_dinh and bt_mac_dinh.g6_gia_so_sanh else None,
+            'g6_sku': bt_mac_dinh.g6_sku if bt_mac_dinh else None,
+            'g6_ten_danh_muc': self.g6_danh_muc.g6_ten_danh_muc if self.g6_danh_muc else None,
+            'g6_ten_thuong_hieu': self.g6_thuong_hieu.g6_ten_thuong_hieu if self.g6_thuong_hieu else None,
         }
 
 
@@ -198,8 +207,8 @@ class G6HinhAnhSanPham(db.Model):
     __tablename__ = 'G6HinhAnhSanPham'
 
     g6_ma_hinh_anh = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    g6_ma_san_pham = db.Column(db.Integer, db.ForeignKey('G6SanPham.g6_ma_san_pham', ondelete='CASCADE'), nullable=False)
-    g6_ma_bien_the = db.Column(db.Integer, db.ForeignKey('G6BienTheSanPham.g6_ma_bien_the', ondelete='SET NULL'))
+    g6_ma_san_pham = db.Column(db.Integer, db.ForeignKey('G6SanPham.g6_ma_san_pham', ondelete='NO ACTION'), nullable=False)
+    g6_ma_bien_the = db.Column(db.Integer, db.ForeignKey('G6BienTheSanPham.g6_ma_bien_the', ondelete='NO ACTION'), nullable=True)
     g6_duong_dan = db.Column(db.String(500), nullable=False)
     g6_alt_text = db.Column(db.String(255))
     g6_thu_tu = db.Column(db.Integer, nullable=False, default=0)

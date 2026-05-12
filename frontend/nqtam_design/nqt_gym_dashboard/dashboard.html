@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — NQT GYM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="dashboard.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav" id="nqtNav">
+  <a href="landing.html" class="nav-logo">NQT GYM</a>
+  <ul class="nav-links">
+    <li><a href="#" class="active">Dashboard</a></li>
+    <li><a href="#">Lịch tập</a></li>
+    <li><a href="#">Chỉ số</a></li>
+    <li><a href="#">Hồ sơ</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-btn" id="themeBtn" title="Toggle theme">
+      <span class="material-symbols-outlined" id="themeIcon">light_mode</span>
+    </button>
+    <div class="nav-avatar" id="navAvatar">NT</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO GREETING -->
+  <section class="hero-bar">
+    <div class="hero-left">
+      <p class="micro">Thứ Năm, 08 Tháng 5 2026</p>
+      <h1 class="hero-greeting">Chào buổi sáng, <span class="accent">Tâm</span></h1>
+      <div class="hero-meta">
+        <span class="phase-badge"><span class="material-symbols-outlined" style="font-size:14px">cycle</span> HYPERTROPHY — TUẦN 6/8</span>
+        <span class="streak-badge">🔥 12 NGÀY LIÊN TIẾP</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPI CARDS -->
+  <section class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="micro">Khối lượng tuần</span>
+        <span class="kpi-pill up">+12%</span>
+      </div>
+      <div class="kpi-value">48,250</div>
+      <div class="kpi-unit">KG</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="micro">Calories đốt</span>
+        <span class="kpi-pill up">+8%</span>
+      </div>
+      <div class="kpi-value">3,420</div>
+      <div class="kpi-unit">KCAL</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <span class="micro">Phục hồi</span>
+        <span class="kpi-pill down">-5%</span>
+      </div>
+      <div class="kpi-value">78</div>
+      <div class="kpi-unit">ĐIỂM</div>
+    </div>
+  </section>
+
+  <!-- CHARTS ROW -->
+  <section class="charts-row">
+    <!-- Weekly Volume Bar Chart -->
+    <div class="chart-card wide">
+      <div class="card-header">
+        <h2 class="card-title">Khối lượng tuần</h2>
+        <span class="micro">KG / BUỔI</span>
+      </div>
+      <div class="bar-chart" id="barChart">
+        <div class="bar-group"><div class="bar" style="--h:65%"><span class="bar-val">8,200</span></div><span class="bar-label">T2</span></div>
+        <div class="bar-group"><div class="bar" style="--h:80%"><span class="bar-val">10,400</span></div><span class="bar-label">T3</span></div>
+        <div class="bar-group"><div class="bar rest" style="--h:15%"><span class="bar-val">REST</span></div><span class="bar-label">T4</span></div>
+        <div class="bar-group"><div class="bar" style="--h:90%"><span class="bar-val">11,800</span></div><span class="bar-label">T5</span></div>
+        <div class="bar-group"><div class="bar" style="--h:72%"><span class="bar-val">9,350</span></div><span class="bar-label">T6</span></div>
+        <div class="bar-group"><div class="bar" style="--h:85%"><span class="bar-val">8,500</span></div><span class="bar-label">T7</span></div>
+        <div class="bar-group"><div class="bar rest" style="--h:15%"><span class="bar-val">REST</span></div><span class="bar-label">CN</span></div>
+      </div>
+    </div>
+
+    <!-- Donut Chart -->
+    <div class="chart-card narrow">
+      <div class="card-header">
+        <h2 class="card-title">Nhóm cơ</h2>
+        <span class="micro">TUẦN NÀY</span>
+      </div>
+      <div class="donut-wrap">
+        <svg viewBox="0 0 120 120" class="donut-svg">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="10"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="var(--accent)" stroke-width="10"
+            stroke-dasharray="110 204" stroke-dashoffset="-52" stroke-linecap="butt" class="donut-seg"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="var(--text-muted)" stroke-width="10"
+            stroke-dasharray="94 220" stroke-dashoffset="-162" stroke-linecap="butt" class="donut-seg"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="var(--text-secondary)" stroke-width="10"
+            stroke-dasharray="110 204" stroke-dashoffset="-256" stroke-linecap="butt" class="donut-seg"/>
+        </svg>
+        <div class="donut-center">
+          <span class="donut-num">6</span>
+          <span class="micro">BUỔI</span>
+        </div>
+      </div>
+      <div class="donut-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span><span class="micro">PUSH 35%</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--text-muted)"></span><span class="micro">PULL 30%</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--text-secondary)"></span><span class="micro">LEGS 35%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TODAY'S WORKOUT -->
+  <section class="workout-card">
+    <div class="card-header">
+      <h2 class="card-title">Bài tập hôm nay</h2>
+      <span class="phase-badge" style="font-size:10px">PUSH DAY — CHEST & SHOULDERS</span>
+    </div>
+    <div class="workout-list">
+      <div class="workout-item">
+        <span class="status-dot done"></span>
+        <div class="workout-info">
+          <span class="workout-name">Bench Press</span>
+          <span class="micro">4×8 · 80KG</span>
+        </div>
+        <span class="workout-check material-symbols-outlined">check_circle</span>
+      </div>
+      <div class="workout-item">
+        <span class="status-dot done"></span>
+        <div class="workout-info">
+          <span class="workout-name">Incline Dumbbell Press</span>
+          <span class="micro">4×10 · 32KG</span>
+        </div>
+        <span class="workout-check material-symbols-outlined">check_circle</span>
+      </div>
+      <div class="workout-item">
+        <span class="status-dot active"></span>
+        <div class="workout-info">
+          <span class="workout-name">OHP</span>
+          <span class="micro">4×8 · 50KG</span>
+        </div>
+        <span class="workout-status micro">ĐANG TẬP</span>
+      </div>
+      <div class="workout-item">
+        <span class="status-dot pending"></span>
+        <div class="workout-info">
+          <span class="workout-name">Lateral Raise</span>
+          <span class="micro">3×15 · 12KG</span>
+        </div>
+      </div>
+      <div class="workout-item">
+        <span class="status-dot pending"></span>
+        <div class="workout-info">
+          <span class="workout-name">Cable Fly</span>
+          <span class="micro">3×12 · 20KG</span>
+        </div>
+      </div>
+    </div>
+    <div class="workout-footer">
+      <button class="btn-primary">Bắt đầu bài tập tiếp theo</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  const html = document.documentElement;
+  const saved = localStorage.getItem('nqt-dashboard-theme');
+  if(saved) html.setAttribute('data-theme', saved);
+  const btn = document.getElementById('themeBtn');
+  const icon = document.getElementById('themeIcon');
+  function upIcon(){ icon.textContent = html.getAttribute('data-theme')==='dark'?'light_mode':'dark_mode'; }
+  upIcon();
+  btn.addEventListener('click',function(){
+    const n = html.getAttribute('data-theme')==='dark'?'light':'dark';
+    html.setAttribute('data-theme',n);
+    localStorage.setItem('nqt-dashboard-theme',n);
+    upIcon();
+  });
+
+  // Set today date
+  const dateEl = document.querySelector('.hero-bar .micro');
+  if(dateEl){
+    const d = new Date();
+    dateEl.textContent = d.toLocaleDateString('vi-VN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  }
+
+  // Greeting
+  const h = new Date().getHours();
+  const greetEl = document.querySelector('.hero-greeting');
+  if(greetEl){
+    let g = 'Chào buổi sáng';
+    if(h>=12) g='Chào buổi chiều';
+    if(h>=18) g='Chào buổi tối';
+    greetEl.innerHTML = g+', <span class="accent">Tâm</span>';
+  }
+})();
+</script>
+</body>
+</html>

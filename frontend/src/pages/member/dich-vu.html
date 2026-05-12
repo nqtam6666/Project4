@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dịch Vụ Phụ — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "success":"#22C55E","error":"#EF4444","warning":"#F59E0B",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+
+<main class="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+  <div class="p-6 md:p-10 max-w-5xl">
+    <div class="mb-8">
+      <h1 class="text-2xl font-black text-white mb-1">Dịch Vụ Phụ</h1>
+      <p class="text-text-muted text-sm">Sauna, hồ bơi, massage và các dịch vụ cao cấp tại phòng gym.</p>
+    </div>
+
+    <div id="nqtDvGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+      <div class="sm:col-span-2 lg:col-span-3 flex justify-center py-16"><div class="w-6 h-6 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+    </div>
+
+    <section>
+      <h2 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-neon-lime text-lg">history</span> Lịch sử đặt dịch vụ
+      </h2>
+      <div id="nqtDvHistory" class="space-y-3">
+        <div class="flex justify-center py-8"><div class="w-6 h-6 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Book modal -->
+<div id="nqtDvModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="bg-bg-card border border-border-subtle rounded-2xl max-w-md w-full p-8">
+    <h3 class="text-xl font-black text-white mb-1">Đặt dịch vụ</h3>
+    <p id="nqtDvModalName" class="text-neon-lime font-caps text-sm uppercase tracking-wide mb-6"></p>
+    <div class="space-y-4 mb-6">
+      <div>
+        <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Ngày sử dụng</label>
+        <input id="nqtDvDate" type="datetime-local" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none"/>
+      </div>
+    </div>
+    <div class="flex gap-3">
+      <button id="nqtDvConfirmBtn" class="flex-1 bg-neon-lime text-bg-main py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Xác nhận</button>
+      <button onclick="document.getElementById('nqtDvModal').classList.add('hidden')" class="flex-1 border border-border-subtle text-text-secondary py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:text-text-primary transition-colors">Huỷ</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { nqtRequireAuth, nqtApi, nqtToast } from '/src/js/member/auth.js';
+import { nqtRenderSidebar, nqtFormatDate, nqtFormatPrice } from '/src/js/nqtLayout.js';
+if (!nqtRequireAuth()) throw new Error('unauth');
+nqtRenderSidebar('dich-vu');
+
+const DV_ICON = { sauna:'whatshot', ho_boi:'pool', massage:'self_improvement', yoga:'sports_gymnastics', default:'spa' };
+let nqtSelDv = null;
+
+window.nqtOpenDv = function(dv) {
+  nqtSelDv = dv;
+  document.getElementById('nqtDvModalName').textContent = dv.g6_ten_dich_vu;
+  document.getElementById('nqtDvModal').classList.remove('hidden');
+  document.getElementById('nqtDvConfirmBtn').onclick = nqtConfirmDv;
+};
+
+async function nqtConfirmDv() {
+  if (!nqtSelDv) return;
+  const dt = document.getElementById('nqtDvDate').value;
+  if (!dt) { nqtToast('Vui lòng chọn thời gian.', 'error'); return; }
+  try {
+    const r = await nqtApi('/api/nxv-dat-dich-vu', {
+      method: 'POST',
+      body: JSON.stringify({ g6_ma_dich_vu: nqtSelDv.g6_ma_dich_vu, g6_thoi_gian_bat_dau: dt })
+    });
+    if (r.ok) {
+      nqtToast('Đặt dịch vụ thành công!', 'success');
+      document.getElementById('nqtDvModal').classList.add('hidden');
+      nqtLoadHistory();
+    } else {
+      const j = await r.json();
+      nqtToast(j.nqt_thong_diep || 'Thất bại.', 'error');
+    }
+  } catch { nqtToast('Lỗi kết nối.', 'error'); }
+}
+
+async function nqtLoadHistory() {
+  const el = document.getElementById('nqtDvHistory');
+  try {
+    const r = await nqtApi('/api/nxv-dat-dich-vu');
+    const j = await r.json();
+    const list = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
+    if (!list.length) { el.innerHTML = '<div class="text-center py-8 text-text-muted">Chưa sử dụng dịch vụ nào.</div>'; return; }
+    const ST = { da_xac_nhan:{l:'Đã xác nhận',c:'text-success border-success/30 bg-success/10'}, cho_xac_nhan:{l:'Chờ xác nhận',c:'text-warning border-warning/30 bg-warning/10'}, da_huy:{l:'Đã huỷ',c:'text-text-muted border-border-subtle bg-bg-elevated'} };
+    el.innerHTML = list.map(d => {
+      const s = ST[d.g6_trang_thai] || ST.cho_xac_nhan;
+      return `<div class="bg-bg-card border border-border-subtle rounded-xl p-4 flex items-center justify-between gap-3">
+        <div>
+          <div class="font-semibold text-white text-sm">${d.g6_ten_dich_vu || 'Dịch vụ'}</div>
+          <div class="text-text-muted text-xs mt-0.5">${nqtFormatDate(d.g6_thoi_gian_bat_dau)}</div>
+        </div>
+        <div class="flex items-center gap-3">
+          ${d.g6_la_mien_phi ? '<span class="text-success text-xs font-caps">Miễn phí</span>' : `<span class="text-neon-lime font-mono text-sm">${nqtFormatPrice(d.g6_gia_theo_luot)}</span>`}
+          <span class="border text-xs font-caps uppercase tracking-wide px-3 py-1 rounded-full ${s.c}">${s.l}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch { el.innerHTML = '<div class="text-center py-6 text-text-muted">Không thể tải lịch sử.</div>'; }
+}
+
+(async () => {
+  // Set default datetime
+  const now = new Date(); now.setMinutes(0);
+  document.getElementById('nqtDvDate').value = now.toISOString().slice(0,16);
+
+  try {
+    const r = await nqtApi('/api/nxv-dich-vu-phu');
+    const j = await r.json();
+    const dvs = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
+    const grid = document.getElementById('nqtDvGrid');
+    if (!dvs.length) { grid.innerHTML = '<div class="sm:col-span-2 lg:col-span-3 text-center py-12 text-text-muted">Chưa có dịch vụ nào.</div>'; }
+    else {
+      grid.innerHTML = dvs.map(dv => {
+        const icon = DV_ICON[(dv.g6_loai_dich_vu||'').toLowerCase()] || DV_ICON.default;
+        return `
+        <div class="bg-bg-card border border-${dv.g6_la_hoat_dong ? 'border-subtle' : 'border-subtle opacity-60'} rounded-2xl p-6 flex flex-col">
+          <div class="w-12 h-12 rounded-xl bg-neon-glow border border-border-neon flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-neon-lime text-2xl">${icon}</span>
+          </div>
+          <h3 class="font-black text-white text-base mb-1">${dv.g6_ten_dich_vu}</h3>
+          <div class="text-text-muted text-xs font-caps uppercase tracking-wide mb-4">${dv.g6_loai_dich_vu || 'Dịch vụ'}</div>
+          <div class="flex items-center justify-between mt-auto">
+            <div>${dv.g6_la_mien_phi_goi ? '<span class="text-success text-sm font-semibold">Miễn phí</span>' : `<span class="text-neon-lime font-mono font-bold">${nqtFormatPrice(dv.g6_gia_theo_luot)}</span><span class="text-text-muted text-xs">/lượt</span>`}</div>
+            ${dv.g6_la_hoat_dong
+              ? `<button onclick='nqtOpenDv(${JSON.stringify(dv).replace(/'/g,"\\'")})'
+                  class="border border-border-neon text-neon-lime px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:bg-neon-glow transition-colors">Đặt ngay</button>`
+              : `<span class="text-text-muted text-xs font-caps uppercase">Tạm ngưng</span>`}
+          </div>
+        </div>`;
+      }).join('');
+    }
+  } catch {
+    document.getElementById('nqtDvGrid').innerHTML = '<div class="sm:col-span-2 lg:col-span-3 text-center py-12 text-text-muted">Không thể tải dữ liệu.</div>';
+  }
+  await nqtLoadHistory();
+})();
+</script>
+</body>
+</html>

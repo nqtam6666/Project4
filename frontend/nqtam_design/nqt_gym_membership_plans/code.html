@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NQT GYM - Membership</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "warning": "#F59E0B",
+                        "on-tertiary-fixed": "#001e2d",
+                        "on-secondary": "#303036",
+                        "surface-container-low": "#1a1d11",
+                        "surface-dim": "#121409",
+                        "primary": "#ffffef",
+                        "neon-dim": "#A8D120",
+                        "success": "#22C55E",
+                        "on-primary-fixed": "#171e00",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#0c3447",
+                        "inverse-on-surface": "#2f3225",
+                        "surface-container-lowest": "#0d0f05",
+                        "on-primary-fixed-variant": "#3d4d00",
+                        "on-primary-container": "#566c00",
+                        "border-neon": "rgba(200, 241, 53, 0.3)",
+                        "surface-bright": "#383a2d",
+                        "on-secondary-fixed": "#1b1b20",
+                        "bg-main": "#0A0A0F",
+                        "on-tertiary-container": "#45687d",
+                        "tertiary": "#fefdff",
+                        "bg-elevated": "#1C1C28",
+                        "info": "#3B82F6",
+                        "on-background": "#e2e4d1",
+                        "primary-fixed-dim": "#aed50d",
+                        "primary-container": "#c8f135",
+                        "surface": "#121409",
+                        "error-container": "#93000a",
+                        "secondary-container": "#49484e",
+                        "text-primary": "#F5F5F0",
+                        "border-subtle": "rgba(255, 255, 255, 0.06)",
+                        "neon-glow": "rgba(200, 241, 53, 0.15)",
+                        "error": "#EF4444",
+                        "on-surface": "#e2e4d1",
+                        "surface-container-highest": "#333629",
+                        "secondary-fixed-dim": "#c8c5cd",
+                        "text-secondary": "#A1A1AA",
+                        "on-surface-variant": "#c5c9ae",
+                        "surface-tint": "#aed50d",
+                        "bg-card": "#12121A",
+                        "primary-fixed": "#c9f236",
+                        "text-muted": "#52525B",
+                        "inverse-surface": "#e2e4d1",
+                        "tertiary-fixed": "#c5e7ff",
+                        "on-secondary-container": "#bab7be",
+                        "outline": "#8f937b",
+                        "on-primary": "#293500",
+                        "tertiary-fixed-dim": "#a8cbe4",
+                        "surface-variant": "#333629",
+                        "outline-variant": "#444934",
+                        "secondary": "#c8c5cd",
+                        "surface-container": "#1e2115",
+                        "secondary-fixed": "#e4e1e9",
+                        "background": "#121409",
+                        "inverse-primary": "#526600",
+                        "surface-container-high": "#292b1f",
+                        "on-secondary-fixed-variant": "#47464c",
+                        "neon-lime": "#C8F135",
+                        "tertiary-container": "#c2e6ff",
+                        "on-tertiary-fixed-variant": "#274b5f",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xxl": "48px",
+                        "sm": "8px",
+                        "section": "96px",
+                        "xs": "4px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "body-base": ["Inter"],
+                        "numeric-data": ["JetBrains Mono"],
+                        "hero-title": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-caps": ["Space Grotesk"],
+                        "display-xl": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-base": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "numeric-data": ["16px", {"lineHeight": "1.0", "fontWeight": "500"}],
+                        "hero-title": ["88px", {"lineHeight": "0.95", "letterSpacing": "-3px", "fontWeight": "900"}],
+                        "display-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.5px", "fontWeight": "600"}],
+                        "display-xl": ["48px", {"lineHeight": "1.1", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bg-main text-text-primary antialiased selection:bg-neon-lime selection:text-black">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-zinc-950/80 backdrop-blur-lg border-b border-white/5 shadow-[0_8px_48px_rgba(0,0,0,0.6)]">
+<div class="flex justify-between items-center h-20 px-8 max-w-full">
+<div class="text-2xl font-black text-white italic">NQT GYM</div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="font-inter tracking-tight uppercase font-bold text-xs text-zinc-400 hover:text-lime-400 hover:glow-lime-400/50 transition-all duration-300 scale-105 active:scale-95" href="#">Home</a>
+<a class="font-inter tracking-tight uppercase font-bold text-xs text-zinc-400 hover:text-lime-400 hover:glow-lime-400/50 transition-all duration-300 scale-105 active:scale-95" href="#">Services</a>
+<a class="font-inter tracking-tight uppercase font-bold text-xs text-lime-400 border-b-2 border-lime-400 pb-1 scale-105 active:scale-95 duration-200" href="#">Membership</a>
+<a class="font-inter tracking-tight uppercase font-bold text-xs text-zinc-400 hover:text-lime-400 hover:glow-lime-400/50 transition-all duration-300 scale-105 active:scale-95" href="#">Trainers</a>
+<a class="font-inter tracking-tight uppercase font-bold text-xs text-zinc-400 hover:text-lime-400 hover:glow-lime-400/50 transition-all duration-300 scale-105 active:scale-95" href="#">Booking</a>
+</div>
+<button class="bg-neon-lime text-black font-label-caps text-label-caps px-lg py-md rounded hover:scale-105 hover:shadow-[0_0_15px_rgba(200,241,53,0.5)] transition-all uppercase tracking-wider">Join Now</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-section pb-section min-h-screen relative overflow-hidden flex flex-col justify-center">
+<!-- Abstract Atmospheric Background Elements -->
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
+<div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-neon-lime/5 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-zinc-800/20 rounded-full blur-[100px]"></div>
+<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiIvPjwvc3ZnPg==')] opacity-20"></div>
+</div>
+<div class="max-w-7xl mx-auto px-lg md:px-xl w-full z-10">
+<!-- Header & Toggle -->
+<div class="text-center mb-xxl">
+<h1 class="font-display-xl text-display-xl text-white mb-md">Unlock Your <span class="text-neon-lime italic">Performance</span></h1>
+<p class="font-body-base text-body-base text-text-secondary max-w-2xl mx-auto mb-lg">Choose the tier that aligns with your goals. Experience premium facilities, elite coaching, and a community of driven individuals.</p>
+<div class="inline-flex items-center bg-bg-card border border-border-subtle rounded-full p-1 backdrop-blur-md">
+<button class="px-lg py-sm rounded-full bg-neon-lime text-black font-label-caps text-label-caps uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(200,241,53,0.3)]">Monthly</button>
+<button class="px-lg py-sm rounded-full text-text-secondary font-label-caps text-label-caps uppercase tracking-wider hover:text-white transition-all">Yearly <span class="text-neon-lime ml-1">-20%</span></button>
+</div>
+</div>
+<!-- Bento Grid Plans -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg lg:gap-xl items-center">
+<!-- Basic Tier -->
+<div class="bg-bg-card/60 backdrop-blur-xl border border-border-subtle rounded-xl p-xl flex flex-col hover:border-white/20 transition-all duration-300">
+<div class="mb-lg">
+<span class="inline-block px-md py-xs rounded bg-white/5 text-text-secondary font-label-caps text-label-caps uppercase tracking-widest mb-md">Base</span>
+<div class="flex items-baseline mb-sm">
+<span class="font-display-lg text-display-lg text-white">$49</span>
+<span class="font-body-sm text-body-sm text-text-muted ml-2">/mo</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Essential access for independent training.</p>
+</div>
+<ul class="space-y-md mb-xl flex-grow">
+<li class="flex items-start">
+<span class="material-symbols-outlined text-text-secondary text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-text-primary">24/7 Gym Access</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-text-secondary text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-text-primary">Standard Equipment</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-text-secondary text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-text-primary">Locker Room Access</span>
+</li>
+</ul>
+<button class="w-full py-md border border-border-subtle text-white font-label-caps text-label-caps uppercase tracking-wider rounded hover:border-neon-lime hover:text-neon-lime transition-all duration-300">Select Base</button>
+</div>
+<!-- Pro Tier (Featured) -->
+<div class="bg-bg-card/80 backdrop-blur-xl border border-neon-lime rounded-xl p-xl flex flex-col scale-105 shadow-[0_8px_48px_rgba(200,241,53,0.15)] relative z-10 transform -translate-y-2">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-neon-lime text-black font-label-caps text-label-caps px-md py-xs rounded-full uppercase tracking-widest shadow-[0_0_15px_rgba(200,241,53,0.5)]">Most Popular</div>
+<div class="mb-lg mt-sm">
+<span class="inline-block px-md py-xs rounded bg-neon-glow text-neon-lime font-label-caps text-label-caps uppercase tracking-widest mb-md">Elite</span>
+<div class="flex items-baseline mb-sm">
+<span class="font-display-lg text-display-lg text-white">$99</span>
+<span class="font-body-sm text-body-sm text-text-muted ml-2">/mo</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">Comprehensive performance package.</p>
+</div>
+<ul class="space-y-md mb-xl flex-grow">
+<li class="flex items-start">
+<span class="material-symbols-outlined text-neon-lime text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-white">All Base Features</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-neon-lime text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-white">Unlimited Group Classes</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-neon-lime text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-white">Recovery Zone Access (Sauna/Ice)</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-neon-lime text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-white">1 PT Session / Month</span>
+</li>
+</ul>
+<button class="w-full py-md bg-neon-lime text-black font-label-caps text-label-caps uppercase tracking-wider rounded hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(200,241,53,0.4)] transition-all duration-300">Join Elite</button>
+</div>
+<!-- VIP Tier -->
+<div class="bg-bg-card/60 backdrop-blur-xl border border-border-subtle rounded-xl p-xl flex flex-col hover:border-white/20 transition-all duration-300">
+<div class="mb-lg">
+<span class="inline-block px-md py-xs rounded bg-white/5 text-text-secondary font-label-caps text-label-caps uppercase tracking-widest mb-md">Apex</span>
+<div class="flex items-baseline mb-sm">
+<span class="font-display-lg text-display-lg text-white">$199</span>
+<span class="font-body-sm text-body-sm text-text-muted ml-2">/mo</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary">The ultimate bespoke training experience.</p>
+</div>
+<ul class="space-y-md mb-xl flex-grow">
+<li class="flex items-start">
+<span class="material-symbols-outlined text-text-secondary text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-text-primary">All Elite Features</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-text-secondary text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-text-primary">Weekly 1-on-1 PT Sessions</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-text-secondary text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-text-primary">Custom Nutrition Plan</span>
+</li>
+<li class="flex items-start">
+<span class="material-symbols-outlined text-text-secondary text-[20px] mr-md mt-1">check</span>
+<span class="font-body-sm text-body-sm text-text-primary">Dedicated Locker &amp; Laundry Service</span>
+</li>
+</ul>
+<button class="w-full py-md border border-border-subtle text-white font-label-caps text-label-caps uppercase tracking-wider rounded hover:border-white hover:bg-white/5 transition-all duration-300">Select Apex</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-zinc-950 w-full py-12 px-8 border-t border-zinc-900">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto border-t border-white/10 pt-10">
+<div class="text-xl font-black text-zinc-100 italic mb-6 md:mb-0">NQT GYM</div>
+<div class="flex space-x-6 mb-6 md:mb-0">
+<a class="font-inter text-[10px] tracking-[0.2em] uppercase text-zinc-600 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="font-inter text-[10px] tracking-[0.2em] uppercase text-zinc-600 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">Terms</a>
+<a class="font-inter text-[10px] tracking-[0.2em] uppercase text-zinc-600 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">FAQ</a>
+<a class="font-inter text-[10px] tracking-[0.2em] uppercase text-zinc-600 hover:text-white transition-colors opacity-80 hover:opacity-100" href="#">Careers</a>
+</div>
+<div class="font-inter text-[10px] tracking-[0.2em] uppercase text-lime-400">
+                © 2024 NQT GYM PERFORMANCE. ALL RIGHTS RESERVED.
+            </div>
+</div>
+</footer>
+</body></html>

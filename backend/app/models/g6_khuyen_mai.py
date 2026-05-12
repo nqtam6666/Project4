@@ -23,10 +23,18 @@ class G6MaGiamGia(db.Model):
     def g6_to_dict(self):
         return {
             'g6_ma_ma_giam_gia': self.g6_ma_ma_giam_gia,
+            'g6_ma_id': self.g6_ma_ma_giam_gia,
             'g6_ma': self.g6_ma,
+            'g6_ma_code': self.g6_ma,
             'g6_loai': self.g6_loai,
+            'g6_loai_giam': self.g6_loai,
             'g6_gia_tri': float(self.g6_gia_tri),
+            'g6_gia_tri_giam': float(self.g6_gia_tri),
             'g6_don_hang_toi_thieu': float(self.g6_don_hang_toi_thieu),
+            'g6_so_luong_tong': self.g6_so_luong_tong,
+            'g6_so_lan_su_dung_toi_da': self.g6_so_luong_tong,
+            'g6_so_luong_da_dung': self.g6_so_luong_da_dung,
+            'g6_so_lan_da_dung': self.g6_so_luong_da_dung,
             'g6_ngay_bat_dau': self.g6_ngay_bat_dau.isoformat() if self.g6_ngay_bat_dau else None,
             'g6_ngay_ket_thuc': self.g6_ngay_ket_thuc.isoformat() if self.g6_ngay_ket_thuc else None,
             'g6_la_hoat_dong': self.g6_la_hoat_dong,
@@ -50,9 +58,12 @@ class G6KhuyenMaiMuaKem(db.Model):
     def g6_to_dict(self):
         return {
             'g6_ma_khuyen_mai': self.g6_ma_khuyen_mai,
+            'g6_ma_id': self.g6_ma_khuyen_mai,
             'g6_ten': self.g6_ten,
             'g6_ma_san_pham_chinh': self.g6_ma_san_pham_chinh,
             'g6_phan_tram_giam': float(self.g6_phan_tram_giam),
+            'g6_dieu_kien': f'Mua {self.g6_so_luong_mua} sản phẩm #{self.g6_ma_san_pham_chinh}',
+            'g6_qua_tang': f'Tặng {self.g6_so_luong_tang} sản phẩm, giảm {self.g6_phan_tram_giam}%',
             'g6_la_hoat_dong': self.g6_la_hoat_dong,
         }
 
@@ -73,6 +84,7 @@ class G6Banner(db.Model):
     def g6_to_dict(self):
         return {
             'g6_ma_banner': self.g6_ma_banner,
+            'g6_ma_id': self.g6_ma_banner,
             'g6_tieu_de': self.g6_tieu_de,
             'g6_hinh_anh': self.g6_hinh_anh,
             'g6_duong_dan': self.g6_duong_dan,

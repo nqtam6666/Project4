@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chỉ Số Cơ Thể — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "success":"#22C55E","error":"#EF4444","warning":"#F59E0B",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+
+<main class="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+  <div class="p-6 md:p-10 max-w-5xl">
+    <div class="flex items-start justify-between mb-8 flex-wrap gap-4">
+      <div>
+        <h1 class="text-2xl font-black text-white mb-1">Chỉ Số Cơ Thể</h1>
+        <p class="text-text-muted text-sm">Theo dõi tiến trình thay đổi cơ thể theo thời gian.</p>
+      </div>
+      <button onclick="document.getElementById('nqtAddModal').classList.remove('hidden')" class="bg-neon-lime text-bg-main px-5 py-2.5 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-base">add</span> Cập nhật chỉ số
+      </button>
+    </div>
+
+    <!-- Latest stats grid -->
+    <div id="nqtLatestStats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="flex justify-center py-6 col-span-2 md:col-span-4"><div class="w-6 h-6 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+    </div>
+
+    <!-- Chart tabs -->
+    <div class="bg-bg-card border border-border-subtle rounded-2xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <h2 class="font-bold text-white">Biểu đồ tiến trình</h2>
+        <div class="flex gap-2">
+          <button onclick="nqtSetMetric('g6_can_nang','Cân nặng (kg)',this)" data-active class="nqt-metric-btn bg-neon-lime text-bg-main px-4 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold">Cân nặng</button>
+          <button onclick="nqtSetMetric('g6_chi_so_bmi','BMI',this)" class="nqt-metric-btn border border-border-subtle text-text-secondary px-4 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">BMI</button>
+          <button onclick="nqtSetMetric('g6_ti_le_mo','Tỉ lệ mỡ (%)',this)" class="nqt-metric-btn border border-border-subtle text-text-secondary px-4 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Tỉ lệ mỡ</button>
+          <button onclick="nqtSetMetric('g6_vong_eo','Vòng eo (cm)',this)" class="nqt-metric-btn border border-border-subtle text-text-secondary px-4 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Vòng eo</button>
+        </div>
+      </div>
+      <canvas id="nqtChart" height="80"></canvas>
+    </div>
+
+    <!-- History table -->
+    <section>
+      <h2 class="text-lg font-bold text-white mb-4">Lịch sử đo</h2>
+      <div class="overflow-x-auto rounded-xl border border-border-subtle">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-border-subtle text-text-muted font-caps text-xs uppercase tracking-wide">
+              <th class="text-left py-3 px-5">Ngày</th>
+              <th class="text-right py-3 px-4">Cân nặng</th>
+              <th class="text-right py-3 px-4">Chiều cao</th>
+              <th class="text-right py-3 px-4">BMI</th>
+              <th class="text-right py-3 px-4">Tỉ lệ mỡ</th>
+              <th class="text-right py-3 px-5">Vòng eo</th>
+            </tr>
+          </thead>
+          <tbody id="nqtChiSoTable">
+            <tr><td colspan="6" class="py-8 text-center text-text-muted">Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Add modal -->
+<div id="nqtAddModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="bg-bg-card border border-border-subtle rounded-2xl max-w-lg w-full p-8">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-black text-white">Cập nhật chỉ số</h3>
+      <button onclick="document.getElementById('nqtAddModal').classList.add('hidden')" class="text-text-muted hover:text-text-primary transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="nqtChiSoForm" onsubmit="nqtSubmitChiSo(event)" class="grid grid-cols-2 gap-4">
+      <div class="col-span-2 md:col-span-1">
+        <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Cân nặng (kg)</label>
+        <input name="g6_can_nang" type="number" step="0.1" required class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30"/>
+      </div>
+      <div class="col-span-2 md:col-span-1">
+        <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Chiều cao (cm)</label>
+        <input name="g6_chieu_cao" type="number" step="0.1" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30"/>
+      </div>
+      <div>
+        <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Tỉ lệ mỡ (%)</label>
+        <input name="g6_ti_le_mo" type="number" step="0.1" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30"/>
+      </div>
+      <div>
+        <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Vòng eo (cm)</label>
+        <input name="g6_vong_eo" type="number" step="0.1" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30"/>
+      </div>
+      <div>
+        <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Tỉ lệ cơ (%)</label>
+        <input name="g6_ti_le_co" type="number" step="0.1" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30"/>
+      </div>
+      <div>
+        <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Ngày đo</label>
+        <input name="g6_ngay_do" type="date" required class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30"/>
+      </div>
+      <div class="col-span-2 pt-2">
+        <button type="submit" class="w-full bg-neon-lime text-bg-main py-3 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Lưu chỉ số</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { nqtRequireAuth, nqtApi, nqtToast } from '/src/js/member/auth.js';
+import { nqtRenderSidebar, nqtFormatDate } from '/src/js/nqtLayout.js';
+if (!nqtRequireAuth()) throw new Error('unauth');
+nqtRenderSidebar('chi-so');
+
+// Set today as default
+document.querySelector('[name=g6_ngay_do]').value = new Date().toISOString().split('T')[0];
+
+let nqtChiSoData = [];
+let nqtChart = null;
+let nqtActiveMetric = 'g6_can_nang';
+let nqtActiveLabel = 'Cân nặng (kg)';
+
+function nqtBuildChart(metric, label) {
+  const sorted = [...nqtChiSoData].sort((a,b) => new Date(a.g6_ngay_do)-new Date(b.g6_ngay_do));
+  const labels = sorted.map(d => nqtFormatDate(d.g6_ngay_do));
+  const values = sorted.map(d => d[metric] || null);
+  const ctx = document.getElementById('nqtChart');
+  if (nqtChart) nqtChart.destroy();
+  nqtChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label,
+        data: values,
+        borderColor: '#C8F135',
+        backgroundColor: 'rgba(200,241,53,0.1)',
+        borderWidth: 2,
+        pointBackgroundColor: '#C8F135',
+        pointRadius: 4,
+        tension: 0.4,
+        fill: true,
+        spanGaps: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.parsed.y} ${label.includes('(') ? label.match(/\((.+)\)/)?.[1]||'' : ''}` } } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#52525B', font: { family: "'JetBrains Mono'" } } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#52525B', font: { family: "'JetBrains Mono'" } } },
+      }
+    }
+  });
+}
+
+window.nqtSetMetric = function(metric, label, btn) {
+  nqtActiveMetric = metric; nqtActiveLabel = label;
+  document.querySelectorAll('.nqt-metric-btn').forEach(b => {
+    b.className = 'nqt-metric-btn border border-border-subtle text-text-secondary px-4 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all';
+  });
+  btn.className = 'nqt-metric-btn bg-neon-lime text-bg-main px-4 py-1.5 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold';
+  nqtBuildChart(metric, label);
+};
+
+window.nqtSubmitChiSo = async function(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const body = {};
+  fd.forEach((v, k) => { if (v) body[k] = Number(v) || v; });
+  // Auto-calc BMI
+  if (body.g6_can_nang && body.g6_chieu_cao) {
+    const h = body.g6_chieu_cao / 100;
+    body.g6_chi_so_bmi = Math.round((body.g6_can_nang / (h * h)) * 10) / 10;
+  }
+  try {
+    const user = JSON.parse(localStorage.getItem('nqt_user') || '{}');
+    const r = await nqtApi(`/api/nqt-hoi-vien/${user.g6_ma_hoi_vien}/nqt-chi-so`, {
+      method: 'POST', body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      nqtToast('Đã lưu chỉ số thành công!', 'success');
+      document.getElementById('nqtAddModal').classList.add('hidden');
+      location.reload();
+    } else { nqtToast('Lưu thất bại.', 'error'); }
+  } catch { nqtToast('Lỗi kết nối.', 'error'); }
+};
+
+(async () => {
+  try {
+    const r = await nqtApi('/api/nqt-hoi-vien/toi/nqt-chi-so');
+    const j = await r.json();
+    nqtChiSoData = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
+    nqtChiSoData.sort((a,b) => new Date(b.g6_ngay_do) - new Date(a.g6_ngay_do));
+
+    const latest = nqtChiSoData[0] || {};
+    const prev = nqtChiSoData[1] || {};
+    function nqtTrend(curr, pre) {
+      if (!curr || !pre) return '';
+      const diff = curr - pre;
+      if (diff < 0) return `<span class="text-success text-xs ml-1">▼ ${Math.abs(diff).toFixed(1)}</span>`;
+      if (diff > 0) return `<span class="text-error text-xs ml-1">▲ ${diff.toFixed(1)}</span>`;
+      return '';
+    }
+    document.getElementById('nqtLatestStats').innerHTML = [
+      { key: 'g6_can_nang', label: 'Cân nặng', unit: 'kg' },
+      { key: 'g6_chi_so_bmi', label: 'BMI', unit: '' },
+      { key: 'g6_ti_le_mo', label: 'Tỉ lệ mỡ', unit: '%' },
+      { key: 'g6_vong_eo', label: 'Vòng eo', unit: 'cm' },
+    ].map(m => `
+      <div class="bg-bg-card border border-border-subtle rounded-xl p-5 text-center">
+        <div class="text-neon-lime font-mono text-xl font-bold">${latest[m.key] !== undefined ? latest[m.key] : '—'}${m.unit ? '<span class="text-text-muted text-sm ml-0.5">'+m.unit+'</span>' : ''}${nqtTrend(latest[m.key], prev[m.key])}</div>
+        <div class="text-text-muted text-xs font-caps uppercase tracking-wide mt-1">${m.label}</div>
+        <div class="text-text-muted text-[10px] mt-1">${latest.g6_ngay_do ? nqtFormatDate(latest.g6_ngay_do) : 'Chưa có dữ liệu'}</div>
+      </div>`).join('');
+
+    nqtBuildChart('g6_can_nang', 'Cân nặng (kg)');
+
+    const tbody = document.getElementById('nqtChiSoTable');
+    if (!nqtChiSoData.length) { tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-text-muted">Chưa có dữ liệu.</td></tr>'; return; }
+    tbody.innerHTML = nqtChiSoData.map(d => `
+      <tr class="border-b border-border-subtle hover:bg-bg-card transition-colors">
+        <td class="py-3 px-5 text-text-primary text-sm">${nqtFormatDate(d.g6_ngay_do)}</td>
+        <td class="py-3 px-4 text-right font-mono text-sm ${d.g6_can_nang ? 'text-text-primary' : 'text-text-muted'}">${d.g6_can_nang || '—'}</td>
+        <td class="py-3 px-4 text-right font-mono text-sm text-text-secondary">${d.g6_chieu_cao || '—'}</td>
+        <td class="py-3 px-4 text-right font-mono text-sm text-text-secondary">${d.g6_chi_so_bmi || '—'}</td>
+        <td class="py-3 px-4 text-right font-mono text-sm text-text-secondary">${d.g6_ti_le_mo || '—'}</td>
+        <td class="py-3 px-5 text-right font-mono text-sm text-text-secondary">${d.g6_vong_eo || '—'}</td>
+      </tr>`).join('');
+  } catch {
+    document.getElementById('nqtLatestStats').innerHTML = '<div class="col-span-2 md:col-span-4 text-center py-6 text-text-muted">Không thể tải dữ liệu.</div>';
+  }
+})();
+</script>
+</body>
+</html>

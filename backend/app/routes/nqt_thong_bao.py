@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, request
+from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.g6_thong_bao import G6ThongBao, G6LichGuiThongBao
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
@@ -62,7 +62,43 @@ def nqt_lay_lich_gui():
     return nqt_ok([l.g6_to_dict() for l in nqt_list])
 
 
-@nqt_thong_bao_bp.route('/nqt-lich-gui-thong-bao/<int:nqt_id>/nqt-bat-tat', methods=['PUT'])
+@nqt_thong_bao_bp.route('/nqt-lich-gui-thong-bao', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_tao_lich_gui():
+    nqt_data = request.get_json() or {}
+    nqt_ten = nqt_data.get('g6_ten', '').strip()
+    nqt_su_kien = nqt_data.get('g6_loai_su_kien', '').strip()
+    nqt_tieu_de = nqt_data.get('g6_tieu_de_mau', '').strip()
+    nqt_noi_dung = nqt_data.get('g6_noi_dung_mau', '').strip()
+    if not nqt_ten or not nqt_su_kien or not nqt_tieu_de or not nqt_noi_dung:
+        return nqt_loi('Thiếu thông tin bắt buộc')
+    nqt_row = G6LichGuiThongBao(
+        g6_ten=nqt_ten,
+        g6_loai_su_kien=nqt_su_kien,
+        g6_bieu_thuc_cron=nqt_data.get('g6_bieu_thuc_cron'),
+        g6_tieu_de_mau=nqt_tieu_de,
+        g6_noi_dung_mau=nqt_noi_dung,
+        g6_kenh=nqt_data.get('g6_kenh', 'in_app'),
+        g6_la_hoat_dong=nqt_data.get('g6_la_hoat_dong', True),
+    )
+    db.session.add(nqt_row)
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Tạo lịch gửi thông báo thành công', 201)
+
+
+@nqt_thong_bao_bp.route('/nqt-lich-gui-thong-bao/<int:nqt_id>', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+def nqt_cap_nhat_lich_gui(nqt_id):
+    nqt_row = G6LichGuiThongBao.query.get_or_404(nqt_id)
+    nqt_data = request.get_json() or {}
+    for nqt_f in ['g6_ten', 'g6_loai_su_kien', 'g6_bieu_thuc_cron', 'g6_tieu_de_mau', 'g6_noi_dung_mau', 'g6_kenh']:
+        if nqt_f in nqt_data:
+            setattr(nqt_row, nqt_f, nqt_data[nqt_f])
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Cập nhật lịch gửi thành công')
+
+
+@nqt_thong_bao_bp.route('/nqt-lich-gui/<int:nqt_id>/bat-tat', methods=['PATCH'])
 @nqt_yeu_cau_dang_nhap
 def nqt_bat_tat_lich_gui(nqt_id):
     nqt_row = G6LichGuiThongBao.query.get_or_404(nqt_id)
@@ -92,8 +128,11 @@ def nqt_gui_email_test():
     nqt_email_gui_tu = NqtDichVuCauHinh.g6_lay('g6_email_gui_tu', nqt_mac_dinh=nqt_smtp_email)
     nqt_ten_nguoi_gui = NqtDichVuCauHinh.g6_lay('g6_ten_nguoi_gui_email', nqt_mac_dinh='NQT Gym')
 
+    if not nqt_smtp_host:
+        return nqt_loi('Chưa cấu hình Máy chủ SMTP (Host). Vui lòng cập nhật trong Cấu hình UI.')
+        
     if not nqt_smtp_email or not nqt_smtp_mat_khau:
-        return nqt_loi('Chưa cấu hình email đăng nhập SMTP và mật khẩu')
+        return nqt_loi('Chưa cấu hình Email đăng nhập SMTP và mật khẩu.')
 
     try:
         # Tạo email

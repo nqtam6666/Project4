@@ -43,8 +43,25 @@ def nxv_tao_hlv():
     nxv_data = request.get_json() or {}
     nxv_ma_nv = nxv_data.get('g6_ma_nhan_vien')
     nxv_ma_cn = nxv_data.get('g6_ma_chi_nhanh')
-    if not nxv_ma_nv or not nxv_ma_cn:
-        return nqt_loi('Thiếu mã nhân viên hoặc chi nhánh')
+    
+    if not nxv_ma_cn:
+        nxv_ma_cn = 1 # Default branch if missing
+        
+    if not nxv_ma_nv:
+        nxv_ht = nxv_data.get('g6_ho_ten')
+        if not nxv_ht:
+            return nqt_loi('Thiếu họ tên nhân viên')
+        from backend.app.models.g6_nhan_vien import G6NhanVien
+        nxv_nv = G6NhanVien(
+            g6_ho_ten=nxv_ht,
+            g6_so_dien_thoai=nxv_data.get('g6_so_dien_thoai'),
+            g6_ma_chi_nhanh=nxv_ma_cn,
+            g6_trang_thai='dang_lam',
+            g6_ngay_vao_lam=date.today()
+        )
+        db.session.add(nxv_nv)
+        db.session.flush()
+        nxv_ma_nv = nxv_nv.g6_ma_nhan_vien
 
     nxv_row = G6HuanLuyenVien(
         g6_ma_nhan_vien=nxv_ma_nv,
@@ -69,8 +86,17 @@ def nxv_tao_hlv():
 def nxv_cap_nhat_hlv(nxv_id):
     nxv_row = G6HuanLuyenVien.query.get_or_404(nxv_id)
     nxv_data = request.get_json() or {}
+    
+    if nxv_row.g6_nhan_vien:
+        if 'g6_ho_ten' in nxv_data:
+            nxv_row.g6_nhan_vien.g6_ho_ten = nxv_data['g6_ho_ten']
+        if 'g6_so_dien_thoai' in nxv_data:
+            nxv_row.g6_nhan_vien.g6_so_dien_thoai = nxv_data['g6_so_dien_thoai']
+        if 'g6_ma_chi_nhanh' in nxv_data:
+            nxv_row.g6_nhan_vien.g6_ma_chi_nhanh = nxv_data['g6_ma_chi_nhanh']
+
     for nxv_f in ['g6_chuyen_mon', 'g6_cap_chung_chi', 'g6_so_nam_kinh_nghiem',
-                  'g6_tieu_su', 'g6_gia_theo_buoi', 'g6_hinh_anh',
+                  'g6_tieu_su', 'g6_gia_theo_buoi', 'g6_hinh_anh', 'g6_ma_chi_nhanh',
                   'g6_thu_hang', 'g6_toi_da_hoi_vien', 'g6_la_hien_thi_web']:
         if nxv_f in nxv_data:
             setattr(nxv_row, nxv_f, nxv_data[nxv_f])
@@ -351,3 +377,22 @@ def nxv_cap_nhat_buoi_tap(nxv_id):
 
     db.session.commit()
     return nqt_ok(nxv_row.g6_to_dict())
+
+
+@nxv_huan_luyen_vien_bp.route('/nxv-buoi-tap-pt/<int:nxv_id>', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nxv_lay_buoi_tap_theo_id(nxv_id):
+    nxv_row = G6BuoiTapPT.query.get_or_404(nxv_id)
+    return nqt_ok(nxv_row.g6_to_dict())
+
+
+@nxv_huan_luyen_vien_bp.route('/nxv-buoi-tap-pt/<int:nxv_id>', methods=['DELETE'])
+@nqt_yeu_cau_dang_nhap
+def nxv_huy_buoi_tap(nxv_id):
+    nxv_row = G6BuoiTapPT.query.get_or_404(nxv_id)
+    if nxv_row.g6_trang_thai == 'da_tap':
+        return nqt_loi('Không thể huỷ buổi đã tập', nqt_ma_trang=400)
+    nxv_row.g6_trang_thai = 'da_huy'
+    db.session.commit()
+    return nqt_ok(None, 'Đã huỷ buổi tập PT')
+

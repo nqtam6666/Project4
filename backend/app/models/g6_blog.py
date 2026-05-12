@@ -63,7 +63,7 @@ class G6DanhGiaSanPham(db.Model):
 
     g6_ma_danh_gia = db.Column(db.Integer, primary_key=True, autoincrement=True)
     g6_ma_san_pham = db.Column(db.Integer, nullable=False)
-    g6_ma_khach_hang = db.Column(db.Integer, db.ForeignKey('G6KhachHang.g6_ma_khach_hang', ondelete='SET NULL'))
+    g6_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung', ondelete='SET NULL'))
     g6_sao = db.Column(db.SmallInteger, nullable=False)
     g6_noi_dung = db.Column(db.Text)
     g6_hinh_anh = db.Column(db.JSON)

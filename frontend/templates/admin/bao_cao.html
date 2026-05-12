@@ -1,0 +1,187 @@
+{% extends "admin/base_nqt.html" %}
+{% block title %}Báo cáo{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+<div class="space-y-4">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">Báo cáo</h1>
+            <p class="text-sm text-[#666] dark:text-[#888]">Thống kê tổng hợp và xuất báo cáo</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="nqtXuatExcel('doanh-thu')" class="inline-flex items-center gap-2 px-3 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333]">
+                <i class="fas fa-file-excel text-[#16a34a]"></i>Doanh thu
+            </button>
+            <button onclick="nqtXuatExcel('hoi-vien')" class="inline-flex items-center gap-2 px-3 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333]">
+                <i class="fas fa-file-excel text-[#16a34a]"></i>Hội viên
+            </button>
+            <button onclick="nqtXuatExcel('het-han')" class="inline-flex items-center gap-2 px-3 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333]">
+                <i class="fas fa-file-excel text-[#16a34a]"></i>Hết hạn
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter thời gian -->
+    <div class="flex items-center gap-3">
+        <select id="nqtKyBaoCao" onchange="nqtTaiTongHop()" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+            <option value="7">7 ngày qua</option>
+            <option value="30" selected>30 ngày qua</option>
+            <option value="90">3 tháng qua</option>
+            <option value="365">1 năm qua</option>
+        </select>
+        <button onclick="nqtTaiTongHop()" class="px-3 py-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors">
+            <i class="fas fa-sync-alt text-[#666] dark:text-[#888] text-sm"></i>
+        </button>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="nqtKpiCards">
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 animate-pulse">
+            <div class="h-3 bg-[#e5e5e5] dark:bg-[#404040] rounded w-1/2 mb-3"></div>
+            <div class="h-7 bg-[#e5e5e5] dark:bg-[#404040] rounded w-3/4"></div>
+        </div>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 animate-pulse">
+            <div class="h-3 bg-[#e5e5e5] dark:bg-[#404040] rounded w-1/2 mb-3"></div>
+            <div class="h-7 bg-[#e5e5e5] dark:bg-[#404040] rounded w-3/4"></div>
+        </div>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 animate-pulse">
+            <div class="h-3 bg-[#e5e5e5] dark:bg-[#404040] rounded w-1/2 mb-3"></div>
+            <div class="h-7 bg-[#e5e5e5] dark:bg-[#404040] rounded w-3/4"></div>
+        </div>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 animate-pulse">
+            <div class="h-3 bg-[#e5e5e5] dark:bg-[#404040] rounded w-1/2 mb-3"></div>
+            <div class="h-7 bg-[#e5e5e5] dark:bg-[#404040] rounded w-3/4"></div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4">
+            <h3 class="text-sm font-semibold text-[#191919] dark:text-[#fafafa] mb-4">Doanh thu theo thời gian</h3>
+            <div class="relative h-48">
+                <canvas id="nqtChartDoanhthu"></canvas>
+                <div id="nqtChartDTSkeleton" class="absolute inset-0 flex items-center justify-center">
+                    <i class="fas fa-circle-notch fa-spin text-[#a3a3a3]"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4">
+            <h3 class="text-sm font-semibold text-[#191919] dark:text-[#fafafa] mb-4">Hội viên mới theo thời gian</h3>
+            <div class="relative h-48">
+                <canvas id="nqtChartHoivien"></canvas>
+                <div id="nqtChartHVSkeleton" class="absolute inset-0 flex items-center justify-center">
+                    <i class="fas fa-circle-notch fa-spin text-[#a3a3a3]"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hội viên sắp hết hạn -->
+    <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md overflow-hidden">
+        <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">Hội viên sắp hết hạn (7 ngày)</h3>
+            <span id="nqtCountHetHan" class="text-xs text-[#666] dark:text-[#888]"></span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-[#fafafa] dark:bg-[#333] border-b border-[#e5e5e5] dark:border-[#404040]">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Hội viên</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">SĐT</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Gói tập</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Ngày hết hạn</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Còn lại</th>
+                    </tr>
+                </thead>
+                <tbody id="nqtBodyHetHan" class="divide-y divide-[#e5e5e5] dark:divide-[#404040]">
+                    <tr><td colspan="5" class="px-4 py-6 text-center text-sm text-[#666] dark:text-[#888]"><i class="fas fa-circle-notch fa-spin mr-2"></i>Đang tải...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let nqtChartDT = null;
+let nqtChartHV = null;
+
+async function nqtTaiTongHop() {
+    const ky = document.getElementById('nqtKyBaoCao').value;
+    const res = await nqtApi.fetch(`/api/nqt-bao-cao/tong-hop?g6_ngay=${ky}`);
+    if (!res?.nqt_thanh_cong) return;
+    const d = res.nqt_du_lieu;
+
+    // KPI Cards
+    const fmt = n => n!=null?Number(n).toLocaleString('vi-VN'):'—';
+    document.getElementById('nqtKpiCards').innerHTML = `
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4">
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Doanh thu</p>
+            <p class="text-2xl font-semibold text-[#191919] dark:text-[#fafafa]">${fmt(d.g6_tong_doanh_thu)}đ</p>
+            ${d.g6_tang_truong_dt!=null?`<p class="text-xs mt-1 ${d.g6_tang_truong_dt>=0?'text-[#16a34a]':'text-[#dc2626]'}">${d.g6_tang_truong_dt>=0?'▲':'▼'} ${Math.abs(d.g6_tang_truong_dt)}%</p>`:''}
+        </div>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4">
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Hội viên mới</p>
+            <p class="text-2xl font-semibold text-[#191919] dark:text-[#fafafa]">${fmt(d.g6_hoi_vien_moi)}</p>
+        </div>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4">
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Đơn hàng</p>
+            <p class="text-2xl font-semibold text-[#191919] dark:text-[#fafafa]">${fmt(d.g6_tong_don_hang)}</p>
+        </div>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4">
+            <p class="text-xs text-[#666] dark:text-[#888] mb-1">Sắp hết hạn</p>
+            <p class="text-2xl font-semibold text-[#d97706]">${fmt(d.g6_sap_het_han)}</p>
+        </div>`;
+
+    // Chart doanh thu
+    if (d.g6_bieu_do_doanh_thu) nqtVeChart('nqtChartDoanhthu','nqtChartDTSkeleton','nqtChartDT',d.g6_bieu_do_doanh_thu,'Doanh thu','rgba(25,25,25,0.08)','#191919');
+    // Chart hội viên
+    if (d.g6_bieu_do_hoi_vien) nqtVeChart('nqtChartHoivien','nqtChartHVSkeleton','nqtChartHV',d.g6_bieu_do_hoi_vien,'Hội viên mới','rgba(22,163,74,0.08)','#16a34a');
+}
+
+function nqtVeChart(canvasId, skeletonId, varName, data, label, bg, border) {
+    document.getElementById(skeletonId)?.remove();
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const textColor = isDark ? '#888' : '#666';
+    if (window[varName]) window[varName].destroy();
+    window[varName] = new Chart(document.getElementById(canvasId), {
+        type: 'line',
+        data: { labels: data.map(d=>d.g6_ngay||d.g6_thang||d.label), datasets: [{ label, data: data.map(d=>d.g6_gia_tri||d.value||0), fill: true, backgroundColor: bg, borderColor: border, borderWidth: 2, pointRadius: 3, tension: 0.4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } }, y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } } } }
+    });
+}
+
+async function nqtTaiHetHan() {
+    const res = await nqtApi.fetch('/api/nqt-bao-cao/het-han');
+    const tbody = document.getElementById('nqtBodyHetHan');
+    if (!res?.nqt_thanh_cong) { tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-sm text-[#dc2626]">Không thể tải</td></tr>`; return; }
+    const list = res.nqt_du_lieu?.g6_danh_sach || res.nqt_du_lieu || [];
+    document.getElementById('nqtCountHetHan').textContent = `${list.length} người`;
+    if (!list.length) { tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-sm text-[#16a34a]"><i class="fas fa-check-circle mr-2"></i>Không có hội viên sắp hết hạn</td></tr>`; return; }
+    const now = new Date();
+    tbody.innerHTML = list.map(r => {
+        const hetHan = new Date(r.g6_ngay_het_han);
+        const conLai = Math.ceil((hetHan-now)/(1000*60*60*24));
+        const conLaiText = conLai<=0?`<span class="text-[#dc2626] font-medium">Đã hết hạn</span>`:conLai<=3?`<span class="text-[#dc2626] font-medium">${conLai} ngày</span>`:`<span class="text-[#d97706] font-medium">${conLai} ngày</span>`;
+        return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
+            <td class="px-4 py-3"><div class="flex items-center gap-2">${nqtAvatarHtml(r.g6_ho_ten,28)}<span class="text-sm font-medium text-[#191919] dark:text-[#fafafa]">${r.g6_ho_ten||'—'}</span></div></td>
+            <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_so_dien_thoai||'—'}</td>
+            <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_goi||'—'}</td>
+            <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ngay_het_han?.slice(0,10)||'—'}</td>
+            <td class="px-4 py-3">${conLaiText}</td></tr>`;
+    }).join('');
+}
+
+function nqtXuatExcel(loai) {
+    const token = localStorage.getItem('nqt_token');
+    window.open(`/api/nqt-bao-cao/${loai}/excel?token=${token}`, '_blank');
+}
+
+nqtTaiTongHop();
+nqtTaiHetHan();
+</script>
+{% endblock %}

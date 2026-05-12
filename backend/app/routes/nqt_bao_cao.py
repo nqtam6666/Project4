@@ -3,7 +3,8 @@ from datetime import datetime, date, timedelta
 from flask import Blueprint, request, send_file
 from flask_jwt_extended import jwt_required
 from backend.app import db
-from backend.app.models.g6_hoi_vien import G6HoiVien, G6DangKyGoiTap
+from backend.app.models.g6_nguoi_dung import G6NguoiDung
+from backend.app.models.g6_hoi_vien import G6DangKyGoiTap
 from backend.app.models.g6_thanh_toan import G6ThanhToan
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
 from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
@@ -144,9 +145,9 @@ def nqt_export_hoi_vien_excel():
         return nqt_loi('Thư viện openpyxl chưa được cài đặt.', 500)
 
     nqt_danh_sach = (
-        G6HoiVien.query
-        .filter(G6HoiVien.g6_la_hoat_dong == True)
-        .order_by(G6HoiVien.g6_ngay_dang_ky.desc())
+        G6NguoiDung.query
+        .filter(G6NguoiDung.g6_la_hoi_vien == True, G6NguoiDung.g6_la_hoat_dong == True)
+        .order_by(G6NguoiDung.g6_ngay_dang_ky.desc())
         .all()
     )
 
@@ -170,7 +171,7 @@ def nqt_export_hoi_vien_excel():
     for nqt_i, nqt_hv in enumerate(nqt_danh_sach, 1):
         nqt_row = nqt_i + 4
         nqt_ws.cell(row=nqt_row, column=1, value=nqt_i)
-        nqt_ws.cell(row=nqt_row, column=2, value=nqt_hv.g6_ma_hoi_vien)
+        nqt_ws.cell(row=nqt_row, column=2, value=nqt_hv.g6_ma_nguoi_dung)
         nqt_ws.cell(row=nqt_row, column=3, value=nqt_hv.g6_ho_ten)
         nqt_ws.cell(row=nqt_row, column=4, value=nqt_hv.g6_so_dien_thoai)
         nqt_ws.cell(row=nqt_row, column=5, value=nqt_hv.g6_email or '')
@@ -211,9 +212,10 @@ def nqt_export_het_han_excel():
     nqt_ngay_cuoi = date.today() + timedelta(days=nqt_so_ngay)
 
     nqt_danh_sach = (
-        db.session.query(G6DangKyGoiTap, G6HoiVien)
-        .join(G6HoiVien, G6DangKyGoiTap.g6_ma_hoi_vien == G6HoiVien.g6_ma_hoi_vien)
+        db.session.query(G6DangKyGoiTap, G6NguoiDung)
+        .join(G6NguoiDung, G6DangKyGoiTap.g6_ma_nguoi_dung == G6NguoiDung.g6_ma_nguoi_dung)
         .filter(
+            G6NguoiDung.g6_la_hoi_vien == True,
             G6DangKyGoiTap.g6_trang_thai == 'dang_hoat_dong',
             G6DangKyGoiTap.g6_ngay_het_han >= date.today(),
             G6DangKyGoiTap.g6_ngay_het_han <= nqt_ngay_cuoi,
@@ -283,11 +285,12 @@ def nqt_tong_hop_bao_cao():
     nqt_hom_nay = date.today()
     nqt_dau_thang = nqt_hom_nay.replace(day=1)
 
-    nqt_tong_hoi_vien = G6HoiVien.query.filter_by(g6_la_hoat_dong=True).count()
+    nqt_tong_hoi_vien = G6NguoiDung.query.filter_by(g6_la_hoat_dong=True, g6_la_hoi_vien=True).count()
 
-    nqt_moi_thang = G6HoiVien.query.filter(
-        G6HoiVien.g6_ngay_dang_ky >= nqt_dau_thang,
-        G6HoiVien.g6_la_hoat_dong == True,
+    nqt_moi_thang = G6NguoiDung.query.filter(
+        G6NguoiDung.g6_la_hoi_vien == True,
+        G6NguoiDung.g6_ngay_dang_ky >= nqt_dau_thang,
+        G6NguoiDung.g6_la_hoat_dong == True,
     ).count()
 
     nqt_goi_sap_het = G6DangKyGoiTap.query.filter(
@@ -303,11 +306,72 @@ def nqt_tong_hop_bao_cao():
         G6ThanhToan.g6_ngay_thanh_toan >= nqt_dau_thang,
     ).scalar() or 0
 
+    # Tổng đơn hàng tháng này
+    nqt_tong_don_hang = G6ThanhToan.query.filter(
+        G6ThanhToan.g6_ngay_tao >= datetime(nqt_dau_thang.year, nqt_dau_thang.month, nqt_dau_thang.day),
+    ).count()
+
+    # Chart doanh thu 7 ngày gần nhất
+    nqt_bieu_do_dt = []
+    for nqt_i in range(6, -1, -1):
+        nqt_ngay = nqt_hom_nay - timedelta(days=nqt_i)
+        nqt_dt_ngay = db.session.query(func.sum(G6ThanhToan.g6_so_tien)).filter(
+            G6ThanhToan.g6_trang_thai == 'da_thanh_toan',
+            func.cast(G6ThanhToan.g6_ngay_thanh_toan, db.Date) == nqt_ngay,
+        ).scalar() or 0
+        nqt_bieu_do_dt.append({'g6_ngay': nqt_ngay.strftime('%d/%m'), 'g6_gia_tri': float(nqt_dt_ngay)})
+
+    # Chart hội viên mới 7 ngày gần nhất
+    nqt_bieu_do_hv = []
+    for nqt_i in range(6, -1, -1):
+        nqt_ngay = nqt_hom_nay - timedelta(days=nqt_i)
+        nqt_so_moi = G6NguoiDung.query.filter(
+            G6NguoiDung.g6_la_hoi_vien == True,
+            G6NguoiDung.g6_ngay_dang_ky == nqt_ngay,
+        ).count()
+        nqt_bieu_do_hv.append({'g6_ngay': nqt_ngay.strftime('%d/%m'), 'g6_gia_tri': nqt_so_moi})
+
     return nqt_ok({
-        'nqt_tong_hoi_vien': nqt_tong_hoi_vien,
-        'nqt_hoi_vien_moi_thang': nqt_moi_thang,
-        'nqt_goi_sap_het_han_7_ngay': nqt_goi_sap_het,
-        'nqt_doanh_thu_thang_nay': float(nqt_doanh_thu_thang),
-        'nqt_thang': nqt_hom_nay.month,
-        'nqt_nam': nqt_hom_nay.year,
+        'g6_tong_doanh_thu': float(nqt_doanh_thu_thang),
+        'g6_tang_truong_dt': 0,
+        'g6_hoi_vien_moi': nqt_moi_thang,
+        'g6_tong_don_hang': nqt_tong_don_hang,
+        'g6_sap_het_han': nqt_goi_sap_het,
+        'g6_bieu_do_doanh_thu': nqt_bieu_do_dt,
+        'g6_bieu_do_hoi_vien': nqt_bieu_do_hv,
     })
+
+
+# ── 5. Danh sách hết hạn JSON ─────────────────────────────────────────────────
+
+@nqt_bao_cao_bp.route('/api/nqt-bao-cao/het-han', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nqt_bao_cao_het_han():
+    nqt_so_ngay = request.args.get('g6_so_ngay', 30, type=int)
+    nqt_hom_nay = date.today()
+    nqt_ngay_cuoi = nqt_hom_nay + timedelta(days=nqt_so_ngay)
+
+    nqt_danh_sach = (
+        db.session.query(G6DangKyGoiTap, G6NguoiDung)
+        .join(G6NguoiDung, G6DangKyGoiTap.g6_ma_nguoi_dung == G6NguoiDung.g6_ma_nguoi_dung)
+        .filter(
+            G6NguoiDung.g6_la_hoi_vien == True,
+            G6DangKyGoiTap.g6_trang_thai == 'dang_hoat_dong',
+            G6DangKyGoiTap.g6_ngay_het_han >= nqt_hom_nay,
+            G6DangKyGoiTap.g6_ngay_het_han <= nqt_ngay_cuoi,
+        )
+        .order_by(G6DangKyGoiTap.g6_ngay_het_han)
+        .all()
+    )
+
+    nqt_rows = []
+    for nqt_dk, nqt_hv in nqt_danh_sach:
+        nqt_ten_goi = nqt_dk.g6_goi_tap.g6_ten_goi if nqt_dk.g6_goi_tap else f'Gói #{nqt_dk.g6_ma_goi_tap}'
+        nqt_rows.append({
+            'g6_ho_ten': nqt_hv.g6_ho_ten,
+            'g6_so_dien_thoai': nqt_hv.g6_so_dien_thoai,
+            'g6_ten_goi': nqt_ten_goi,
+            'g6_ngay_het_han': str(nqt_dk.g6_ngay_het_han),
+        })
+
+    return nqt_ok({'g6_danh_sach': nqt_rows, 'g6_tong': len(nqt_rows)})

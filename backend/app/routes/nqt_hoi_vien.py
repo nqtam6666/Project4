@@ -1,9 +1,10 @@
-﻿import uuid
+import uuid
 from datetime import date, timedelta
 from flask import Blueprint, request
 from sqlalchemy import func, cast, Date
 from backend.app import db
-from backend.app.models.g6_hoi_vien import G6HoiVien, G6GoiTap, G6DangKyGoiTap, G6DiemDanh, G6ChiSoCoThe
+from backend.app.models.g6_nguoi_dung import G6NguoiDung
+from backend.app.models.g6_hoi_vien import G6GoiTap, G6DangKyGoiTap, G6DiemDanh, G6ChiSoCoThe
 from backend.app.models.g6_thanh_toan import G6ThanhToan
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
 from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
@@ -24,7 +25,7 @@ def nqt_lay_tat_ca_hoi_vien():
     nqt_trang_thai = request.args.get('g6_trang_thai', '').strip()    # 'true' / 'false'
     nqt_sap_het_han = request.args.get('g6_sap_het_han', type=int)    # số ngày, ví dụ 7
 
-    nqt_q = G6HoiVien.query
+    nqt_q = G6NguoiDung.query.filter_by(g6_la_hoi_vien=True)
     if nqt_chi_nhanh:
         nqt_q = nqt_q.filter_by(g6_ma_chi_nhanh=nqt_chi_nhanh)
     if nqt_trang_thai == 'true':
@@ -33,20 +34,20 @@ def nqt_lay_tat_ca_hoi_vien():
         nqt_q = nqt_q.filter_by(g6_la_hoat_dong=False)
     if nqt_tim:
         nqt_q = nqt_q.filter(
-            G6HoiVien.g6_ho_ten.ilike(f'%{nqt_tim}%') |
-            G6HoiVien.g6_so_dien_thoai.ilike(f'%{nqt_tim}%')
+            G6NguoiDung.g6_ho_ten.ilike(f'%{nqt_tim}%') |
+            G6NguoiDung.g6_so_dien_thoai.ilike(f'%{nqt_tim}%')
         )
     if nqt_sap_het_han:
         # Lọc hội viên có gói tập sắp hết hạn trong N ngày
         nqt_han = date.today() + timedelta(days=nqt_sap_het_han)
-        nqt_ids_sq = db.session.query(G6DangKyGoiTap.g6_ma_hoi_vien).filter(
+        nqt_ids_sq = db.session.query(G6DangKyGoiTap.g6_ma_nguoi_dung).filter(
             G6DangKyGoiTap.g6_trang_thai == 'dang_hoat_dong',
             G6DangKyGoiTap.g6_ngay_het_han >= date.today(),
             G6DangKyGoiTap.g6_ngay_het_han <= nqt_han,
         ).scalar_subquery()
-        nqt_q = nqt_q.filter(G6HoiVien.g6_ma_hoi_vien.in_(nqt_ids_sq))
+        nqt_q = nqt_q.filter(G6NguoiDung.g6_ma_nguoi_dung.in_(nqt_ids_sq))
 
-    nqt_phan_trang = nqt_q.order_by(G6HoiVien.g6_ngay_tao.desc()).paginate(
+    nqt_phan_trang = nqt_q.order_by(G6NguoiDung.g6_ngay_tao.desc()).paginate(
         page=nqt_trang, per_page=nqt_gioi_han, error_out=False
     )
     return nqt_ok({
@@ -61,7 +62,7 @@ def nqt_lay_tat_ca_hoi_vien():
 @nqt_yeu_cau_dang_nhap
 @nqt_yeu_cau_quyen('g6_xem_hoi_vien')
 def nqt_lay_hoi_vien(nqt_id):
-    nqt_row = G6HoiVien.query.get_or_404(nqt_id)
+    nqt_row = G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_id, g6_la_hoi_vien=True).first_or_404()
     return nqt_ok(nqt_row.g6_to_dict())
 
 
@@ -76,13 +77,14 @@ def nqt_tao_hoi_vien():
 
     if not nqt_ho_ten or not nqt_sdt or not nqt_chi_nhanh:
         return nqt_loi('Thiếu họ tên, số điện thoại hoặc chi nhánh')
-    if G6HoiVien.query.filter_by(g6_so_dien_thoai=nqt_sdt).first():
+    if G6NguoiDung.query.filter_by(g6_so_dien_thoai=nqt_sdt).first():
         return nqt_loi('Số điện thoại đã được đăng ký')
 
-    nqt_row = G6HoiVien(
+    nqt_row = G6NguoiDung(
         g6_ho_ten=nqt_ho_ten,
         g6_so_dien_thoai=nqt_sdt,
         g6_ma_chi_nhanh=nqt_chi_nhanh,
+        g6_la_hoi_vien=True,
         g6_ngay_dang_ky=date.today(),
         g6_ma_qr=str(uuid.uuid4()),
         g6_email=nqt_data.get('g6_email'),
@@ -101,7 +103,7 @@ def nqt_tao_hoi_vien():
 @nqt_yeu_cau_dang_nhap
 @nqt_yeu_cau_quyen('g6_sua_hoi_vien')
 def nqt_cap_nhat_hoi_vien(nqt_id):
-    nqt_row = G6HoiVien.query.get_or_404(nqt_id)
+    nqt_row = G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_id, g6_la_hoi_vien=True).first_or_404()
     nqt_data = request.get_json() or {}
     for nqt_f in ['g6_ho_ten', 'g6_email', 'g6_dia_chi', 'g6_la_hoat_dong', 'g6_ghi_chu']:
         if nqt_f in nqt_data:
@@ -114,7 +116,7 @@ def nqt_cap_nhat_hoi_vien(nqt_id):
 @nqt_yeu_cau_dang_nhap
 @nqt_yeu_cau_quyen('g6_xoa_hoi_vien')
 def nqt_xoa_hoi_vien(nqt_id):
-    nqt_row = G6HoiVien.query.get_or_404(nqt_id)
+    nqt_row = G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_id, g6_la_hoi_vien=True).first_or_404()
     db.session.delete(nqt_row)
     db.session.commit()
     return nqt_ok(None, 'Xóa hội viên thành công')
@@ -125,7 +127,13 @@ def nqt_xoa_hoi_vien(nqt_id):
 @nqt_hoi_vien_bp.route('/nqt-goi-tap', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
 def nqt_lay_goi_tap():
-    nqt_list = G6GoiTap.query.filter_by(g6_la_hoat_dong=True).order_by(G6GoiTap.g6_thu_tu_hien_thi).all()
+    nqt_trang_thai = request.args.get('g6_trang_thai', 'hoat_dong')
+    nqt_q = G6GoiTap.query
+    if nqt_trang_thai == 'hoat_dong':
+        nqt_q = nqt_q.filter_by(g6_la_hoat_dong=True)
+    elif nqt_trang_thai == 'an':
+        nqt_q = nqt_q.filter_by(g6_la_hoat_dong=False)
+    nqt_list = nqt_q.order_by(G6GoiTap.g6_thu_tu_hien_thi).all()
     return nqt_ok([g.g6_to_dict() for g in nqt_list])
 
 
@@ -179,19 +187,13 @@ def nqt_xoa_goi_tap(nqt_id):
 def nqt_dang_ky_goi_tap():
     from datetime import timedelta
     nqt_data = request.get_json() or {}
-    nqt_hv_id = nqt_data.get('g6_ma_hoi_vien')
-    nqt_gt_id = nqt_data.get('g6_ma_goi_tap')
-    if not nqt_hv_id or not nqt_gt_id:
-        return nqt_loi('Thiếu mã hội viên hoặc gói tập')
-    nqt_hv = G6HoiVien.query.get_or_404(nqt_hv_id)
+    nqt_hv = G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_hv_id, g6_la_hoi_vien=True).first_or_404()
     nqt_gt = G6GoiTap.query.get_or_404(nqt_gt_id)
     nqt_ngay_bd = date.today()
-    nqt_ngay_hh = nqt_ngay_bd + date.resolution.__class__(days=nqt_gt.g6_so_ngay)
-    from datetime import timedelta
     nqt_ngay_hh = nqt_ngay_bd + timedelta(days=nqt_gt.g6_so_ngay)
     nqt_gia = float(nqt_gt.g6_gia_khuyen_mai or nqt_gt.g6_gia)
     nqt_row = G6DangKyGoiTap(
-        g6_ma_hoi_vien=nqt_hv_id,
+        g6_ma_nguoi_dung=nqt_hv_id,
         g6_ma_goi_tap=nqt_gt_id,
         g6_ma_chi_nhanh=nqt_hv.g6_ma_chi_nhanh,
         g6_ngay_bat_dau=nqt_ngay_bd,
@@ -206,8 +208,8 @@ def nqt_dang_ky_goi_tap():
 @nqt_hoi_vien_bp.route('/nqt-hoi-vien/<int:nqt_id>/nqt-dang-ky', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
 def nqt_lay_dang_ky(nqt_id):
-    G6HoiVien.query.get_or_404(nqt_id)
-    nqt_list = G6DangKyGoiTap.query.filter_by(g6_ma_hoi_vien=nqt_id).all()
+    G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_id, g6_la_hoi_vien=True).first_or_404()
+    nqt_list = G6DangKyGoiTap.query.filter_by(g6_ma_nguoi_dung=nqt_id).all()
     return nqt_ok([d.g6_to_dict() for d in nqt_list])
 
 
@@ -222,18 +224,18 @@ def nqt_checkin_qr():
     nqt_chi_nhanh = nqt_data.get('g6_ma_chi_nhanh')
     if not nqt_qr or not nqt_chi_nhanh:
         return nqt_loi('Thiếu mã QR hoặc chi nhánh')
-    nqt_hv = G6HoiVien.query.filter_by(g6_ma_qr=nqt_qr, g6_la_hoat_dong=True).first()
+    nqt_hv = G6NguoiDung.query.filter_by(g6_ma_qr=nqt_qr, g6_la_hoat_dong=True, g6_la_hoi_vien=True).first()
     if not nqt_hv:
         return nqt_loi('Mã QR không hợp lệ', nqt_ma_trang=404)
     nqt_dang_ky = G6DangKyGoiTap.query.filter_by(
-        g6_ma_hoi_vien=nqt_hv.g6_ma_hoi_vien,
+        g6_ma_nguoi_dung=nqt_hv.g6_ma_nguoi_dung,
         g6_trang_thai='dang_hoat_dong'
     ).filter(G6DangKyGoiTap.g6_ngay_het_han >= date.today()).first()
     if not nqt_dang_ky:
         return nqt_loi('Hội viên không có gói tập đang hoạt động', nqt_ma_trang=403)
     nqt_dd = G6DiemDanh(
         g6_ma_dang_ky=nqt_dang_ky.g6_ma_dang_ky,
-        g6_ma_hoi_vien=nqt_hv.g6_ma_hoi_vien,
+        g6_ma_nguoi_dung=nqt_hv.g6_ma_nguoi_dung,
         g6_ma_chi_nhanh=nqt_chi_nhanh,
         g6_phuong_thuc='qr',
     )
@@ -248,8 +250,8 @@ def nqt_checkin_qr():
 @nqt_hoi_vien_bp.route('/nqt-hoi-vien/<int:nqt_id>/nqt-chi-so', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
 def nqt_lay_chi_so(nqt_id):
-    G6HoiVien.query.get_or_404(nqt_id)
-    nqt_list = G6ChiSoCoThe.query.filter_by(g6_ma_hoi_vien=nqt_id).order_by(
+    G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_id, g6_la_hoi_vien=True).first_or_404()
+    nqt_list = G6ChiSoCoThe.query.filter_by(g6_ma_nguoi_dung=nqt_id).order_by(
         G6ChiSoCoThe.g6_ngay_do.desc()
     ).all()
     return nqt_ok([c.g6_to_dict() for c in nqt_list])
@@ -258,7 +260,7 @@ def nqt_lay_chi_so(nqt_id):
 @nqt_hoi_vien_bp.route('/nqt-hoi-vien/<int:nqt_id>/nqt-chi-so', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
 def nqt_them_chi_so(nqt_id):
-    G6HoiVien.query.get_or_404(nqt_id)
+    G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_id, g6_la_hoi_vien=True).first_or_404()
     nqt_data = request.get_json() or {}
     nqt_can = nqt_data.get('g6_can_nang')
     nqt_cao = nqt_data.get('g6_chieu_cao')
@@ -266,7 +268,7 @@ def nqt_them_chi_so(nqt_id):
     if nqt_can and nqt_cao:
         nqt_bmi = round(float(nqt_can) / ((float(nqt_cao) / 100) ** 2), 2)
     nqt_row = G6ChiSoCoThe(
-        g6_ma_hoi_vien=nqt_id,
+        g6_ma_nguoi_dung=nqt_id,
         g6_ngay_do=nqt_data.get('g6_ngay_do', str(date.today())),
         g6_can_nang=nqt_can,
         g6_chieu_cao=nqt_cao,
@@ -291,7 +293,7 @@ def nqt_thong_ke_dashboard():
     nqt_7_ngay_toi = nqt_hom_nay + timedelta(days=7)
 
     # Tổng hội viên
-    nqt_tong_hv = G6HoiVien.query.filter_by(g6_la_hoat_dong=True).count()
+    nqt_tong_hv = G6NguoiDung.query.filter_by(g6_la_hoat_dong=True, g6_la_hoi_vien=True).count()
 
     # Check-in hôm nay (tất cả lượt vào, kể cả đã ra)
     nqt_checkin_hom_nay = G6DiemDanh.query.filter(
@@ -322,8 +324,9 @@ def nqt_thong_ke_dashboard():
     ).scalar() or 0
 
     # Hội viên mới đăng ký tháng này
-    nqt_hv_moi = G6HoiVien.query.filter(
-        G6HoiVien.g6_ngay_dang_ky >= nqt_dau_thang
+    nqt_hv_moi = G6NguoiDung.query.filter(
+        G6NguoiDung.g6_la_hoi_vien == True,
+        G6NguoiDung.g6_ngay_dang_ky >= nqt_dau_thang
     ).count()
 
     return nqt_ok({
@@ -350,14 +353,15 @@ def nqt_thong_ke_bieu_do():
 
     # Query số hội viên đăng ký theo ngày
     nqt_rows = db.session.query(
-        cast(G6HoiVien.g6_ngay_dang_ky, Date).label('nqt_ngay'),
-        func.count(G6HoiVien.g6_ma_hoi_vien).label('nqt_so_luong')
+        cast(G6NguoiDung.g6_ngay_dang_ky, Date).label('nqt_ngay'),
+        func.count(G6NguoiDung.g6_ma_nguoi_dung).label('nqt_so_luong')
     ).filter(
-        G6HoiVien.g6_ngay_dang_ky >= nqt_ngay_bat_dau
+        G6NguoiDung.g6_la_hoi_vien == True,
+        G6NguoiDung.g6_ngay_dang_ky >= nqt_ngay_bat_dau
     ).group_by(
-        cast(G6HoiVien.g6_ngay_dang_ky, Date)
+        cast(G6NguoiDung.g6_ngay_dang_ky, Date)
     ).order_by(
-        cast(G6HoiVien.g6_ngay_dang_ky, Date)
+        cast(G6NguoiDung.g6_ngay_dang_ky, Date)
     ).all()
 
     # Tạo map ngày → số lượng

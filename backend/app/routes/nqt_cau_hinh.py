@@ -1,9 +1,9 @@
-﻿from flask import Blueprint, request
+from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.g6_cau_hinh import G6CauHinh
 from backend.app.services.g6_dich_vu_cau_hinh import NqtDichVuCauHinh
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen, nqt_ghi_nhat_ky
 
 nqt_cau_hinh_bp = Blueprint('g6_cau_hinh', __name__, url_prefix='/api')
 
@@ -32,6 +32,7 @@ def nqt_lay_mot_cau_hinh(nqt_khoa):
 @nqt_cau_hinh_bp.route('/nqt-cau-hinh', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
 @nqt_yeu_cau_quyen('g6_sua_cau_hinh')
+@nqt_ghi_nhat_ky('Cập nhật cấu hình', 'G6CauHinh')
 def nqt_cap_nhat_cau_hinh():
     nqt_data = request.get_json() or {}
     if not isinstance(nqt_data, dict):

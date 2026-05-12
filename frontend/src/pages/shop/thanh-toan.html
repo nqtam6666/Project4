@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thanh Toán — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "success":"#22C55E","error":"#EF4444",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+<div class="pt-[72px]">
+  <div class="max-w-screen-lg mx-auto px-6 py-12">
+    <div class="flex items-center gap-3 mb-8">
+      <a href="/src/pages/shop/gio-hang.html" class="text-text-muted hover:text-neon-lime transition-colors">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <h1 class="text-2xl font-black text-white">Thanh Toán</h1>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Form -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Shipping info -->
+        <div class="bg-bg-card border border-border-subtle rounded-2xl p-6">
+          <h2 class="font-bold text-white mb-5 flex items-center gap-2">
+            <span class="material-symbols-outlined text-neon-lime text-lg">local_shipping</span> Thông tin giao hàng
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Họ và tên người nhận</label>
+              <input id="nqtHoTen" type="text" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+            </div>
+            <div>
+              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Số điện thoại</label>
+              <input id="nqtSdt" type="tel" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+            </div>
+            <div>
+              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Email</label>
+              <input id="nqtEmail" type="email" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Địa chỉ chi tiết</label>
+              <input id="nqtDiaChi" type="text" placeholder="Số nhà, tên đường, phường/xã..." class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary placeholder:text-text-muted focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+            </div>
+            <div>
+              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Tỉnh / Thành phố</label>
+              <input id="nqtTinh" type="text" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+            </div>
+            <div>
+              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Ghi chú</label>
+              <input id="nqtGhiChu" type="text" placeholder="Tuỳ chọn..." class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary placeholder:text-text-muted focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment method -->
+        <div class="bg-bg-card border border-border-subtle rounded-2xl p-6">
+          <h2 class="font-bold text-white mb-5 flex items-center gap-2">
+            <span class="material-symbols-outlined text-neon-lime text-lg">payment</span> Phương thức thanh toán
+          </h2>
+          <div class="space-y-3" id="nqtPayMethods">
+            <label class="flex items-center gap-4 p-4 rounded-xl border border-border-neon bg-neon-glow cursor-pointer">
+              <input type="radio" name="nqtPayMethod" value="tien_mat" checked class="accent-neon-lime"/>
+              <span class="material-symbols-outlined text-neon-lime">payments</span>
+              <span class="font-caps text-sm font-semibold text-white">Tiền mặt khi nhận hàng (COD)</span>
+            </label>
+            <label class="flex items-center gap-4 p-4 rounded-xl border border-border-subtle hover:border-border-neon cursor-pointer transition-colors">
+              <input type="radio" name="nqtPayMethod" value="chuyen_khoan" class="accent-neon-lime"/>
+              <span class="material-symbols-outlined text-text-secondary">account_balance</span>
+              <span class="font-caps text-sm font-semibold text-text-secondary">Chuyển khoản ngân hàng</span>
+            </label>
+            <label class="flex items-center gap-4 p-4 rounded-xl border border-border-subtle hover:border-border-neon cursor-pointer transition-colors">
+              <input type="radio" name="nqtPayMethod" value="vi_dien_tu" class="accent-neon-lime"/>
+              <span class="material-symbols-outlined text-text-secondary">wallet</span>
+              <span class="font-caps text-sm font-semibold text-text-secondary">Ví điện tử (MoMo, ZaloPay)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div>
+        <div class="bg-bg-card border border-border-subtle rounded-2xl p-6 sticky top-24">
+          <h2 class="font-bold text-white mb-4">Đơn hàng</h2>
+          <div id="nqtOrderSummary" class="space-y-2 mb-4 text-sm max-h-48 overflow-y-auto"></div>
+          <div class="border-t border-border-subtle pt-4 mb-5">
+            <div class="flex justify-between font-bold">
+              <span class="text-white">Tổng</span>
+              <span id="nqtOrderTotal" class="text-neon-lime font-mono text-lg">0₫</span>
+            </div>
+          </div>
+          <button id="nqtPlaceOrderBtn" onclick="nqtPlaceOrder()" class="w-full bg-neon-lime text-bg-main py-4 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-base">check_circle</span> Đặt hàng
+          </button>
+          <p class="text-text-muted text-xs text-center mt-4">Bằng cách đặt hàng, bạn đồng ý với điều khoản sử dụng của NQT GYM.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success overlay -->
+    <div id="nqtSuccessOverlay" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-bg-card border border-border-neon rounded-2xl max-w-md w-full p-10 text-center">
+        <div class="w-16 h-16 bg-neon-lime rounded-full flex items-center justify-center mx-auto mb-5">
+          <span class="material-symbols-outlined text-bg-main text-3xl">check</span>
+        </div>
+        <h2 class="text-2xl font-black text-white mb-2">Đặt hàng thành công!</h2>
+        <p class="text-text-secondary mb-6">Cảm ơn bạn đã mua hàng. Chúng tôi sẽ xử lý đơn hàng trong thời gian sớm nhất.</p>
+        <a href="/src/pages/shop/don-hang.html" class="block w-full text-center bg-neon-lime text-bg-main py-3 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors mb-3">Xem đơn hàng</a>
+        <a href="/src/pages/shop.html" class="block w-full text-center text-text-muted text-sm hover:text-text-secondary transition-colors">Tiếp tục mua sắm</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+import { nqtRenderPublicNav, nqtFormatPrice, nqtGetCart, nqtSaveCart } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('shop');
+
+const cart = nqtGetCart();
+if (!cart.length) { window.location.href = '/src/pages/shop/gio-hang.html'; }
+
+const subtotal = cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+document.getElementById('nqtOrderTotal').textContent = nqtFormatPrice(subtotal);
+document.getElementById('nqtOrderSummary').innerHTML = cart.map(i => `
+  <div class="flex justify-between text-text-secondary">
+    <span class="truncate flex-1">${i.name} <span class="text-text-muted">×${i.qty||1}</span></span>
+    <span class="font-mono ml-3 flex-shrink-0">${nqtFormatPrice((i.price||0)*(i.qty||1))}</span>
+  </div>`).join('');
+
+// Pre-fill from localStorage if member
+try {
+  const user = JSON.parse(localStorage.getItem('nqt_user') || '{}');
+  if (user.nqt_ho_ten) document.getElementById('nqtHoTen').value = user.nqt_ho_ten;
+  if (user.nqt_email) document.getElementById('nqtEmail').value = user.nqt_email;
+  if (user.nqt_so_dien_thoai) document.getElementById('nqtSdt').value = user.nqt_so_dien_thoai;
+} catch {}
+
+window.nqtPlaceOrder = async function() {
+  const hoTen = document.getElementById('nqtHoTen').value.trim();
+  const sdt   = document.getElementById('nqtSdt').value.trim();
+  const addr  = document.getElementById('nqtDiaChi').value.trim();
+  const tinh  = document.getElementById('nqtTinh').value.trim();
+  if (!hoTen || !addr) { alert('Vui lòng điền đầy đủ họ tên và địa chỉ.'); return; }
+  const method = document.querySelector('[name=nqtPayMethod]:checked')?.value || 'tien_mat';
+
+  const btn = document.getElementById('nqtPlaceOrderBtn');
+  btn.disabled = true; btn.textContent = 'Đang xử lý...';
+
+  const token = localStorage.getItem('nqt_token');
+  try {
+    const r = await fetch('/api/nqt-don-hang', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {}) },
+      body: JSON.stringify({
+        g6_ho_ten_nguoi_nhan: hoTen,
+        g6_so_dien_thoai_nguoi_nhan: sdt,
+        g6_dia_chi_giao_hang: `${addr}, ${tinh}`.trim().replace(/,\s*$/, ''),
+        g6_phuong_thuc_thanh_toan: method,
+        g6_ghi_chu: document.getElementById('nqtGhiChu').value,
+        g6_chi_tiet: cart.map(i => ({ g6_ma_bien_the: i.variantId || i.id, g6_so_luong: i.qty||1, g6_don_gia: i.price||0, g6_ten_san_pham: i.name })),
+        g6_tong_tam_tinh: subtotal,
+        g6_phi_van_chuyen: 0,
+        g6_tong_thanh_toan: subtotal,
+      })
+    });
+    if (r.ok) {
+      nqtSaveCart([]);
+      document.getElementById('nqtSuccessOverlay').classList.remove('hidden');
+    } else {
+      const j = await r.json();
+      alert(j.nqt_thong_diep || 'Đặt hàng thất bại.');
+      btn.disabled = false; btn.textContent = 'Đặt hàng';
+    }
+  } catch { alert('Lỗi kết nối.'); btn.disabled = false; btn.textContent = 'Đặt hàng'; }
+};
+</script>
+</body>
+</html>

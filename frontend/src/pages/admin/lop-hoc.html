@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi" id="nqtHtmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp học - NQT Gym Admin</title>
+    <script>if (localStorage.getItem('nqt_dark_mode') === 'true') { document.documentElement.classList.add('dark'); }</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div id="nqt-page-content" style="display:none" class="space-y-4">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">Lớp học &amp; Lịch học</h1>
+            <p class="text-sm text-[#666] dark:text-[#888]">Quản lý lớp học, lịch và đặt chỗ</p>
+        </div>
+        <button id="nqtBtnThem" onclick="nqtMoModal('nqtModalThemLop')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors">
+            <i class="fas fa-plus"></i>Thêm lớp
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex space-x-1 border-b border-[#e5e5e5] dark:border-[#404040]">
+        <button onclick="nqtChuyenTab('lophoc')" id="nqtTabLophoc" class="px-4 py-2 text-sm font-medium border-b-2 border-[#191919] dark:border-[#fafafa] text-[#191919] dark:text-[#fafafa] -mb-px">Lớp học</button>
+        <button onclick="nqtChuyenTab('lich')" id="nqtTabLich" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] -mb-px">Lịch lớp học</button>
+        <button onclick="nqtChuyenTab('datcho')" id="nqtTabDatcho" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] -mb-px">Đặt chỗ</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1 max-w-md">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-[#a3a3a3]"><i class="fas fa-search text-sm"></i></span>
+            <input type="text" id="nqtTimKiem" oninput="nqtXuLyTimKiem()" placeholder="Tìm kiếm..."
+                class="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa] placeholder-[#a3a3a3]">
+        </div>
+        <button onclick="nqtTaiDuLieu()" class="px-3 py-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors">
+            <i class="fas fa-sync-alt text-[#666] dark:text-[#888] text-sm"></i>
+        </button>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead id="nqtTableHead" class="bg-[#fafafa] dark:bg-[#333] border-b border-[#e5e5e5] dark:border-[#404040]"></thead>
+                <tbody id="nqtTableBody" class="divide-y divide-[#e5e5e5] dark:divide-[#404040]">
+                    <tr><td colspan="6" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]"><i class="fas fa-circle-notch fa-spin mr-2"></i>Đang tải...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="nqtPagination" class="px-4 py-3 border-t border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between hidden">
+            <span id="nqtPagInfo" class="text-xs text-[#666] dark:text-[#888]"></span>
+            <div id="nqtPagButtons" class="flex gap-1"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Action Bar -->
+<div id="nqtBulkBar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
+    <div class="bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] px-4 py-2.5 rounded-md shadow-lg flex items-center space-x-3">
+        <span class="text-sm">Đã chọn <strong id="nqtSoDaChon">0</strong> lớp học</span>
+        <div class="w-px h-5 bg-white/20 dark:bg-[#191919]/20"></div>
+        <button onclick="nqtMoBulkModal(true)" class="px-3 py-1.5 bg-[#16a34a] hover:bg-[#15803d] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-check-circle"></i><span>Hoạt động</span>
+        </button>
+        <button onclick="nqtMoBulkModal(false)" class="px-3 py-1.5 bg-[#d97706] hover:bg-[#b45309] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-eye-slash"></i><span>Tạm ngừng</span>
+        </button>
+        <button onclick="nqtMoBulkModal('delete')" class="px-3 py-1.5 bg-[#dc2626] hover:bg-[#b91c1c] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-trash-can"></i><span>Xoá</span>
+        </button>
+        <button onclick="nqtBoChonTatCa()" class="p-1.5 hover:bg-white/10 dark:hover:bg-[#191919]/10 rounded-md transition-colors" title="Bỏ chọn">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Modal: Bulk Action -->
+<div id="modalBulkAction" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalBulkAction')">
+    <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-sm shadow-lg">
+        <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+            <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]" id="nqtBulkTitle">Thao tác hàng loạt</h3>
+            <button onclick="nqtDongModal('modalBulkAction')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-6 text-center">
+            <div class="w-12 h-12 mx-auto mb-4 bg-[#f5f5f5] dark:bg-[#404040] rounded-full flex items-center justify-center">
+                <i class="fas fa-users-class text-[#525252] dark:text-[#a3a3a3] text-xl" id="nqtBulkIcon"></i>
+            </div>
+            <p class="text-sm text-[#666] dark:text-[#888] mb-1">Bạn đang thực hiện thao tác cho</p>
+            <p class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]"><span id="nqtBulkCount">0</span> lớp học</p>
+            <p class="text-xs text-[#a3a3a3] dark:text-[#666] mt-2" id="nqtBulkMessage">Trạng thái sẽ được cập nhật.</p>
+        </div>
+        <div class="px-4 py-3 border-t border-[#e5e5e5] dark:border-[#404040] flex justify-end space-x-2">
+            <button onclick="nqtDongModal('modalBulkAction')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+            <button onclick="nqtXacNhanBulkAction()" id="nqtBulkConfirmBtn" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Lớp -->
+<div id="nqtModalThemLop" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)nqtDongModal('nqtModalThemLop')">
+    <div class="bg-white dark:bg-[#262626] rounded-lg w-full max-w-lg border border-[#e5e5e5] dark:border-[#404040]">
+        <div class="px-6 py-4 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+            <h3 id="nqtModalLopTitle" class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">Thêm lớp học</h3>
+            <button onclick="nqtDongModal('nqtModalThemLop')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="nqtFormLop" onsubmit="nqtLuuLop(event)" class="p-6 space-y-4">
+            <input type="hidden" id="nqtLopId">
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Tên lớp *</label>
+                <input type="text" id="nqtTenLop" required placeholder="Yoga buổi sáng"
+                    class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Chi nhánh *</label>
+                    <select id="nqtChiNhanhLop" required class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                        <option value="">-- Chọn chi nhánh --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Loại lớp *</label>
+                    <select id="nqtLoaiLop" required class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                        <option value="yoga">Yoga</option>
+                        <option value="spinning">Spinning</option>
+                        <option value="boxing">Boxing</option>
+                        <option value="zumba">Zumba</option>
+                        <option value="aerobic">Aerobic</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Độ khó</label>
+                <select id="nqtDoKho" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                    <option value="co_ban">Cơ bản</option>
+                    <option value="trung_binh">Trung bình</option>
+                    <option value="nang_cao">Nâng cao</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Mô tả</label>
+                <textarea id="nqtMoTaLop" rows="2" placeholder="Mô tả lớp học..."
+                    class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="nqtDongModal('nqtModalThemLop')" class="px-4 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333]">Huỷ</button>
+                <button type="submit" id="nqtBtnLuuLop" class="px-4 py-2 text-sm bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5]">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
+nqtInitAdminLayout('lop-hoc');
+
+let nqtTabHienTai = 'lophoc';
+let nqtTrang = 1;
+let nqtTimKiemTimer = null;
+let nqtDaChon = [];
+let nqtBulkActionType = null;
+
+window.nqtToggleRow = function(id, e) {
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    const idx = nqtDaChon.indexOf(id);
+    if (idx === -1) nqtDaChon.push(id);
+    else nqtDaChon.splice(idx, 1);
+    nqtCapNhatBulkBar();
+    document.querySelectorAll('[data-row-id]').forEach(tr => {
+        const trId = parseInt(tr.dataset.rowId);
+        const sel = nqtDaChon.includes(trId);
+        if (sel) {
+            tr.classList.remove('hover:bg-[#fafafa]', 'dark:hover:bg-[#1a1a1a]');
+            tr.classList.add('nqt-row-selected');
+        } else {
+            tr.classList.remove('nqt-row-selected');
+            tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#1a1a1a]');
+        }
+    });
+};
+
+window.nqtBoChonTatCa = function() {
+    nqtDaChon = [];
+    document.querySelectorAll('[data-row-id]').forEach(tr => {
+        tr.classList.remove('nqt-row-selected');
+        tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#1a1a1a]');
+    });
+    nqtCapNhatBulkBar();
+};
+
+function nqtCapNhatBulkBar() {
+    const bar = document.getElementById('nqtBulkBar');
+    document.getElementById('nqtSoDaChon').textContent = nqtDaChon.length;
+    if (nqtDaChon.length > 0) bar.classList.remove('hidden');
+    else bar.classList.add('hidden');
+}
+
+window.nqtMoBulkModal = function(action) {
+    nqtBulkActionType = action;
+    document.getElementById('nqtBulkCount').textContent = nqtDaChon.length;
+    
+    if (action === 'delete') {
+        document.getElementById('nqtBulkTitle').textContent = `Xoá lớp học`;
+        document.getElementById('nqtBulkMessage').textContent = `Dữ liệu sẽ bị ẩn và loại khỏi danh sách (xoá mềm).`;
+        document.getElementById('nqtBulkConfirmBtn').className = "inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#dc2626] text-white text-sm font-medium rounded-md hover:bg-[#b91c1c]";
+    } else {
+        const nqtLabels = { true: 'Hoạt động', false: 'Tạm ngừng' };
+        document.getElementById('nqtBulkTitle').textContent = `Cập nhật sang ${nqtLabels[action]}`;
+        document.getElementById('nqtBulkMessage').textContent = `Lớp học sẽ được cập nhật trạng thái hiển thị.`;
+        document.getElementById('nqtBulkConfirmBtn').className = "inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5]";
+    }
+    nqtMoModal('modalBulkAction');
+}
+
+window.nqtXacNhanBulkAction = async function() {
+    if (nqtDaChon.length === 0) return;
+    const btn = document.getElementById('nqtBulkConfirmBtn');
+    const nqtRestoreBulk = nqtBtnLoading(btn, 'Đang xử lý...');
+
+    let nqtThanhCong = 0, nqtThatBai = 0;
+    for (const id of nqtDaChon) {
+        let res;
+        if (nqtBulkActionType === 'delete') {
+            res = await nqtApi.fetch(`/api/nxv-lop-hoc/${id}`, { method: 'DELETE' });
+        } else {
+            res = await nqtApi.fetch(`/api/nxv-lop-hoc/${id}`, { method: 'PUT', body: { g6_la_hoat_dong: nqtBulkActionType } });
+        }
+        if (res && res.nqt_thanh_cong) nqtThanhCong++;
+        else nqtThatBai++;
+    }
+
+    nqtRestoreBulk();
+    nqtDongModal('modalBulkAction');
+    nqtBoChonTatCa();
+    nqtTaiDuLieu();
+
+    if (nqtThatBai === 0) nqtToast(`Đã xử lý ${nqtThanhCong} lớp học!`, 'success');
+    else nqtToast(`Thành công: ${nqtThanhCong}, Thất bại: ${nqtThatBai}`, 'warn');
+}
+
+const nqtCols = {
+    lophoc: ['Tên lớp','Loại lớp','Độ khó','Trạng thái','Thao tác'],
+    lich:   ['Lớp học','Ngày dạy','Giờ bắt đầu','Giờ kết thúc','Đã đặt','Thao tác'],
+    datcho: ['Hội viên','Lớp / Lịch','Trạng thái','Ngày đặt','Thao tác'],
+};
+const nqtApis = {
+    lophoc: '/api/nxv-lop-hoc',
+    lich:   '/api/nxv-lich-lop-hoc',
+    datcho: '/api/nxv-dat-cho',
+};
+
+function nqtChuyenTab(tab) {
+    nqtTabHienTai = tab;
+    nqtTrang = 1;
+    nqtBoChonTatCa();
+    document.querySelectorAll('[id^=nqtTab]').forEach(b => {
+        b.className = 'px-4 py-2 text-sm font-medium border-b-2 border-transparent text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] -mb-px';
+    });
+    const map = {lophoc:'Lophoc', lich:'Lich', datcho:'Datcho'};
+    const btn = document.getElementById('nqtTab' + map[tab]);
+    if (btn) btn.className = 'px-4 py-2 text-sm font-medium border-b-2 border-[#191919] dark:border-[#fafafa] text-[#191919] dark:text-[#fafafa] -mb-px';
+    const btnThem = document.getElementById('nqtBtnThem');
+    if (btnThem) btnThem.style.display = tab === 'lophoc' ? 'inline-flex' : 'none';
+    nqtRenderHead();
+    nqtTaiDuLieu();
+}
+
+function nqtRenderHead() {
+    const cols = nqtCols[nqtTabHienTai];
+    document.getElementById('nqtTableHead').innerHTML = `<tr>${cols.map(c=>`<th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">${c}</th>`).join('')}</tr>`;
+}
+
+async function nqtTaiDuLieu() {
+    const q = document.getElementById('nqtTimKiem')?.value.trim() || '';
+    const url = `${nqtApis[nqtTabHienTai]}?g6_trang=${nqtTrang}&g6_gioi_han=15${q?'&g6_tim_kiem='+encodeURIComponent(q):''}`;
+    const tbody = document.getElementById('nqtTableBody');
+    const colspan = nqtCols[nqtTabHienTai].length;
+    tbody.innerHTML = `<tr><td colspan="${colspan}" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]"><i class="fas fa-circle-notch fa-spin mr-2"></i>Đang tải...</td></tr>`;
+    const res = await nqtApi.fetch(url);
+    if (!res?.nqt_thanh_cong) { tbody.innerHTML = `<tr><td colspan="${colspan}" class="px-4 py-8 text-center text-sm text-[#dc2626]">Không thể tải dữ liệu</td></tr>`; return; }
+    const data = res.nqt_du_lieu;
+    const list = data.nxv_danh_sach || data.g6_danh_sach || data || [];
+    if (!list.length) { tbody.innerHTML = `<tr><td colspan="${colspan}" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]">Không có dữ liệu</td></tr>`; return; }
+    tbody.innerHTML = list.map(r => nqtRenderRow(r)).join('');
+    const tong = data.nxv_tong || data.g6_tong || list.length;
+    nqtHienThiPagination(tong, colspan);
+}
+
+async function nqtLoadBranchesLop() {
+    const data = await nqtApi.fetch('/api/nqt-chi-nhanh');
+    if (data?.nqt_thanh_cong) {
+        const sel = document.getElementById('nqtChiNhanhLop');
+        if(sel) sel.innerHTML = '<option value="">-- Chọn chi nhánh --</option>' + data.nqt_du_lieu.map(b => `<option value="${b.g6_ma_chi_nhanh}">${b.g6_ten_chi_nhanh}</option>`).join('');
+    }
+}
+
+function nqtRenderRow(r) {
+    const badge = (v) => v ? `<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#dcfce7] dark:bg-[#16a34a]/20 text-[#16a34a]">Hoạt động</span>` : `<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#f5f5f5] dark:bg-[#333] text-[#666] dark:text-[#888]">Tạm ngừng</span>`;
+    const actions = (id, api) => `<button onclick="nqtXoa(${id},'${api}')" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button>`;
+    const t = nqtTabHienTai;
+    const doKhoMap = {co_ban:'Cơ bản', trung_binh:'Trung bình', nang_cao:'Nâng cao'};
+    if (t === 'lophoc') {
+        const lopId = r.nxv_ma_lop||r.g6_ma_lop_hoc||r.g6_ma_lop;
+        const isChecked = nqtDaChon.includes(lopId);
+        return `<tr data-row-id="${lopId}" class="cursor-pointer transition-colors ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]'}" onclick="nqtToggleRow(${lopId}, event)">
+        <td class="px-4 py-3"><p class="font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_lop||'—'}</p><p class="text-xs text-[#666] dark:text-[#888]">${r.g6_mo_ta||''}</p></td>
+        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa] capitalize">${r.g6_loai_lop||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${doKhoMap[r.g6_do_kho]||r.g6_do_kho||'—'}</td>
+        <td class="px-4 py-3">${badge(r.g6_la_hoat_dong)}</td>
+        <td class="px-4 py-3 text-right">${actions(lopId, 'nxv-lop-hoc')}</td></tr>`;
+    }
+    if (t === 'lich') return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
+        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_lop||r.nxv_ma_lop||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ngay_day?.slice(0,10)||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_gio_bat_dau||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_gio_ket_thuc||'—'}</td>
+        <td class="px-4 py-3 text-center text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_so_cho_da_dat||0}/${r.g6_suc_chua||'—'}</td>
+        <td class="px-4 py-3 text-right">${actions(r.nxv_ma_lich||r.g6_ma_lich, 'nxv-lich-lop-hoc')}</td></tr>`;
+    const trangThaiDat = {'cho_xac_nhan':'Chờ xác nhận','da_xac_nhan':'Đã xác nhận','vang_mat':'Vắng','hoan_thanh':'Hoàn thành','huy':'Đã huỷ'};
+    return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
+        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hoi_vien||r.g6_ma_hoi_vien||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_lop||r.nxv_ma_lich||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${trangThaiDat[r.g6_trang_thai]||r.g6_trang_thai||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ngay_tao?.slice(0,10)||'—'}</td>
+        <td class="px-4 py-3 text-right space-x-1">
+          ${r.g6_trang_thai==='cho_xac_nhan'?`<button onclick="nqtCapNhatDatCho(${r.g6_ma_dat_cho||r.nxv_ma_dat_cho},'da_xac_nhan')" class="text-xs px-2 py-1 rounded border border-[#bbf7d0] dark:border-[#166534] text-[#16a34a] hover:bg-[#f0fdf4] dark:hover:bg-[#166534]/20">Xác nhận</button>`:''}
+          ${r.g6_trang_thai!=='huy'&&r.g6_trang_thai!=='hoan_thanh'?`<button onclick="nqtCapNhatDatCho(${r.g6_ma_dat_cho||r.nxv_ma_dat_cho},'da_huy')" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Huỷ</button>`:'—'}
+        </td></tr>`;
+}
+
+function nqtHienThiPagination(tong, colspan) {
+    const totalPages = Math.ceil(tong / 15);
+    const pag = document.getElementById('nqtPagination');
+    document.getElementById('nqtPagInfo').textContent = `${tong} kết quả`;
+    if (totalPages <= 1) { pag.classList.add('hidden'); return; }
+    pag.classList.remove('hidden');
+    document.getElementById('nqtPagButtons').innerHTML = Array.from({length: Math.min(totalPages,7)}, (_,i) => i+1)
+        .map(i => `<button onclick="nqtTrang=${i};nqtTaiDuLieu()" class="px-2.5 py-1 text-xs rounded border ${i===nqtTrang?'bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] border-[#191919] dark:border-[#fafafa]':'border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] hover:bg-[#f5f5f5] dark:hover:bg-[#333]'}">${i}</button>`).join('');
+}
+
+function nqtXuLyTimKiem() {
+    clearTimeout(nqtTimKiemTimer);
+    nqtTimKiemTimer = setTimeout(() => { nqtTrang = 1; nqtTaiDuLieu(); }, 400);
+}
+
+async function nqtXoa(id, api) {
+    if (!confirm('Xoá bản ghi này?')) return;
+    const res = await nqtApi.fetch(`/api/${api}/${id}`, { method: 'DELETE' });
+    res?.nqt_thanh_cong ? (nqtToast('Đã xoá'), nqtTaiDuLieu()) : nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+}
+
+async function nqtCapNhatDatCho(id, trangThai) {
+    if (trangThai === 'da_huy' && !confirm('Huỷ đặt chỗ này?')) return;
+    const res = await nqtApi.fetch(`/api/nxv-dat-cho/${id}`, { method: 'PUT', body: { g6_trang_thai: trangThai } });
+    res?.nqt_thanh_cong ? (nqtToast(trangThai === 'da_xac_nhan' ? 'Đã xác nhận' : 'Đã huỷ'), nqtTaiDuLieu()) : nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+}
+
+async function nqtLuuLop(e) {
+    e.preventDefault();
+    const id = document.getElementById('nqtLopId').value;
+    const btn = document.getElementById('nqtBtnLuuLop');
+    const nqtRestore = nqtBtnLoading(btn, 'Đang lưu...');
+    const payload = {
+        g6_ten_lop: document.getElementById('nqtTenLop').value.trim(),
+        g6_loai_lop: document.getElementById('nqtLoaiLop').value,
+        g6_ma_chi_nhanh: parseInt(document.getElementById('nqtChiNhanhLop').value),
+        g6_do_kho: document.getElementById('nqtDoKho').value,
+        g6_mo_ta: document.getElementById('nqtMoTaLop').value.trim(),
+    };
+    const res = await nqtApi.fetch(id ? `/api/nxv-lop-hoc/${id}` : '/api/nxv-lop-hoc', { method: id?'PUT':'POST', body: payload });
+    nqtRestore();
+    if (res?.nqt_thanh_cong) { nqtToast('Lưu thành công'); nqtDongModal('nqtModalThemLop'); e.target.reset(); document.getElementById('nqtLopId').value=''; nqtTaiDuLieu(); }
+    else nqtToast(res?.nqt_thong_diep||'Lỗi', 'error');
+}
+
+// expose for inline onclick handlers
+window.nqtChuyenTab = nqtChuyenTab;
+window.nqtTaiDuLieu = nqtTaiDuLieu;
+window.nqtXuLyTimKiem = nqtXuLyTimKiem;
+window.nqtXoa = nqtXoa;
+window.nqtCapNhatDatCho = nqtCapNhatDatCho;
+window.nqtLuuLop = nqtLuuLop;
+
+nqtLoadBranchesLop();
+nqtRenderHead();
+nqtTaiDuLieu();
+</script>
+</body>
+</html>

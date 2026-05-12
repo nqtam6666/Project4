@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NQT GYM — Sức Mạnh Tối Đa</title>
+<meta name="description" content="NQT GYM - Không gian tập luyện nghiêm túc. Thiết bị chuẩn quốc tế, huấn luyện viên chuyên nghiệp."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   NQT GYM — INDUSTRIAL DESIGN SYSTEM
+   Bebas Neue (display) + DM Sans (body)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* — CSS Custom Properties — */
+:root {
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --transition: 0.3s ease;
+}
+
+[data-theme="dark"] {
+  --bg-page: #0d0d0d;
+  --bg-surface: #161616;
+  --bg-elevated: #1e1e1e;
+  --accent: #ff5533;
+  --accent-dim: #cc4429;
+  --accent-glow: rgba(255,85,51,0.15);
+  --text-primary: #f0ede8;
+  --text-secondary: #a8a49e;
+  --text-muted: #5a5854;
+  --border: rgba(255,255,255,0.08);
+  --border-accent: rgba(255,85,51,0.3);
+}
+
+[data-theme="light"] {
+  --bg-page: #f5f2ec;
+  --bg-surface: #ffffff;
+  --bg-elevated: #edeae4;
+  --accent: #0d0d0d;
+  --accent-dim: #333;
+  --accent-glow: rgba(13,13,13,0.08);
+  --text-primary: #0d0d0d;
+  --text-secondary: #5a5854;
+  --text-muted: #a8a49e;
+  --border: rgba(0,0,0,0.08);
+  --border-accent: rgba(13,13,13,0.2);
+}
+
+/* — Reset & Base — */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--transition), color var(--transition);
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* — Micro-label utility — */
+.micro-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.display-heading {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  color: var(--text-primary);
+}
+
+/* ═══ NAVBAR ═══ */
+.nqt-navbar {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 clamp(16px, 4vw, 48px);
+  background: var(--bg-page);
+  border-bottom: 0.5px solid var(--border);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.nqt-navbar-logo {
+  font-family: var(--font-display);
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.nqt-navbar-links {
+  display: flex; gap: 32px; align-items: center;
+  list-style: none;
+}
+
+.nqt-navbar-links a {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-secondary);
+  transition: color var(--transition);
+}
+.nqt-navbar-links a:hover { color: var(--accent); }
+
+.nqt-theme-toggle {
+  width: 36px; height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+  font-size: 20px;
+}
+.nqt-theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.nqt-navbar-cta {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 2px;
+  transition: all var(--transition);
+}
+[data-theme="light"] .nqt-navbar-cta { color: #f0ede8; }
+.nqt-navbar-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.nqt-navbar-right { display: flex; align-items: center; gap: 16px; }
+
+/* ═══ HERO ═══ */
+.nqt-hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 120px clamp(16px, 4vw, 48px) 80px;
+  position: relative;
+}
+
+.nqt-hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-bottom: 24px;
+}
+.nqt-hero-eyebrow .dot {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity:1; } 50% { opacity:0.3; }
+}
+
+.nqt-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 12vw, 160px);
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  margin-bottom: 32px;
+}
+.nqt-hero h1 .accent { color: var(--accent); }
+
+.nqt-hero-sub {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 480px;
+  margin-bottom: 40px;
+  line-height: 1.7;
+}
+
+.nqt-hero-actions { display: flex; gap: 16px; align-items: center; }
+
+.nqt-btn-primary {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 16px 40px;
+  background: var(--accent);
+  color: #fff;
+  border: none; border-radius: 2px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+[data-theme="light"] .nqt-btn-primary { color: #f0ede8; }
+.nqt-btn-primary:hover { transform: translateY(-2px); }
+
+.nqt-btn-outline {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 15px 32px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.nqt-btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+.nqt-hero-stats {
+  position: absolute;
+  right: clamp(16px, 4vw, 48px);
+  bottom: 80px;
+  display: flex; gap: 48px;
+}
+.nqt-hero-stat .num {
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: var(--accent);
+  line-height: 1;
+}
+.nqt-hero-stat .label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ═══ SECTION BASE ═══ */
+.nqt-section {
+  padding: 96px clamp(16px, 4vw, 48px);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.nqt-section-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 48px;
+  padding-bottom: 24px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.nqt-section-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 56px);
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+
+.nqt-section-count {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--text-muted);
+}
+
+/* ═══ FEATURES GRID ═══ */
+.nqt-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 0.5px solid var(--border);
+}
+
+.nqt-feature-card {
+  background: var(--bg-page);
+  padding: 40px 32px;
+  transition: background var(--transition);
+  position: relative;
+}
+.nqt-feature-card:hover { background: var(--bg-surface); }
+
+.nqt-feature-card .icon-wrap {
+  width: 48px; height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  color: var(--accent);
+  font-size: 24px;
+  transition: all var(--transition);
+}
+.nqt-feature-card:hover .icon-wrap {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.nqt-feature-card h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.nqt-feature-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ═══ PRICING ═══ */
+.nqt-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 0.5px solid var(--border);
+}
+
+.nqt-price-card {
+  background: var(--bg-page);
+  padding: 48px 32px;
+  display: flex; flex-direction: column;
+  transition: background var(--transition);
+  position: relative;
+}
+.nqt-price-card:hover { background: var(--bg-surface); }
+
+.nqt-price-card.featured {
+  background: var(--bg-surface);
+  border: 1px solid var(--accent);
+}
+
+.nqt-price-card .badge {
+  position: absolute; top: 16px; right: 16px;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 4px 12px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 2px;
+}
+[data-theme="light"] .nqt-price-card .badge { color: #f0ede8; }
+
+.nqt-price-card .tier {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.nqt-price-card .price {
+  font-family: var(--font-display);
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.nqt-price-card .period {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.nqt-price-features {
+  list-style: none;
+  flex: 1;
+  margin-bottom: 32px;
+}
+.nqt-price-features li {
+  font-size: 14px;
+  color: var(--text-secondary);
+  padding: 8px 0;
+  display: flex; align-items: center; gap: 12px;
+}
+.nqt-price-features li .material-symbols-outlined {
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.nqt-price-card .nqt-btn-primary { width: 100%; text-align: center; }
+
+/* ═══ CTA SECTION ═══ */
+.nqt-cta-section {
+  padding: 120px clamp(16px, 4vw, 48px);
+  text-align: center;
+  border-top: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+}
+
+.nqt-cta-section h2 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 96px);
+  text-transform: uppercase;
+  line-height: 0.9;
+  margin-bottom: 24px;
+}
+.nqt-cta-section p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto 40px;
+}
+
+/* ═══ FOOTER ═══ */
+.nqt-footer {
+  padding: 48px clamp(16px, 4vw, 48px);
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 0.5px solid var(--border);
+}
+.nqt-footer-brand {
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.nqt-footer-copy {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  .nqt-navbar-links { display: none; }
+  .nqt-features-grid,
+  .nqt-pricing-grid { grid-template-columns: 1fr; }
+  .nqt-hero-stats { position: static; margin-top: 48px; }
+  .nqt-section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .nqt-footer { flex-direction: column; gap: 16px; text-align: center; }
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="nqt-navbar" id="nqtNavbar">
+  <a href="/" class="nqt-navbar-logo">NQT GYM</a>
+  <ul class="nqt-navbar-links">
+    <li><a href="#features">Dịch vụ</a></li>
+    <li><a href="#pricing">Bảng giá</a></li>
+    <li><a href="#trainers">Huấn luyện viên</a></li>
+    <li><a href="#contact">Liên hệ</a></li>
+  </ul>
+  <div class="nqt-navbar-right">
+    <button class="nqt-theme-toggle" id="nqtThemeToggle" title="Toggle theme">
+      <span class="material-symbols-outlined" id="nqtThemeIcon">dark_mode</span>
+    </button>
+    <a href="/login" class="nqt-navbar-cta">Đăng nhập</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="nqt-hero">
+  <div class="nqt-hero-eyebrow">
+    <span class="dot"></span>
+    <span class="micro-label">Đang mở cửa — 05:00 → 23:00</span>
+  </div>
+  <h1>
+    Sức mạnh<br/>
+    <span class="accent">tối đa</span>
+  </h1>
+  <p class="nqt-hero-sub">
+    Không gian dành riêng cho tập luyện nghiêm túc. Thiết bị chuẩn quốc tế, huấn luyện viên chuyên nghiệp, kết quả có thể đong đếm.
+  </p>
+  <div class="nqt-hero-actions">
+    <button class="nqt-btn-primary" onclick="location.href='#pricing'">Bắt đầu ngay</button>
+    <button class="nqt-btn-outline" onclick="location.href='#features'">Khám phá</button>
+  </div>
+  <div class="nqt-hero-stats">
+    <div class="nqt-hero-stat">
+      <div class="num" data-count="1200">0</div>
+      <div class="label">Hội viên</div>
+    </div>
+    <div class="nqt-hero-stat">
+      <div class="num" data-count="15">0</div>
+      <div class="label">Huấn luyện viên</div>
+    </div>
+    <div class="nqt-hero-stat">
+      <div class="num" data-count="3">0</div>
+      <div class="label">Chi nhánh</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="nqt-section" id="features">
+  <div class="nqt-section-header">
+    <h2 class="nqt-section-title">Dịch vụ</h2>
+    <span class="nqt-section-count">(06)</span>
+  </div>
+  <div class="nqt-features-grid">
+    <div class="nqt-feature-card">
+      <div class="icon-wrap"><span class="material-symbols-outlined">fitness_center</span></div>
+      <h3>Phòng tập hiện đại</h3>
+      <p>Trang bị hơn 200+ thiết bị chuẩn quốc tế từ Technogym, Life Fitness và Hammer Strength.</p>
+    </div>
+    <div class="nqt-feature-card">
+      <div class="icon-wrap"><span class="material-symbols-outlined">sports_martial_arts</span></div>
+      <h3>Huấn luyện cá nhân</h3>
+      <p>Chương trình tập được thiết kế riêng bởi đội ngũ PT chuyên nghiệp, cam kết kết quả.</p>
+    </div>
+    <div class="nqt-feature-card">
+      <div class="icon-wrap"><span class="material-symbols-outlined">groups</span></div>
+      <h3>Lớp học nhóm</h3>
+      <p>Yoga, HIIT, Boxing, Spinning — hơn 30 lớp mỗi tuần với các HLV hàng đầu.</p>
+    </div>
+    <div class="nqt-feature-card">
+      <div class="icon-wrap"><span class="material-symbols-outlined">spa</span></div>
+      <h3>Sauna & phục hồi</h3>
+      <p>Hệ thống sauna hồng ngoại, phòng xông hơi và dịch vụ massage thể thao chuyên sâu.</p>
+    </div>
+    <div class="nqt-feature-card">
+      <div class="icon-wrap"><span class="material-symbols-outlined">local_cafe</span></div>
+      <h3>Nutrition bar</h3>
+      <p>Smoothie, protein shake và thực phẩm bổ sung chất lượng cao ngay tại phòng tập.</p>
+    </div>
+    <div class="nqt-feature-card">
+      <div class="icon-wrap"><span class="material-symbols-outlined">monitoring</span></div>
+      <h3>Theo dõi tiến độ</h3>
+      <p>Dashboard cá nhân với biểu đồ chi tiết, theo dõi chỉ số cơ thể và hiệu suất tập luyện.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section class="nqt-section" id="pricing">
+  <div class="nqt-section-header">
+    <h2 class="nqt-section-title">Bảng giá</h2>
+    <span class="nqt-section-count">(03)</span>
+  </div>
+  <div class="nqt-pricing-grid">
+    <div class="nqt-price-card">
+      <div class="tier">Standard</div>
+      <div class="price">500K</div>
+      <div class="period">VNĐ / tháng</div>
+      <ul class="nqt-price-features">
+        <li><span class="material-symbols-outlined">check</span>Toàn quyền khu tập</li>
+        <li><span class="material-symbols-outlined">check</span>Gửi xe miễn phí</li>
+        <li><span class="material-symbols-outlined">check</span>Tủ đồ cá nhân</li>
+      </ul>
+      <button class="nqt-btn-outline" style="width:100%;text-align:center;">Chọn gói</button>
+    </div>
+    <div class="nqt-price-card featured">
+      <span class="badge">Popular</span>
+      <div class="tier">Premium</div>
+      <div class="price">1.2M</div>
+      <div class="period">VNĐ / 3 tháng</div>
+      <ul class="nqt-price-features">
+        <li><span class="material-symbols-outlined">check</span>Toàn quyền khu tập</li>
+        <li><span class="material-symbols-outlined">check</span>Sauna miễn phí</li>
+        <li><span class="material-symbols-outlined">check</span>1 khách đi kèm</li>
+        <li><span class="material-symbols-outlined">check</span>1 buổi PT định hướng</li>
+      </ul>
+      <button class="nqt-btn-primary">Đăng ký ngay</button>
+    </div>
+    <div class="nqt-price-card">
+      <div class="tier">VIP</div>
+      <div class="price">4.5M</div>
+      <div class="period">VNĐ / năm</div>
+      <ul class="nqt-price-features">
+        <li><span class="material-symbols-outlined">check</span>Tất cả quyền lợi Premium</li>
+        <li><span class="material-symbols-outlined">check</span>2 khách đi kèm / lần</li>
+        <li><span class="material-symbols-outlined">check</span>5 buổi PT 1-on-1</li>
+        <li><span class="material-symbols-outlined">check</span>Ưu tiên đặt lớp</li>
+      </ul>
+      <button class="nqt-btn-outline" style="width:100%;text-align:center;">Chọn gói</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="nqt-cta-section" id="contact">
+  <h2>Sẵn sàng<br/><span style="color:var(--accent)">thay đổi?</span></h2>
+  <p>Đăng ký ngay hôm nay để nhận một ngày trải nghiệm miễn phí tại NQT GYM.</p>
+  <button class="nqt-btn-primary" onclick="location.href='/register'">Đăng ký miễn phí</button>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="nqt-footer">
+  <div class="nqt-footer-brand">NQT GYM</div>
+  <div class="nqt-footer-copy">© 2026 NQT GYM. All rights reserved.</div>
+</footer>
+
+<script>
+/* ── Theme Toggle ── */
+(function(){
+  const html = document.documentElement;
+  const saved = localStorage.getItem('nqt-dashboard-theme');
+  if (saved) html.setAttribute('data-theme', saved);
+  
+  const btn = document.getElementById('nqtThemeToggle');
+  const icon = document.getElementById('nqtThemeIcon');
+  
+  function updateIcon() {
+    icon.textContent = html.getAttribute('data-theme') === 'dark' ? 'light_mode' : 'dark_mode';
+  }
+  updateIcon();
+  
+  btn.addEventListener('click', function() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('nqt-dashboard-theme', next);
+    updateIcon();
+  });
+})();
+
+/* ── Counter Animation ── */
+document.addEventListener('DOMContentLoaded', function() {
+  const counters = document.querySelectorAll('[data-count]');
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.count);
+      let current = 0;
+      const step = Math.max(1, Math.floor(target / 60));
+      const timer = setInterval(function() {
+        current += step;
+        if (current >= target) { current = target; clearInterval(timer); }
+        el.textContent = current.toLocaleString('vi-VN');
+      }, 20);
+      observer.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(function(c) { observer.observe(c); });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+{% extends "admin/base_nqt.html" %}
+
+{% block title %}Phân Quyền Hệ Thống{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header Actions -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+        <div>
+            <h2 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">Quản lý Vai Trò</h2>
+            <p class="text-sm text-[#666] dark:text-[#888] mt-1">Thêm, sửa, xóa và thiết lập quyền hạn cho từng vai trò.</p>
+        </div>
+        <button onclick="nqtMoModalRole()" class="bg-[#191919] text-white px-4 py-2 rounded-md text-sm font-medium flex items-center shadow-md">
+            <i class="fas fa-plus mr-2"></i>Thêm Vai Trò
+        </button>
+    </div>
+
+    <!-- Roles Grid -->
+    <div id="nqtRolesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Roles will be rendered here -->
+    </div>
+
+</div>
+
+<!-- Modal: Role (Add/Edit) -->
+<div id="nqtModalRole" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#262626] rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-[#e5e5e5] dark:border-[#404040]">
+        <div class="px-6 py-4 border-b border-[#e5e5e5] dark:border-[#404040] flex justify-between items-center bg-[#fafaf9] dark:bg-[#1a1a1a]">
+            <h3 id="nqtRoleModalTitle" class="text-base font-semibold text-[#191919] dark:text-[#fafafa]">Thêm Vai Trò Mới</h3>
+            <button onclick="nqtDongModal('nqtModalRole')" class="text-[#a3a3a3] hover:text-[#191919] dark:hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="nqtRoleForm" onsubmit="nqtSaveRole(event)" class="p-6 space-y-4">
+            <input type="hidden" id="nqtRoleId" value="">
+            <div>
+                <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1.5">Tên Vai Trò <span class="text-red-500">*</span></label>
+                <input type="text" id="nqtRoleName" required class="w-full px-3 py-2 bg-white dark:bg-[#333] border border-[#d4d4d4] dark:border-[#525252] rounded-md text-sm text-[#191919] dark:text-[#fafafa] focus:ring-2 focus:ring-[#191919] dark:focus:ring-white focus:border-transparent outline-none transition-all placeholder-[#a3a3a3] dark:placeholder-[#666]" placeholder="VD: Nhân viên CSKH">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1.5">Mô tả</label>
+                <textarea id="nqtRoleDesc" rows="3" class="w-full px-3 py-2 bg-white dark:bg-[#333] border border-[#d4d4d4] dark:border-[#525252] rounded-md text-sm text-[#191919] dark:text-[#fafafa] focus:ring-2 focus:ring-[#191919] dark:focus:ring-white focus:border-transparent outline-none transition-all placeholder-[#a3a3a3] dark:placeholder-[#666]" placeholder="Mô tả chức năng của vai trò này..."></textarea>
+            </div>
+            <div class="pt-4 flex justify-end space-x-3">
+                <button type="button" onclick="nqtDongModal('nqtModalRole')" class="px-4 py-2 text-sm font-medium text-[#525252] dark:text-[#a3a3a3] hover:bg-[#f5f5f5] dark:hover:bg-[#404040] rounded-md transition-colors">Hủy</button>
+                <button type="submit" id="nqtRoleSubmitBtn" class="bg-[#191919] text-white px-4 py-2 rounded-md text-sm font-medium transition-all shadow-md">
+                    Lưu Vai Trò
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Assign Permissions -->
+<div id="nqtModalPermissions" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#262626] rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-[#e5e5e5] dark:border-[#404040]">
+        <div class="px-6 py-4 border-b border-[#e5e5e5] dark:border-[#404040] flex justify-between items-center bg-[#fafaf9] dark:bg-[#1a1a1a]">
+            <div>
+                <h3 class="text-base font-semibold text-[#191919] dark:text-[#fafafa]">Phân Quyền Vai Trò</h3>
+                <p id="nqtPermRoleName" class="text-xs text-[#666] dark:text-[#888] mt-1"></p>
+            </div>
+            <button onclick="nqtDongModal('nqtModalPermissions')" class="text-[#a3a3a3] hover:text-[#191919] dark:hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="p-6 flex-1 overflow-y-auto">
+            <div class="mb-4 flex items-center justify-between">
+                <div class="text-sm text-[#191919] dark:text-[#fafafa] font-medium">Danh sách quyền hệ thống</div>
+                <button type="button" onclick="nqtSelectAllPerms()" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Chọn tất cả</button>
+            </div>
+            <!-- Permissions Grid -->
+            <div id="nqtPermissionsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Grouped permissions will be rendered here -->
+            </div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-[#e5e5e5] dark:border-[#404040] flex justify-end space-x-3 bg-[#fafaf9] dark:bg-[#1a1a1a]">
+            <input type="hidden" id="nqtPermRoleId" value="">
+            <button type="button" onclick="nqtDongModal('nqtModalPermissions')" class="px-4 py-2 text-sm font-medium text-[#525252] dark:text-[#a3a3a3] hover:bg-[#f5f5f5] dark:hover:bg-[#404040] rounded-md transition-colors">Đóng</button>
+            <button type="button" onclick="nqtSavePermissions()" id="nqtPermSubmitBtn" class="bg-[#191919] text-white px-4 py-2 rounded-md text-sm font-medium transition-all shadow-md">
+                Cập Nhật Quyền
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let nqtRoles = [];
+    let nqtAllPermissions = {}; // grouped by nhom_quyen
+
+    async function nqtLoadData() {
+        // Load Roles
+        const resRoles = await nqtApi.fetch('/api/nqt-vai-tro');
+        if (resRoles && resRoles.nqt_thanh_cong) {
+            nqtRoles = resRoles.nqt_du_lieu;
+            nqtRenderRoles();
+        }
+
+        // Load Permissions
+        const resPerms = await nqtApi.fetch('/api/nqt-quyen-han');
+        if (resPerms && resPerms.nqt_thanh_cong) {
+            nqtAllPermissions = resPerms.nqt_du_lieu.g6_danh_sach_nhom;
+        }
+    }
+
+    function nqtRenderRoles() {
+        const grid = document.getElementById('nqtRolesGrid');
+        if (!nqtRoles || nqtRoles.length === 0) {
+            grid.innerHTML = `<div class="col-span-full py-12 text-center text-[#666] dark:text-[#888]">Chưa có vai trò nào được tạo.</div>`;
+            return;
+        }
+
+        grid.innerHTML = nqtRoles.map(r => `
+            <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-xl overflow-hidden flex flex-col relative group">
+                ${r.g6_ten_vai_tro === 'G6QuanTri' ? '<div class="absolute top-0 right-0 w-16 h-16 overflow-hidden"><div class="absolute top-2 -right-6 bg-red-500 text-white text-[10px] font-bold py-1 w-24 text-center transform rotate-45 shadow-sm">SYSTEM</div></div>' : ''}
+                
+                <div class="p-5 flex-1">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
+                        <i class="fas ${r.g6_ten_vai_tro === 'G6QuanTri' ? 'fa-crown' : 'fa-user-shield'} text-lg"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-[#191919] dark:text-[#fafafa] mb-1 pr-6">${r.g6_ten_vai_tro}</h3>
+                    <p class="text-sm text-[#666] dark:text-[#888] line-clamp-2">${r.g6_mo_ta || 'Không có mô tả'}</p>
+                </div>
+                
+                <div class="border-t border-[#e5e5e5] dark:border-[#404040] bg-[#fafaf9] dark:bg-[#1a1a1a] p-3 flex justify-between items-center">
+                    <button onclick="nqtOpenPermissions(${r.g6_ma_vai_tro})" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors flex items-center">
+                        <i class="fas fa-key mr-1.5"></i> Cấu hình quyền
+                    </button>
+                    ${r.g6_ten_vai_tro !== 'G6QuanTri' ? `
+                    <div class="flex space-x-2">
+                        <button onclick="nqtEditRole(${r.g6_ma_vai_tro})" class="w-7 h-7 rounded bg-white dark:bg-[#333] border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#a3a3a3] hover:text-[#191919] dark:hover:text-white flex items-center justify-center transition-colors" title="Sửa">
+                            <i class="fas fa-pen text-[10px]"></i>
+                        </button>
+                        <button onclick="nqtDeleteRole(${r.g6_ma_vai_tro}, '${r.g6_ten_vai_tro}')" class="w-7 h-7 rounded bg-white dark:bg-[#333] border border-[#e5e5e5] dark:border-[#404040] text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center transition-colors" title="Xóa">
+                            <i class="fas fa-trash text-[10px]"></i>
+                        </button>
+                    </div>
+                    ` : '<span class="text-[10px] text-[#a3a3a3] font-medium uppercase">Mặc định</span>'}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // --- Role CRUD ---
+    function nqtMoModalRole() {
+        document.getElementById('nqtRoleModalTitle').textContent = 'Thêm Vai Trò Mới';
+        document.getElementById('nqtRoleId').value = '';
+        document.getElementById('nqtRoleForm').reset();
+        nqtMoModal('nqtModalRole');
+    }
+
+    function nqtEditRole(id) {
+        const role = nqtRoles.find(r => r.g6_ma_vai_tro === id);
+        if (!role) return;
+        document.getElementById('nqtRoleModalTitle').textContent = 'Chỉnh Sửa Vai Trò';
+        document.getElementById('nqtRoleId').value = role.g6_ma_vai_tro;
+        document.getElementById('nqtRoleName').value = role.g6_ten_vai_tro;
+        document.getElementById('nqtRoleDesc').value = role.g6_mo_ta || '';
+        nqtMoModal('nqtModalRole');
+    }
+
+    async function nqtSaveRole(e) {
+        e.preventDefault();
+        const id = document.getElementById('nqtRoleId').value;
+        const name = document.getElementById('nqtRoleName').value.trim();
+        const desc = document.getElementById('nqtRoleDesc').value.trim();
+
+        const btn = document.getElementById('nqtRoleSubmitBtn');
+        const restore = nqtBtnLoading(btn);
+
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/nqt-vai-tro/${id}` : '/api/nqt-vai-tro';
+
+        const res = await nqtApi.fetch(url, {
+            method,
+            body: { g6_ten_vai_tro: name, g6_mo_ta: desc }
+        });
+
+        restore();
+
+        if (res && res.nqt_thanh_cong) {
+            nqtToast(res.nqt_thong_diep, 'success');
+            nqtDongModal('nqtModalRole');
+            nqtLoadData();
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi hệ thống', 'error');
+        }
+    }
+
+    async function nqtDeleteRole(id, name) {
+        if (!confirm(`Bạn có chắc chắn muốn xóa vai trò "${name}" không? Hành động này không thể hoàn tác.`)) return;
+        
+        const res = await nqtApi.fetch(`/api/nqt-vai-tro/${id}`, { method: 'DELETE' });
+        if (res && res.nqt_thanh_cong) {
+            nqtToast(res.nqt_thong_diep, 'success');
+            nqtLoadData();
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi hệ thống', 'error');
+        }
+    }
+
+    // --- Permissions Assignment ---
+    async function nqtOpenPermissions(roleId) {
+        const role = nqtRoles.find(r => r.g6_ma_vai_tro === roleId);
+        if (!role) return;
+
+        document.getElementById('nqtPermRoleName').textContent = `Đang thiết lập cho: ${role.g6_ten_vai_tro}`;
+        document.getElementById('nqtPermRoleId').value = roleId;
+
+        if (role.g6_ten_vai_tro === 'G6QuanTri') {
+            nqtToast('Vai trò G6QuanTri mặc định có toàn quyền, không cần thiết lập.', 'info');
+            return;
+        }
+
+        // Fetch current permissions for this role
+        const res = await nqtApi.fetch(`/api/nqt-vai-tro/${roleId}/nqt-quyen`);
+        let currentPerms = [];
+        if (res && res.nqt_thanh_cong) {
+            currentPerms = res.nqt_du_lieu.g6_danh_sach_quyen_id || [];
+        }
+
+        // Render permissions grid
+        const container = document.getElementById('nqtPermissionsContainer');
+        let html = '';
+        
+        for (const [group, perms] of Object.entries(nqtAllPermissions)) {
+            html += `
+                <div class="bg-[#fafaf9] dark:bg-[#333] border border-[#e5e5e5] dark:border-[#404040] rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-[#191919] dark:text-[#fafafa] border-b border-[#e5e5e5] dark:border-[#404040] pb-2 mb-3 uppercase tracking-wide flex justify-between items-center">
+                        ${group}
+                        <label class="inline-flex items-center space-x-2 text-xs font-normal text-blue-600 cursor-pointer">
+                            <input type="checkbox" class="nqt-group-check rounded text-blue-600 focus:ring-blue-500" onchange="nqtToggleGroup(this, '${group}')">
+                            <span>Tất cả</span>
+                        </label>
+                    </h4>
+                    <div class="space-y-2 group-container-${group.replace(/\s+/g, '-')}">
+            `;
+            
+            perms.forEach(p => {
+                const checked = currentPerms.includes(p.g6_ma_quyen) ? 'checked' : '';
+                html += `
+                        <label class="flex items-start space-x-3 cursor-pointer group hover:bg-black/5 dark:hover:bg-white/5 p-1 -mx-1 rounded transition-colors">
+                            <div class="flex-shrink-0 mt-0.5">
+                                <input type="checkbox" name="permissions[]" value="${p.g6_ma_quyen}" class="nqt-perm-cb rounded border-gray-300 text-[#191919] focus:ring-[#191919] bg-white dark:bg-[#262626] dark:border-[#525252]" ${checked}>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-[#191919] dark:text-[#fafafa] font-medium leading-none">${p.g6_ten_quyen}</p>
+                            </div>
+                        </label>
+                `;
+            });
+            html += `</div></div>`;
+        }
+        
+        container.innerHTML = html;
+        nqtMoModal('nqtModalPermissions');
+    }
+
+    function nqtSelectAllPerms() {
+        document.querySelectorAll('.nqt-perm-cb').forEach(cb => cb.checked = true);
+        document.querySelectorAll('.nqt-group-check').forEach(cb => cb.checked = true);
+    }
+
+    function nqtToggleGroup(cb, group) {
+        const container = document.querySelector(`.group-container-${group.replace(/\s+/g, '-')}`);
+        if (container) {
+            container.querySelectorAll('.nqt-perm-cb').forEach(c => c.checked = cb.checked);
+        }
+    }
+
+    async function nqtSavePermissions() {
+        const roleId = document.getElementById('nqtPermRoleId').value;
+        const checkboxes = document.querySelectorAll('.nqt-perm-cb:checked');
+        const selectedPerms = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+        const btn = document.getElementById('nqtPermSubmitBtn');
+        const restore = nqtBtnLoading(btn);
+
+        const res = await nqtApi.fetch(`/api/nqt-vai-tro/${roleId}/nqt-phan-quyen`, {
+            method: 'POST',
+            body: { danh_sach_quyen: selectedPerms }
+        });
+
+        restore();
+
+        if (res && res.nqt_thanh_cong) {
+            nqtToast(res.nqt_thong_diep, 'success');
+            nqtDongModal('nqtModalPermissions');
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi hệ thống', 'error');
+        }
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+        nqtLoadData();
+    });
+</script>
+{% endblock %}

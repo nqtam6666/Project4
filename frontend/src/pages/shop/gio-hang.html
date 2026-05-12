@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Giỏ Hàng — NQT GYM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{
+  "neon-lime":"#C8F135","neon-dim":"#A8D120","bg-main":"#0A0A0F","bg-card":"#12121A",
+  "bg-elevated":"#1C1C28","text-primary":"#F5F5F0","text-secondary":"#A1A1AA","text-muted":"#52525B",
+  "border-subtle":"rgba(255,255,255,0.06)","border-neon":"rgba(200,241,53,0.3)","neon-glow":"rgba(200,241,53,0.15)",
+  "error":"#EF4444",
+},fontFamily:{"sans":["Inter","sans-serif"],"mono":["JetBrains Mono","monospace"],"caps":["Space Grotesk","sans-serif"]}}}}
+</script>
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}</style>
+</head>
+<body class="bg-bg-main text-text-primary font-sans antialiased">
+<div class="pt-[72px]">
+  <div class="max-w-screen-lg mx-auto px-6 py-12">
+    <div class="flex items-center gap-3 mb-8">
+      <a href="/src/pages/shop.html" class="text-text-muted hover:text-neon-lime transition-colors">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <h1 class="text-2xl font-black text-white">Giỏ Hàng</h1>
+      <span id="nqtCartCount" class="bg-neon-glow border border-border-neon text-neon-lime text-xs font-caps uppercase tracking-wide px-3 py-1 rounded-full font-semibold"></span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Cart items -->
+      <div class="lg:col-span-2">
+        <div id="nqtCartItems">
+          <div class="flex justify-center py-16"><div class="w-6 h-6 border-2 border-neon-lime border-t-transparent rounded-full animate-spin"></div></div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="lg:col-span-1">
+        <div class="bg-bg-card border border-border-subtle rounded-2xl p-6 sticky top-24">
+          <h2 class="font-bold text-white mb-5">Tổng đơn hàng</h2>
+          <div class="space-y-3 mb-5 text-sm">
+            <div class="flex justify-between text-text-secondary">
+              <span>Tạm tính</span>
+              <span id="nqtSubtotal" class="font-mono">0₫</span>
+            </div>
+            <div class="flex justify-between text-text-secondary">
+              <span>Phí vận chuyển</span>
+              <span class="text-text-muted font-mono">Tính lúc checkout</span>
+            </div>
+          </div>
+          <div class="border-t border-border-subtle pt-4 mb-5">
+            <div class="flex justify-between font-bold">
+              <span class="text-white">Tổng cộng</span>
+              <span id="nqtTotal" class="text-neon-lime font-mono text-lg">0₫</span>
+            </div>
+          </div>
+          <!-- Coupon -->
+          <div class="flex gap-2 mb-5">
+            <input id="nqtCoupon" type="text" placeholder="Mã giảm giá" class="flex-1 bg-bg-elevated border border-border-subtle rounded-xl px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-border-neon focus:outline-none"/>
+            <button onclick="nqtApplyCoupon()" class="border border-border-neon text-neon-lime px-4 py-2 rounded-xl font-caps text-xs uppercase tracking-wide font-semibold hover:bg-neon-glow transition-colors">Áp dụng</button>
+          </div>
+          <a href="/src/pages/shop/thanh-toan.html" id="nqtCheckoutBtn" class="block w-full text-center bg-neon-lime text-bg-main py-3.5 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">
+            Thanh toán
+          </a>
+          <a href="/src/pages/shop.html" class="block w-full text-center text-text-muted text-sm mt-3 hover:text-text-secondary transition-colors">
+            Tiếp tục mua sắm
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+import { nqtRenderPublicNav, nqtFormatPrice, nqtGetCart, nqtSaveCart } from '/src/js/nqtLayout.js';
+nqtRenderPublicNav('shop');
+
+function nqtRenderCart() {
+  const cart = nqtGetCart();
+  const el = document.getElementById('nqtCartItems');
+  document.getElementById('nqtCartCount').textContent = `${cart.length} sản phẩm`;
+
+  if (!cart.length) {
+    el.innerHTML = `<div class="text-center py-20">
+      <span class="material-symbols-outlined text-5xl text-text-muted block mb-4">shopping_cart</span>
+      <p class="text-text-secondary mb-5">Giỏ hàng trống.</p>
+      <a href="/src/pages/shop.html" class="inline-block bg-neon-lime text-bg-main px-6 py-3 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Vào Shop</a>
+    </div>`;
+    document.getElementById('nqtSubtotal').textContent = '0₫';
+    document.getElementById('nqtTotal').textContent = '0₫';
+    document.getElementById('nqtCheckoutBtn').classList.add('opacity-50', 'pointer-events-none');
+    return;
+  }
+
+  el.innerHTML = `<div class="space-y-3">${cart.map((item, i) => `
+    <div class="bg-bg-card border border-border-subtle rounded-xl p-4 flex items-center gap-4">
+      <div class="w-16 h-16 bg-bg-elevated rounded-xl flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-2xl text-text-muted">inventory_2</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold text-white text-sm truncate">${item.name}</div>
+        <div class="text-neon-lime font-mono text-sm mt-0.5">${nqtFormatPrice(item.price)}</div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button onclick="nqtChangeQty(${i},-1)" class="w-8 h-8 rounded-lg border border-border-subtle text-text-secondary hover:border-border-neon hover:text-neon-lime transition-colors flex items-center justify-center text-lg">−</button>
+        <span class="font-mono text-white w-6 text-center">${item.qty || 1}</span>
+        <button onclick="nqtChangeQty(${i},1)" class="w-8 h-8 rounded-lg border border-border-subtle text-text-secondary hover:border-border-neon hover:text-neon-lime transition-colors flex items-center justify-center text-lg">+</button>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <div class="font-mono font-bold text-white text-sm">${nqtFormatPrice((item.price||0)*(item.qty||1))}</div>
+        <button onclick="nqtRemove(${i})" class="text-error text-xs hover:underline mt-1 block">Xoá</button>
+      </div>
+    </div>`).join('')}</div>`;
+
+  const subtotal = cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  document.getElementById('nqtSubtotal').textContent = nqtFormatPrice(subtotal);
+  document.getElementById('nqtTotal').textContent = nqtFormatPrice(subtotal);
+  document.getElementById('nqtCheckoutBtn').classList.remove('opacity-50','pointer-events-none');
+}
+
+window.nqtChangeQty = function(idx, delta) {
+  const cart = nqtGetCart();
+  cart[idx].qty = Math.max(1, (cart[idx].qty||1) + delta);
+  nqtSaveCart(cart);
+  nqtRenderCart();
+};
+window.nqtRemove = function(idx) {
+  const cart = nqtGetCart();
+  cart.splice(idx, 1);
+  nqtSaveCart(cart);
+  nqtRenderCart();
+};
+window.nqtApplyCoupon = function() {
+  const code = document.getElementById('nqtCoupon').value.trim();
+  if (!code) return;
+  alert('Tính năng mã giảm giá sẽ được áp dụng lúc checkout.');
+};
+
+nqtRenderCart();
+</script>
+</body>
+</html>

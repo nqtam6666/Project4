@@ -6,10 +6,10 @@ from backend.app.models.g6_nguoi_dung import (  # noqa: F401
 from backend.app.models.g6_chi_nhanh import G6ChiNhanh, G6ThietBi  # noqa: F401
 from backend.app.models.g6_nhan_vien import G6NhanVien, G6LichLamViec  # noqa: F401
 from backend.app.models.g6_hoi_vien import (  # noqa: F401
-    G6HoiVien, G6GoiTap, G6DangKyGoiTap, G6DiemDanh, G6ChiSoCoThe,
+    G6GoiTap, G6DangKyGoiTap, G6DiemDanh, G6ChiSoCoThe,
 )
 from backend.app.models.g6_khach_hang import (  # noqa: F401
-    G6KhachHang, G6DiaChiGiaoHang, G6HangThanhVien, G6DiemKhachHang, G6GiaoDichDiem,
+    G6DiaChiGiaoHang, G6HangThanhVien, G6DiemKhachHang, G6GiaoDichDiem,
 )
 from backend.app.models.g6_don_hang import (  # noqa: F401
     G6GioHang, G6ChiTietGioHang, G6DonHang, G6ChiTietDonHang, G6LichSuDonHang,
@@ -31,3 +31,7 @@ from backend.app.models.g6_san_pham import (  # noqa: F401
     G6ThanhPhanDinhDuong, G6ChungNhanSanPham,
     G6TonKho, G6LichSuTonKho,
 )
+from backend.app.models.nxv_danh_gia import NxvDanhGiaHLV, NxvDanhGiaLopHoc  # noqa: F401
+from backend.app.models.nxv_chuong_trinh_tap import NxvChuongTrinhTapLuyen, NxvBaiTapTrongNgay  # noqa: F401
+from backend.app.models.nxv_bao_tri import NxvLichSuBaoTri, NxvPhieuSuaChua  # noqa: F401
+from backend.app.models.nxv_su_kien import NxvSuKien, NxvDangKySuKien  # noqa: F401

@@ -1,0 +1,152 @@
+{% extends "admin/base_nqt.html" %}
+{% block title %}Vận chuyển{% endblock %}
+{% block content %}
+<div class="space-y-4">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">Vận chuyển</h1>
+            <p class="text-sm text-[#666] dark:text-[#888]">Quản lý đơn vị vận chuyển và vùng giao hàng</p>
+        </div>
+        <button onclick="nqtMoModal('nqtModalThemDV')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors">
+            <i class="fas fa-plus"></i>Thêm đơn vị
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex space-x-1 border-b border-[#e5e5e5] dark:border-[#404040]">
+        <button onclick="nqtChuyenTab('donvi')" id="nqtTabDonvi" class="px-4 py-2 text-sm font-medium border-b-2 border-[#191919] dark:border-[#fafafa] text-[#191919] dark:text-[#fafafa] -mb-px">Đơn vị VC</button>
+        <button onclick="nqtChuyenTab('vung')" id="nqtTabVung" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] -mb-px">Vùng giao hàng</button>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead id="nqtTableHead" class="bg-[#fafafa] dark:bg-[#333] border-b border-[#e5e5e5] dark:border-[#404040]"></thead>
+                <tbody id="nqtTableBody" class="divide-y divide-[#e5e5e5] dark:divide-[#404040]">
+                    <tr><td colspan="5" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]"><i class="fas fa-circle-notch fa-spin mr-2"></i>Đang tải...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Đơn vị -->
+<div id="nqtModalThemDV" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)nqtDongModal('nqtModalThemDV')">
+    <div class="bg-white dark:bg-[#262626] rounded-lg w-full max-w-md border border-[#e5e5e5] dark:border-[#404040]">
+        <div class="px-6 py-4 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">Thêm đơn vị vận chuyển</h3>
+            <button onclick="nqtDongModal('nqtModalThemDV')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="nqtFormDV" onsubmit="nqtLuuDV(event)" class="p-6 space-y-4">
+            <input type="hidden" id="nqtDVId">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Tên đơn vị *</label>
+                    <input type="text" id="nqtTenDV" required placeholder="Giao Hàng Nhanh"
+                        class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Mã viết tắt *</label>
+                    <input type="text" id="nqtMaDV" required placeholder="GHN" maxlength="10"
+                        class="w-full px-3 py-2 text-sm font-mono uppercase bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="nqtDongModal('nqtModalThemDV')" class="px-4 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333]">Huỷ</button>
+                <button type="submit" id="nqtBtnLuuDV" class="px-4 py-2 text-sm bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5]">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let nqtTabHienTai = 'donvi';
+let nqtCarrierId = null;
+const nqtTabCfg = {
+    donvi: { api: () => '/api/nqt-van-chuyen?g6_tat_ca=1', cols: ['Tên đơn vị','Mã','Trạng thái','Thao tác'] },
+    vung:  { api: () => nqtCarrierId ? `/api/nqt-van-chuyen/${nqtCarrierId}/nqt-vung` : null, cols: ['Tỉnh/Thành','Phí cơ bản','Phí/kg','Miễn phí từ','Thời gian dự kiến','Thao tác'] },
+};
+
+function nqtChuyenTab(tab) {
+    nqtTabHienTai = tab;
+    document.querySelectorAll('[id^=nqtTab]').forEach(b => b.className = 'px-4 py-2 text-sm font-medium border-b-2 border-transparent text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] -mb-px');
+    const map = {donvi:'Donvi',vung:'Vung'};
+    const btn = document.getElementById('nqtTab'+map[tab]);
+    if (btn) btn.className = 'px-4 py-2 text-sm font-medium border-b-2 border-[#191919] dark:border-[#fafafa] text-[#191919] dark:text-[#fafafa] -mb-px';
+    nqtRenderHead(); nqtTaiDuLieu();
+}
+
+function nqtRenderHead() {
+    document.getElementById('nqtTableHead').innerHTML = `<tr>${nqtTabCfg[nqtTabHienTai].cols.map(c=>`<th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">${c}</th>`).join('')}</tr>`;
+}
+
+async function nqtTaiDuLieu() {
+    const cfg = nqtTabCfg[nqtTabHienTai];
+    const tbody = document.getElementById('nqtTableBody');
+    const nc = cfg.cols.length;
+    const nqtUrl = cfg.api();
+    if (!nqtUrl) {
+        tbody.innerHTML = `<tr><td colspan="${nc}" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]">Chọn một đơn vị vận chuyển để xem vùng giao hàng</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = `<tr><td colspan="${nc}" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]"><i class="fas fa-circle-notch fa-spin mr-2"></i>Đang tải...</td></tr>`;
+    const res = await nqtApi.fetch(nqtUrl);
+    if (!res?.nqt_thanh_cong) { tbody.innerHTML = `<tr><td colspan="${nc}" class="px-4 py-8 text-center text-sm text-[#dc2626]">Không thể tải dữ liệu</td></tr>`; return; }
+    const list = res.nqt_du_lieu?.g6_danh_sach || res.nqt_du_lieu || [];
+    if (!list.length) { tbody.innerHTML = `<tr><td colspan="${nc}" class="px-4 py-8 text-center text-sm text-[#666] dark:text-[#888]">Không có dữ liệu</td></tr>`; return; }
+    tbody.innerHTML = list.map(r => nqtRenderRow(r)).join('');
+}
+
+function nqtRenderRow(r) {
+    const fmt = n => n!=null?Number(n).toLocaleString('vi-VN')+'đ':'—';
+    const badge = v => v?`<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#dcfce7] dark:bg-[#16a34a]/20 text-[#16a34a]">Hoạt động</span>`:`<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#f5f5f5] dark:bg-[#333] text-[#666] dark:text-[#888]">Tạm dừng</span>`;
+    if (nqtTabHienTai === 'donvi') return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a] cursor-pointer" onclick="nqtChonDonVi(${r.g6_ma_don_vi},'${r.g6_ten||''}')">
+        <td class="px-4 py-3 font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten||'—'}</td>
+        <td class="px-4 py-3 text-xs font-mono font-semibold text-[#191919] dark:text-[#fafafa] bg-[#f5f5f5] dark:bg-[#333] rounded px-2">${r.g6_ma||'—'}</td>
+        <td class="px-4 py-3">${badge(r.g6_la_hoat_dong)}</td>
+        <td class="px-4 py-3 text-right"><button onclick="nqtXoa(${r.g6_ma_don_vi},'nqt-van-chuyen')" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Vô hiệu</button></td></tr>`;
+    return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
+        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_tinh_thanh||'—'}</td>
+        <td class="px-4 py-3 text-sm font-mono text-[#191919] dark:text-[#fafafa]">${fmt(r.g6_phi_co_ban)}</td>
+        <td class="px-4 py-3 text-sm font-mono text-[#666] dark:text-[#888]">${fmt(r.g6_phi_theo_kg)}</td>
+        <td class="px-4 py-3 text-sm font-mono text-[#666] dark:text-[#888]">${fmt(r.g6_mien_phi_tu)}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_thoi_gian_du_kien||'—'}</td>
+        <td class="px-4 py-3 text-right"><button onclick="nqtXoaVung(${r.g6_ma_vung})" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
+}
+
+function nqtChonDonVi(id, ten) {
+    nqtCarrierId = id;
+    nqtChuyenTab('vung');
+    if (typeof nqtToast === 'function') nqtToast(`Đang xem vùng của: ${ten}`, 'info');
+}
+
+async function nqtLuuDV(e) {
+    e.preventDefault();
+    const btn = document.getElementById('nqtBtnLuuDV');
+    const nqtRestore = nqtBtnLoading(btn,'Đang lưu...');
+    const payload = { g6_ten: document.getElementById('nqtTenDV').value.trim(), g6_ma: document.getElementById('nqtMaDV').value.trim().toUpperCase() };
+    const res = await nqtApi.fetch('/api/nqt-van-chuyen',{method:'POST',body:payload});
+    nqtRestore();
+    if (res?.nqt_thanh_cong) { nqtToast('Thêm thành công'); nqtDongModal('nqtModalThemDV'); e.target.reset(); nqtTaiDuLieu(); }
+    else nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+}
+
+async function nqtXoa(id,api) {
+    if (!confirm('Vô hiệu hóa đơn vị này?')) return;
+    const res = await nqtApi.fetch(`/api/${api}/${id}`,{method:'DELETE'});
+    res?.nqt_thanh_cong?(nqtToast('Đã vô hiệu'),nqtTaiDuLieu()):nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+}
+
+async function nqtXoaVung(id) {
+    if (!confirm('Xoá vùng giao hàng này?')) return;
+    const res = await nqtApi.fetch(`/api/nqt-vung-van-chuyen/${id}`,{method:'DELETE'});
+    res?.nqt_thanh_cong?(nqtToast('Đã xoá'),nqtTaiDuLieu()):nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+}
+
+nqtRenderHead();
+nqtTaiDuLieu();
+</script>
+{% endblock %}
