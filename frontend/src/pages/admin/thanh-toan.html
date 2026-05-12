@@ -24,17 +24,9 @@
     <div class="flex flex-col sm:flex-row gap-3">
         <select id="nqtLocTrangThai" onchange="nqtTaiDanhSach(1)" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
             <option value="">Tất cả trạng thái</option>
-            <option value="cho_xu_ly">Chờ xử lý</option>
-            <option value="thanh_cong">Thành công</option>
-            <option value="that_bai">Thất bại</option>
-            <option value="hoan_tien">Hoàn tiền</option>
         </select>
         <select id="nqtLocPhuongThuc" onchange="nqtTaiDanhSach(1)" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
             <option value="">Tất cả phương thức</option>
-            <option value="cod">COD</option>
-            <option value="bank_transfer">Chuyển khoản</option>
-            <option value="momo">MoMo</option>
-            <option value="vnpay">VNPay</option>
         </select>
         <button onclick="nqtTaiDanhSach()" class="px-3 py-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors" title="Làm mới">
             <i class="fas fa-sync-alt text-[#666] dark:text-[#888] text-sm"></i>
@@ -280,6 +272,18 @@ nqtInitAdminLayout('thanh-toan');
     };
 
     const nqtLoaiGdMap = { 'don_hang': 'Đơn hàng', 'goi_tap': 'Gói tập', 'dich_vu': 'Dịch vụ', 'nap_diem': 'Nạp điểm' };
+
+    const locTrangThai = document.getElementById('nqtLocTrangThai');
+    if (locTrangThai) {
+        locTrangThai.innerHTML = '<option value="">Tất cả trạng thái</option>' + 
+            Object.entries(nqtTrangThaiMap).map(([k, v]) => `<option value="${k}">${v.text}</option>`).join('');
+    }
+
+    const locPhuongThuc = document.getElementById('nqtLocPhuongThuc');
+    if (locPhuongThuc) {
+        locPhuongThuc.innerHTML = '<option value="">Tất cả phương thức</option>' + 
+            Object.entries(nqtPhuongThucMap).map(([k, v]) => `<option value="${k}">${v.text}</option>`).join('');
+    }
 
     function nqtDinhDangTien(nqtSo) {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(nqtSo || 0);

@@ -1,10 +1,10 @@
 import bcrypt
 from datetime import datetime, timezone, timedelta
 from flask import Blueprint, request
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, get_jwt, verify_jwt_in_request
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, get_jwt, verify_jwt_in_request, decode_token
 from backend.app import db
 from backend.app.models.g6_nguoi_dung import G6NguoiDung, G6NguoiDungVaiTro, G6VaiTroQuyen
-from backend.app.models.g6_xac_thuc import G6PhienDangNhap
+from backend.app.models.g6_xac_thuc import G6PhienDangNhap, G6NhatKyHoatDong
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
 from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
 from backend.app.services.g6_dich_vu_cau_hinh import NqtDichVuCauHinh
@@ -58,23 +58,58 @@ def nqt_dang_nhap():
         for vtq in ndvt.g6_vai_tro.g6_quyen:
             nqt_quyen_list.append(vtq.g6_quyen.g6_ten_quyen)
 
-    nqt_additional_claims = {
-        'g6_vai_tro': nqt_vai_tro_list,
-        'g6_quyen': list(set(nqt_quyen_list)),
-        'g6_ho_ten': nqt_user.g6_ho_ten,
-        'g6_loai': 'nhan_vien',
-    }
-    nqt_jwt_expiry = int(NqtDichVuCauHinh.g6_lay('g6_jwt_het_han_phut', nqt_mac_dinh=60)) * 60
-    nqt_access_token = create_access_token(
-        identity=str(nqt_user.g6_ma_nguoi_dung),
-        additional_claims=nqt_additional_claims,
-        expires_delta=timedelta(seconds=nqt_jwt_expiry)
-    )
     nqt_refresh_expiry = int(NqtDichVuCauHinh.g6_lay('g6_jwt_refresh_ngay', nqt_mac_dinh=7))
-    nqt_refresh_token = create_refresh_token(
-        identity=str(nqt_user.g6_ma_nguoi_dung),
-        expires_delta=timedelta(days=nqt_refresh_expiry)
-    )
+    loai_nd = 'G6QuanTri' if 'G6QuanTri' in nqt_vai_tro_list else 'G6NhanVien'
+
+    try:
+        phien = G6PhienDangNhap(
+            g6_loai_nguoi_dung=loai_nd,
+            g6_ma_nguoi_dung=nqt_user.g6_ma_nguoi_dung,
+            g6_ma_refresh_token_hash='',
+            g6_thiet_bi=request.user_agent.string[:200] if request.user_agent else None,
+            g6_dia_chi_ip=request.remote_addr,
+            g6_het_han_luc=datetime.utcnow() + timedelta(days=nqt_refresh_expiry)
+        )
+        db.session.add(phien)
+        db.session.flush()
+
+        nqt_additional_claims = {
+            'g6_vai_tro': nqt_vai_tro_list,
+            'g6_quyen': list(set(nqt_quyen_list)),
+            'g6_ho_ten': nqt_user.g6_ho_ten,
+            'g6_loai': 'nhan_vien',
+            'g6_phien_id': phien.g6_ma_phien
+        }
+        nqt_jwt_expiry = int(NqtDichVuCauHinh.g6_lay('g6_jwt_het_han_phut', nqt_mac_dinh=60)) * 60
+        nqt_access_token = create_access_token(
+            identity=str(nqt_user.g6_ma_nguoi_dung),
+            additional_claims=nqt_additional_claims,
+            expires_delta=timedelta(seconds=nqt_jwt_expiry)
+        )
+        nqt_refresh_token = create_refresh_token(
+            identity=str(nqt_user.g6_ma_nguoi_dung),
+            additional_claims={'g6_phien_id': phien.g6_ma_phien},
+            expires_delta=timedelta(days=nqt_refresh_expiry)
+        )
+
+        import hashlib
+        nqt_decoded_refresh = decode_token(nqt_refresh_token)
+        nqt_jti_hash = hashlib.sha256(nqt_decoded_refresh['jti'].encode()).hexdigest()
+        phien.g6_ma_refresh_token_hash = nqt_jti_hash
+
+        nhat_ky = G6NhatKyHoatDong(
+            g6_loai_nguoi_dung=loai_nd,
+            g6_ma_nguoi_dung=nqt_user.g6_ma_nguoi_dung,
+            g6_hanh_dong='Đăng nhập hệ thống',
+            g6_ten_bang='G6NguoiDung',
+            g6_ma_ban_ghi=nqt_user.g6_ma_nguoi_dung,
+            g6_dia_chi_ip=request.remote_addr,
+            g6_thiet_bi=request.user_agent.string[:200] if request.user_agent else None
+        )
+        db.session.add(nhat_ky)
+        db.session.commit()
+    except Exception:
+        pass
 
     return nqt_ok({
         'g6_access_token': nqt_access_token,
@@ -91,6 +126,18 @@ def nqt_lam_moi_token():
         return nqt_loi('Refresh token không hợp lệ hoặc đã hết hạn', nqt_ma_trang=401)
 
     nqt_identity = get_jwt_identity()
+    nqt_jti = get_jwt().get('jti')
+    import hashlib
+    nqt_jti_hash = hashlib.sha256(nqt_jti.encode()).hexdigest()
+    
+    nqt_phien = G6PhienDangNhap.query.filter_by(
+        g6_ma_nguoi_dung=int(nqt_identity),
+        g6_ma_refresh_token_hash=nqt_jti_hash,
+    ).first()
+
+    if not nqt_phien or nqt_phien.g6_la_thu_hoi:
+        return nqt_loi('Phiên đăng nhập đã bị thu hồi hoặc hết hạn', nqt_ma_trang=401)
+
     nqt_user = G6NguoiDung.query.get(int(nqt_identity))
     if not nqt_user or not nqt_user.g6_la_hoat_dong:
         return nqt_loi('Tài khoản không hợp lệ', nqt_ma_trang=401)

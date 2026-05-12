@@ -6,7 +6,7 @@ class NxvChuongTrinhTapLuyen(db.Model):
     __tablename__ = 'NxvChuongTrinhTapLuyen'
 
     nxv_ma_chuong_trinh = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nxv_ma_hoi_vien = db.Column(db.Integer, db.ForeignKey('G6HoiVien.g6_ma_hoi_vien', ondelete='CASCADE'), nullable=False)
+    nxv_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung', ondelete='CASCADE'), nullable=False)
     nxv_ma_hlv = db.Column(db.Integer, db.ForeignKey('G6HuanLuyenVien.g6_ma_hlv', ondelete='SET NULL'))
     nxv_ten = db.Column(db.String(200), nullable=False)
     nxv_muc_tieu = db.Column(db.String(100))

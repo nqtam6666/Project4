@@ -30,8 +30,7 @@
                 <option value="">Tất cả chi nhánh</option>
             </select>
             <select id="filterTrangThai" onchange="nqtLoadNhanVien()" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
-                <option value="">Đang làm</option>
-                <option value="nghi_viec">Nghỉ việc</option>
+                <option value="">Tất cả trạng thái</option>
             </select>
             <button onclick="nqtLoadNhanVien()" class="px-3 py-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors" title="Làm mới">
                 <i class="fas fa-sync-alt text-[#666] dark:text-[#888] text-sm"></i>
@@ -44,7 +43,8 @@
                 <table class="w-full text-sm">
                     <thead class="bg-[#fafafa] dark:bg-[#333] border-b border-[#e5e5e5] dark:border-[#404040]">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Họ tên</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Nhân viên</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Tài khoản</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Chi nhánh</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">SĐT / Email</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">Ngày vào làm</th>
@@ -54,7 +54,7 @@
                         </tr>
                     </thead>
                     <tbody id="staffTableBody" class="divide-y divide-[#e5e5e5] dark:divide-[#404040]">
-                        <tr><td colspan="7" class="px-6 py-6"><div class="space-y-2"><div class="h-4 w-3/4 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div><div class="h-4 w-1/2 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div><div class="h-4 w-5/6 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div></div></td></tr>
+                        <tr><td colspan="8" class="px-6 py-6"><div class="space-y-2"><div class="h-4 w-3/4 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div><div class="h-4 w-1/2 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div><div class="h-4 w-5/6 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -194,9 +194,6 @@
                     <div>
                         <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Trạng thái</label>
                         <select name="g6_trang_thai" class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
-                            <option value="dang_lam">Đang làm</option>
-                            <option value="nghi_phep">Nghỉ phép</option>
-                            <option value="nghi_viec">Nghỉ việc</option>
                         </select>
                     </div>
                 </div>
@@ -234,6 +231,19 @@ nqtInitAdminLayout('nhan-vien');
     let nqtBranchMap = {};
     let nqtDaChon = [];
     let nqtBulkActionType = null;
+    
+    const nqtStatusLabels = { dang_lam: 'Đang làm', nghi_phep: 'Nghỉ phép', nghi_viec: 'Nghỉ việc' };
+
+    const locTrangThai = document.getElementById('filterTrangThai');
+    if (locTrangThai) {
+        locTrangThai.innerHTML = '<option value="">Tất cả trạng thái</option>' + 
+            Object.entries(nqtStatusLabels).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+    }
+
+    const editTrangThai = document.querySelector('select[name="g6_trang_thai"]');
+    if (editTrangThai) {
+        editTrangThai.innerHTML = Object.entries(nqtStatusLabels).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+    }
 
     window.nqtToggleRow = function(id, e) {
         // Don't toggle when clicking action buttons
@@ -321,7 +331,7 @@ nqtInitAdminLayout('nhan-vien');
 
     async function nqtLoadNhanVien() {
         const tbody = document.getElementById('staffTableBody');
-        tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-6"><div class="space-y-2"><div class="h-4 w-3/4 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div><div class="h-4 w-1/2 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div><div class="h-4 w-5/6 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-6"><div class="space-y-2"><div class="h-4 w-3/4 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div><div class="h-4 w-1/2 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div><div class="h-4 w-5/6 animate-pulse rounded-md bg-[#e5e5e5] dark:bg-[#404040]"></div></div></td></tr>';
 
         const nqtChiNhanh = document.getElementById('filterChiNhanh').value;
         const nqtTrangThai = document.getElementById('filterTrangThai').value;
@@ -334,7 +344,7 @@ nqtInitAdminLayout('nhan-vien');
 
         nqtAllStaff = data.nqt_du_lieu;
         if (nqtAllStaff.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-12 text-center text-[#666] dark:text-[#888]">Không có nhân viên nào</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-12 text-center text-[#666] dark:text-[#888]">Không có nhân viên nào</td></tr>';
             return;
         }
 
@@ -343,7 +353,6 @@ nqtInitAdminLayout('nhan-vien');
             nghi_phep: 'bg-[#fef3c7] text-[#d97706] dark:bg-[#92400e]/20 dark:text-[#fcd34d]',
             nghi_viec: 'bg-[#f5f5f5] text-[#525252] dark:bg-[#404040] dark:text-[#a3a3a3]',
         };
-        const nqtStatusLabels = { dang_lam: 'Đang làm', nghi_phep: 'Nghỉ phép', nghi_viec: 'Nghỉ việc' };
 
         tbody.innerHTML = nqtAllStaff.map(s => {
             const nqtName = (s.g6_ho_ten || '').replace(/'/g, "\\'");
@@ -353,6 +362,12 @@ nqtInitAdminLayout('nhan-vien');
             return `
                 <tr data-row-id="${s.g6_ma_nhan_vien}" class="cursor-pointer transition-all duration-100 ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#333]'}" onclick="nqtToggleRow(${s.g6_ma_nhan_vien}, event)">
                     <td class="px-4 py-3 font-medium text-[#191919] dark:text-[#fafafa]">${s.g6_ho_ten}</td>
+                    <td class="px-4 py-3">
+                        <div class="text-[#191919] dark:text-[#fafafa] font-medium">${s.g6_ten_dang_nhap || '—'}</div>
+                        <div class="flex flex-wrap gap-1 mt-1">
+                            ${(s.g6_vai_tro || []).map(vt => `<span class="px-1.5 py-0.5 rounded-sm bg-[#eef2ff] text-[#4338ca] dark:bg-[#312e81]/30 dark:text-[#a5b4fc] text-[10px] uppercase font-bold">${vt}</span>`).join('')}
+                        </div>
+                    </td>
                     <td class="px-4 py-3 text-[#666] dark:text-[#888]">${nqtBranchName}</td>
                     <td class="px-4 py-3">
                         <p class="text-[#191919] dark:text-[#fafafa]">${s.g6_so_dien_thoai || '—'}</p>

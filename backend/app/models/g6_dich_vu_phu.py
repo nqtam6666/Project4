@@ -39,7 +39,7 @@ class G6DatDichVu(db.Model):
 
     g6_ma_dat_dich_vu = db.Column(db.Integer, primary_key=True, autoincrement=True)
     g6_ma_dich_vu = db.Column(db.Integer, db.ForeignKey('G6DichVuPhu.g6_ma_dich_vu'), nullable=False)
-    g6_ma_hoi_vien = db.Column(db.Integer, db.ForeignKey('G6HoiVien.g6_ma_hoi_vien'), nullable=False)
+    g6_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung'), nullable=False)
     g6_thoi_gian_bat_dau = db.Column(db.DateTime, nullable=False)
     g6_thoi_gian_ket_thuc = db.Column(db.DateTime, nullable=False)
     g6_trang_thai = db.Column(db.String(20), nullable=False, default='da_dat')  # 'da_dat','da_dung','da_huy'
@@ -54,7 +54,7 @@ class G6DatDichVu(db.Model):
         return {
             'g6_ma_dat_dich_vu': self.g6_ma_dat_dich_vu,
             'g6_ma_dich_vu': self.g6_ma_dich_vu,
-            'g6_ma_hoi_vien': self.g6_ma_hoi_vien,
+            'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_thoi_gian_bat_dau': self.g6_thoi_gian_bat_dau.isoformat() if self.g6_thoi_gian_bat_dau else None,
             'g6_thoi_gian_ket_thuc': self.g6_thoi_gian_ket_thuc.isoformat() if self.g6_thoi_gian_ket_thuc else None,
             'g6_trang_thai': self.g6_trang_thai,

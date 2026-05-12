@@ -7,7 +7,7 @@ from backend.app.models.g6_san_pham import (
     G6TonKho, G6LichSuTonKho,
 )
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_ghi_nhat_ky
 
 nxv_san_pham_bp = Blueprint('nxv_san_pham', __name__, url_prefix='/api')
 
@@ -247,6 +247,7 @@ def nxv_lay_chi_tiet_sp(nxv_id):
 
 @nxv_san_pham_bp.route('/nxv-san-pham', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
+@nqt_ghi_nhat_ky('Thêm sản phẩm', 'G6SanPham')
 def nxv_tao_san_pham():
     nxv_data = request.get_json() or {}
     nxv_ten = nxv_data.get('g6_ten_san_pham', '').strip()
@@ -295,6 +296,7 @@ def nxv_tao_san_pham():
 
 @nxv_san_pham_bp.route('/nxv-san-pham/<int:nxv_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_ghi_nhat_ky('Cập nhật sản phẩm', 'G6SanPham')
 def nxv_cap_nhat_sp(nxv_id):
     nxv_row = G6SanPham.query.get_or_404(nxv_id)
     nxv_data = request.get_json() or {}
@@ -335,6 +337,7 @@ def nxv_cap_nhat_sp(nxv_id):
 
 @nxv_san_pham_bp.route('/nxv-san-pham/<int:nxv_id>', methods=['DELETE'])
 @nqt_yeu_cau_dang_nhap
+@nqt_ghi_nhat_ky('Xóa sản phẩm', 'G6SanPham')
 def nxv_xoa_sp(nxv_id):
     nxv_row = G6SanPham.query.get_or_404(nxv_id)
     nxv_row.g6_la_hoat_dong = False

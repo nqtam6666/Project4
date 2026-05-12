@@ -62,6 +62,48 @@
     </div>
 </div>
 
+<!-- Bulk Action Bar -->
+<div id="nqtBulkBar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
+    <div class="bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] px-4 py-2.5 rounded-md shadow-lg flex items-center space-x-3">
+        <span class="text-sm">Đã chọn <strong id="nqtSoDaChon">0</strong> khách hàng</span>
+        <div class="w-px h-5 bg-white/20 dark:bg-[#191919]/20"></div>
+        <button onclick="nqtMoBulkModal(true)" class="px-3 py-1.5 bg-[#16a34a] hover:bg-[#15803d] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-check-circle"></i><span>Hoạt động</span>
+        </button>
+        <button onclick="nqtMoBulkModal(false)" class="px-3 py-1.5 bg-[#d97706] hover:bg-[#b45309] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-lock"></i><span>Tạm khóa</span>
+        </button>
+        <button onclick="nqtMoBulkModal('delete')" class="px-3 py-1.5 bg-[#dc2626] hover:bg-[#b91c1c] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-trash-can"></i><span>Xoá</span>
+        </button>
+        <button onclick="nqtBoChonTatCa()" class="p-1.5 hover:bg-white/10 dark:hover:bg-[#191919]/10 rounded-md transition-colors" title="Bỏ chọn">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Modal: Bulk Action -->
+<div id="modalBulkAction" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalBulkAction')">
+    <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-sm shadow-lg">
+        <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+            <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]" id="nqtBulkTitle">Thao tác hàng loạt</h3>
+            <button onclick="nqtDongModal('modalBulkAction')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-6 text-center">
+            <div class="w-12 h-12 mx-auto mb-4 bg-[#f5f5f5] dark:bg-[#404040] rounded-full flex items-center justify-center">
+                <i class="fas fa-users text-[#525252] dark:text-[#a3a3a3] text-xl" id="nqtBulkIcon"></i>
+            </div>
+            <p class="text-sm text-[#666] dark:text-[#888] mb-1">Bạn đang thực hiện thao tác cho</p>
+            <p class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]"><span id="nqtBulkCount">0</span> khách hàng</p>
+            <p class="text-xs text-[#a3a3a3] dark:text-[#666] mt-2" id="nqtBulkMessage">Trạng thái sẽ được cập nhật.</p>
+        </div>
+        <div class="px-4 py-3 border-t border-[#e5e5e5] dark:border-[#404040] flex justify-end space-x-2">
+            <button onclick="nqtDongModal('modalBulkAction')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+            <button onclick="nqtXacNhanBulkAction()" id="nqtBulkConfirmBtn" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal: Thêm -->
 <div id="modalThemKhachHang" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalThemKhachHang')">
     <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
@@ -158,6 +200,87 @@ nqtInitAdminLayout('khach-hang');
 
 (function() {
     let nqtTrangHienTai = 1, nqtTimKiemHienTai = '', nqtIdXoa = null, nqtDanhSachHang = [];
+    let nqtDaChon = [];
+    let nqtBulkActionType = null;
+
+    window.nqtToggleRow = function(id, e) {
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        const idx = nqtDaChon.indexOf(id);
+        if (idx === -1) nqtDaChon.push(id);
+        else nqtDaChon.splice(idx, 1);
+        nqtCapNhatBulkBar();
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            const trId = parseInt(tr.dataset.rowId);
+            const sel = nqtDaChon.includes(trId);
+            if (sel) {
+                tr.classList.remove('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+                tr.classList.add('nqt-row-selected');
+            } else {
+                tr.classList.remove('nqt-row-selected');
+                tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+            }
+        });
+    };
+
+    window.nqtBoChonTatCa = function() {
+        nqtDaChon = [];
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            tr.classList.remove('nqt-row-selected');
+            tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+        });
+        nqtCapNhatBulkBar();
+    };
+
+    function nqtCapNhatBulkBar() {
+        const bar = document.getElementById('nqtBulkBar');
+        document.getElementById('nqtSoDaChon').textContent = nqtDaChon.length;
+        if (nqtDaChon.length > 0) bar.classList.remove('hidden');
+        else bar.classList.add('hidden');
+    }
+
+    window.nqtMoBulkModal = function(action) {
+        nqtBulkActionType = action;
+        document.getElementById('nqtBulkCount').textContent = nqtDaChon.length;
+        
+        if (action === 'delete') {
+            document.getElementById('nqtBulkTitle').textContent = `Xoá khách hàng`;
+            document.getElementById('nqtBulkMessage').textContent = `Dữ liệu sẽ bị xoá vĩnh viễn và không thể khôi phục.`;
+            document.getElementById('nqtBulkConfirmBtn').className = "inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#dc2626] text-white text-sm font-medium rounded-md hover:bg-[#b91c1c]";
+        } else {
+            const nqtLabels = { true: 'Hoạt động', false: 'Tạm khóa' };
+            document.getElementById('nqtBulkTitle').textContent = `Cập nhật sang ${nqtLabels[action]}`;
+            document.getElementById('nqtBulkMessage').textContent = `Khách hàng sẽ được cập nhật trạng thái.`;
+            document.getElementById('nqtBulkConfirmBtn').className = "inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5]";
+        }
+        nqtMoModal('modalBulkAction');
+    }
+
+    window.nqtXacNhanBulkAction = async function() {
+        if (nqtDaChon.length === 0) return;
+        const btn = document.getElementById('nqtBulkConfirmBtn');
+        const nqtRestoreBulk = nqtBtnLoading(btn, 'Đang xử lý...');
+
+        let nqtThanhCong = 0, nqtThatBai = 0;
+        for (const id of nqtDaChon) {
+            let res;
+            if (nqtBulkActionType === 'delete') {
+                res = await nqtApi.fetch(`/api/nqt-khach-hang/${id}`, { method: 'DELETE' });
+            } else {
+                res = await nqtApi.fetch(`/api/nqt-khach-hang/${id}`, { method: 'PUT', body: { g6_la_hoat_dong: nqtBulkActionType } });
+            }
+            if (res && res.nqt_thanh_cong) nqtThanhCong++;
+            else nqtThatBai++;
+        }
+
+        nqtRestoreBulk();
+        nqtDongModal('modalBulkAction');
+        nqtBoChonTatCa();
+        nqtTaiDanhSach(nqtTrangHienTai);
+
+        if (nqtThatBai === 0) nqtToast(`Đã xử lý ${nqtThanhCong} khách hàng!`, 'success');
+        else nqtToast(`Thành công: ${nqtThanhCong}, Thất bại: ${nqtThatBai}`, 'warn');
+    }
+
     const nqtMauHang = { 'bronze': 'bg-[#fef3c7] text-[#92400e]', 'silver': 'bg-[#f3f4f6] text-[#374151]', 'gold': 'bg-[#fef9c3] text-[#a16207]', 'diamond': 'bg-[#cffafe] text-[#0e7490]' };
 
     async function nqtTaiDanhSachHang() { const res = await nqtApi.fetch('/api/nqt-hang-thanh-vien'); if (res?.nqt_thanh_cong) nqtDanhSachHang = res.nqt_du_lieu; }
@@ -182,8 +305,9 @@ nqtInitAdminLayout('khach-hang');
             const mau = nqtMauHang[hang.g6_icon] || nqtMauHang['bronze'];
             const trangThai = kh.g6_la_hoat_dong !== false;
             const cls = trangThai ? 'bg-[#dcfce7] text-[#16a34a] dark:bg-[#166534]/20 dark:text-[#4ade80]' : 'bg-[#fef2f2] text-[#dc2626] dark:bg-[#991b1b]/20 dark:text-[#f87171]';
+            const isChecked = nqtDaChon.includes(kh.g6_ma_khach_hang);
             return `
-            <tr class="hover:bg-[#fafafa] dark:hover:bg-[#333] transition-colors">
+            <tr data-row-id="${kh.g6_ma_khach_hang}" class="cursor-pointer transition-colors ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#333]'}" onclick="nqtToggleRow(${kh.g6_ma_khach_hang}, event)">
                 <td class="px-4 py-3 font-mono text-[#191919] dark:text-[#fafafa]">#${kh.g6_ma_khach_hang}</td>
                 <td class="px-4 py-3 font-medium text-[#191919] dark:text-[#fafafa]">${kh.g6_ho_ten}</td>
                 <td class="px-4 py-3"><p class="text-[#191919] dark:text-[#fafafa]">${kh.g6_email || 'N/A'}</p><p class="text-xs text-[#666] dark:text-[#888]">${kh.g6_so_dien_thoai || ''}</p></td>

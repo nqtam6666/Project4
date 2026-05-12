@@ -2,7 +2,7 @@
 export default {
   content: [
     './index.html',
-    './src/**/*.{html,js}',
+    './src/**/*.{html,js,jsx}',
   ],
   darkMode: 'class',
   theme: {
@@ -34,6 +34,8 @@ export default {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         display: ['Inter', 'system-ui', 'sans-serif'],
         caps: ['Lexend', 'sans-serif'],
+        header: ['Barlow Condensed', 'sans-serif'],
+        body: ['Cormorant Garamond', 'serif'],
       },
       fontSize: {
         'display-xl': ['36px', { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '800' }],

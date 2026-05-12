@@ -8,8 +8,8 @@ from flask_jwt_extended import (
     get_jwt_identity, get_jwt, verify_jwt_in_request
 )
 from backend.app import db
-from backend.app.models.g6_hoi_vien import G6HoiVien, G6DangKyGoiTap, G6DiemDanh, G6ChiSoCoThe
-from backend.app.models.nqt_hoi_vien_auth import NqtHoiVienAuth
+from backend.app.models.g6_nguoi_dung import G6NguoiDung
+from backend.app.models.g6_hoi_vien import G6DangKyGoiTap, G6DiemDanh, G6ChiSoCoThe
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
 from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
 from backend.app.services.g6_dich_vu_cau_hinh import NqtDichVuCauHinh
@@ -59,30 +59,26 @@ def nqt_dang_ky_hoi_vien():
         return nqt_loi('Email không hợp lệ', nqt_ma_trang=422)
 
     # Check duplicate SĐT
-    if G6HoiVien.query.filter_by(g6_so_dien_thoai=nqt_sdt).first():
+    if G6NguoiDung.query.filter_by(g6_so_dien_thoai=nqt_sdt).first():
         return nqt_loi('Số điện thoại đã được đăng ký', nqt_ma_trang=409)
 
     try:
-        # Tạo G6HoiVien
-        nqt_hoi_vien = G6HoiVien(
+        # Tạo G6NguoiDung (Hội viên)
+        nqt_hoi_vien = G6NguoiDung(
             g6_ma_chi_nhanh=nqt_ma_chi_nhanh,
             g6_ho_ten=nqt_ho_ten,
             g6_so_dien_thoai=nqt_sdt,
             g6_email=nqt_email,
+            g6_la_hoi_vien=True,
             g6_ngay_dang_ky=datetime.utcnow().date(),
             g6_ma_qr=str(uuid.uuid4())[:12].upper(),
         )
+        nqt_hoi_vien.nqt_dat_mat_khau(nqt_mat_khau)
         db.session.add(nqt_hoi_vien)
-        db.session.flush()  # lấy g6_ma_hoi_vien
-
-        # Tạo NqtHoiVienAuth
-        nqt_auth = NqtHoiVienAuth(nqt_ma_hoi_vien=nqt_hoi_vien.g6_ma_hoi_vien)
-        nqt_auth.nqt_dat_mat_khau(nqt_mat_khau)
-        db.session.add(nqt_auth)
         db.session.commit()
 
         # Trả JWT luôn
-        nqt_tokens = _nqt_tao_jwt(nqt_hoi_vien.g6_ma_hoi_vien, nqt_hoi_vien.g6_ho_ten)
+        nqt_tokens = _nqt_tao_jwt(nqt_hoi_vien.g6_ma_nguoi_dung, nqt_hoi_vien.g6_ho_ten)
         return nqt_ok({
             **nqt_tokens,
             'nqt_hoi_vien': nqt_hoi_vien.g6_to_dict(),
@@ -103,36 +99,32 @@ def nqt_dang_nhap_hoi_vien():
     if not nqt_sdt or not nqt_mat_khau:
         return nqt_loi('Thiếu số điện thoại hoặc mật khẩu')
 
-    nqt_hoi_vien = G6HoiVien.query.filter_by(g6_so_dien_thoai=nqt_sdt).first()
+    nqt_hoi_vien = G6NguoiDung.query.filter_by(g6_so_dien_thoai=nqt_sdt, g6_la_hoi_vien=True).first()
     if not nqt_hoi_vien:
         return nqt_loi('Số điện thoại hoặc mật khẩu không đúng', nqt_ma_trang=401)
 
-    nqt_auth = nqt_hoi_vien.nqt_xac_thuc
-    if not nqt_auth:
-        return nqt_loi('Tài khoản chưa được kích hoạt. Vui lòng đăng ký.', nqt_ma_trang=403)
-
     # Kiểm tra khóa
-    if nqt_auth.nqt_khoa_den and nqt_auth.nqt_khoa_den > datetime.utcnow():
+    if nqt_hoi_vien.g6_khoa_den and nqt_hoi_vien.g6_khoa_den > datetime.utcnow():
         return nqt_loi('Tài khoản tạm thời bị khóa. Thử lại sau 30 phút.', nqt_ma_trang=403)
 
-    if not nqt_auth.nqt_la_hoat_dong:
+    if not nqt_hoi_vien.g6_la_hoat_dong:
         return nqt_loi('Tài khoản đã bị vô hiệu hóa', nqt_ma_trang=403)
 
     # Xác thực mật khẩu
-    if not nqt_auth.nqt_kiem_tra_mat_khau(nqt_mat_khau):
+    if not nqt_hoi_vien.nqt_kiem_tra_mat_khau(nqt_mat_khau):
         nqt_so_lan_sai = int(NqtDichVuCauHinh.g6_lay('nqt_so_lan_sai_hoi_vien', nqt_mac_dinh=5))
-        nqt_auth.nqt_lan_dang_nhap_sai += 1
-        if nqt_auth.nqt_lan_dang_nhap_sai >= nqt_so_lan_sai:
-            nqt_auth.nqt_khoa_tai_khoan()
+        nqt_hoi_vien.g6_lan_dang_nhap_sai += 1
+        if nqt_hoi_vien.g6_lan_dang_nhap_sai >= nqt_so_lan_sai:
+            nqt_hoi_vien.nqt_khoa_tai_khoan()
         db.session.commit()
         return nqt_loi('Số điện thoại hoặc mật khẩu không đúng', nqt_ma_trang=401)
 
     # Reset
-    nqt_auth.nqt_lan_dang_nhap_sai = 0
-    nqt_auth.nqt_khoa_den = None
+    nqt_hoi_vien.g6_lan_dang_nhap_sai = 0
+    nqt_hoi_vien.g6_khoa_den = None
     db.session.commit()
 
-    nqt_tokens = _nqt_tao_jwt(nqt_hoi_vien.g6_ma_hoi_vien, nqt_hoi_vien.g6_ho_ten)
+    nqt_tokens = _nqt_tao_jwt(nqt_hoi_vien.g6_ma_nguoi_dung, nqt_hoi_vien.g6_ho_ten)
     return nqt_ok({
         **nqt_tokens,
         'nqt_hoi_vien': nqt_hoi_vien.g6_to_dict(),
@@ -149,7 +141,7 @@ def nqt_lay_profile_hoi_vien():
     except Exception:
         return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
 
-    nqt_hoi_vien = G6HoiVien.query.get(nqt_ma)
+    nqt_hoi_vien = G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_ma, g6_la_hoi_vien=True).first()
     if not nqt_hoi_vien:
         return nqt_loi('Không tìm thấy hội viên', nqt_ma_trang=404)
 
@@ -176,7 +168,7 @@ def nqt_cap_nhat_profile_hoi_vien():
     except Exception:
         return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
 
-    nqt_hoi_vien = G6HoiVien.query.get(nqt_ma)
+    nqt_hoi_vien = G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_ma, g6_la_hoi_vien=True).first()
     if not nqt_hoi_vien:
         return nqt_loi('Không tìm thấy hội viên', nqt_ma_trang=404)
 
@@ -225,15 +217,14 @@ def nqt_doi_mat_khau_hoi_vien():
     if len(nqt_mk_moi) < 6:
         return nqt_loi('Mật khẩu mới phải có ít nhất 6 ký tự', nqt_ma_trang=422)
 
-    nqt_hoi_vien = G6HoiVien.query.get(nqt_ma)
-    if not nqt_hoi_vien or not nqt_hoi_vien.nqt_xac_thuc:
+    nqt_hoi_vien = G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_ma, g6_la_hoi_vien=True).first()
+    if not nqt_hoi_vien:
         return nqt_loi('Không tìm thấy tài khoản', nqt_ma_trang=404)
 
-    nqt_auth = nqt_hoi_vien.nqt_xac_thuc
-    if not nqt_auth.nqt_kiem_tra_mat_khau(nqt_mk_cu):
+    if not nqt_hoi_vien.nqt_kiem_tra_mat_khau(nqt_mk_cu):
         return nqt_loi('Mật khẩu hiện tại không đúng', nqt_ma_trang=401)
 
-    nqt_auth.nqt_dat_mat_khau(nqt_mk_moi)
+    nqt_hoi_vien.nqt_dat_mat_khau(nqt_mk_moi)
     db.session.commit()
     return nqt_ok(None, 'Đổi mật khẩu thành công')
 
@@ -248,7 +239,7 @@ def nqt_lay_dang_ky_goi_tap_cua_toi():
     except Exception:
         return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
 
-    nqt_list = G6DangKyGoiTap.query.filter_by(g6_ma_hoi_vien=nqt_ma)\
+    nqt_list = G6DangKyGoiTap.query.filter_by(g6_ma_nguoi_dung=nqt_ma)\
         .order_by(G6DangKyGoiTap.g6_ngay_bat_dau.desc()).all()
     return nqt_ok([d.g6_to_dict() for d in nqt_list])
 
@@ -264,7 +255,7 @@ def nqt_lay_diem_danh_cua_toi():
         return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
 
     nqt_gioi_han = request.args.get('g6_gioi_han', 20, type=int)
-    nqt_list = G6DiemDanh.query.filter_by(g6_ma_hoi_vien=nqt_ma)\
+    nqt_list = G6DiemDanh.query.filter_by(g6_ma_nguoi_dung=nqt_ma)\
         .order_by(G6DiemDanh.g6_thoi_gian_vao.desc())\
         .limit(nqt_gioi_han).all()
     return nqt_ok([d.g6_to_dict() for d in nqt_list])
@@ -281,7 +272,7 @@ def nqt_lay_chi_so_cua_toi():
         return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
 
     nqt_gioi_han = request.args.get('g6_gioi_han', 10, type=int)
-    nqt_list = G6ChiSoCoThe.query.filter_by(g6_ma_hoi_vien=nqt_ma)\
+    nqt_list = G6ChiSoCoThe.query.filter_by(g6_ma_nguoi_dung=nqt_ma)\
         .order_by(G6ChiSoCoThe.g6_ngay_do.desc())\
         .limit(nqt_gioi_han).all()
     return nqt_ok([c.g6_to_dict() for c in nqt_list])
@@ -294,12 +285,12 @@ def nqt_quen_mat_khau():
     import string
     nqt_data = request.get_json() or {}
     nqt_sdt = (nqt_data.get('g6_so_dien_thoai') or '').strip()
-    nqt_hoi_vien = G6HoiVien.query.filter_by(g6_so_dien_thoai=nqt_sdt).first()
-    if not nqt_hoi_vien or not nqt_hoi_vien.nqt_xac_thuc:
+    nqt_hoi_vien = G6NguoiDung.query.filter_by(g6_so_dien_thoai=nqt_sdt, g6_la_hoi_vien=True).first()
+    if not nqt_hoi_vien:
         return nqt_loi('Không tìm thấy số điện thoại đã đăng ký', nqt_ma_trang=404)
     nqt_token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-    nqt_hoi_vien.nqt_xac_thuc.nqt_reset_token = nqt_token
-    nqt_hoi_vien.nqt_xac_thuc.nqt_reset_token_het_han = datetime.utcnow() + timedelta(hours=1)
+    nqt_hoi_vien.g6_reset_token = nqt_token
+    nqt_hoi_vien.g6_reset_token_het_han = datetime.utcnow() + timedelta(hours=1)
     db.session.commit()
     return nqt_ok(
         None,
@@ -315,15 +306,15 @@ def nqt_dat_lai_mat_khau():
     nqt_mk_moi = nqt_data.get('g6_mat_khau_moi') or ''
     if len(nqt_mk_moi) < 6:
         return nqt_loi('Mật khẩu phải có ít nhất 6 ký tự', nqt_ma_trang=422)
-    nqt_auth = NqtHoiVienAuth.query.filter_by(nqt_reset_token=nqt_token).first()
-    if not nqt_auth:
+    nqt_hoi_vien = G6NguoiDung.query.filter_by(g6_reset_token=nqt_token, g6_la_hoi_vien=True).first()
+    if not nqt_hoi_vien:
         return nqt_loi('Mã đặt lại không hợp lệ', nqt_ma_trang=400)
-    if nqt_auth.nqt_reset_token_het_han and nqt_auth.nqt_reset_token_het_han < datetime.utcnow():
+    if nqt_hoi_vien.g6_reset_token_het_han and nqt_hoi_vien.g6_reset_token_het_han < datetime.utcnow():
         return nqt_loi('Mã đặt lại đã hết hạn', nqt_ma_trang=400)
-    nqt_auth.nqt_dat_mat_khau(nqt_mk_moi)
-    nqt_auth.nqt_reset_token = None
-    nqt_auth.nqt_reset_token_het_han = None
-    nqt_auth.nqt_lan_dang_nhap_sai = 0
-    nqt_auth.nqt_khoa_den = None
+    nqt_hoi_vien.nqt_dat_mat_khau(nqt_mk_moi)
+    nqt_hoi_vien.g6_reset_token = None
+    nqt_hoi_vien.g6_reset_token_het_han = None
+    nqt_hoi_vien.g6_lan_dang_nhap_sai = 0
+    nqt_hoi_vien.g6_khoa_den = None
     db.session.commit()
     return nqt_ok(None, 'Đặt lại mật khẩu thành công')

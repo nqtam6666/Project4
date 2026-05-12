@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, request
+from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.g6_thong_bao import G6ThongBao, G6LichGuiThongBao
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
@@ -128,8 +128,11 @@ def nqt_gui_email_test():
     nqt_email_gui_tu = NqtDichVuCauHinh.g6_lay('g6_email_gui_tu', nqt_mac_dinh=nqt_smtp_email)
     nqt_ten_nguoi_gui = NqtDichVuCauHinh.g6_lay('g6_ten_nguoi_gui_email', nqt_mac_dinh='NQT Gym')
 
+    if not nqt_smtp_host:
+        return nqt_loi('Chưa cấu hình Máy chủ SMTP (Host). Vui lòng cập nhật trong Cấu hình UI.')
+        
     if not nqt_smtp_email or not nqt_smtp_mat_khau:
-        return nqt_loi('Chưa cấu hình email đăng nhập SMTP và mật khẩu')
+        return nqt_loi('Chưa cấu hình Email đăng nhập SMTP và mật khẩu.')
 
     try:
         # Tạo email

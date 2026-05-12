@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, request
+from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.g6_nhan_vien import G6NhanVien, G6LichLamViec
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
@@ -17,8 +17,6 @@ def nqt_lay_tat_ca_nhan_vien():
         nqt_q = nqt_q.filter_by(g6_ma_chi_nhanh=nqt_chi_nhanh)
     if nqt_trang_thai:
         nqt_q = nqt_q.filter_by(g6_trang_thai=nqt_trang_thai)
-    else:
-        nqt_q = nqt_q.filter_by(g6_trang_thai='dang_lam')
     return nqt_ok([n.g6_to_dict() for n in nqt_q.all()])
 
 

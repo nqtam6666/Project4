@@ -80,7 +80,7 @@ class G6DangKyGoiPT(db.Model):
     __tablename__ = 'G6DangKyGoiPT'
 
     g6_ma_dang_ky_pt = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    g6_ma_hoi_vien = db.Column(db.Integer, db.ForeignKey('G6HoiVien.g6_ma_hoi_vien'), nullable=False)
+    g6_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung'), nullable=False)
     g6_ma_goi_pt = db.Column(db.Integer, db.ForeignKey('G6GoiPT.g6_ma_goi_pt'), nullable=False)
     g6_ma_hlv = db.Column(db.Integer, db.ForeignKey('G6HuanLuyenVien.g6_ma_hlv'), nullable=False)
     g6_ngay_mua = db.Column(db.Date, nullable=False)
@@ -97,7 +97,7 @@ class G6DangKyGoiPT(db.Model):
     def g6_to_dict(self):
         return {
             'g6_ma_dang_ky_pt': self.g6_ma_dang_ky_pt,
-            'g6_ma_hoi_vien': self.g6_ma_hoi_vien,
+            'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_ma_goi_pt': self.g6_ma_goi_pt,
             'g6_ma_hlv': self.g6_ma_hlv,
             'g6_ngay_mua': str(self.g6_ngay_mua),
@@ -114,7 +114,7 @@ class G6BuoiTapPT(db.Model):
 
     g6_ma_buoi_tap = db.Column(db.Integer, primary_key=True, autoincrement=True)
     g6_ma_dang_ky_pt = db.Column(db.Integer, db.ForeignKey('G6DangKyGoiPT.g6_ma_dang_ky_pt'), nullable=False)
-    g6_ma_hoi_vien = db.Column(db.Integer, db.ForeignKey('G6HoiVien.g6_ma_hoi_vien'), nullable=False)
+    g6_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung'), nullable=False)
     g6_ma_hlv = db.Column(db.Integer, db.ForeignKey('G6HuanLuyenVien.g6_ma_hlv'), nullable=False)
     g6_ma_chi_nhanh = db.Column(db.Integer, db.ForeignKey('G6ChiNhanh.g6_ma_chi_nhanh'), nullable=False)
     g6_ngay_tap = db.Column(db.DateTime, nullable=False)
@@ -131,7 +131,7 @@ class G6BuoiTapPT(db.Model):
         return {
             'g6_ma_buoi_tap': self.g6_ma_buoi_tap,
             'g6_ma_dang_ky_pt': self.g6_ma_dang_ky_pt,
-            'g6_ma_hoi_vien': self.g6_ma_hoi_vien,
+            'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_ma_hlv': self.g6_ma_hlv,
             'g6_ma_chi_nhanh': self.g6_ma_chi_nhanh,
             'g6_ngay_tap': self.g6_ngay_tap.isoformat() if self.g6_ngay_tap else None,

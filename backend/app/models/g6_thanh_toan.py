@@ -6,7 +6,7 @@ class G6ThanhToan(db.Model):
     __tablename__ = 'G6ThanhToan'
 
     g6_ma_thanh_toan = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    g6_ma_khach_hang = db.Column(db.Integer, db.ForeignKey('G6KhachHang.g6_ma_khach_hang', ondelete='SET NULL'))
+    g6_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung', ondelete='SET NULL'))
     g6_loai_giao_dich = db.Column(db.String(30), nullable=False)
     g6_so_tien = db.Column(db.Numeric(15, 0), nullable=False)
     g6_phuong_thuc = db.Column(db.String(30), nullable=False, default='cod')

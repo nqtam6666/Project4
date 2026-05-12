@@ -70,7 +70,7 @@ class G6DatChoLopHoc(db.Model):
 
     g6_ma_dat_cho = db.Column(db.Integer, primary_key=True, autoincrement=True)
     g6_ma_lich_lop = db.Column(db.Integer, db.ForeignKey('G6LichLopHoc.g6_ma_lich_lop'), nullable=False)
-    g6_ma_hoi_vien = db.Column(db.Integer, db.ForeignKey('G6HoiVien.g6_ma_hoi_vien'), nullable=False)
+    g6_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung'), nullable=False)
     g6_ngay_tap = db.Column(db.Date, nullable=False)
     g6_trang_thai = db.Column(db.String(20), nullable=False, default='dat_cho')  # 'dat_cho','da_den','vang_mat','da_huy'
     g6_thoi_gian_dat = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -83,7 +83,7 @@ class G6DatChoLopHoc(db.Model):
         return {
             'g6_ma_dat_cho': self.g6_ma_dat_cho,
             'g6_ma_lich_lop': self.g6_ma_lich_lop,
-            'g6_ma_hoi_vien': self.g6_ma_hoi_vien,
+            'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_ngay_tap': str(self.g6_ngay_tap) if self.g6_ngay_tap else None,
             'g6_trang_thai': self.g6_trang_thai,
             'g6_thoi_gian_dat': self.g6_thoi_gian_dat.isoformat() if self.g6_thoi_gian_dat else None,

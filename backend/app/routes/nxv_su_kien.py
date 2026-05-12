@@ -133,6 +133,26 @@ def nxv_lay_dang_ky_su_kien(nxv_sk_id):
     return nqt_ok([d.nxv_to_dict() for d in nxv_list])
 
 
+@nxv_su_kien_bp.route('/nxv-dang-ky-su-kien', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nxv_lay_tat_ca_dang_ky():
+    nxv_trang_thai = request.args.get('nxv_trang_thai')
+    nxv_trang = request.args.get('g6_trang', 1, type=int)
+    nxv_q = NxvDangKySuKien.query.filter(NxvDangKySuKien.g6_deleted_at == None)
+    
+    if nxv_trang_thai:
+        nxv_q = nxv_q.filter_by(nxv_trang_thai=nxv_trang_thai)
+        
+    nxv_phan_trang = nxv_q.order_by(NxvDangKySuKien.nxv_ngay_tao.desc()).paginate(
+        page=nxv_trang, per_page=20, error_out=False
+    )
+    return nqt_ok({
+        'nxv_danh_sach': [d.nxv_to_dict() for d in nxv_phan_trang.items],
+        'g6_tong': nxv_phan_trang.total,
+        'g6_trang': nxv_trang,
+    })
+
+
 @nxv_su_kien_bp.route('/nxv-dang-ky-su-kien', methods=['POST'])
 def nxv_dang_ky_su_kien():
     nxv_data = request.get_json() or {}

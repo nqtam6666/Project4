@@ -26,13 +26,8 @@
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-[#a3a3a3]"><i class="fas fa-search text-sm"></i></span>
             <input type="text" id="nqtTimKiem" onkeyup="nqtXuLyTimKiem(event)" class="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa] placeholder-[#a3a3a3]" placeholder="Tìm mã đơn, tên khách...">
         </div>
-        <select id="nqtLocTrangThai" onchange="nqtTaiDanhSach(1)" class="px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+        <select id="nqtLocTrangThai" onchange="nqtTaiDanhSach(1)" class="w-full sm:w-48 px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">
             <option value="">Tất cả trạng thái</option>
-            <option value="cho_xac_nhan">Chờ xác nhận</option>
-            <option value="da_xac_nhan">Đã xác nhận</option>
-            <option value="dang_giao">Đang giao</option>
-            <option value="da_giao">Đã giao</option>
-            <option value="da_huy">Đã hủy</option>
         </select>
         <button onclick="nqtTaiDanhSach()" class="inline-flex items-center justify-center px-3 py-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">
             <i class="fas fa-sync-alt text-[#666] dark:text-[#888] text-sm"></i>
@@ -90,6 +85,47 @@
     </div>
 </div>
 
+<!-- Bulk Action Bar -->
+<div id="nqtBulkBar" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
+    <div class="bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] px-4 py-2.5 rounded-md shadow-lg flex items-center space-x-3">
+        <span class="text-sm">Đã chọn <strong id="nqtSoDaChon">0</strong> đơn hàng</span>
+        <div class="w-px h-5 bg-white/20 dark:bg-[#191919]/20"></div>
+        <button onclick="nqtMoBulkModal('da_xac_nhan')" class="px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-check"></i><span>Xác nhận</span>
+        </button>
+        <button onclick="nqtMoBulkModal('dang_giao')" class="px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-truck"></i><span>Đang giao</span>
+        </button>
+        <button onclick="nqtMoBulkModal('da_giao')" class="px-3 py-1.5 bg-[#16a34a] hover:bg-[#15803d] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-box-open"></i><span>Đã giao</span>
+        </button>
+        <button onclick="nqtMoBulkModal('da_huy')" class="px-3 py-1.5 bg-[#dc2626] hover:bg-[#b91c1c] rounded-md text-sm font-medium transition-colors flex items-center space-x-1.5 text-white">
+            <i class="fas fa-ban"></i><span>Hủy đơn</span>
+        </button>
+        <button onclick="nqtBoChonTatCa()" class="p-1.5 hover:bg-white/10 dark:hover:bg-[#191919]/10 rounded-md transition-colors" title="Bỏ chọn">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Modal: Bulk Action -->
+<div id="modalBulkAction" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalBulkAction')">
+    <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-sm shadow-lg">
+        <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+            <h3 class="font-semibold text-[#191919] dark:text-[#fafafa]">Thao tác hàng loạt</h3>
+            <button onclick="nqtDongModal('modalBulkAction')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-6 text-center">
+            <p class="text-sm text-[#666] dark:text-[#888] mb-1" id="nqtBulkMessage">Bạn đang cập nhật trạng thái cho</p>
+            <p class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]"><span id="nqtBulkCount">0</span> đơn hàng</p>
+        </div>
+        <div class="px-4 py-3 border-t border-[#e5e5e5] dark:border-[#404040] flex justify-end space-x-2">
+            <button onclick="nqtDongModal('modalBulkAction')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Hủy</button>
+            <button onclick="nqtXacNhanBulkAction()" id="nqtBulkConfirmBtn" class="px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040]">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal: Chi tiết -->
 <div id="modalChiTiet" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4" onclick="if(event.target === this) nqtDongModal('modalChiTiet')">
     <div class="bg-white dark:bg-[#262626] rounded-md w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -133,10 +169,6 @@
         <div class="px-4 py-3 border-t border-[#e5e5e5] dark:border-[#404040] bg-[#fafafa] dark:bg-[#333] flex items-center justify-between">
             <select id="nqtTrangThaiMoi" class="px-3 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] rounded-md bg-white dark:bg-[#262626] text-[#191919] dark:text-[#fafafa]">
                 <option value="">-- Chọn trạng thái --</option>
-                <option value="da_xac_nhan">Xác nhận</option>
-                <option value="dang_giao">Đang giao</option>
-                <option value="da_giao">Đã giao</option>
-                <option value="da_huy">Hủy đơn</option>
             </select>
             <div class="flex space-x-2">
                 <button onclick="nqtDongModal('modalChiTiet')" class="px-4 py-2 text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]">Đóng</button>
@@ -151,6 +183,9 @@ nqtInitAdminLayout('don-hang');
 
 (function() {
     let nqtTrangHienTai = 1, nqtTimKiemHienTai = '', nqtDonHangHienTai = null;
+    let nqtDaChon = [];
+    let nqtBulkActionType = null;
+    
     const nqtTrangThaiMap = {
         'cho_xac_nhan': { text: 'Chờ xác nhận', cls: 'bg-[#fef3c7] text-[#92400e]' },
         'da_xac_nhan': { text: 'Đã xác nhận', cls: 'bg-[#dbeafe] text-[#1e40af]' },
@@ -160,6 +195,18 @@ nqtInitAdminLayout('don-hang');
     };
     const nqtPhuongThucMap = { 'cod': 'COD', 'bank_transfer': 'Chuyển khoản', 'momo': 'MoMo', 'vnpay': 'VNPay' };
     const fmt = n => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0);
+
+    const locTrangThai = document.getElementById('nqtLocTrangThai');
+    if (locTrangThai) {
+        locTrangThai.innerHTML = '<option value="">Tất cả trạng thái</option>' + 
+            Object.entries(nqtTrangThaiMap).map(([k, v]) => `<option value="${k}">${v.text}</option>`).join('');
+    }
+
+    const trangThaiMoi = document.getElementById('nqtTrangThaiMoi');
+    if (trangThaiMoi) {
+        trangThaiMoi.innerHTML = '<option value="">-- Chọn trạng thái --</option>' + 
+            Object.entries(nqtTrangThaiMap).map(([k, v]) => `<option value="${k}">${v.text}</option>`).join('');
+    }
 
     async function nqtTaiDanhSach(trang = 1) {
         nqtTrangHienTai = trang;
@@ -178,8 +225,9 @@ nqtInitAdminLayout('don-hang');
 
         body.innerHTML = list.map(d => {
             const s = nqtTrangThaiMap[d.g6_trang_thai] || { text: d.g6_trang_thai, cls: 'bg-[#f5f5f5] text-[#525252]' };
+            const isChecked = nqtDaChon.includes(d.g6_ma_don_hang);
             return `
-            <tr class="hover:bg-[#fafafa] dark:hover:bg-[#333] transition-colors">
+            <tr data-row-id="${d.g6_ma_don_hang}" class="cursor-pointer transition-all duration-100 ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#333]'}" onclick="nqtToggleRow(${d.g6_ma_don_hang}, event)">
                 <td class="px-4 py-3 font-mono text-[#191919] dark:text-[#fafafa]">#${d.g6_ma_don_hang}</td>
                 <td class="px-4 py-3"><p class="font-medium text-[#191919] dark:text-[#fafafa]">${d.g6_ho_ten_nguoi_nhan || 'N/A'}</p><p class="text-xs text-[#666] dark:text-[#888]">${d.g6_so_dien_thoai || ''}</p></td>
                 <td class="px-4 py-3 font-medium text-[#191919] dark:text-[#fafafa]">${fmt(d.g6_tong_thanh_toan)}</td>
@@ -207,6 +255,69 @@ nqtInitAdminLayout('don-hang');
 
     window.nqtXuLyTimKiem = e => { nqtTimKiemHienTai = e.target.value; if (e.key === 'Enter') nqtTaiDanhSach(1); }
     window.nqtTaiDanhSach = nqtTaiDanhSach;
+
+    window.nqtToggleRow = function(id, e) {
+        if (e.target.closest('button') || e.target.closest('a') || e.target.closest('select')) return;
+        const idx = nqtDaChon.indexOf(id);
+        if (idx === -1) nqtDaChon.push(id);
+        else nqtDaChon.splice(idx, 1);
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            const trId = parseInt(tr.dataset.rowId);
+            const sel = nqtDaChon.includes(trId);
+            if (sel) {
+                tr.classList.remove('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+                tr.classList.add('nqt-row-selected');
+            } else {
+                tr.classList.remove('nqt-row-selected');
+                tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+            }
+        });
+        nqtCapNhatBulkBar();
+    };
+
+    window.nqtBoChonTatCa = function() {
+        nqtDaChon = [];
+        document.querySelectorAll('[data-row-id]').forEach(tr => {
+            tr.classList.remove('nqt-row-selected');
+            tr.classList.add('hover:bg-[#fafafa]', 'dark:hover:bg-[#333]');
+        });
+        nqtCapNhatBulkBar();
+    };
+
+    function nqtCapNhatBulkBar() {
+        const bar = document.getElementById('nqtBulkBar');
+        document.getElementById('nqtSoDaChon').textContent = nqtDaChon.length;
+        if (nqtDaChon.length > 0) bar.classList.remove('hidden');
+        else bar.classList.add('hidden');
+    }
+
+    window.nqtMoBulkModal = function(action) {
+        nqtBulkActionType = action;
+        document.getElementById('nqtBulkCount').textContent = nqtDaChon.length;
+        document.getElementById('nqtBulkMessage').textContent = `Chuyển sang trạng thái "${nqtTrangThaiMap[action]?.text || action}" cho`;
+        nqtMoModal('modalBulkAction');
+    }
+
+    window.nqtXacNhanBulkAction = async function() {
+        if (nqtDaChon.length === 0 || !nqtBulkActionType) return;
+        const btn = document.getElementById('nqtBulkConfirmBtn');
+        const nqtRestoreBulk = nqtBtnLoading(btn, 'Đang xử lý...');
+
+        let nqtThanhCong = 0, nqtThatBai = 0;
+        for (const id of nqtDaChon) {
+            const res = await nqtApi.fetch(`/api/nqt-don-hang/${id}/nqt-cap-nhat-trang-thai`, { method: 'PUT', body: { g6_trang_thai: nqtBulkActionType } });
+            if (res && res.nqt_thanh_cong) nqtThanhCong++;
+            else nqtThatBai++;
+        }
+
+        nqtRestoreBulk();
+        nqtDongModal('modalBulkAction');
+        nqtBoChonTatCa();
+        nqtTaiDanhSach(nqtTrangHienTai);
+
+        if (nqtThatBai === 0) nqtToast(`Đã cập nhật ${nqtThanhCong} đơn hàng!`, 'success');
+        else nqtToast(`Thành công: ${nqtThanhCong}, Thất bại: ${nqtThatBai}`, 'warn');
+    }
 
     window.nqtXemChiTiet = async id => {
         const res = await nqtApi.fetch(`/api/nqt-don-hang/${id}`);

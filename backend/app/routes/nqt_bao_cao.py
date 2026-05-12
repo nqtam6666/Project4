@@ -3,7 +3,8 @@ from datetime import datetime, date, timedelta
 from flask import Blueprint, request, send_file
 from flask_jwt_extended import jwt_required
 from backend.app import db
-from backend.app.models.g6_hoi_vien import G6HoiVien, G6DangKyGoiTap
+from backend.app.models.g6_nguoi_dung import G6NguoiDung
+from backend.app.models.g6_hoi_vien import G6DangKyGoiTap
 from backend.app.models.g6_thanh_toan import G6ThanhToan
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
 from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
@@ -144,9 +145,9 @@ def nqt_export_hoi_vien_excel():
         return nqt_loi('Thư viện openpyxl chưa được cài đặt.', 500)
 
     nqt_danh_sach = (
-        G6HoiVien.query
-        .filter(G6HoiVien.g6_la_hoat_dong == True)
-        .order_by(G6HoiVien.g6_ngay_dang_ky.desc())
+        G6NguoiDung.query
+        .filter(G6NguoiDung.g6_la_hoi_vien == True, G6NguoiDung.g6_la_hoat_dong == True)
+        .order_by(G6NguoiDung.g6_ngay_dang_ky.desc())
         .all()
     )
 
@@ -170,7 +171,7 @@ def nqt_export_hoi_vien_excel():
     for nqt_i, nqt_hv in enumerate(nqt_danh_sach, 1):
         nqt_row = nqt_i + 4
         nqt_ws.cell(row=nqt_row, column=1, value=nqt_i)
-        nqt_ws.cell(row=nqt_row, column=2, value=nqt_hv.g6_ma_hoi_vien)
+        nqt_ws.cell(row=nqt_row, column=2, value=nqt_hv.g6_ma_nguoi_dung)
         nqt_ws.cell(row=nqt_row, column=3, value=nqt_hv.g6_ho_ten)
         nqt_ws.cell(row=nqt_row, column=4, value=nqt_hv.g6_so_dien_thoai)
         nqt_ws.cell(row=nqt_row, column=5, value=nqt_hv.g6_email or '')
@@ -211,9 +212,10 @@ def nqt_export_het_han_excel():
     nqt_ngay_cuoi = date.today() + timedelta(days=nqt_so_ngay)
 
     nqt_danh_sach = (
-        db.session.query(G6DangKyGoiTap, G6HoiVien)
-        .join(G6HoiVien, G6DangKyGoiTap.g6_ma_hoi_vien == G6HoiVien.g6_ma_hoi_vien)
+        db.session.query(G6DangKyGoiTap, G6NguoiDung)
+        .join(G6NguoiDung, G6DangKyGoiTap.g6_ma_nguoi_dung == G6NguoiDung.g6_ma_nguoi_dung)
         .filter(
+            G6NguoiDung.g6_la_hoi_vien == True,
             G6DangKyGoiTap.g6_trang_thai == 'dang_hoat_dong',
             G6DangKyGoiTap.g6_ngay_het_han >= date.today(),
             G6DangKyGoiTap.g6_ngay_het_han <= nqt_ngay_cuoi,
@@ -283,11 +285,12 @@ def nqt_tong_hop_bao_cao():
     nqt_hom_nay = date.today()
     nqt_dau_thang = nqt_hom_nay.replace(day=1)
 
-    nqt_tong_hoi_vien = G6HoiVien.query.filter_by(g6_la_hoat_dong=True).count()
+    nqt_tong_hoi_vien = G6NguoiDung.query.filter_by(g6_la_hoat_dong=True, g6_la_hoi_vien=True).count()
 
-    nqt_moi_thang = G6HoiVien.query.filter(
-        G6HoiVien.g6_ngay_dang_ky >= nqt_dau_thang,
-        G6HoiVien.g6_la_hoat_dong == True,
+    nqt_moi_thang = G6NguoiDung.query.filter(
+        G6NguoiDung.g6_la_hoi_vien == True,
+        G6NguoiDung.g6_ngay_dang_ky >= nqt_dau_thang,
+        G6NguoiDung.g6_la_hoat_dong == True,
     ).count()
 
     nqt_goi_sap_het = G6DangKyGoiTap.query.filter(
@@ -322,8 +325,9 @@ def nqt_tong_hop_bao_cao():
     nqt_bieu_do_hv = []
     for nqt_i in range(6, -1, -1):
         nqt_ngay = nqt_hom_nay - timedelta(days=nqt_i)
-        nqt_so_moi = G6HoiVien.query.filter(
-            G6HoiVien.g6_ngay_dang_ky == nqt_ngay,
+        nqt_so_moi = G6NguoiDung.query.filter(
+            G6NguoiDung.g6_la_hoi_vien == True,
+            G6NguoiDung.g6_ngay_dang_ky == nqt_ngay,
         ).count()
         nqt_bieu_do_hv.append({'g6_ngay': nqt_ngay.strftime('%d/%m'), 'g6_gia_tri': nqt_so_moi})
 
@@ -348,9 +352,10 @@ def nqt_bao_cao_het_han():
     nqt_ngay_cuoi = nqt_hom_nay + timedelta(days=nqt_so_ngay)
 
     nqt_danh_sach = (
-        db.session.query(G6DangKyGoiTap, G6HoiVien)
-        .join(G6HoiVien, G6DangKyGoiTap.g6_ma_hoi_vien == G6HoiVien.g6_ma_hoi_vien)
+        db.session.query(G6DangKyGoiTap, G6NguoiDung)
+        .join(G6NguoiDung, G6DangKyGoiTap.g6_ma_nguoi_dung == G6NguoiDung.g6_ma_nguoi_dung)
         .filter(
+            G6NguoiDung.g6_la_hoi_vien == True,
             G6DangKyGoiTap.g6_trang_thai == 'dang_hoat_dong',
             G6DangKyGoiTap.g6_ngay_het_han >= nqt_hom_nay,
             G6DangKyGoiTap.g6_ngay_het_han <= nqt_ngay_cuoi,

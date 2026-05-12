@@ -6,16 +6,17 @@ class G6GioHang(db.Model):
     __tablename__ = 'G6GioHang'
 
     g6_ma_gio_hang = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    g6_ma_khach_hang = db.Column(db.Integer, db.ForeignKey('G6KhachHang.g6_ma_khach_hang', ondelete='CASCADE'))
+    g6_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung', ondelete='CASCADE'))
     g6_phien_khach = db.Column(db.String(100))
     g6_ngay_cap_nhat = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    g6_nguoi_dung = db.relationship('G6NguoiDung', back_populates='g6_gio_hang')
     g6_chi_tiet = db.relationship('G6ChiTietGioHang', back_populates='g6_gio_hang', cascade='all, delete-orphan')
 
     def g6_to_dict(self):
         return {
             'g6_ma_gio_hang': self.g6_ma_gio_hang,
-            'g6_ma_khach_hang': self.g6_ma_khach_hang,
+            'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_chi_tiet': [ct.g6_to_dict() for ct in self.g6_chi_tiet],
         }
 
@@ -45,8 +46,8 @@ class G6DonHang(db.Model):
     __tablename__ = 'G6DonHang'
 
     g6_ma_don_hang = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    g6_ma_khach_hang = db.Column(db.Integer, db.ForeignKey('G6KhachHang.g6_ma_khach_hang', ondelete='SET NULL'))
-    g6_ma_nguoi_xu_ly = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung', ondelete='SET NULL'))
+    g6_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung'))
+    g6_ma_nguoi_xu_ly = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung'))
     g6_ma_van_chuyen = db.Column(db.Integer, db.ForeignKey('G6DonViVanChuyen.g6_ma_don_vi'))
     g6_ma_giam_gia = db.Column(db.Integer, db.ForeignKey('G6MaGiamGia.g6_ma_ma_giam_gia', ondelete='SET NULL'))
     g6_ho_ten_nguoi_nhan = db.Column(db.String(100), nullable=False)
@@ -67,11 +68,12 @@ class G6DonHang(db.Model):
 
     g6_chi_tiet = db.relationship('G6ChiTietDonHang', back_populates='g6_don_hang', cascade='all, delete-orphan')
     g6_lich_su = db.relationship('G6LichSuDonHang', back_populates='g6_don_hang', cascade='all, delete-orphan')
+    g6_nguoi_dung = db.relationship('G6NguoiDung', foreign_keys=[g6_ma_nguoi_dung], back_populates='g6_don_hang')
 
     def g6_to_dict(self):
         return {
             'g6_ma_don_hang': self.g6_ma_don_hang,
-            'g6_ma_khach_hang': self.g6_ma_khach_hang,
+            'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_ho_ten_nguoi_nhan': self.g6_ho_ten_nguoi_nhan,
             'g6_so_dien_thoai': self.g6_so_dien_thoai,
             'g6_dia_chi_giao_hang': self.g6_dia_chi_giao_hang,

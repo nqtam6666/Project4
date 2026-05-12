@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from backend.app.models.g6_xac_thuc import G6NhatKyHoatDong, G6PhienDangNhap
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen, nqt_ghi_nhat_ky
 from backend.app import db
 
 nqt_quan_tri_bp = Blueprint('nqt_quan_tri', __name__, url_prefix='/api')
@@ -71,6 +71,7 @@ def nqt_lay_phien_dang_nhap():
 @nqt_quan_tri_bp.route('/nqt-phien-dang-nhap/<int:nqt_id>/nqt-thu-hoi', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
 @nqt_yeu_cau_quyen('g6_quan_tri_he_thong')
+@nqt_ghi_nhat_ky('Thu hồi phiên đăng nhập', 'G6PhienDangNhap')
 def nqt_thu_hoi_phien(nqt_id):
     nqt_row = G6PhienDangNhap.query.get_or_404(nqt_id)
     nqt_row.g6_la_thu_hoi = True
@@ -81,16 +82,16 @@ def nqt_thu_hoi_phien(nqt_id):
 @nqt_quan_tri_bp.route('/nqt-phien-dang-nhap/nqt-thu-hoi-tat-ca', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
 @nqt_yeu_cau_quyen('g6_quan_tri_he_thong')
+@nqt_ghi_nhat_ky('Thu hồi tất cả phiên đăng nhập', 'G6PhienDangNhap')
 def nqt_thu_hoi_tat_ca_phien():
     nqt_data = request.get_json() or {}
     nqt_nd_id = nqt_data.get('g6_ma_nguoi_dung')
     nqt_loai = nqt_data.get('g6_loai_nguoi_dung')
-    if not nqt_nd_id or not nqt_loai:
-        return nqt_loi('Thiếu mã người dùng hoặc loại')
-    nqt_so_luong = G6PhienDangNhap.query.filter_by(
-        g6_ma_nguoi_dung=nqt_nd_id,
-        g6_loai_nguoi_dung=nqt_loai,
-        g6_la_thu_hoi=False,
-    ).update({'g6_la_thu_hoi': True})
+    
+    nqt_q = G6PhienDangNhap.query.filter_by(g6_la_thu_hoi=False)
+    if nqt_nd_id and nqt_loai:
+        nqt_q = nqt_q.filter_by(g6_ma_nguoi_dung=nqt_nd_id, g6_loai_nguoi_dung=nqt_loai)
+        
+    nqt_so_luong = nqt_q.update({'g6_la_thu_hoi': True})
     db.session.commit()
     return nqt_ok({'g6_so_phien_thu_hoi': nqt_so_luong}, 'Đã thu hồi tất cả phiên')

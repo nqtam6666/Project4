@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.nxv_bao_tri import NxvLichSuBaoTri, NxvPhieuSuaChua
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_ghi_nhat_ky
 from datetime import datetime
 import random
 import string
@@ -53,6 +53,7 @@ def nxv_lay_bao_tri_chi_tiet(nxv_id):
 
 @nxv_bao_tri_bp.route('/nxv-bao-tri', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
+@nqt_ghi_nhat_ky('Thêm lịch bảo trì', 'NxvLichSuBaoTri')
 def nxv_tao_bao_tri():
     nxv_data = request.get_json() or {}
     nxv_tb_id = nxv_data.get('nxv_ma_thiet_bi')
@@ -77,6 +78,7 @@ def nxv_tao_bao_tri():
 
 @nxv_bao_tri_bp.route('/nxv-bao-tri/<int:nxv_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_ghi_nhat_ky('Cập nhật lịch bảo trì', 'NxvLichSuBaoTri')
 def nxv_cap_nhat_bao_tri(nxv_id):
     nxv_row = NxvLichSuBaoTri.query.get_or_404(nxv_id)
     nxv_data = request.get_json() or {}
@@ -92,6 +94,7 @@ def nxv_cap_nhat_bao_tri(nxv_id):
 
 @nxv_bao_tri_bp.route('/nxv-bao-tri/<int:nxv_id>', methods=['DELETE'])
 @nqt_yeu_cau_dang_nhap
+@nqt_ghi_nhat_ky('Xóa lịch bảo trì', 'NxvLichSuBaoTri')
 def nxv_xoa_bao_tri(nxv_id):
     nxv_row = NxvLichSuBaoTri.query.get_or_404(nxv_id)
     nxv_row.g6_deleted_at = datetime.utcnow()
@@ -133,6 +136,7 @@ def nxv_lay_phieu_chi_tiet(nxv_id):
 
 @nxv_bao_tri_bp.route('/nxv-phieu-sua-chua', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
+@nqt_ghi_nhat_ky('Tạo phiếu sửa chữa', 'NxvPhieuSuaChua')
 def nxv_tao_phieu_sua_chua():
     nxv_data = request.get_json() or {}
     nxv_tb_id = nxv_data.get('nxv_ma_thiet_bi')
@@ -156,6 +160,7 @@ def nxv_tao_phieu_sua_chua():
 
 @nxv_bao_tri_bp.route('/nxv-phieu-sua-chua/<int:nxv_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_ghi_nhat_ky('Cập nhật phiếu sửa chữa', 'NxvPhieuSuaChua')
 def nxv_cap_nhat_phieu(nxv_id):
     nxv_row = NxvPhieuSuaChua.query.get_or_404(nxv_id)
     nxv_data = request.get_json() or {}
@@ -171,6 +176,7 @@ def nxv_cap_nhat_phieu(nxv_id):
 
 @nxv_bao_tri_bp.route('/nxv-phieu-sua-chua/<int:nxv_id>', methods=['DELETE'])
 @nqt_yeu_cau_dang_nhap
+@nqt_ghi_nhat_ky('Xóa phiếu sửa chữa', 'NxvPhieuSuaChua')
 def nxv_xoa_phieu(nxv_id):
     nxv_row = NxvPhieuSuaChua.query.get_or_404(nxv_id)
     nxv_row.g6_deleted_at = datetime.utcnow()

@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import react from '@vitejs/plugin-react';
 
 function nqtAdminRewrite() {
   const adminPages = [
@@ -39,7 +40,7 @@ function nqtAdminRewrite() {
 }
 
 export default defineConfig({
-  plugins: [nqtAdminRewrite()],
+  plugins: [react(), nqtAdminRewrite()],
   root: '.',
   build: {
     outDir: 'dist',
@@ -95,7 +96,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://127.0.0.1:5000',
         changeOrigin: true,
       },
     },

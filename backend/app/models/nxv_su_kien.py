@@ -48,8 +48,7 @@ class NxvDangKySuKien(db.Model):
 
     nxv_ma_dang_ky = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nxv_ma_su_kien = db.Column(db.Integer, db.ForeignKey('NxvSuKien.nxv_ma_su_kien', ondelete='CASCADE'), nullable=False)
-    nxv_ma_hoi_vien = db.Column(db.Integer, db.ForeignKey('G6HoiVien.g6_ma_hoi_vien', ondelete='SET NULL'))
-    nxv_ma_khach_hang = db.Column(db.Integer, db.ForeignKey('G6KhachHang.g6_ma_khach_hang', ondelete='SET NULL'))
+    nxv_ma_nguoi_dung = db.Column(db.Integer, db.ForeignKey('G6NguoiDung.g6_ma_nguoi_dung', ondelete='SET NULL'))
     nxv_ho_ten = db.Column(db.String(100), nullable=False)
     nxv_so_dien_thoai = db.Column(db.String(15))
     nxv_email = db.Column(db.String(100))
@@ -66,14 +65,17 @@ class NxvDangKySuKien(db.Model):
         return {
             'nxv_ma_dang_ky': self.nxv_ma_dang_ky,
             'nxv_ma_su_kien': self.nxv_ma_su_kien,
-            'nxv_ma_hoi_vien': self.nxv_ma_hoi_vien,
-            'nxv_ma_khach_hang': self.nxv_ma_khach_hang,
+            'g6_ten_su_kien': self.nxv_su_kien.nxv_ten if self.nxv_su_kien else None,
+            'nxv_ma_nguoi_dung': self.nxv_ma_nguoi_dung,
             'nxv_ho_ten': self.nxv_ho_ten,
+            'g6_ten_nguoi_dung': self.nxv_ho_ten,
             'nxv_so_dien_thoai': self.nxv_so_dien_thoai,
             'nxv_email': self.nxv_email,
             'nxv_so_ve': self.nxv_so_ve,
             'nxv_tong_tien': float(self.nxv_tong_tien),
             'nxv_trang_thai': self.nxv_trang_thai,
+            'g6_trang_thai': self.nxv_trang_thai,
             'nxv_ma_qr': self.nxv_ma_qr,
             'nxv_ngay_tao': self.nxv_ngay_tao.isoformat() if self.nxv_ngay_tao else None,
+            'g6_ngay_tao': self.nxv_ngay_tao.isoformat() if self.nxv_ngay_tao else None,
         }

@@ -17,21 +17,21 @@
     <!-- Welcome Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">
+            <h1 class="text-2xl font-header font-black text-[#C9A84C] tracking-widest uppercase">
                 <span id="nqtGreeting">Xin chào</span>, <span id="nqtUserNameWelcome">Admin</span>
             </h1>
-            <p class="text-sm text-[#666] dark:text-[#888] mt-0.5" id="nqtCurrentDate">...</p>
+            <p class="text-xs text-[#A1A1AA] uppercase tracking-widest mt-1" id="nqtCurrentDate">...</p>
         </div>
         <div class="text-right">
-            <div class="text-2xl font-medium text-[#191919] dark:text-[#fafafa] tabular-nums" id="nqtCurrentTime">--:--</div>
-            <div class="text-xs text-[#666] dark:text-[#888]" id="nqtDayOfWeek">...</div>
+            <div class="text-3xl font-header font-bold text-[#C9A84C] tracking-tighter tabular-nums" id="nqtCurrentTime">--:--</div>
+            <div class="text-[10px] text-[#A1A1AA] uppercase tracking-[3px]" id="nqtDayOfWeek">...</div>
         </div>
     </div>
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Tổng hội viên -->
-        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/hoi-vien.html'">
+        <div class="bg-white dark:bg-[#1C1C1C] border border-black/5 dark:border-white/5 p-5 cursor-pointer group hover:border-[#C9A84C]/50 transition-all duration-300" onclick="window.location.href='/src/pages/admin/hoi-vien.html'">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
                     <i class="fas fa-users text-sm text-[#525252] dark:text-[#a3a3a3]"></i>
@@ -39,11 +39,11 @@
                 <span id="nqtBadgeHvMoi" class="text-[10px] text-[#16a34a] dark:text-[#4ade80] font-medium">+0 mới</span>
             </div>
             <p class="text-xs text-[#666] dark:text-[#888] mb-1">Tổng hội viên</p>
-            <p id="nqtStatTongHoiVien" class="text-xl font-semibold text-[#191919] dark:text-[#fafafa]">0</p>
+            <p id="nqtStatTongHoiVien" class="text-xl font-semibold text-[#1A1A1A] dark:text-[#fafafa]">0</p>
         </div>
 
         <!-- Doanh thu tháng -->
-        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/thanh-toan.html'">
+        <div class="bg-white dark:bg-[#1C1C1C] border border-black/5 dark:border-white/5 p-5 cursor-pointer group hover:border-[#C9A84C]/50 transition-all duration-300" onclick="window.location.href='/src/pages/admin/thanh-toan.html'">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
                     <i class="fas fa-chart-line text-sm text-[#525252] dark:text-[#a3a3a3]"></i>
@@ -55,7 +55,7 @@
         </div>
 
         <!-- Đang tập luyện -->
-        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4">
+        <div class="bg-white dark:bg-[#1C1C1C] border border-black/5 dark:border-white/5 p-5">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-8 h-8 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
                     <i class="fas fa-running text-sm text-[#525252] dark:text-[#a3a3a3]"></i>
@@ -73,7 +73,7 @@
         </div>
 
         <!-- Sắp hết hạn -->
-        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/hoi-vien.html'">
+        <div class="bg-white dark:bg-[#1C1C1C] border border-black/5 dark:border-white/5 p-5 cursor-pointer group hover:border-[#C9A84C]/50 transition-all duration-300" onclick="window.location.href='/src/pages/admin/hoi-vien.html'">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-8 h-8 bg-[#fef2f2] dark:bg-[#451a1a] rounded-md flex items-center justify-center">
                     <i class="fas fa-exclamation-triangle text-sm text-[#dc2626] dark:text-[#f87171]"></i>
@@ -88,7 +88,7 @@
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <!-- Chart Area -->
-        <div class="lg:col-span-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md">
+        <div class="lg:col-span-2 bg-white dark:bg-[#1C1C1C] border border-black/5 dark:border-white/5 rounded-md">
             <div class="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
                 <div>
                     <h2 class="text-sm font-medium text-[#191919] dark:text-[#fafafa]">Biểu đồ tăng trưởng</h2>
@@ -150,7 +150,7 @@
 
     <!-- Bottom Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-4 cursor-pointer hover:border-[#d4d4d4] dark:hover:border-[#525252] transition-colors" onclick="window.location.href='/src/pages/admin/hoi-vien.html'">
+        <div class="bg-white dark:bg-[#1C1C1C] border border-black/5 dark:border-white/5 p-5 cursor-pointer group hover:border-[#C9A84C]/50 transition-all duration-300" onclick="window.location.href='/src/pages/admin/hoi-vien.html'">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-[#f5f5f5] dark:bg-[#404040] rounded-md flex items-center justify-center">
                     <i class="fas fa-dumbbell text-[#525252] dark:text-[#a3a3a3]"></i>
@@ -327,13 +327,12 @@ nqtInitAdminLayout('dashboard');
     let nqtChartInstance = null;
 
     function nqtGetChartColors() {
-        const isDark = document.documentElement.classList.contains('dark');
         return {
-            line: isDark ? '#fafafa' : '#191919',
-            fill: isDark ? 'rgba(250,250,250,0.08)' : 'rgba(25,25,25,0.06)',
-            grid: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-            text: isDark ? '#666' : '#a3a3a3',
-            point: isDark ? '#fafafa' : '#191919',
+            line: '#C9A84C',
+            fill: 'rgba(201, 168, 76, 0.05)',
+            grid: 'rgba(255, 255, 255, 0.03)',
+            text: '#A1A1AA',
+            point: '#C9A84C',
         };
     }
 

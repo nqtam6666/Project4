@@ -15,6 +15,14 @@ export function nqtInitAdminLayout(activePage) {
         link.href = '/src/css/input.css';
         document.head.appendChild(link);
     }
+    
+    // Inject fonts
+    if (!document.querySelector('link[href*="fonts.googleapis.com"]')) {
+        const fontLink = document.createElement('link');
+        fontLink.rel = 'stylesheet';
+        fontLink.href = 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@400;500;600;700;800;900&display=swap';
+        document.head.appendChild(fontLink);
+    }
 
     // Dynamic Theme Loader
     (async function() {
@@ -74,6 +82,14 @@ export function nqtInitAdminLayout(activePage) {
                     document.title = activeItem.querySelector('span').textContent + ' - ' + cfg['g6_ten_website'] + ' Admin';
                 }
             }
+            if (cfg['g6_logo_url']) {
+                const brandIconContainer = document.getElementById('ic-admin-brand-icon');
+                if (brandIconContainer) {
+                    brandIconContainer.innerHTML = `<img src="${cfg['g6_logo_url']}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 6px;" alt="Logo">`;
+                    brandIconContainer.style.background = 'transparent';
+                    brandIconContainer.style.boxShadow = 'none';
+                }
+            }
             if (cfg['g6_favicon_url']) {
                 let link = document.querySelector("link[rel~='icon']");
                 if (!link) {
@@ -99,117 +115,256 @@ export function nqtInitAdminLayout(activePage) {
     const style = document.createElement('style');
     style.textContent = `
         /* ===== BODY & LAYOUT ===== */
-        body, div[class*="bg-[#FAFAF9]"], div.bg-\\[\\#FAFAF9\\] { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: var(--bg-page) !important;
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #0A0A0A !important;
+            color: #F5F5F0 !important;
         }
         
-        /* ===== SIDEBAR — Frosted Glass ===== */
+        /* ===== SIDEBAR — Industrial Solid ===== */
         aside {
-            background: rgba(255, 255, 255, 0.78) !important;
-            backdrop-filter: blur(24px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-            border-color: rgba(229, 229, 229, 0.4) !important;
-            box-shadow: 1px 0 30px rgba(0,0,0,0.03) !important;
+            background: #1C1C1C !important;
+            border-color: rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 10px 0 50px rgba(0,0,0,0.5) !important;
         }
+        
         .dark aside {
-            background: rgba(13,15,20,0.85) !important;
-            border-color: rgba(30,34,48,0.6) !important;
-            box-shadow: 1px 0 40px rgba(0,0,0,0.15) !important;
+            background: #121212 !important;
         }
-        /* Sidebar brand area gradient accent */
-        aside > div:first-child {
-            position: relative;
-        }
+
         aside > div:first-child::after {
             content: '';
             position: absolute;
-            bottom: 0; left: 16px; right: 16px; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(var(--primary-rgb),0.3), transparent);
+            bottom: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, #C9A84C, transparent);
         }
 
-        /* ===== HEADER — Glass with gradient line ===== */
+        /* ===== HEADER — Dark Glass ===== */
         header {
-            background: rgba(255, 255, 255, 0.82) !important;
-            backdrop-filter: blur(20px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-            border-color: transparent !important;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.02) !important;
+            background: rgba(10, 10, 10, 0.8) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.15) !important;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3) !important;
         }
         header::after {
             content: '';
             position: absolute;
-            bottom: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent 10%, rgba(var(--primary-rgb),0.2) 50%, transparent 90%);
-        }
-        .dark header {
-            background: rgba(13,15,20,0.88) !important;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 20px rgba(0,0,0,0.1) !important;
+            bottom: -1px; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent 0%, #C9A84C 50%, transparent 100%);
+            opacity: 0.3;
         }
 
-        /* ===== PRIMARY BUTTONS — Gradient Glow ===== */
+        /* ===== PRIMARY BUTTONS — Gold Industrial ===== */
         button[class*="bg-[#191919]"], 
         a[class*="bg-[#191919]"],
-        button[type="submit"] {
-            background: linear-gradient(135deg, var(--primary-color), color-mix(in srgb, var(--primary-color) 80%, #000)) !important;
-            color: #ffffff !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            box-shadow: 0 0 18px rgba(var(--primary-rgb), 0.25), 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+        button[type="submit"],
+        .nqt-primary-btn {
+            background: #C9A84C !important;
+            color: #0A0A0A !important;
+            border: 1px solid #C9A84C !important;
+            box-shadow: 0 0 20px rgba(201, 168, 76, 0.2) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            border-radius: 10px !important;
-            font-weight: 600 !important;
-            letter-spacing: 0.01em !important;
+            border-radius: 4px !important;
+            font-weight: 800 !important;
+            font-family: 'Barlow Condensed', sans-serif !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
         }
         button[class*="bg-[#191919]"]:hover, 
         a[class*="bg-[#191919]"]:hover,
         button[type="submit"]:hover {
-            box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.5), 0 8px 25px rgba(var(--primary-rgb), 0.2) !important;
-            transform: translateY(-2px) scale(1.01) !important;
-            filter: brightness(1.08);
-        }
-        button[class*="bg-[#191919]"]:active, 
-        a[class*="bg-[#191919]"]:active,
-        button[type="submit"]:active {
-            transform: translateY(0) scale(0.98) !important;
-            box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.3) !important;
-        }
-        .dark button[class*="bg-[#191919]"], 
-        .dark a[class*="bg-[#191919]"],
-        .dark button[type="submit"] {
-            color: #ffffff !important;
-            background: linear-gradient(135deg, var(--primary-color), color-mix(in srgb, var(--primary-color) 70%, #ff8080)) !important;
+            background: transparent !important;
+            color: #C9A84C !important;
+            box-shadow: 0 0 30px rgba(201, 168, 76, 0.4) !important;
+            transform: translateY(-1px) !important;
         }
 
-        /* ===== SIDEBAR ITEMS — Premium Active State ===== */
+        /* ===== SIDEBAR ITEMS — Industrial Gold ===== */
+        .nqt-sidebar-item {
+            font-family: 'Barlow Condensed', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin: 2px 12px !important;
+            border-radius: 4px !important;
+            transition: all 0.2s ease !important;
+            color: rgba(255, 255, 255, 0.6) !important; /* Force light text on dark sidebar */
+        }
         .nqt-sidebar-item.active {
-            background: linear-gradient(90deg, rgba(var(--primary-rgb),0.12), rgba(var(--primary-rgb),0.04)) !important;
-            border-left: none !important;
-            padding-left: 1rem !important;
-            font-weight: 700 !important;
+            background: #C9A84C !important;
+            color: #0A0A0A !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3) !important;
         }
-        .dark .nqt-sidebar-item.active {
-            background: linear-gradient(90deg, rgba(var(--primary-rgb),0.18), rgba(var(--primary-rgb),0.04)) !important;
+        .nqt-sidebar-item:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: #C9A84C !important;
         }
-        .nqt-sidebar-item.active i {
-            color: var(--primary-color) !important;
-            filter: drop-shadow(0 0 6px rgba(var(--primary-rgb),0.5));
+        .nqt-sidebar-item.active i, .nqt-sidebar-item.active span {
+            color: #0A0A0A !important;
         }
-        .nqt-sidebar-item.active span {
-            color: var(--text-main) !important;
+        .nqt-sidebar-item:not(.active) i {
+            color: #C9A84C !important;
+            opacity: 0.7;
+        }
+        .nqt-sidebar-item:not(.active) span {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        .nqt-sidebar-item:not(.active):hover span {
+            color: #C9A84C !important;
         }
 
-        /* ===== CARDS — Floating with Gradient Border ===== */
-        .grid > div[class*="bg-white"], .grid > div[class*="dark:bg-[#262626]"],
-        div.bg-white, div[class*="dark:bg-[#262626]"] {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease !important;
-            border-radius: 12px !important;
+        :root {
+            --nqt-bg: #F8F8F5;
+            --nqt-surface: #FFFFFF;
+            --nqt-text: #1A1A1A;
+            --nqt-text-dim: #666666;
+            --nqt-border: rgba(0,0,0,0.08);
+            --nqt-gold: #C9A84C;
+            --nqt-gold-glow: rgba(201, 168, 76, 0.1);
+            --nqt-sidebar: #FFFFFF; /* Light sidebar for Light Mode */
+            --nqt-sidebar-text: #444444;
+            --nqt-sidebar-border: rgba(0,0,0,0.05);
         }
-        .grid > div[class*="bg-white"]:hover, .grid > div[class*="dark:bg-[#262626]"]:hover {
-            transform: translateY(-3px) !important;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.06), 0 0 0 1px rgba(var(--primary-rgb),0.08) !important;
+        .dark {
+            --nqt-bg: #0A0A0A;
+            --nqt-surface: #1C1C1C;
+            --nqt-text: #F5F5F0;
+            --nqt-text-dim: rgba(255,255,255,0.5);
+            --nqt-border: rgba(255,255,255,0.05);
+            --nqt-gold: #C9A84C;
+            --nqt-gold-glow: rgba(201, 168, 76, 0.2);
+            --nqt-sidebar: #1C1C1C; /* Dark sidebar for Dark Mode */
+            --nqt-sidebar-text: rgba(255,255,255,0.6);
+            --nqt-sidebar-border: rgba(255,255,255,0.05);
         }
-        .dark .grid > div[class*="bg-white"]:hover, .dark .grid > div[class*="dark:bg-[#262626]"]:hover {
-            box-shadow: 0 12px 40px rgba(0,0,0,0.2), 0 0 20px rgba(var(--primary-rgb),0.06) !important;
+
+        /* ===== GLOBAL THEME OVERRIDES ===== */
+        body {
+            background-color: var(--nqt-bg) !important;
+            color: var(--nqt-text) !important;
+        }
+        
+        #nqtAdminWrapper {
+            background-color: var(--nqt-bg);
+            color: var(--nqt-text);
+        }
+
+        header {
+            background-color: var(--nqt-surface) !important;
+            border-bottom: 1px solid var(--nqt-border) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+        }
+        
+        aside {
+            background-color: var(--nqt-sidebar) !important;
+            border-right: 1px solid var(--nqt-sidebar-border) !important;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.02) !important;
+        }
+
+        /* ===== LIGHT MODE COMPREHENSIVE FIXES ===== */
+        /* 1. Override hardcoded dark backgrounds for Cards and Containers */
+        html:not(.dark) .bg-\\[\\#1a1a1a\\],
+        html:not(.dark) .bg-\\[\\#1c1c1c\\],
+        html:not(.dark) .bg-\\[\\#191919\\],
+        html:not(.dark) .bg-\\[\\#262626\\],
+        html:not(.dark) .bg-zinc-900,
+        html:not(.dark) .bg-neutral-900,
+        html:not(.dark) .bg-gray-900,
+        html:not(.dark) .bg-surface-container,
+        html:not(.dark) .bg-surface-container-high {
+            background-color: var(--nqt-surface) !important;
+            border: 1px solid var(--nqt-border) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* 2. Override hardcoded dark backgrounds for Inputs and deep elements */
+        html:not(.dark) .bg-\\[\\#0a0a0a\\],
+        html:not(.dark) .bg-\\[\\#000000\\],
+        html:not(.dark) .bg-black,
+        html:not(.dark) .bg-background,
+        html:not(.dark) .bg-surface-bright {
+            background-color: var(--nqt-bg) !important;
+            border: 1px solid var(--nqt-border) !important;
+        }
+
+        /* 3. Text Color and Table Header Fixes */
+        html:not(.dark) thead,
+        html:not(.dark) thead tr,
+        html:not(.dark) th,
+        html:not(.dark) thead th {
+            background-color: #f1f5f9 !important; /* Light gray for headers */
+            color: var(--nqt-text) !important;
+            font-weight: 800 !important;
+            border-bottom: 2px solid var(--nqt-border) !important;
+        }
+        
+        html:not(.dark) td {
+            color: var(--nqt-text) !important;
+            font-weight: 600 !important;
+        }
+        
+        html:not(.dark) .nqt-card-theme p,
+        html:not(.dark) .nqt-card-theme span {
+            color: var(--nqt-text) !important;
+        }
+        
+        /* Specific fix for dim texts and subtexts */
+        html:not(.dark) td.text-\\[\\#666\\],
+        html:not(.dark) .text-\\[\\#666\\],
+        html:not(.dark) .text-white\\/40,
+        html:not(.dark) .text-white\\/50,
+        html:not(.dark) .text-white\\/60,
+        html:not(.dark) .text-gray-300,
+        html:not(.dark) .text-gray-400,
+        html:not(.dark) .text-gray-500,
+        html:not(.dark) .text-slate-300,
+        html:not(.dark) .text-\\[\\#a3a3a3\\],
+        html:not(.dark) .text-\\[\\#888\\] {
+            color: var(--nqt-text-dim) !important;
+        }
+        
+        /* Force white text classes to be dark */
+        html:not(.dark) .text-white,
+        html:not(.dark) .text-\\[\\#fafafa\\],
+        html:not(.dark) .text-\\[\\#f5f5f5\\],
+        html:not(.dark) .text-gray-100,
+        html:not(.dark) .text-gray-200 {
+            color: var(--nqt-text) !important;
+        }
+
+        /* ===== SIDEBAR ITEMS — Industrial Gold ===== */
+        .nqt-sidebar-item {
+            font-family: 'Barlow Condensed', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin: 2px 12px !important;
+            border-radius: 4px !important;
+            transition: all 0.2s ease !important;
+            color: var(--nqt-sidebar-text) !important;
+        }
+        .nqt-sidebar-item.active {
+            background: #C9A84C !important;
+            color: #0A0A0A !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3) !important;
+        }
+        .nqt-sidebar-item:not(.active):hover {
+            background: rgba(var(--nqt-gold-rgb), 0.1) !important;
+            color: var(--nqt-gold) !important;
+        }
+        .nqt-sidebar-item.active i, .nqt-sidebar-item.active span {
+            color: #0A0A0A !important;
+        }
+        .nqt-sidebar-item:not(.active) i {
+            color: var(--nqt-gold) !important;
+            opacity: 0.8;
+        }
+        .nqt-sidebar-item:not(.active) span {
+            color: var(--nqt-sidebar-text) !important;
         }
 
         /* ===== TABLE CONTAINERS — Rounded & Elevated ===== */
@@ -224,24 +379,22 @@ export function nqtInitAdminLayout(activePage) {
         }
 
         /* ===== TABLE ROWS — Gradient Hover ===== */
-        table tbody tr {
-            transition: all 0.2s ease !important;
+        /* ===== TABLES — High Contrast Dark ===== */
+        table thead th {
+            background: #121212 !important;
+            color: #C9A84C !important;
+            font-family: 'Barlow Condensed', sans-serif !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            font-weight: 700 !important;
+            border-bottom: 2px solid rgba(201, 168, 76, 0.3) !important;
+        }
+        table tbody td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+            color: #F5F5F0 !important;
         }
         table tbody tr:hover {
-            background: linear-gradient(90deg, rgba(var(--primary-rgb),0.04), transparent) !important;
-        }
-        .dark table tbody tr:hover {
-            background: linear-gradient(90deg, rgba(var(--primary-rgb),0.08), transparent) !important;
-        }
-        /* Table header bottom accent */
-        table thead {
-            position: relative;
-        }
-        table thead::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, rgba(var(--primary-rgb),0.25), transparent 70%);
+            background: rgba(201, 168, 76, 0.03) !important;
         }
 
         /* ===== TABS — Animated Indicator ===== */
@@ -286,8 +439,8 @@ export function nqtInitAdminLayout(activePage) {
         }
 
         /* ===== MISC ===== */
-        .nqt-row-selected { background: linear-gradient(90deg, rgba(59,130,246,0.08), transparent) !important; border-left: 3px solid #3b82f6; }
-        .dark .nqt-row-selected { background: linear-gradient(90deg, rgba(59,130,246,0.1), transparent) !important; }
+        .nqt-row-selected { background-color: rgba(201, 168, 76, 0.12) !important; border-left: 3px solid var(--nqt-gold) !important; }
+        .dark .nqt-row-selected { background-color: rgba(201, 168, 76, 0.25) !important; border-left: 3px solid var(--nqt-gold) !important; }
         tr:not(.nqt-row-selected) { border-left: 3px solid transparent; }
         
         #nqtCmdInput::placeholder { color: #a3a3a3; }
@@ -338,61 +491,157 @@ export function nqtInitAdminLayout(activePage) {
             animation: nqtFadeUp 0.4s ease forwards;
         }
 
-        /* ===== ACTION BUTTONS — Premium Icon Buttons ===== */
-        .nqt-action-btn {
-            color: var(--text-muted);
-            background: transparent;
-            border: 1.5px solid var(--border-main);
-            cursor: pointer;
-        }
-        .nqt-action-btn:hover {
-            transform: scale(1.08) !important;
-        }
-        /* Edit Button */
-        .nqt-action-edit:hover {
-            color: #3b82f6 !important;
-            background: rgba(59,130,246,0.08) !important;
-            border-color: rgba(59,130,246,0.3) !important;
-            box-shadow: 0 0 12px rgba(59,130,246,0.12) !important;
-        }
-        .dark .nqt-action-edit:hover {
-            background: rgba(59,130,246,0.15) !important;
-            box-shadow: 0 0 16px rgba(59,130,246,0.15) !important;
-        }
-        /* Delete Button */
-        .nqt-action-delete:hover {
-            color: #ef4444 !important;
-            background: rgba(239,68,68,0.08) !important;
-            border-color: rgba(239,68,68,0.3) !important;
-            box-shadow: 0 0 12px rgba(239,68,68,0.12) !important;
-        }
-        .dark .nqt-action-delete:hover {
-            background: rgba(239,68,68,0.15) !important;
-            box-shadow: 0 0 16px rgba(239,68,68,0.15) !important;
-        }
-
-        /* Legacy icon-only action buttons (hoi-vien, etc.) */
-        td button[title="Sửa"], td button[title="Xóa"], td button[title="Xoá"],
+        /* ===== ACTION BUTTONS — Gold Industrial ===== */
+        .nqt-action-btn, td button[title="Sửa"], td button[title="Xóa"], td button[title="Xoá"],
         td button[class*="fa-edit"], td button[class*="fa-trash"] {
-            border: 1.5px solid var(--border-main) !important;
-            border-radius: 10px !important;
+            border: 1.5px solid var(--nqt-border) !important;
+            border-radius: 4px !important;
             width: 34px !important;
             height: 34px !important;
             transition: all 0.2s ease !important;
+            background: transparent !important;
+            color: var(--nqt-text-dim) !important;
         }
-        td button[title="Sửa"]:hover {
-            color: #3b82f6 !important;
-            background: rgba(59,130,246,0.08) !important;
-            border-color: rgba(59,130,246,0.3) !important;
-            box-shadow: 0 0 12px rgba(59,130,246,0.12) !important;
-            transform: scale(1.08) !important;
+        .text-gray-500, .text-slate-500, .text-on-surface-variant {
+            color: var(--nqt-text-dim) !important;
         }
-        td button[title="Xóa"]:hover, td button[title="Xoá"]:hover {
-            color: #ef4444 !important;
-            background: rgba(239,68,68,0.08) !important;
-            border-color: rgba(239,68,68,0.3) !important;
-            box-shadow: 0 0 12px rgba(239,68,68,0.12) !important;
-            transform: scale(1.08) !important;
+        
+        /* ===== SHORTCUT KEYS (KBD) — Theme Aware ===== */
+        kbd {
+            background-color: var(--nqt-surface) !important;
+            color: var(--nqt-text) !important;
+            border: 1px solid var(--nqt-border) !important;
+            border-bottom-width: 2px !important;
+            border-radius: 4px !important;
+            padding: 2px 6px !important;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.05) !important;
+        }
+        .dark kbd {
+            box-shadow: 0 1px 0 rgba(255,255,255,0.05) !important;
+        }
+        
+        /* ===== HEADER ELEMENTS — High Contrast ===== */
+        header input::placeholder {
+            color: var(--nqt-text-dim) !important;
+            opacity: 0.7 !important;
+        }
+        header input {
+            color: var(--nqt-text) !important;
+        }
+        
+        #nqtDarkModeBtn i, #nqtNotifBtn i {
+            color: var(--nqt-text) !important;
+            opacity: 1 !important; /* Full opacity for bolder look */
+            font-weight: 900 !important;
+            transition: all 0.2s ease !important;
+        }
+        #nqtDarkModeBtn:hover i, #nqtNotifBtn:hover i {
+            color: var(--nqt-gold) !important;
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px var(--nqt-gold-glow));
+        }
+        
+        #nqtNotifBadge {
+            background-color: #EF4444 !important; /* Vibrant Red */
+            color: white !important;
+            border: 2px solid var(--nqt-surface) !important;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4) !important;
+            font-weight: 800 !important;
+        }
+
+        .dark header kbd {
+            background-color: rgba(255, 255, 255, 0.08) !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+            color: var(--nqt-gold) !important;
+            font-weight: 800 !important;
+        }
+        
+        /* ===== MODALS & COMMAND PALETTE — Theme Aware ===== */
+        #nqtCmdOverlay, .nqt-modal-backdrop {
+            background-color: rgba(0,0,0,0.5) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            z-index: 9999 !important;
+        }
+        
+        #nqtCmdOverlay > div, .nqt-modal-panel {
+            background-color: var(--nqt-surface) !important;
+            border: 1px solid var(--nqt-border) !important;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15) !important;
+            color: var(--nqt-text) !important;
+        }
+
+        .nqt-cmd-item {
+            color: var(--nqt-text) !important;
+            border-left: 2px solid transparent !important;
+            transition: all 0.2s ease !important;
+        }
+        .nqt-cmd-item:hover, .nqt-cmd-item.active {
+            background: var(--nqt-gold-glow) !important;
+            color: var(--nqt-gold) !important;
+            border-left-color: var(--nqt-gold) !important;
+        }
+        
+        #nqtCmdInput {
+            background-color: var(--nqt-bg) !important;
+            color: var(--nqt-text) !important;
+            border: 1.5px solid var(--nqt-border) !important;
+            border-radius: 8px !important;
+        }
+        #nqtCmdInput:focus {
+            border-color: var(--nqt-gold) !important;
+            box-shadow: 0 0 0 3px var(--nqt-gold-glow) !important;
+            outline: none !important;
+        }
+        
+        #nqtCmdResults {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* ===== NOTIFICATIONS PANEL — Theme Aware ===== */
+        #nqtNotifPanel {
+            background-color: var(--nqt-surface) !important;
+            border: 1px solid var(--nqt-border) !important;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15) !important;
+            color: var(--nqt-text) !important;
+        }
+        
+        #nqtNotifPanel > div:first-child, #nqtNotifPanel > div:last-child {
+            background-color: rgba(var(--nqt-gold-rgb, 201, 168, 76), 0.03) !important;
+            border-color: var(--nqt-border) !important;
+        }
+
+        #nqtNotifList button:hover {
+            background-color: var(--nqt-gold-glow) !important;
+        }
+
+        #nqtNotifList p {
+            color: var(--nqt-text) !important;
+        }
+        #nqtNotifList p.text-on-surface-variant {
+            color: var(--nqt-text-dim) !important;
+        }
+        
+        .nqt-notif-item-title {
+            color: var(--nqt-text) !important;
+            font-weight: 700 !important;
+        }
+        
+        .nqt-notif-item-sub {
+            color: var(--nqt-text-dim) !important;
+        }
+        .nqt-action-btn:hover, td button[title="Sửa"]:hover, td button[title="Xóa"]:hover, td button[title="Xoá"]:hover {
+            transform: scale(1.05) !important;
+            border-color: var(--nqt-gold) !important;
+            color: var(--nqt-gold) !important;
+            background: var(--nqt-gold-glow) !important;
+            box-shadow: 0 0 15px var(--nqt-gold-glow) !important;
         }
         /* Old text-based delete buttons fallback */
         button[class*="text-[#dc2626]"]:not(.nqt-action-btn) {
@@ -426,10 +675,20 @@ export function nqtInitAdminLayout(activePage) {
 
         /* ===== PAGE HEADER TITLE ===== */
         #nqt-page-title {
-            background: linear-gradient(135deg, var(--text-main), var(--text-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: 'Barlow Condensed', sans-serif !important;
+            text-transform: uppercase !important;
+            letter-spacing: 2px !important;
+            font-weight: 800 !important;
+            font-size: 1.5rem !important;
+            color: #C9A84C !important;
+            text-shadow: 0 0 10px rgba(201, 168, 76, 0.2);
+        }
+        
+        h2, h3, h4 {
+            font-family: 'Barlow Condensed', sans-serif !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            font-weight: 700 !important;
         }
 
         /* ===== SEARCH BUTTON (Ctrl+K) ===== */
@@ -450,13 +709,15 @@ export function nqtInitAdminLayout(activePage) {
 
         /* ===== SIDEBAR BRAND ICON ===== */
         aside > div:first-child .neon-button {
-            border-radius: 14px !important;
-            background: linear-gradient(135deg, var(--primary-color), color-mix(in srgb, var(--primary-color) 70%, #ff8080)) !important;
+            border-radius: 8px !important;
+            background: #C9A84C !important;
+            color: #0A0A0A !important;
+            box-shadow: 0 0 15px rgba(201, 168, 76, 0.4) !important;
             animation: nqtBrandPulse 3s ease-in-out infinite;
         }
         @keyframes nqtBrandPulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(var(--primary-rgb),0.4); }
-            50% { box-shadow: 0 0 25px rgba(var(--primary-rgb),0.6), 0 0 40px rgba(var(--primary-rgb),0.2); }
+            0%, 100% { box-shadow: 0 0 15px rgba(201, 168, 76, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(201, 168, 76, 0.6), 0 0 40px rgba(201, 168, 76, 0.2); }
         }
 
         /* ===== USER AVATAR — Ring Effect ===== */
@@ -527,14 +788,17 @@ export function nqtInitAdminLayout(activePage) {
 
     // Build full shell HTML
     const shellHTML = `
-    <aside class="w-64 bg-surface-container-lowest border-r border-outline-variant flex flex-col fixed h-full z-20 shadow-sm">
-        <div class="p-5 flex items-center space-x-3 border-b border-outline-variant">
-            <div class="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-sm neon-button">
-                <i class="fas fa-dumbbell text-base"></i>
+    <aside class="w-64 bg-[#1C1C1C] border-r border-white/5 flex flex-col fixed h-full z-20 shadow-2xl">
+        <div class="p-6 flex items-center space-x-3 border-b border-white/5 relative">
+            <div id="ic-admin-brand-icon" class="w-10 h-10 bg-[#C9A84C] text-[#0A0A0A] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(201,168,76,0.3)] neon-button">
+                <i class="fas fa-dumbbell text-xl"></i>
             </div>
-            <span id="ic-admin-brand" class="text-base font-black italic tracking-tight text-on-surface truncate">IRON COMMAND</span>
+            <div class="flex flex-col">
+                <span id="ic-admin-brand" class="text-xl font-header font-black tracking-widest text-[#C9A84C] leading-none">IRONCORE</span>
+                <span class="text-[9px] uppercase tracking-[3px] text-white/40 font-header mt-1">Admin Command</span>
+            </div>
         </div>
-        <nav class="flex-1 p-3 space-y-1 overflow-y-auto">${navHtml}</nav>
+        <nav class="flex-1 py-6 space-y-1 overflow-y-auto">${navHtml}</nav>
         <div class="p-3 border-t border-outline-variant">
             <button onclick="nqtLogout()" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm text-error font-medium hover:bg-error/10 transition-colors">
                 <i class="fas fa-sign-out-alt w-5 text-center text-lg"></i>
@@ -598,27 +862,31 @@ export function nqtInitAdminLayout(activePage) {
 
     <div id="nqt-toast-container" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
 
-    <div id="nqtCmdOverlay" class="hidden fixed inset-0 bg-black/80 z-[9998] flex items-start justify-center pt-24 px-4 backdrop-blur-sm" onclick="if(event.target===this) nqtInchideComenzi()">
-        <div class="w-full max-w-2xl bg-surface-container rounded-xl border border-outline-variant shadow-2xl overflow-hidden transform transition-all">
-            <div class="flex items-center px-5 border-b border-outline-variant bg-surface-container-high">
-                <i class="fas fa-search text-outline text-lg mr-4 flex-shrink-0"></i>
-                <input id="nqtCmdInput" type="text" placeholder="Tìm trang, tính năng..."
-                    class="flex-1 py-4 text-base bg-transparent text-on-surface outline-none font-medium placeholder-outline"
-                    oninput="nqtLocLenh(this.value)" onkeydown="nqtCmdKeyDown(event)">
-                <kbd class="flex-shrink-0 px-2 py-1 bg-surface-bright rounded text-[10px] font-mono font-bold text-on-surface-variant border border-outline-variant">ESC</kbd>
+    <div id="nqtCmdOverlay" class="hidden fixed inset-0 z-[9998] flex items-start justify-center pt-24 px-4" onclick="if(event.target===this) nqtInchideComenzi()">
+        <div class="w-full max-w-2xl bg-surface-container rounded-2xl shadow-2xl border border-outline-variant overflow-hidden transform transition-all duration-300">
+            <div class="p-4 border-b border-outline-variant flex items-center space-x-3 bg-surface-container-high">
+                <i class="fas fa-search text-on-surface-variant"></i>
+                <input type="text" id="nqtCmdInput" placeholder="Tìm trang, tính năng..." oninput="nqtLocLenh(this.value)" onkeydown="nqtCmdKeyDown(event)"
+                    class="flex-1 bg-transparent border-0 focus:ring-0 text-sm placeholder-on-surface-variant/50">
+                <div class="flex items-center space-x-1">
+                    <kbd class="px-1.5 py-0.5 bg-background rounded text-[10px] font-mono border border-outline-variant text-outline">ESC</kbd>
+                </div>
             </div>
-            <div id="nqtCmdResults" class="max-h-80 overflow-y-auto py-2"></div>
-            <div class="px-5 py-3 border-t border-outline-variant bg-surface-container-high flex items-center space-x-6 text-[11px] font-medium text-on-surface-variant">
-                <span class="flex items-center"><kbd class="font-mono bg-background border border-outline-variant rounded px-1.5 py-0.5 mr-1.5">↑↓</kbd> Chọn</span>
-                <span class="flex items-center"><kbd class="font-mono bg-background border border-outline-variant rounded px-1.5 py-0.5 mr-1.5">Enter</kbd> Mở</span>
-                <span class="flex items-center"><kbd class="font-mono bg-background border border-outline-variant rounded px-1.5 py-0.5 mr-1.5">Esc</kbd> Đóng</span>
+            <div id="nqtCmdResults" class="max-h-[60vh] overflow-y-auto py-2 custom-scrollbar"></div>
+            <div class="px-4 py-2 border-t border-outline-variant bg-surface-container-low flex items-center justify-between text-[10px] text-outline font-medium uppercase tracking-wider">
+                <div class="flex items-center space-x-3">
+                    <span class="flex items-center"><i class="fas fa-arrow-up mr-1"></i><i class="fas fa-arrow-down mr-1"></i> Di chuyển</span>
+                    <span class="flex items-center"><i class="fas fa-level-down-alt fa-rotate-90 mr-1"></i> Chọn</span>
+                </div>
+                <span>Quick Actions</span>
             </div>
         </div>
     </div>`;
 
     // Inject into body before page content
     const wrapper = document.createElement('div');
-    wrapper.className = 'bg-[#FAFAF9] dark:bg-[#1a1a1a] text-[#191919] dark:text-[#fafafa] min-h-screen flex transition-colors duration-200';
+    wrapper.id = 'nqtAdminWrapper';
+    wrapper.className = 'bg-background text-on-surface min-h-screen flex transition-colors duration-200';
     wrapper.innerHTML = shellHTML;
     document.body.insertBefore(wrapper, document.body.firstChild);
 
@@ -718,15 +986,21 @@ export function nqtInitAdminLayout(activePage) {
 
     // Dark mode
     window.nqtToggleDarkMode = function() {
-        const html = document.getElementById('nqtHtmlRoot');
+        const html = document.documentElement;
         const icon = document.getElementById('nqtDarkModeIcon');
         const isDark = html.classList.toggle('dark');
         localStorage.setItem('nqt_dark_mode', isDark);
-        if (icon) icon.className = isDark ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm';
+        if (icon) icon.className = isDark ? 'fas fa-sun text-base' : 'fas fa-moon text-base';
     };
     (function() {
-        const icon = document.getElementById('nqtDarkModeIcon');
-        if (icon && localStorage.getItem('nqt_dark_mode') === 'true') icon.className = 'fas fa-sun text-sm';
+        const isDark = localStorage.getItem('nqt_dark_mode') !== 'false'; // Default to dark
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+            const icon = document.getElementById('nqtDarkModeIcon');
+            if (icon) icon.className = 'fas fa-sun text-base';
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
     })();
 
     // Toast — Premium v2
@@ -741,7 +1015,7 @@ export function nqtInitAdminLayout(activePage) {
         };
         const progressColors = { success: '#10b981', error: '#ef4444', warn: '#f97316', info: 'var(--secondary-color)' };
         const el = document.createElement('div');
-        el.style.cssText = 'pointer-events:auto; display:flex; align-items:center; gap:12px; padding:14px 18px; border-radius:14px; font-size:14px; font-weight:600; box-shadow:0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.06); background:var(--bg-surface); color:var(--text-main); border:1px solid var(--border-main); position:relative; overflow:hidden; transform:translateX(40px); opacity:0; transition:all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);';
+        el.style.cssText = 'pointer-events:auto; display:flex; align-items:center; gap:12px; padding:14px 18px; border-radius:14px; font-size:14px; font-weight:600; box-shadow:0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.06); background:var(--nqt-surface); color:var(--nqt-text); border:1px solid var(--nqt-border); position:relative; overflow:hidden; transform:translateX(40px); opacity:0; transition:all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);';
         el.innerHTML = `<div style="width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;${iconColors[type]||iconColors.info}"><i class="fas ${icons[type]||'fa-info-circle'} text-sm"></i></div><span style="flex:1">${msg}</span><div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:${progressColors[type]||progressColors.info};border-radius:0 0 14px 14px;animation:nqtToastProgress 3s linear forwards;"></div>`;
         // Inject keyframes if not exists
         if (!document.getElementById('nqtToastKF')) {
@@ -919,13 +1193,13 @@ export function nqtInitAdminLayout(activePage) {
             info: 'text-secondary bg-[rgba(var(--secondary-rgb,81,139,189),0.15)] dark:bg-[rgba(var(--secondary-rgb,81,139,189),0.25)]' 
         };
         list.innerHTML = nqtNotifData.map(n => `
-            <button onclick="window.location.href='${n.url}'; nqtDongNotif();" class="w-full flex items-start space-x-4 px-5 py-3 hover:bg-surface-bright transition-colors text-left border-b border-outline-variant/50 last:border-0">
+            <button onclick="window.location.href='${n.url}'; nqtDongNotif();" class="w-full flex items-start space-x-4 px-5 py-3 hover:bg-surface-bright transition-colors text-left border-b border-outline-variant/50 last:border-0 group">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${typeColors[n.type]||typeColors.info}">
                     <i class="fas ${n.icon} text-sm"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-on-surface truncate">${n.title}</p>
-                    <p class="text-xs text-on-surface-variant mt-0.5">${n.sub}</p>
+                    <p class="text-sm font-bold text-on-surface nqt-notif-item-title">${n.title}</p>
+                    <p class="text-xs text-on-surface-variant mt-0.5 nqt-notif-item-sub">${n.sub}</p>
                 </div>
             </button>
         `).join('');
@@ -1016,18 +1290,6 @@ export function nqtInitAdminLayout(activePage) {
         if(avatarEl) avatarEl.innerHTML = nqtTaoAvatar(hoTen, 32);
     } catch(e) {}
 
-    // Favicon from config
-    fetch('/api/nqt-cau-hinh/g6_favicon_url', { headers:{'Authorization':`Bearer ${token}`} })
-        .then(r => {
-            if (!r.ok || !r.headers.get('content-type')?.includes('application/json')) throw new Error('Not JSON');
-            return r.json();
-        }).then(data=>{
-            if(data.nqt_thanh_cong && data.nqt_du_lieu?.g6_gia_tri) {
-                let fav = document.querySelector('link[rel="icon"]');
-                if(!fav){fav=document.createElement('link');fav.rel='icon';document.head.appendChild(fav);}
-                fav.href = data.nqt_du_lieu.g6_gia_tri;
-            }
-        }).catch(()=>{});
 
     // Load notifications badge
     setTimeout(() => { if(localStorage.getItem('nqt_admin_token')) nqtTaiThongBao(); }, 1500);
