@@ -325,19 +325,20 @@ nqtInitAdminLayout('dashboard');
 
     // ========== CHART.JS REAL CHART ==========
     let nqtChartInstance = null;
+    let nqtLastChartData = null; // Cache for theme changes
 
     function nqtGetChartColors() {
+        const isDark = document.documentElement.classList.contains('dark');
         return {
             line: '#C9A84C',
-            fill: 'rgba(201, 168, 76, 0.05)',
-            grid: 'rgba(255, 255, 255, 0.03)',
-            text: '#A1A1AA',
+            fill: isDark ? 'rgba(201, 168, 76, 0.05)' : 'rgba(201, 168, 76, 0.02)',
+            grid: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)',
+            text: isDark ? '#A1A1AA' : '#71717A',
             point: '#C9A84C',
         };
     }
 
     function nqtTaoChartData(soNgay) {
-        // Placeholder tĩnh (không random) khi API fail
         const nqtLabels = [], nqtValues = [];
         const now = new Date();
         for (let i = soNgay - 1; i >= 0; i--) {
@@ -356,30 +357,36 @@ nqtInitAdminLayout('dashboard');
         return { nqtLabels, nqtValues };
     }
 
-    async function nqtVeChart(soNgay = 7) {
+    async function nqtVeChart(soNgay = 7, isUpdate = false) {
         const canvas = document.getElementById('nqtChartDoanhThu');
         if (!canvas) return;
         if (typeof Chart === 'undefined') return;
         const ctx = canvas.getContext('2d');
         const colors = nqtGetChartColors();
 
-        // Thử lấy data từ API, nếu không có thì dùng placeholder
         let nqtLabels, nqtValues;
-        try {
-            const res = await nqtApi.fetch(`/api/nqt-thong-ke-bieu-do?g6_so_ngay=${soNgay}`);
-            if (res?.nqt_thanh_cong && res.nqt_du_lieu?.g6_nhan) {
-                nqtLabels = res.nqt_du_lieu.g6_nhan;
-                nqtValues = res.nqt_du_lieu.g6_gia_tri;
-            } else { throw new Error('no data'); }
-        } catch {
-            const fallback = nqtTaoChartData(soNgay);
-            nqtLabels = fallback.nqtLabels;
-            nqtValues = fallback.nqtValues;
+        
+        // Use cache if just updating theme
+        if (isUpdate && nqtLastChartData) {
+            nqtLabels = nqtLastChartData.labels;
+            nqtValues = nqtLastChartData.values;
+        } else {
+            try {
+                const res = await nqtApi.fetch(`/api/nqt-thong-ke-bieu-do?g6_so_ngay=${soNgay}`);
+                if (res?.nqt_thanh_cong && res.nqt_du_lieu?.g6_nhan) {
+                    nqtLabels = res.nqt_du_lieu.g6_nhan;
+                    nqtValues = res.nqt_du_lieu.g6_gia_tri;
+                    nqtLastChartData = { labels: nqtLabels, values: nqtValues };
+                } else { throw new Error('no data'); }
+            } catch {
+                const fallback = nqtTaoChartData(soNgay);
+                nqtLabels = fallback.nqtLabels;
+                nqtValues = fallback.nqtValues;
+            }
         }
 
         const nqtExisting = Chart.getChart(canvas);
         if (nqtExisting) nqtExisting.destroy();
-        if (nqtChartInstance) nqtChartInstance.destroy();
 
         nqtChartInstance = new Chart(ctx, {
             type: 'line',
@@ -461,7 +468,6 @@ nqtInitAdminLayout('dashboard');
     nqtUpdateClock();
     nqtLoadStats();
 
-    // Đợi Chart.js load xong (có thể được inject async qua SPA) rồi mới vẽ
     function nqtWaitChart(nqtRetry) {
         if (typeof Chart !== 'undefined') {
             nqtVeChart(7);
@@ -469,9 +475,8 @@ nqtInitAdminLayout('dashboard');
             setTimeout(() => nqtWaitChart(nqtRetry - 1), 100);
         }
     }
-    nqtWaitChart(30); // thử tối đa 3 giây
+    nqtWaitChart(30);
 
-    // Chart period switcher
     document.querySelectorAll('.nqt-chart-period').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.nqt-chart-period').forEach(b => {
@@ -484,16 +489,11 @@ nqtInitAdminLayout('dashboard');
         });
     });
 
-    // Re-render chart when dark mode changes
-    const nqtDarkBtn = document.getElementById('nqtDarkModeBtn');
-    if (nqtDarkBtn) {
-        nqtDarkBtn.addEventListener('click', () => {
-            setTimeout(() => {
-                const activePeriod = document.querySelector('.nqt-chart-period.font-medium');
-                nqtVeChart(parseInt(activePeriod?.dataset.period || '7'));
-            }, 50);
-        });
-    }
+    // Re-render chart when dark mode changes via global event
+    window.addEventListener('nqt-theme-changed', () => {
+        const activePeriod = document.querySelector('.nqt-chart-period.font-medium');
+        nqtVeChart(parseInt(activePeriod?.dataset.period || '7'), true);
+    });
 })();
 </script>
 </body>

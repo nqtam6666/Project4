@@ -146,7 +146,7 @@
             <button onclick="nqtDongModal('modalSuaKhachHang')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
         </div>
         <form id="formSuaKhachHang" class="p-4 overflow-y-auto space-y-4">
-            <input type="hidden" name="g6_ma_khach_hang">
+            <input type="hidden" name="g6_ma_nguoi_dung">
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-[#191919] dark:text-[#fafafa] mb-1">Họ và tên</label>
@@ -305,18 +305,18 @@ nqtInitAdminLayout('khach-hang');
             const mau = nqtMauHang[hang.g6_icon] || nqtMauHang['bronze'];
             const trangThai = kh.g6_la_hoat_dong !== false;
             const cls = trangThai ? 'bg-[#dcfce7] text-[#16a34a] dark:bg-[#166534]/20 dark:text-[#4ade80]' : 'bg-[#fef2f2] text-[#dc2626] dark:bg-[#991b1b]/20 dark:text-[#f87171]';
-            const isChecked = nqtDaChon.includes(kh.g6_ma_khach_hang);
+            const isChecked = nqtDaChon.includes(kh.g6_ma_nguoi_dung);
             return `
-            <tr data-row-id="${kh.g6_ma_khach_hang}" class="cursor-pointer transition-colors ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#333]'}" onclick="nqtToggleRow(${kh.g6_ma_khach_hang}, event)">
-                <td class="px-4 py-3 font-mono text-[#191919] dark:text-[#fafafa]">#${kh.g6_ma_khach_hang}</td>
+            <tr data-row-id="${kh.g6_ma_nguoi_dung}" class="cursor-pointer transition-colors ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#333]'}" onclick="nqtToggleRow(${kh.g6_ma_nguoi_dung}, event)">
+                <td class="px-4 py-3 font-mono text-[#191919] dark:text-[#fafafa]">#${kh.g6_ma_nguoi_dung}</td>
                 <td class="px-4 py-3 font-medium text-[#191919] dark:text-[#fafafa]">${kh.g6_ho_ten}</td>
                 <td class="px-4 py-3"><p class="text-[#191919] dark:text-[#fafafa]">${kh.g6_email || 'N/A'}</p><p class="text-xs text-[#666] dark:text-[#888]">${kh.g6_so_dien_thoai || ''}</p></td>
                 <td class="px-4 py-3"><span class="px-2 py-0.5 text-xs font-medium rounded-md ${mau}">${hang.g6_ten_hang}</span></td>
                 <td class="px-4 py-3 font-medium text-[#191919] dark:text-[#fafafa]">${kh.g6_diem_hien_tai || 0}</td>
                 <td class="px-4 py-3 text-center"><span class="px-2 py-0.5 text-xs font-medium rounded-md ${cls}">${trangThai ? 'Hoạt động' : 'Tạm khóa'}</span></td>
                 <td class="px-4 py-3 text-right">
-                    <button onclick="nqtSuaKhachHang(${kh.g6_ma_khach_hang})" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa] hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors"><i class="fas fa-edit"></i></button>
-                    <button onclick="nqtXoaKhachHang(${kh.g6_ma_khach_hang}, '${kh.g6_ho_ten.replace(/'/g, "\\'")}'))" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#991b1b]/20 transition-colors"><i class="fas fa-trash"></i></button>
+                    <button onclick="nqtSuaKhachHang(${kh.g6_ma_nguoi_dung})" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa] hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors"><i class="fas fa-edit"></i></button>
+                    <button onclick="nqtXoaKhachHang(${kh.g6_ma_nguoi_dung}, '${kh.g6_ho_ten.replace(/'/g, "\\'")}')" class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sm text-[#666] hover:text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#991b1b]/20 transition-colors"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>`;
         }).join('');
@@ -343,7 +343,7 @@ nqtInitAdminLayout('khach-hang');
         const res = await nqtApi.fetch(`/api/nqt-khach-hang/${id}`);
         if (!res?.nqt_thanh_cong) return;
         const kh = res.nqt_du_lieu, form = document.getElementById('formSuaKhachHang');
-        form.g6_ma_khach_hang.value = kh.g6_ma_khach_hang;
+        form.g6_ma_nguoi_dung.value = kh.g6_ma_nguoi_dung;
         form.g6_ho_ten.value = kh.g6_ho_ten || '';
         form.g6_email.value = kh.g6_email || '';
         form.g6_so_dien_thoai.value = kh.g6_so_dien_thoai || '';
@@ -355,7 +355,7 @@ nqtInitAdminLayout('khach-hang');
         e.preventDefault();
         const nqtBtn = e.target.querySelector('[type="submit"]');
         const nqtRestore = nqtBtnLoading(nqtBtn, 'Đang lưu...');
-        const fd = new FormData(e.target), id = fd.get('g6_ma_khach_hang'), data = Object.fromEntries(fd);
+        const fd = new FormData(e.target), id = fd.get('g6_ma_nguoi_dung'), data = Object.fromEntries(fd);
         data.g6_la_hoat_dong = data.g6_la_hoat_dong === 'true';
         const res = await nqtApi.fetch(`/api/nqt-khach-hang/${id}`, { method: 'PUT', body: data });
         nqtRestore();

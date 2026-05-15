@@ -1,8 +1,8 @@
-﻿from flask import Blueprint, request
+from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.g6_thanh_toan import G6ThanhToan, G6HoaDon
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
 from datetime import datetime
 import random
 import string
@@ -12,6 +12,7 @@ nqt_thanh_toan_bp = Blueprint('g6_thanh_toan', __name__, url_prefix='/api')
 
 @nqt_thanh_toan_bp.route('/nqt-thanh-toan', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_KHO')
 def nqt_lay_tat_ca_thanh_toan():
     nqt_trang = request.args.get('g6_trang', 1, type=int)
     nqt_gioi_han = request.args.get('g6_gioi_han', 20, type=int)
@@ -45,6 +46,7 @@ def _nqt_tao_so_hoa_don():
 
 @nqt_thanh_toan_bp.route('/nqt-thanh-toan', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_KHO')
 def nqt_tao_thanh_toan():
     nqt_data = request.get_json() or {}
     nqt_so_tien = nqt_data.get('g6_so_tien', 0)
@@ -55,7 +57,7 @@ def nqt_tao_thanh_toan():
         return nqt_loi('Số tiền không hợp lệ')
 
     nqt_row = G6ThanhToan(
-        g6_ma_khach_hang=nqt_data.get('g6_ma_khach_hang'),
+        g6_ma_nguoi_dung=nqt_data.get('g6_ma_khach_hang') or nqt_data.get('g6_ma_nguoi_dung'),
         g6_loai_giao_dich=nqt_loai,
         g6_so_tien=nqt_so_tien,
         g6_phuong_thuc=nqt_phuong_thuc,
@@ -77,7 +79,7 @@ def nqt_tao_thanh_toan():
 
 def nqt_xuat_hoa_don(nqt_tt: G6ThanhToan):
     from backend.app.services.g6_dich_vu_cau_hinh import NqtDichVuCauHinh
-    nqt_vat = NqtDichVuCauHinh.g6_lay('g6_thue_vat_phan_tram', nqt_mac_dinh=0)
+    nqt_vat = float(NqtDichVuCauHinh.g6_lay('g6_thue_vat_phan_tram', nqt_mac_dinh=0) or 0)
     nqt_tien_thue = float(nqt_tt.g6_so_tien) * nqt_vat / 100
     nqt_hd = G6HoaDon(
         g6_ma_thanh_toan=nqt_tt.g6_ma_thanh_toan,
@@ -91,6 +93,7 @@ def nqt_xuat_hoa_don(nqt_tt: G6ThanhToan):
 
 @nqt_thanh_toan_bp.route('/nqt-thanh-toan/<int:nqt_id>', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_KHO')
 def nqt_lay_thanh_toan(nqt_id):
     nqt_row = G6ThanhToan.query.get_or_404(nqt_id)
     nqt_result = nqt_row.g6_to_dict()
@@ -101,6 +104,7 @@ def nqt_lay_thanh_toan(nqt_id):
 
 @nqt_thanh_toan_bp.route('/nqt-thanh-toan/<int:nqt_id>/nqt-huy', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_KHO')
 def nqt_huy_thanh_toan(nqt_id):
     nqt_row = G6ThanhToan.query.get_or_404(nqt_id)
     if nqt_row.g6_trang_thai == 'thanh_cong':
@@ -116,6 +120,7 @@ def nqt_huy_thanh_toan(nqt_id):
 
 @nqt_thanh_toan_bp.route('/nqt-thanh-toan/<int:nqt_id>/nqt-hoan-tien', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_KHO')
 def nqt_hoan_tien(nqt_id):
     nqt_row = G6ThanhToan.query.get_or_404(nqt_id)
     if nqt_row.g6_trang_thai != 'thanh_cong':
@@ -129,6 +134,7 @@ def nqt_hoan_tien(nqt_id):
 
 @nqt_thanh_toan_bp.route('/nqt-thanh-toan/<int:nqt_id>/nqt-xac-nhan', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_KHO')
 def nqt_xac_nhan_thanh_toan(nqt_id):
     nqt_row = G6ThanhToan.query.get_or_404(nqt_id)
     if nqt_row.g6_trang_thai == 'thanh_cong':

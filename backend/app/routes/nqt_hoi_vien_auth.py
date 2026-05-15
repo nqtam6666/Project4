@@ -78,11 +78,17 @@ def nqt_dang_ky_hoi_vien():
         db.session.commit()
 
         # Trả JWT luôn
-        nqt_tokens = _nqt_tao_jwt(nqt_hoi_vien.g6_ma_nguoi_dung, nqt_hoi_vien.g6_ho_ten)
-        return nqt_ok({
-            **nqt_tokens,
+        from flask import make_response
+        from flask_jwt_extended import set_access_cookies, set_refresh_cookies
+        
+        nqt_response = make_response(nqt_ok({
             'nqt_hoi_vien': nqt_hoi_vien.g6_to_dict(),
-        }, 'Đăng ký thành công', nqt_ma_trang=201)
+        }, 'Đăng ký thành công', nqt_ma_trang=201))
+        
+        set_access_cookies(nqt_response, nqt_tokens['nqt_access_token'])
+        set_refresh_cookies(nqt_response, nqt_tokens['nqt_refresh_token'])
+        
+        return nqt_response
 
     except Exception as e:
         db.session.rollback()
@@ -124,11 +130,17 @@ def nqt_dang_nhap_hoi_vien():
     nqt_hoi_vien.g6_khoa_den = None
     db.session.commit()
 
-    nqt_tokens = _nqt_tao_jwt(nqt_hoi_vien.g6_ma_nguoi_dung, nqt_hoi_vien.g6_ho_ten)
-    return nqt_ok({
-        **nqt_tokens,
+    from flask import make_response
+    from flask_jwt_extended import set_access_cookies, set_refresh_cookies
+    
+    nqt_response = make_response(nqt_ok({
         'nqt_hoi_vien': nqt_hoi_vien.g6_to_dict(),
-    }, 'Đăng nhập thành công')
+    }, 'Đăng nhập thành công'))
+    
+    set_access_cookies(nqt_response, nqt_tokens['nqt_access_token'])
+    set_refresh_cookies(nqt_response, nqt_tokens['nqt_refresh_token'])
+    
+    return nqt_response
 
 
 # ── GET /api/nqt-hoi-vien/toi ────────────────────────────────────────────────
@@ -198,6 +210,14 @@ def nqt_cap_nhat_profile_hoi_vien():
 
     db.session.commit()
     return nqt_ok({'nqt_hoi_vien': nqt_hoi_vien.g6_to_dict()}, 'Cập nhật thông tin thành công')
+
+
+@nqt_hv_auth_bp.route('/nqt-hoi-vien/dang-xuat', methods=['POST'])
+def nqt_dang_xuat_hoi_vien():
+    from flask_jwt_extended import unset_jwt_cookies
+    nqt_response = nqt_ok(None, 'Đăng xuất thành công')
+    unset_jwt_cookies(nqt_response)
+    return nqt_response
 
 
 # ── PUT /api/nqt-hoi-vien/doi-mat-khau ───────────────────────────────────────

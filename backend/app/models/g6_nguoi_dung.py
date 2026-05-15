@@ -69,7 +69,8 @@ class G6NguoiDung(db.Model):
     g6_ma_nguoi_dung = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # ── Thông tin đăng nhập ───────────────────────────────────────────────
-    g6_ten_dang_nhap = db.Column(db.String(50), unique=True)          # nullable cho hội viên chưa có tài khoản
+    # ── Thông tin đăng nhập ───────────────────────────────────────────────
+    g6_ten_dang_nhap = db.Column(db.String(50))                       # Bỏ unique=True để dùng Index lọc bên dưới
     g6_mat_khau = db.Column(db.String(255))                           # nullable cho khách vãng lai
     g6_ho_ten = db.Column(db.String(100), nullable=False)
     g6_email = db.Column(db.String(100))
@@ -110,6 +111,11 @@ class G6NguoiDung(db.Model):
     # ── Timestamps ────────────────────────────────────────────────────────
     g6_ngay_tao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     g6_ngay_cap_nhat = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        db.Index('ix_g6_nguoi_dung_ten_dang_nhap', 'g6_ten_dang_nhap', unique=True, 
+                 mssql_where=db.text('g6_ten_dang_nhap IS NOT NULL')),
+    )
 
     # ── Relationships ─────────────────────────────────────────────────────
     g6_chi_nhanh = db.relationship('G6ChiNhanh', foreign_keys=[g6_ma_chi_nhanh])

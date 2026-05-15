@@ -409,7 +409,7 @@ function nqtRenderRow(r) {
     if (t === 'sanpham') {
         const isChecked = nqtDaChon.includes(r.nxv_ma_san_pham||r.g6_ma_san_pham);
         return `<tr data-row-id="${r.nxv_ma_san_pham||r.g6_ma_san_pham}" class="cursor-pointer transition-colors ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]'}" onclick="nqtToggleRow(${r.nxv_ma_san_pham||r.g6_ma_san_pham}, event)">
-        <td class="px-4 py-3"><p class="font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten||'—'}</p><p class="text-xs text-[#666] dark:text-[#888] font-mono">${r.g6_sku||''}</p></td>
+        <td class="px-4 py-3"><p class="font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_san_pham||r.g6_ten||'—'}</p><p class="text-xs text-[#666] dark:text-[#888] font-mono">${r.g6_sku||''}</p></td>
         <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa] font-mono">${fmt(r.g6_gia_ban)}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_danh_muc||r.nxv_ma_danh_muc||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_thuong_hieu||r.nxv_ma_thuong_hieu||'—'}</td>
@@ -417,14 +417,14 @@ function nqtRenderRow(r) {
         <td class="px-4 py-3 text-right"><button onclick="nqtSuaSP(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="text-xs px-2 py-1 rounded border border-[#e5e5e5] dark:border-[#404040] hover:bg-[#f5f5f5] dark:hover:bg-[#333] text-[#666] dark:text-[#888] mr-1">Sửa</button>${del(r.nxv_ma_san_pham||r.g6_ma_san_pham,'nxv-san-pham')}</td></tr>`;
     }
     if (t === 'danhmuc') return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
-        <td class="px-4 py-3 font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten||'—'}</td>
+        <td class="px-4 py-3 font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_danh_muc||r.g6_ten||'—'}</td>
         <td class="px-4 py-3 text-xs font-mono text-[#666] dark:text-[#888]">${r.g6_slug||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_mo_ta||'—'}</td>
         <td class="px-4 py-3 text-right"><button onclick="nqtSuaDM(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="text-xs px-2 py-1 rounded border border-[#e5e5e5] dark:border-[#404040] hover:bg-[#f5f5f5] dark:hover:bg-[#333] text-[#666] dark:text-[#888] mr-1">Sửa</button>${del(r.nxv_ma_danh_muc||r.g6_ma_danh_muc,'nxv-danh-muc')}</td></tr>`;
     if (t === 'tonkho') {
         const tinhTrang = r.g6_so_luong<=0 ? `<span class="text-xs font-medium text-[#dc2626]">Hết hàng</span>` : r.g6_so_luong<=r.g6_so_luong_toi_thieu ? `<span class="text-xs font-medium text-[#d97706]">Sắp hết</span>` : `<span class="text-xs font-medium text-[#16a34a]">Còn hàng</span>`;
         return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
-        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_san_pham||r.nxv_ma_bien_the||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_san_pham||r.g6_ma_bien_the||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_chi_nhanh||r.g6_ma_chi_nhanh||'—'}</td>
         <td class="px-4 py-3 text-sm font-mono font-semibold text-[#191919] dark:text-[#fafafa]">${r.g6_so_luong??'—'}</td>
         <td class="px-4 py-3 text-sm font-mono text-[#666] dark:text-[#888]">${r.g6_so_luong_toi_thieu??'—'}</td>
@@ -432,7 +432,7 @@ function nqtRenderRow(r) {
         <td class="px-4 py-3 text-right"><button onclick="nqtNhapHang(${r.nxv_ma_ton_kho||r.g6_ma_ton_kho})" class="text-xs px-2 py-1 rounded border border-[#e5e5e5] dark:border-[#404040] hover:bg-[#f5f5f5] dark:hover:bg-[#333] text-[#666] dark:text-[#888]">Nhập hàng</button></td></tr>`;
     }
     return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
-        <td class="px-4 py-3 font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten||'—'}</td>
+        <td class="px-4 py-3 font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_thuong_hieu||r.g6_ten||'—'}</td>
         <td class="px-4 py-3 text-xs font-mono text-[#666] dark:text-[#888]">${r.g6_slug||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_quoc_gia||r.g6_nuoc_xuat_xu||'—'}</td>
         <td class="px-4 py-3 text-right"><button onclick="nqtSuaTH(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="text-xs px-2 py-1 rounded border border-[#e5e5e5] dark:border-[#404040] hover:bg-[#f5f5f5] dark:hover:bg-[#333] text-[#666] dark:text-[#888] mr-1">Sửa</button>${del(r.nxv_ma_thuong_hieu||r.g6_ma_thuong_hieu,'nxv-thuong-hieu')}</td></tr>`;

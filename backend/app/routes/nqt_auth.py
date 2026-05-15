@@ -111,11 +111,17 @@ def nqt_dang_nhap():
     except Exception:
         pass
 
-    return nqt_ok({
-        'g6_access_token': nqt_access_token,
-        'g6_refresh_token': nqt_refresh_token,
+    from flask import make_response
+    from flask_jwt_extended import set_access_cookies, set_refresh_cookies
+    
+    nqt_response = make_response(nqt_ok({
         'g6_nguoi_dung': nqt_user.g6_to_dict(),
-    }, 'Đăng nhập thành công')
+    }, 'Đăng nhập thành công'))
+    
+    set_access_cookies(nqt_response, nqt_access_token)
+    set_refresh_cookies(nqt_response, nqt_refresh_token)
+    
+    return nqt_response
 
 
 @nqt_auth_bp.route('/nqt-lam-moi-token', methods=['POST'])
@@ -164,24 +170,10 @@ def nqt_lam_moi_token():
 
 @nqt_auth_bp.route('/nqt-dang-xuat', methods=['POST'])
 def nqt_dang_xuat():
-    try:
-        verify_jwt_in_request(refresh=True)
-        nqt_identity = get_jwt_identity()
-        nqt_jti = get_jwt().get('jti')
-        if nqt_jti:
-            import hashlib
-            nqt_jti_hash = hashlib.sha256(nqt_jti.encode()).hexdigest()
-            nqt_phien = G6PhienDangNhap.query.filter_by(
-                g6_ma_nguoi_dung=int(nqt_identity),
-                g6_ma_refresh_token_hash=nqt_jti_hash,
-                g6_la_thu_hoi=False,
-            ).first()
-            if nqt_phien:
-                nqt_phien.g6_la_thu_hoi = True
-                db.session.commit()
-    except Exception:
-        pass
-    return nqt_ok(None, 'Đăng xuất thành công')
+    from flask_jwt_extended import unset_jwt_cookies
+    nqt_response = nqt_ok(None, 'Đăng xuất thành công')
+    unset_jwt_cookies(nqt_response)
+    return nqt_response
 
 
 @nqt_auth_bp.route('/nqt-toi', methods=['GET'])

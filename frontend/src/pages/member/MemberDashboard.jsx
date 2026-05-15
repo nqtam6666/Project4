@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   LayoutDashboard, Calendar, History, Package, User, 
   Bell, LogOut, CheckCircle2, TrendingUp, Activity, 
-  QrCode, UserCircle2, MessageSquare, Info, Zap
+  ChevronRight, Search, Filter, Plus, QrCode, 
+  UserCircle2, ShieldCheck, Moon, Sun, ArrowRight,
+  Zap, MessageSquare, Info
 } from 'lucide-react';
+import { generateQrSvg } from '../../js/nqtQrHelper';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, LineChart, Line 
@@ -19,6 +22,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 const MemberDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
+  const [showQR, setShowQR] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('nqt_theme') !== 'light');
+  const [isAdmin, setIsAdmin] = useState(false); // Default to false
 
   // States for real data
   const [profile, setProfile] = useState({});
@@ -32,115 +38,136 @@ const MemberDashboard = () => {
   const [classes, setClasses] = useState([]);
   const [pts, setPts] = useState({ active: null, available: [] });
   const [tabLoading, setTabLoading] = useState(false);
+  
+  const qrRef = useRef(null);
+  const modalQrRef = useRef(null);
 
-  // Mock fallbacks for missing APIs
-  const mockTrainer = {
-    g6_ho_ten: "Chưa đăng ký",
-    g6_chuyen_mon: "Vui lòng chọn HLV",
-    g6_anh_the: "https://ui-avatars.com/api/?name=PT&background=0D8ABC&color=fff"
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/nqt-hoi-vien/dang-xuat', { method: 'POST', credentials: 'include' });
+    } catch(e) {}
+    localStorage.removeItem('nqt_access_token');
+    localStorage.removeItem('nqt_refresh_token');
+    localStorage.removeItem('nqt_admin_token');
+    window.location.href = '/login';
   };
 
   useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('nqt_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('nqt_theme', 'light');
+    }
+
+    if (!document.getElementById('nqt-portal-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'nqt-portal-fonts';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap';
+      document.head.appendChild(link);
+    }
+
     const fetchRealData = async () => {
-      const token = localStorage.getItem('nqt_access_token');
-      if (!token) {
-        window.location.href = '/login';
-        return;
-      }
-
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
       try {
-        // Fetch Profile & Package
-        const resProfile = await fetch('/api/nqt-hoi-vien/toi', { headers });
+        const resProfile = await fetch('/api/nqt-hoi-vien/toi', { credentials: 'include' });
         if (resProfile.status === 401) throw new Error('Unauthorized');
         const dataProfile = await resProfile.json();
         if (dataProfile.nqt_thanh_cong) {
           setProfile(dataProfile.nqt_du_lieu.nqt_hoi_vien || {});
           setActivePackage(dataProfile.nqt_du_lieu.nqt_goi_hien_tai || null);
+          
+          if (localStorage.getItem('nqt_admin_token')) {
+             setIsAdmin(true);
+          }
         }
 
-        // Fetch Attendance
-        const resAtt = await fetch('/api/nqt-hoi-vien/diem-danh?g6_gioi_han=5', { headers });
+        const resAtt = await fetch('/api/nqt-hoi-vien/diem-danh?g6_gioi_han=5', { credentials: 'include' });
         const dataAtt = await resAtt.json();
         if (dataAtt.nqt_thanh_cong) setAttendance(dataAtt.nqt_du_lieu || []);
 
-        // Fetch Metrics
-        const resMetrics = await fetch('/api/nqt-hoi-vien/toi/nqt-chi-so', { headers });
+        const resMetrics = await fetch('/api/nqt-hoi-vien/toi/nqt-chi-so', { credentials: 'include' });
         const dataMetrics = await resMetrics.json();
         if (dataMetrics.nqt_thanh_cong) {
-          // Format for Recharts: newest last
           const formattedMetrics = (dataMetrics.nqt_du_lieu || [])
             .reverse()
             .map(m => ({
-              name: m.g6_ngay_do.substring(5, 10), // MM-DD
+              name: m.g6_ngay_do.substring(5, 10),
               weight: m.g6_can_nang,
               fat: m.g6_ty_le_mo || 0
             }));
           setMetrics(formattedMetrics);
         }
 
+        try {
+          const resPt = await fetch('/api/nxv-dang-ky-pt?g6_trang_thai=dang_dung', { credentials: 'include' });
+          if (resPt.ok) {
+            const dataPt = await resPt.json();
+            const ptList = dataPt.nqt_du_lieu?.g6_danh_sach || dataPt.nqt_du_lieu || [];
+            if (dataPt.nqt_thanh_cong && ptList.length > 0) {
+              setPts(prev => ({ ...prev, active: ptList[0] }));
+            }
+          }
+        } catch(e) { }
+
         setLoading(false);
       } catch (error) {
-        // Handle 401 or error
-        localStorage.removeItem('nqt_access_token');
-        localStorage.removeItem('nqt_refresh_token');
-        window.location.href = '/login';
+        handleLogout();
       }
     };
 
     fetchRealData();
-  }, []);
+  }, [isDarkMode]);
+
 
   useEffect(() => {
     if (activeTab === 'dashboard') return;
     const fetchTabData = async () => {
       setTabLoading(true);
-      const token = localStorage.getItem('nqt_access_token');
-      const headers = { 'Authorization': `Bearer ${token}` };
-      
       try {
         if (activeTab === 'history') {
-          const res = await fetch('/api/nqt-hoi-vien/diem-danh', { headers });
+          const res = await fetch('/api/nqt-hoi-vien/diem-danh', { credentials: 'include' });
           const data = await res.json();
           if (data.nqt_thanh_cong) setFullHistory(data.nqt_du_lieu || []);
         } else if (activeTab === 'packages') {
-          const resMyPkgs = await fetch('/api/nqt-dang-ky-goi-tap', { headers });
-          const resAllPkgs = await fetch('/api/nqt-goi-tap');
+          const resMyPkgs = await fetch('/api/nqt-dang-ky-goi-tap', { credentials: 'include' });
+          const resAllPkgs = await fetch('/api/nqt-public/goi-tap');
           const dataMy = await resMyPkgs.json();
           const dataAll = await resAllPkgs.json();
           setPackages({
-            active: dataMy.nqt_thanh_cong ? dataMy.nqt_du_lieu : [],
+            active: dataMy.nqt_thanh_cong ? (dataMy.nqt_du_lieu?.g6_danh_sach || dataMy.nqt_du_lieu) : [],
             available: dataAll.nqt_thanh_cong ? dataAll.nqt_du_lieu : []
           });
         } else if (activeTab === 'classes') {
-          const res = await fetch('/api/nxv-lich-lop-hoc');
+          const res = await fetch('/api/nqt-public/classes');
           const data = await res.json();
           if (data.nqt_thanh_cong) setClasses(data.nqt_du_lieu || []);
         } else if (activeTab === 'pt') {
-          const resMyPt = await fetch('/api/nxv-dang-ky-pt', { headers });
-          const resAllPt = await fetch('/api/nxv-hlv');
-          const dataMy = await resMyPt.json();
+          let myPt = null;
+          try {
+            const resMyPt = await fetch('/api/nxv-dang-ky-pt', { credentials: 'include' });
+            const dataMy = await resMyPt.json();
+            if (dataMy.nqt_thanh_cong) {
+              const list = dataMy.nqt_du_lieu?.g6_danh_sach || dataMy.nqt_du_lieu;
+              if (list && list.length > 0) myPt = list[0];
+            }
+          } catch(e) { }
+          const resAllPt = await fetch('/api/nqt-public/huan-luyen-vien');
           const dataAll = await resAllPt.json();
           setPts({
-            active: dataMy.nqt_thanh_cong && dataMy.nqt_du_lieu.length > 0 ? dataMy.nqt_du_lieu[0] : null,
+            active: myPt,
             available: dataAll.nqt_thanh_cong ? dataAll.nqt_du_lieu : []
           });
         }
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error("Fetch Error:", e); }
       setTabLoading(false);
     };
     fetchTabData();
   }, [activeTab]);
 
-  if (loading) return <SkeletonLoader />;
+  if (loading) return <div className="min-h-screen bg-[#0A0A0A] dark:bg-white flex items-center justify-center">Loading...</div>;
 
-  // Calculate days left
   let daysLeft = 'Hết hạn';
   if (activePackage && activePackage.g6_ngay_het_han) {
     const end = new Date(activePackage.g6_ngay_het_han);
@@ -151,51 +178,88 @@ const MemberDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F0] font-sans selection:bg-[#C9A84C]/30 overflow-hidden flex">
+    <div className="min-h-screen bg-[#0A0A0A] dark:bg-[#F5F5F0] text-[#F5F5F0] dark:text-[#0A0A0A] font-['Barlow_Condensed'] transition-colors duration-500 flex">
       
-      {/* --- Sidebar --- */}
-      <aside className="w-72 bg-white/5 backdrop-blur-2xl border-r border-white/10 flex flex-col h-screen sticky top-0 z-50">
-        <div className="p-8 border-b border-white/5 text-center">
-          <h1 className="text-3xl font-black tracking-[4px] text-[#C9A84C]">IRONCORE</h1>
-          <p className="text-[10px] uppercase tracking-[3px] text-[#A1A1AA] font-bold mt-1">Member Portal</p>
+      <aside className="w-72 bg-white/5 dark:bg-black/5 backdrop-blur-2xl border-r border-white/10 dark:border-black/10 flex flex-col h-screen sticky top-0 z-50">
+        <div className="p-8 border-b border-white/5 dark:border-black/5 text-center">
+          <h1 className="text-3xl font-black tracking-[4px] text-[#C9A84C] font-['Cormorant_Garamond']">IRONCORE</h1>
+          <p className="text-[10px] uppercase tracking-[3px] text-[#A1A1AA] dark:text-gray-500 font-bold mt-1">Member Portal</p>
         </div>
 
-        {/* Profile Card */}
         <div className="p-6">
-          <div className="bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-[#C9A84C]/30 transition-all group">
+          <div className="bg-white/5 dark:bg-black/5 rounded-2xl p-4 border border-white/10 dark:border-black/10 group">
             <div className="flex items-center space-x-3 mb-4">
-              <img src={profile.g6_anh_the || "https://ui-avatars.com/api/?name="+encodeURIComponent(profile.g6_ho_ten||'HV')+"&background=1C1C1C&color=C9A84C"} className="w-12 h-12 rounded-xl object-cover border border-[#C9A84C]/20 group-hover:scale-105 transition-transform" />
+              <img src={profile.g6_anh_the || "https://ui-avatars.com/api/?name="+encodeURIComponent(profile.g6_ho_ten||'HV')+"&background=C9A84C&color=000"} className="w-12 h-12 rounded-xl object-cover border border-[#C9A84C]/20" />
               <div>
                 <h3 className="font-bold text-sm leading-none">{profile.g6_ho_ten || 'Hội viên'}</h3>
-                <p className="text-[10px] text-slate-500 mt-1">{profile.g6_ma_qr || `ID: ${profile.g6_ma_hoi_vien}`}</p>
+                <p className="text-[10px] text-slate-500 mt-1">ID: {profile.g6_ma_hoi_vien}</p>
               </div>
             </div>
-            <div className="flex justify-between items-center bg-[#C9A84C]/5 rounded-lg p-2 border border-[#C9A84C]/10">
-              <QrCode size={16} className="text-[#C9A84C]" />
+              <img 
+                src={profile.g6_ma_hoi_vien ? generateQrSvg(profile.g6_ma_hoi_vien, 40) : ""} 
+                className="w-10 h-10 rounded bg-white p-0.5" 
+              />
               <span className="text-[9px] font-bold text-[#C9A84C] tracking-widest">SHOW QR CODE</span>
-            </div>
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 px-4 space-y-1">
-          <NavItem icon={<LayoutDashboard size={20}/>} label="Dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-          <NavItem icon={<Calendar size={20}/>} label="Lịch tập" active={activeTab === 'classes'} onClick={() => setActiveTab('classes')} />
-          <NavItem icon={<History size={20}/>} label="Lịch sử" active={activeTab === 'history'} onClick={() => setActiveTab('history')} />
-          <NavItem icon={<Package size={20}/>} label="Gói tập" active={activeTab === 'packages'} onClick={() => setActiveTab('packages')} />
-          <NavItem icon={<UserCircle2 size={20}/>} label="PT Cá nhân" active={activeTab === 'pt'} onClick={() => setActiveTab('pt')} />
+          <NavItem 
+            icon={<LayoutDashboard size={20}/>} 
+            label="Dashboard" 
+            active={activeTab === 'dashboard'} 
+            onClick={() => setActiveTab('dashboard')} 
+          />
+          <NavItem 
+            icon={<Calendar size={20}/>} 
+            label="Lịch tập" 
+            active={activeTab === 'classes'} 
+            onClick={() => setActiveTab('classes')} 
+          />
+          <NavItem 
+            icon={<History size={20}/>} 
+            label="Lịch sử" 
+            active={activeTab === 'history'} 
+            onClick={() => setActiveTab('history')} 
+          />
+          <NavItem 
+            icon={<Package size={20}/>} 
+            label="Gói tập" 
+            active={activeTab === 'packages'} 
+            onClick={() => setActiveTab('packages')} 
+          />
+          <NavItem 
+            icon={<UserCircle2 size={20}/>} 
+            label="PT Cá nhân" 
+            active={activeTab === 'pt'} 
+            onClick={() => setActiveTab('pt')} 
+          />
         </nav>
 
-        <div className="p-6 border-t border-white/5">
+        <div className="p-4 space-y-2 border-t border-white/5 dark:border-black/5">
+          {isAdmin && (
+            <button 
+              onClick={() => window.location.href = '/admin/dashboard'}
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-widest bg-[#C9A84C]/10 text-[#C9A84C] border border-[#C9A84C]/20 hover:bg-[#C9A84C] hover:text-[#0A0A0A]"
+            >
+              <Zap className="w-5 h-5" />
+              <span>Quản trị hệ thống</span>
+            </button>
+          )}
+
           <button 
-            onClick={() => {
-              localStorage.removeItem('nqt_access_token');
-              localStorage.removeItem('nqt_refresh_token');
-              window.location.href = '/login';
-            }}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all text-sm font-bold"
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-widest bg-white/5 dark:bg-black/5 text-[#A1A1AA] hover:bg-white/10 dark:hover:bg-black/10 hover:text-[#F5F5F0] dark:hover:text-black"
           >
-            <LogOut size={18} />
+            {isDarkMode ? <Bell className="w-5 h-5" /> : <Zap className="w-5 h-5" />}
+            <span>{isDarkMode ? 'Chế độ Sáng' : 'Chế độ Tối'}</span>
+          </button>
+
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-widest text-[#ef4444] hover:bg-[#ef4444]/10"
+          >
+            <LogOut className="w-5 h-5" />
             <span>Đăng xuất</span>
           </button>
         </div>
@@ -226,10 +290,16 @@ const MemberDashboard = () => {
             <header className="flex justify-between items-end mb-10 relative z-10">
           <div>
             <h2 className="text-3xl font-black tracking-tight flex items-center">
-              Chào ngày mới, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C9A84C] to-[#E5C76B] ml-2">{profile.g6_ho_ten || 'bạn'}</span>
+              {(() => {
+                const hour = new Date().getHours();
+                if (hour < 12) return 'Chào buổi sáng, ';
+                if (hour < 18) return 'Chào buổi chiều, ';
+                return 'Chào buổi tối, ';
+              })()}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C9A84C] to-[#E5C76B] ml-2">{profile.g6_ho_ten || 'bạn'}</span>
               <Zap className="ml-3 text-[#C9A84C] fill-[#C9A84C]/20" size={24} />
             </h2>
-            <p className="text-[#A1A1AA] mt-1 font-medium italic">"The only bad workout is the one that didn't happen."</p>
+            <p className="text-[#A1A1AA] mt-1 font-medium italic">"Mỗi bước tập luyện đều đưa bạn gần hơn tới phiên bản tốt nhất của chính mình."</p>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -352,24 +422,39 @@ const MemberDashboard = () => {
               <Zap size={120} className="text-[#C9A84C]" />
             </div>
             <h3 className="font-bold text-xl mb-8 flex items-center"><User size={20} className="mr-3 text-[#C9A84C]"/> Huấn luyện viên cá nhân</h3>
-            <div className="flex flex-col items-center py-6">
-              <div className="relative mb-6">
-                <img src={mockTrainer.g6_anh_the} className="w-24 h-24 rounded-full object-cover border-4 border-[#C9A84C]/20 shadow-[0_0_30px_rgba(201,168,76,0.2)]" />
-                <div className="absolute bottom-1 right-1 w-5 h-5 bg-[#C9A84C] rounded-full border-4 border-[#0A0A0A]"></div>
-              </div>
-              <h4 className="text-2xl font-black">{mockTrainer.g6_ho_ten}</h4>
-              <p className="text-[#C9A84C] text-sm font-bold tracking-widest uppercase mt-2 mb-8">{mockTrainer.g6_chuyen_mon}</p>
-              
-              <div className="flex space-x-4 w-full max-w-xs relative z-10">
-                <button className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-2xl flex items-center justify-center space-x-2 transition-all font-bold text-sm">
-                  <MessageSquare size={18} />
-                  <span>Nhắn tin</span>
-                </button>
-                <button className="flex-1 bg-[#C9A84C] hover:bg-[#E5C76B] text-[#0A0A0A] py-3 rounded-2xl flex items-center justify-center space-x-2 transition-all font-bold text-sm shadow-[0_0_20px_rgba(201,168,76,0.3)]">
-                  <Calendar size={18} />
-                  <span>Đặt lịch</span>
-                </button>
-              </div>
+            <div className="flex flex-col items-center py-6 text-center">
+              {pts.active ? (
+                <>
+                  <div className="relative mb-6">
+                    <img src={pts.active.g6_hinh_anh || "https://ui-avatars.com/api/?name="+encodeURIComponent(pts.active.g6_ten_hlv || 'PT')+"&background=C9A84C&color=000"} className="w-24 h-24 rounded-full object-cover border-4 border-[#C9A84C]/20 shadow-[0_0_30px_rgba(201,168,76,0.2)]" />
+                    <div className="absolute bottom-1 right-1 w-5 h-5 bg-[#C9A84C] rounded-full border-4 border-[#0A0A0A]"></div>
+                  </div>
+                  <h4 className="text-2xl font-black">{pts.active.g6_ten_hlv}</h4>
+                  <p className="text-[#C9A84C] text-sm font-bold tracking-widest uppercase mt-2 mb-8">{pts.active.g6_chuyen_mon || 'Fitness Expert'}</p>
+                  
+                  <div className="flex space-x-4 w-full max-w-xs relative z-10">
+                    <button className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-2xl flex items-center justify-center space-x-2 transition-all font-bold text-sm">
+                      <MessageSquare size={18} />
+                      <span>Nhắn tin</span>
+                    </button>
+                    <button className="flex-1 bg-[#C9A84C] hover:bg-[#E5C76B] text-[#0A0A0A] py-3 rounded-2xl flex items-center justify-center space-x-2 transition-all font-bold text-sm shadow-[0_0_20px_rgba(201,168,76,0.3)]">
+                      <Calendar size={18} />
+                      <span>Đặt lịch</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="py-10">
+                  <UserCircle2 size={64} className="mx-auto text-slate-700 mb-6" />
+                  <p className="text-slate-400 mb-8 italic">Bạn chưa đăng ký HLV cá nhân</p>
+                  <button 
+                    onClick={() => setActiveTab('pt')}
+                    className="bg-[#C9A84C] text-[#0A0A0A] px-8 py-3 rounded-2xl font-black uppercase tracking-widest hover:bg-[#E5C76B] transition-all"
+                  >
+                    Tìm Coach Ngay
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -377,6 +462,51 @@ const MemberDashboard = () => {
         )}
           </>
         )}
+        
+        {/* QR Modal */}
+        <AnimatePresence>
+          {showQR && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowQR(false)}
+                className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              />
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="bg-[#1C1C1C] border border-[#C9A84C]/30 rounded-[40px] p-10 max-w-sm w-full relative z-10 text-center shadow-[0_0_50px_rgba(201,168,76,0.2)]"
+              >
+                <div className="mb-6">
+                   <h3 className="text-2xl font-black text-[#C9A84C] tracking-widest uppercase mb-2">Member QR</h3>
+                   <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Dùng để điểm danh tại quầy</p>
+                </div>
+                {/* QR Code Image */}
+                <div className="bg-white p-6 rounded-3xl mb-8 shadow-inner flex justify-center">
+                   <img 
+                      src={profile.g6_ma_hoi_vien ? generateQrSvg(profile.g6_ma_hoi_vien, 250) : ""} 
+                      className="w-60 h-60" 
+                      alt="Member QR"
+                   />
+                </div>
+                <div className="space-y-2 mb-8">
+                  <p className="text-xl font-black">{profile.g6_ho_ten}</p>
+                  <p className="text-[#C9A84C] text-sm font-bold tracking-widest">{profile.g6_ma_qr || `ID: ${profile.g6_ma_hoi_vien}`}</p>
+                </div>
+                
+                <button 
+                  onClick={() => setShowQR(false)}
+                  className="w-full bg-[#C9A84C] text-[#0A0A0A] py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-[#E5C76B] transition-all"
+                >
+                  Đóng
+                </button>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </main>
 
       <style dangerouslySetInnerHTML={{ __html: `
@@ -520,7 +650,7 @@ const PackagesView = ({ packages }) => (
       {packages.available.map((pkg, idx) => (
         <div key={idx} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-[#C9A84C]/50 transition-all flex flex-col h-full group">
           <h4 className="font-black text-lg mb-2 text-[#F5F5F0]">{pkg.g6_ten_goi}</h4>
-          <p className="text-2xl font-black text-[#C9A84C] mb-4">{parseInt(pkg.g6_gia_tien).toLocaleString()}đ</p>
+          <p className="text-2xl font-black text-[#C9A84C] mb-4">{parseInt(pkg.g6_gia || pkg.g6_gia_tien || 0).toLocaleString()}đ</p>
           <div className="flex-1">
             <p className="text-sm text-[#A1A1AA] mb-6">{pkg.g6_mo_ta || 'Gói tập tiêu chuẩn tại hệ thống Ironcore Gym.'}</p>
           </div>
@@ -538,7 +668,7 @@ const ClassesView = ({ classes }) => (
   <div className="space-y-6">
     <h2 className="text-3xl font-black tracking-tight flex items-center mb-8">
       <Calendar size={28} className="mr-4 text-[#C9A84C]" />
-      Lịch <span className="text-[#C9A84C] ml-2">Lớp Học</span>
+      Lớp Học <span className="text-[#C9A84C] ml-2">Tại Gym</span>
     </h2>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {classes.length === 0 ? (
@@ -548,14 +678,14 @@ const ClassesView = ({ classes }) => (
           <div className="w-1.5 absolute top-0 bottom-0 left-0 bg-[#C9A84C]"></div>
           <div className="flex-1 pl-4">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="font-black text-xl text-[#F5F5F0]">{cls.nxv_ten_lop_hoc || cls.g6_ten_lop || 'Lớp GroupX'}</h3>
-              <span className="px-3 py-1 bg-[#C9A84C]/20 text-[#C9A84C] rounded-lg text-[10px] font-bold uppercase tracking-widest border border-[#C9A84C]/30">{cls.nxv_loai_lop || 'Class'}</span>
+              <h3 className="font-black text-xl text-[#F5F5F0]">{cls.g6_ten_lop || 'Lớp GroupX'}</h3>
+              <span className="px-3 py-1 bg-[#C9A84C]/20 text-[#C9A84C] rounded-lg text-[10px] font-bold uppercase tracking-widest border border-[#C9A84C]/30">{cls.g6_loai_lop || 'Class'}</span>
             </div>
-            <p className="text-[#A1A1AA] text-sm mb-4"><Calendar size={14} className="inline mr-2" /> {cls.nxv_ngay_hoc || cls.nxv_thoi_gian_bat_dau || '--'} | {cls.nxv_gio_bat_dau || ''} - {cls.nxv_gio_ket_thuc || ''}</p>
+            <p className="text-[#A1A1AA] text-sm mb-4">{cls.g6_mo_ta || 'Lớp tập nhóm tại hệ thống IronCore Gym'}</p>
             <div className="flex justify-between items-center mt-6">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold"><User size={12}/></div>
-                <span className="text-sm font-bold text-[#A1A1AA]">{cls.nxv_huan_luyen_vien || 'Coach'}</span>
+                <span className="text-sm font-bold text-[#A1A1AA]">Tối đa {cls.g6_so_hoc_vien_toi_da || '--'} học viên</span>
               </div>
               <button className="px-6 py-2 bg-white/5 hover:bg-[#C9A84C] hover:text-[#0A0A0A] border border-white/10 rounded-xl transition-all font-bold text-xs uppercase tracking-widest">
                 Tham gia
@@ -578,11 +708,11 @@ const PTView = ({ pts }) => (
     {pts.active ? (
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 relative overflow-hidden flex items-center space-x-8">
         <Zap className="absolute top-[-20px] right-[-20px] text-[#C9A84C] opacity-10" size={150} />
-        <img src={pts.active.nxv_anh_the || "https://ui-avatars.com/api/?name=PT&background=C9A84C&color=000"} className="w-32 h-32 rounded-2xl object-cover border-4 border-[#C9A84C]/20 relative z-10" />
+        <img src={pts.active.g6_hinh_anh || "https://ui-avatars.com/api/?name="+encodeURIComponent(pts.active.g6_ten_hlv || 'PT')+"&background=C9A84C&color=000"} className="w-32 h-32 rounded-2xl object-cover border-4 border-[#C9A84C]/20 relative z-10" />
         <div className="relative z-10 flex-1">
           <p className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-[3px] mb-1">HLV CÁ NHÂN</p>
-          <h3 className="text-3xl font-black text-[#F5F5F0] mb-2">{pts.active.nxv_ho_ten || 'Coach Iron'}</h3>
-          <p className="text-[#C9A84C] font-bold uppercase tracking-widest text-sm mb-6">{pts.active.nxv_chuyen_mon || 'Fitness Expert'}</p>
+          <h3 className="text-3xl font-black text-[#F5F5F0] mb-2">{pts.active.g6_ten_hlv || 'Coach Iron'}</h3>
+          <p className="text-[#C9A84C] font-bold uppercase tracking-widest text-sm mb-6">{pts.active.g6_chuyen_mon || 'Fitness Expert'} — {pts.active.g6_ten_goi}</p>
           <div className="flex space-x-4">
             <button className="px-6 py-3 bg-[#C9A84C] text-[#0A0A0A] font-bold rounded-xl shadow-[0_0_15px_rgba(201,168,76,0.3)] hover:scale-105 transition-transform flex items-center space-x-2">
               <Calendar size={18} /><span>Đặt lịch</span>
@@ -603,9 +733,9 @@ const PTView = ({ pts }) => (
     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {pts.available.map((pt, idx) => (
         <div key={idx} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-center hover:border-white/20 transition-all group">
-          <img src={pt.nxv_anh_the || "https://ui-avatars.com/api/?name=PT&background=1C1C1C&color=C9A84C"} className="w-24 h-24 mx-auto rounded-full object-cover border-2 border-white/10 group-hover:border-[#C9A84C] transition-colors mb-4" />
-          <h4 className="font-black text-lg text-[#F5F5F0] mb-1">{pt.nxv_ho_ten || 'Coach'}</h4>
-          <p className="text-[#C9A84C] text-xs font-bold uppercase tracking-widest mb-6">{pt.nxv_chuyen_mon || 'Personal Trainer'}</p>
+          <img src={pt.g6_hinh_anh || "https://ui-avatars.com/api/?name="+encodeURIComponent(pt.g6_ho_ten || 'PT')+"&background=1C1C1C&color=C9A84C"} className="w-24 h-24 mx-auto rounded-full object-cover border-2 border-white/10 group-hover:border-[#C9A84C] transition-colors mb-4" />
+          <h4 className="font-black text-lg text-[#F5F5F0] mb-1">{pt.g6_ho_ten || 'Coach'}</h4>
+          <p className="text-[#C9A84C] text-xs font-bold uppercase tracking-widest mb-6">{pt.g6_chuyen_mon || 'Personal Trainer'}</p>
           <button className="w-full py-2 bg-white/5 hover:bg-[#C9A84C] hover:text-[#0A0A0A] border border-white/10 rounded-xl transition-all font-bold text-xs uppercase tracking-widest">
             Đăng ký
           </button>

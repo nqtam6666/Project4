@@ -307,6 +307,7 @@ class G6TonKho(db.Model):
     g6_ngay_cap_nhat = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     g6_bien_the = db.relationship('G6BienTheSanPham', back_populates='g6_ton_kho')
+    g6_chi_nhanh = db.relationship('G6ChiNhanh', backref='g6_ton_kho')
 
     def g6_to_dict(self):
         return {
@@ -317,6 +318,10 @@ class G6TonKho(db.Model):
             'g6_so_luong_dat_truoc': self.g6_so_luong_dat_truoc,
             'g6_nguong_canh_bao': self.g6_nguong_canh_bao,
             'g6_ngay_cap_nhat': self.g6_ngay_cap_nhat.isoformat() if self.g6_ngay_cap_nhat else None,
+            'g6_ten_san_pham': self.g6_bien_the.g6_san_pham.g6_ten_san_pham if self.g6_bien_the and self.g6_bien_the.g6_san_pham else None,
+            'g6_ten_bien_the': self.g6_bien_the.g6_ten_bien_the if self.g6_bien_the else None,
+            'g6_ten_chi_nhanh': self.g6_chi_nhanh.g6_ten_chi_nhanh if self.g6_chi_nhanh else None,
+            'g6_so_luong_toi_thieu': self.g6_nguong_canh_bao
         }
 
 

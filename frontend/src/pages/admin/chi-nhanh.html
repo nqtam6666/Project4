@@ -241,11 +241,11 @@
                 <button onclick="nqtDongModal('modalThietBi')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-4 overflow-y-auto flex-1 space-y-4">
-                <form id="formAddThietBi" class="bg-[#fafafa] dark:bg-[#333] rounded-md p-3 flex gap-3 border border-[#e5e5e5] dark:border-[#404040]">
+                <form id="formAddThietBi" class="bg-[#fafafa] dark:bg-[#333] rounded-md p-3 flex items-center gap-3 border border-[#e5e5e5] dark:border-[#404040]">
                     <input type="hidden" name="g6_ma_chi_nhanh" id="thietBiChiNhanh">
-                    <input type="text" name="g6_ten_thiet_bi" required placeholder="Tên thiết bị *" class="flex-1 px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
-                    <input type="text" name="g6_thuong_hieu" placeholder="Thương hiệu" class="flex-1 px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
-                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-3 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919]">
+                    <input type="text" name="g6_ten_thiet_bi" required placeholder="Tên thiết bị *" class="flex-1 min-w-0 px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    <input type="text" name="g6_thuong_hieu" placeholder="Thương hiệu" class="flex-1 min-w-0 px-3 py-2 text-sm bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md text-[#191919] dark:text-[#fafafa]">
+                    <button type="submit" class="shrink-0 inline-flex items-center justify-center w-9 h-9 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] transition-all active:scale-95">
                         <i class="fas fa-plus"></i>
                     </button>
                 </form>
@@ -495,14 +495,20 @@ nqtInitAdminLayout('chi-nhanh');
             el.innerHTML = '<p class="text-center text-[#666] dark:text-[#888] py-8">Chưa có thiết bị nào.</p>';
             return;
         }
-        const nqtStatusColors = { hoat_dong: 'bg-[#dcfce7] text-[#16a34a]', bao_tri: 'bg-[#fef3c7] text-[#d97706]', hong: 'bg-[#fef2f2] text-[#dc2626]' };
+        const nqtStatusColors = { hoat_dong: 'bg-[#dcfce7] text-[#16a34a] dark:bg-[#166534]/20 dark:text-[#4ade80]', bao_tri: 'bg-[#fef3c7] text-[#d97706] dark:bg-[#92400e]/20 dark:text-[#fbbf24]', hong: 'bg-[#fef2f2] text-[#dc2626] dark:bg-[#7f1d1d]/20 dark:text-[#f87171]' };
+        const nqtStatusLabels = { hoat_dong: 'Hoạt động', bao_tri: 'Bảo trì', hong: 'Hỏng' };
+        
         el.innerHTML = list.map(t => `
-            <div class="flex items-center justify-between p-3 bg-[#fafafa] dark:bg-[#333] rounded-md border border-[#e5e5e5] dark:border-[#404040]">
-                <div>
-                    <p class="font-medium text-[#191919] dark:text-[#fafafa] text-sm">${t.g6_ten_thiet_bi}</p>
-                    ${t.g6_thuong_hieu ? `<p class="text-xs text-[#666] dark:text-[#888]">${t.g6_thuong_hieu}</p>` : ''}
+            <div class="flex items-center justify-between p-3 bg-white dark:bg-[#262626] hover:bg-[#fafafa] dark:hover:bg-[#333] rounded-md border border-[#e5e5e5] dark:border-[#404040] transition-colors group">
+                <div class="min-w-0">
+                    <p class="font-medium text-[#191919] dark:text-[#fafafa] text-sm truncate">${t.g6_ten_thiet_bi}</p>
+                    ${t.g6_thuong_hieu ? `<p class="text-xs text-[#666] dark:text-[#888] truncate">${t.g6_thuong_hieu}</p>` : ''}
                 </div>
-                <span class="px-2 py-0.5 text-xs font-medium rounded-md ${nqtStatusColors[t.g6_trang_thai] || 'bg-[#f5f5f5] text-[#525252]'}">${t.g6_trang_thai}</span>
+                <div class="flex items-center gap-3 shrink-0">
+                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${nqtStatusColors[t.g6_trang_thai] || 'bg-[#f5f5f5] text-[#525252]'}">
+                        ${nqtStatusLabels[t.g6_trang_thai] || t.g6_trang_thai}
+                    </span>
+                </div>
             </div>
         `).join('');
     }

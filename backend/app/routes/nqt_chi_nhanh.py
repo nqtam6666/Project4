@@ -2,13 +2,14 @@ from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.g6_chi_nhanh import G6ChiNhanh, G6ThietBi
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
 
 nqt_chi_nhanh_bp = Blueprint('g6_chi_nhanh', __name__, url_prefix='/api')
 
 
 @nqt_chi_nhanh_bp.route('/nqt-chi-nhanh', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_xem_cau_hinh')
 def nqt_lay_tat_ca_chi_nhanh():
     nqt_tat_ca = request.args.get('g6_tat_ca', '0') == '1'
     nqt_q = G6ChiNhanh.query
@@ -20,6 +21,7 @@ def nqt_lay_tat_ca_chi_nhanh():
 
 @nqt_chi_nhanh_bp.route('/nqt-chi-nhanh/<int:nqt_id>', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_xem_cau_hinh')
 def nqt_lay_chi_nhanh(nqt_id):
     nqt_row = G6ChiNhanh.query.get_or_404(nqt_id)
     return nqt_ok(nqt_row.g6_to_dict())
@@ -27,6 +29,7 @@ def nqt_lay_chi_nhanh(nqt_id):
 
 @nqt_chi_nhanh_bp.route('/nqt-chi-nhanh', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_sua_cau_hinh')
 def nqt_tao_chi_nhanh():
     nqt_data = request.get_json() or {}
     nqt_ten = nqt_data.get('g6_ten_chi_nhanh', '').strip()
@@ -50,6 +53,7 @@ def nqt_tao_chi_nhanh():
 
 @nqt_chi_nhanh_bp.route('/nqt-chi-nhanh/<int:nqt_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_sua_cau_hinh')
 def nqt_cap_nhat_chi_nhanh(nqt_id):
     nqt_row = G6ChiNhanh.query.get_or_404(nqt_id)
     nqt_data = request.get_json() or {}
@@ -104,6 +108,7 @@ def nqt_tao_thiet_bi():
 
 @nqt_chi_nhanh_bp.route('/nqt-chi-nhanh/<int:nqt_id>', methods=['DELETE'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_sua_cau_hinh')
 def nqt_xoa_chi_nhanh(nqt_id):
     nqt_row = G6ChiNhanh.query.get_or_404(nqt_id)
     nqt_row.g6_la_hoat_dong = False

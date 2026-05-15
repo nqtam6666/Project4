@@ -45,7 +45,8 @@ def nqt_tao_app(nqt_moi_truong: str = None):
     migrate.init_app(app, db)
     jwt.init_app(app)
     mail.init_app(app)
-    CORS(app)
+    # Cho phép gửi nhận Cookie từ Frontend Vite
+    CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
     # Import models để Migrate nhận diện
     from backend.app.models import (  # noqa: F401

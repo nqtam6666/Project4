@@ -53,7 +53,10 @@ class G6LichLopHoc(db.Model):
         return {
             'g6_ma_lich_lop': self.g6_ma_lich_lop,
             'g6_ma_lop_hoc': self.g6_ma_lop_hoc,
+            'g6_ten_lop': self.g6_lop_hoc.g6_ten_lop if self.g6_lop_hoc else None,
+            'g6_loai_lop': self.g6_lop_hoc.g6_loai_lop if self.g6_lop_hoc else None,
             'g6_ma_hlv': self.g6_ma_hlv,
+            'g6_ten_hlv': self.g6_hlv.g6_nhan_vien.g6_ho_ten if self.g6_hlv and self.g6_hlv.g6_nhan_vien else None,
             'g6_thu_trong_tuan': self.g6_thu_trong_tuan,
             'g6_gio_bat_dau': str(self.g6_gio_bat_dau) if self.g6_gio_bat_dau else None,
             'g6_thoi_luong': self.g6_thoi_luong,

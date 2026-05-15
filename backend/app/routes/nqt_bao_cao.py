@@ -67,7 +67,7 @@ def nqt_export_doanh_thu_excel():
             func.sum(G6ThanhToan.g6_so_tien).label('nqt_tong_tien'),
         )
         .filter(
-            G6ThanhToan.g6_trang_thai == 'da_thanh_toan',
+            G6ThanhToan.g6_trang_thai == 'thanh_cong',
             extract('year', G6ThanhToan.g6_ngay_thanh_toan) == nqt_nam,
         )
         .group_by(extract('month', G6ThanhToan.g6_ngay_thanh_toan))
@@ -302,7 +302,7 @@ def nqt_tong_hop_bao_cao():
     nqt_doanh_thu_thang = db.session.query(
         func.sum(G6ThanhToan.g6_so_tien)
     ).filter(
-        G6ThanhToan.g6_trang_thai == 'da_thanh_toan',
+        G6ThanhToan.g6_trang_thai == 'thanh_cong',
         G6ThanhToan.g6_ngay_thanh_toan >= nqt_dau_thang,
     ).scalar() or 0
 
@@ -316,7 +316,7 @@ def nqt_tong_hop_bao_cao():
     for nqt_i in range(6, -1, -1):
         nqt_ngay = nqt_hom_nay - timedelta(days=nqt_i)
         nqt_dt_ngay = db.session.query(func.sum(G6ThanhToan.g6_so_tien)).filter(
-            G6ThanhToan.g6_trang_thai == 'da_thanh_toan',
+            G6ThanhToan.g6_trang_thai == 'thanh_cong',
             func.cast(G6ThanhToan.g6_ngay_thanh_toan, db.Date) == nqt_ngay,
         ).scalar() or 0
         nqt_bieu_do_dt.append({'g6_ngay': nqt_ngay.strftime('%d/%m'), 'g6_gia_tri': float(nqt_dt_ngay)})
