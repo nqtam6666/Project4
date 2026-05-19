@@ -403,3 +403,51 @@ def nxv_huy_buoi_tap(nxv_id):
     db.session.commit()
     return nqt_ok(None, 'Đã huỷ buổi tập PT')
 
+
+from flask_jwt_extended import get_jwt_identity
+from backend.app.models.g6_nhan_vien import G6NhanVien
+
+@nxv_huan_luyen_vien_bp.route('/nxv-hlv/me', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nxv_lay_hlv_me():
+    # Lấy thông tin user hiện tại
+    user_id = int(get_jwt_identity())
+    
+    # Tìm NhanVien map với user
+    nv = G6NhanVien.query.filter_by(g6_ma_nguoi_dung=user_id).first()
+    if not nv:
+        return nqt_loi('Bạn không phải là nhân viên', 403)
+        
+    # Tìm HuanLuyenVien map với NhanVien
+    hlv = G6HuanLuyenVien.query.filter_by(g6_ma_nhan_vien=nv.g6_ma_nhan_vien).first()
+    if not hlv:
+        return nqt_loi('Bạn không phải là huấn luyện viên', 403)
+        
+    return nqt_ok(hlv.g6_to_dict())
+
+@nxv_huan_luyen_vien_bp.route('/nxv-hlv/me/avatar', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+def nxv_cap_nhat_hlv_me_avatar():
+    user_id = int(get_jwt_identity())
+    
+    nv = G6NhanVien.query.filter_by(g6_ma_nguoi_dung=user_id).first()
+    if not nv:
+        return nqt_loi('Bạn không phải là nhân viên', 403)
+        
+    hlv = G6HuanLuyenVien.query.filter_by(g6_ma_nhan_vien=nv.g6_ma_nhan_vien).first()
+    if not hlv:
+        return nqt_loi('Bạn không phải là huấn luyện viên', 403)
+        
+    data = request.get_json() or {}
+    hinh_anh = data.get('g6_hinh_anh')
+    if not hinh_anh:
+        return nqt_loi('Vui lòng cung cấp link hình ảnh')
+        
+    hlv.g6_hinh_anh = hinh_anh
+    # Đồng bộ avatar với G6NhanVien và G6NguoiDung nếu cần
+    nv.g6_hinh_anh = hinh_anh
+    if nv.g6_nguoi_dung:
+        nv.g6_nguoi_dung.g6_anh_dai_dien = hinh_anh
+        
+    db.session.commit()
+    return nqt_ok(hlv.g6_to_dict(), 'Cập nhật ảnh đại diện thành công')

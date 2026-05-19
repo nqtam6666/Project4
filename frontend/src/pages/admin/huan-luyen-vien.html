@@ -17,7 +17,7 @@
             <h1 class="text-lg font-semibold text-[#191919] dark:text-[#fafafa]">Huấn luyện viên</h1>
             <p class="text-sm text-[#666] dark:text-[#888]">Quản lý HLV, gói PT và lịch buổi tập</p>
         </div>
-        <button onclick="nqtMoModal('nqtModalThemHLV')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors">
+        <button id="nqtBtnThem" onclick="nqtMoModal('nqtModalThemHLV')" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] text-sm font-medium rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors">
             <i class="fas fa-plus"></i>Thêm HLV
         </button>
     </div>
@@ -264,6 +264,16 @@ const nqtTabConfig = {
     buoitap: { api: '/api/nxv-buoi-tap-pt',   label: 'Buổi tập',   cols: ['Hội viên','HLV','Ngày tập','Giờ bắt đầu','Trạng thái','Thao tác'] },
 };
 
+function nqtAvatarHtml(name, size = 32) {
+    if (!name) name = 'User';
+    return `<img src="https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1C1C1C&color=C9A84C&size=${size}" class="rounded-full w-[${size}px] h-[${size}px] border border-white/10 shadow-sm" alt="${name}">`;
+}
+
+function nqtRenderHead() {
+    const cols = nqtTabConfig[nqtTabHienTai].cols;
+    document.getElementById('nqtTableHead').innerHTML = cols.map(c => `<th class="px-4 py-3 text-left text-xs font-medium text-[#666] dark:text-[#888] uppercase">${c}</th>`).join('');
+}
+
 function nqtChuyenTab(tab) {
     nqtTabHienTai = tab;
     nqtTrang = 1;
@@ -274,12 +284,22 @@ function nqtChuyenTab(tab) {
         b.classList.replace('text-[#191919]','text-[#666]');
         b.classList.replace('dark:text-[#fafafa]','dark:text-[#888]');
     });
-    const btn = document.getElementById('nqtTab' + tab.charAt(0).toUpperCase() + tab.slice(1).replace('goipt','GoiPT').replace('dangky','DangKy').replace('buoitap','BuoiTap'));
+    
+    const tabIds = { hlv: 'nqtTabHLV', goipt: 'nqtTabGoiPT', dangky: 'nqtTabDangKy', buoitap: 'nqtTabBuoiTap' };
+    const btn = document.getElementById(tabIds[tab]);
+    
     if (btn) {
         btn.classList.replace('border-transparent','border-[#191919]');
         btn.classList.add('dark:border-[#fafafa]','text-[#191919]','dark:text-[#fafafa]');
         btn.classList.remove('text-[#666]','dark:text-[#888]');
     }
+    
+    const btnThem = document.getElementById('nqtBtnThem');
+    if (btnThem) {
+        btnThem.style.display = tab === 'hlv' ? 'inline-flex' : 'none';
+    }
+    
+    nqtRenderHead();
     nqtTaiDuLieu();
 }
 
@@ -332,28 +352,28 @@ function nqtRenderRow(r) {
         <button onclick="nqtXoaHLV(${hlvId})" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
     }
     if (t === 'goipt') return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
-        <td class="px-4 py-3 font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten||'—'}</td>
+        <td class="px-4 py-3 font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_goi||'—'}</td>
         <td class="px-4 py-3 text-center text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_so_buoi||0}</td>
         <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${fmt(r.g6_gia)}</td>
-        <td class="px-4 py-3 text-center text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_thoi_han_ngay||'—'}</td>
+        <td class="px-4 py-3 text-center text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_hieu_luc_ngay||'—'}</td>
         <td class="px-4 py-3 text-center">${badge(r.g6_la_hoat_dong)}</td>
-        <td class="px-4 py-3 text-right"><button onclick="nqtXoaGoiPT(${r.nxv_ma_goi||r.g6_ma_goi})" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
+        <td class="px-4 py-3 text-right"><button onclick="nqtXoaGoiPT(${r.nxv_ma_goi||r.g6_ma_goi_pt})" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
     if (t === 'dangky') return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
-        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hoi_vien||r.g6_ma_hoi_vien||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hoi_vien||r.g6_ma_nguoi_dung||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hlv||r.g6_ma_hlv||'—'}</td>
-        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_goi||r.nxv_ma_goi||'—'}</td>
-        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ngay_bat_dau?.slice(0,10)||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_goi||r.g6_ma_goi_pt||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ngay_mua?.slice(0,10)||'—'}</td>
         <td class="px-4 py-3 text-center text-sm font-medium text-[#191919] dark:text-[#fafafa]">${r.g6_so_buoi_con_lai??'—'}</td>
-        <td class="px-4 py-3 text-right"><button onclick="nqtXoa(${r.nxv_ma_dang_ky||r.g6_ma_dang_ky},'nxv-dang-ky-pt')" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
+        <td class="px-4 py-3 text-right"><button onclick="nqtXoa(${r.nxv_ma_dang_ky||r.g6_ma_dang_ky_pt},'nxv-dang-ky-pt')" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
     // buoitap
     const trangThaiBuoi = {'cho_xac_nhan':'Chờ xác nhận','da_xac_nhan':'Đã xác nhận','hoan_thanh':'Hoàn thành','huy':'Đã huỷ'};
     return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
-        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hoi_vien||r.g6_ma_hoi_vien||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hoi_vien||r.g6_ma_nguoi_dung||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hlv||r.g6_ma_hlv||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ngay_tap?.slice(0,10)||'—'}</td>
-        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_gio_bat_dau||'—'}</td>
+        <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ngay_tap?.slice(11,16)||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${trangThaiBuoi[r.g6_trang_thai]||r.g6_trang_thai||'—'}</td>
-        <td class="px-4 py-3 text-right"><button onclick="nqtXoa(${r.nxv_ma_buoi||r.g6_ma_buoi},'nxv-buoi-tap-pt')" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
+        <td class="px-4 py-3 text-right"><button onclick="nqtXoa(${r.nxv_ma_buoi||r.g6_ma_buoi_tap},'nxv-buoi-tap-pt')" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
 }
 
 function nqtHienThiPagination(tong) {
@@ -447,6 +467,7 @@ window.nqtXoaGoiPT = nqtXoaGoiPT;
 window.nqtXoa = nqtXoa;
 
 nqtLoadBranches();
+nqtRenderHead();
 nqtTaiDuLieu();
 </script>
 </body>

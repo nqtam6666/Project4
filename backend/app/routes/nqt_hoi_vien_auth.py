@@ -81,8 +81,12 @@ def nqt_dang_ky_hoi_vien():
         from flask import make_response
         from flask_jwt_extended import set_access_cookies, set_refresh_cookies
         
+        nqt_tokens = _nqt_tao_jwt(nqt_hoi_vien.g6_ma_nguoi_dung, nqt_hoi_vien.g6_ho_ten)
+        
         nqt_response = make_response(nqt_ok({
             'nqt_hoi_vien': nqt_hoi_vien.g6_to_dict(),
+            'nqt_access_token': nqt_tokens['nqt_access_token'],
+            'nqt_refresh_token': nqt_tokens['nqt_refresh_token']
         }, 'Đăng ký thành công', nqt_ma_trang=201))
         
         set_access_cookies(nqt_response, nqt_tokens['nqt_access_token'])
@@ -133,8 +137,12 @@ def nqt_dang_nhap_hoi_vien():
     from flask import make_response
     from flask_jwt_extended import set_access_cookies, set_refresh_cookies
     
+    nqt_tokens = _nqt_tao_jwt(nqt_hoi_vien.g6_ma_nguoi_dung, nqt_hoi_vien.g6_ho_ten)
+    
     nqt_response = make_response(nqt_ok({
         'nqt_hoi_vien': nqt_hoi_vien.g6_to_dict(),
+        'nqt_access_token': nqt_tokens['nqt_access_token'],
+        'nqt_refresh_token': nqt_tokens['nqt_refresh_token']
     }, 'Đăng nhập thành công'))
     
     set_access_cookies(nqt_response, nqt_tokens['nqt_access_token'])
@@ -332,9 +340,186 @@ def nqt_dat_lai_mat_khau():
     if nqt_hoi_vien.g6_reset_token_het_han and nqt_hoi_vien.g6_reset_token_het_han < datetime.utcnow():
         return nqt_loi('Mã đặt lại đã hết hạn', nqt_ma_trang=400)
     nqt_hoi_vien.nqt_dat_mat_khau(nqt_mk_moi)
-    nqt_hoi_vien.g6_reset_token = None
     nqt_hoi_vien.g6_reset_token_het_han = None
     nqt_hoi_vien.g6_lan_dang_nhap_sai = 0
     nqt_hoi_vien.g6_khoa_den = None
     db.session.commit()
     return nqt_ok(None, 'Đặt lại mật khẩu thành công')
+
+# ── POST /api/nqt-mua-goi-tap ────────────────────────────────────────────────
+@nqt_hv_auth_bp.route('/nqt-mua-goi-tap', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_mua_goi_tap_cua_toi():
+    from backend.app.models.g6_hoi_vien import G6GoiTap, G6DangKyGoiTap
+    from datetime import date, timedelta
+    nqt_identity = get_jwt_identity()
+    try:
+        nqt_ma = int(nqt_identity.split(':')[1])
+    except Exception:
+        return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
+    
+    nqt_data = request.get_json() or {}
+    nqt_gt_id = nqt_data.get('g6_ma_goi_tap')
+    if not nqt_gt_id:
+        return nqt_loi('Thiếu mã gói tập')
+        
+    nqt_gt = G6GoiTap.query.get_or_404(nqt_gt_id)
+    nqt_hv = G6NguoiDung.query.get_or_404(nqt_ma)
+    
+    nqt_ngay_bd = date.today()
+    nqt_ngay_hh = nqt_ngay_bd + timedelta(days=nqt_gt.g6_so_ngay)
+    nqt_gia = float(nqt_gt.g6_gia_khuyen_mai or nqt_gt.g6_gia)
+    
+    nqt_row = G6DangKyGoiTap(
+        g6_ma_nguoi_dung=nqt_ma,
+        g6_ma_goi_tap=nqt_gt_id,
+        g6_ma_chi_nhanh=nqt_hv.g6_ma_chi_nhanh,
+        g6_ngay_bat_dau=nqt_ngay_bd,
+        g6_ngay_het_han=nqt_ngay_hh,
+        g6_gia_thuc_te=nqt_gia,
+    )
+    db.session.add(nqt_row)
+    db.session.commit()
+    return nqt_ok(nqt_row.g6_to_dict(), 'Mua gói tập thành công', 201)
+
+# ── POST /api/nqt-mua-goi-pt ─────────────────────────────────────────────────
+@nqt_hv_auth_bp.route('/nqt-mua-goi-pt', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_mua_goi_pt_cua_toi():
+    from backend.app.models.g6_huan_luyen_vien import G6GoiPT, G6DangKyGoiPT, G6HuanLuyenVien
+    from datetime import date, timedelta
+    nqt_identity = get_jwt_identity()
+    try:
+        nqt_ma = int(nqt_identity.split(':')[1])
+    except Exception:
+        return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
+    
+    nqt_data = request.get_json() or {}
+    nqt_hlv_id = nqt_data.get('g6_ma_hlv')
+    nqt_goi_id = nqt_data.get('g6_ma_goi_pt')
+    
+    if nqt_hlv_id:
+        nxv_goi = G6GoiPT.query.filter_by(g6_ma_hlv=nqt_hlv_id, g6_la_hoat_dong=True).first()
+        if not nxv_goi:
+            return nqt_loi('Huấn luyện viên chưa có gói PT nào')
+    elif nqt_goi_id:
+        nxv_goi = G6GoiPT.query.get_or_404(nqt_goi_id)
+    else:
+        return nqt_loi('Thiếu thông tin gói PT hoặc HLV')
+    if not nxv_goi.g6_la_hoat_dong:
+        return nqt_loi('Gói PT không còn hoạt động')
+        
+    nxv_hlv = G6HuanLuyenVien.query.get_or_404(nxv_goi.g6_ma_hlv)
+    if nxv_hlv.g6_so_hoi_vien_hien_tai >= nxv_hlv.g6_toi_da_hoi_vien:
+        return nqt_loi('Huấn luyện viên đã đạt tối đa hội viên')
+        
+    nxv_ngay_mua = date.today()
+    nxv_ngay_hh = nxv_ngay_mua + timedelta(days=nxv_goi.g6_hieu_luc_ngay)
+    nxv_gia = float(nxv_goi.g6_gia_khuyen_mai or nxv_goi.g6_gia)
+    
+    nxv_row = G6DangKyGoiPT(
+        g6_ma_nguoi_dung=nqt_ma,
+        g6_ma_goi_pt=nxv_goi.g6_ma_goi_pt,
+        g6_ma_hlv=nxv_goi.g6_ma_hlv,
+        g6_ngay_mua=nxv_ngay_mua,
+        g6_ngay_het_han=nxv_ngay_hh,
+        g6_so_buoi_con_lai=nxv_goi.g6_so_buoi,
+        g6_gia_thuc_te=nxv_gia,
+    )
+    db.session.add(nxv_row)
+    nxv_hlv.g6_so_hoi_vien_hien_tai += 1
+    db.session.commit()
+    return nqt_ok(nxv_row.g6_to_dict(), 'Đăng ký PT thành công', 201)
+
+# ── POST /api/nqt-dat-cho-lop ────────────────────────────────────────────────
+@nqt_hv_auth_bp.route('/nqt-dat-cho-lop', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_dat_cho_lop_cua_toi():
+    from backend.app.models.g6_lop_hoc import G6LichLopHoc, G6DatChoLopHoc
+    from datetime import date
+    nqt_identity = get_jwt_identity()
+    try:
+        nqt_ma = int(nqt_identity.split(':')[1])
+    except Exception:
+        return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
+        
+    nqt_data = request.get_json() or {}
+    nxv_lop_id = nqt_data.get('g6_ma_lop_hoc')
+    nxv_lich_id = nqt_data.get('g6_ma_lich_lop')
+    nxv_ngay = nqt_data.get('g6_ngay_tap') or str(date.today())
+    
+    if nxv_lop_id:
+        nxv_lich = G6LichLopHoc.query.filter_by(g6_ma_lop_hoc=nxv_lop_id, g6_la_hoat_dong=True).first()
+        if not nxv_lich:
+            return nqt_loi('Lớp học chưa có lịch xếp sẵn')
+        nxv_lich_id = nxv_lich.g6_ma_lich_lop
+    elif nxv_lich_id:
+        nxv_lich = G6LichLopHoc.query.get_or_404(nxv_lich_id)
+    else:
+        return nqt_loi('Thiếu thông tin lịch lớp')
+        
+    nxv_trung = G6DatChoLopHoc.query.filter_by(
+        g6_ma_lich_lop=nxv_lich_id,
+        g6_ma_nguoi_dung=nqt_ma,
+        g6_ngay_tap=nxv_ngay,
+    ).filter(G6DatChoLopHoc.g6_trang_thai != 'da_huy').first()
+    if nxv_trung:
+        return nqt_loi('Bạn đã đặt chỗ cho lớp này rồi')
+        
+    nxv_so_dat = G6DatChoLopHoc.query.filter_by(
+        g6_ma_lich_lop=nxv_lich_id,
+        g6_ngay_tap=nxv_ngay,
+    ).filter(G6DatChoLopHoc.g6_trang_thai.in_(['dat_cho', 'da_den'])).count()
+    if nxv_so_dat >= nxv_lich.g6_suc_chua_toi_da:
+        return nqt_loi('Lớp học đã đầy chỗ')
+
+    nxv_row = G6DatChoLopHoc(
+        g6_ma_lich_lop=nxv_lich_id,
+        g6_ma_nguoi_dung=nqt_ma,
+        g6_ngay_tap=nxv_ngay,
+    )
+    db.session.add(nxv_row)
+    db.session.commit()
+    return nqt_ok(nxv_row.g6_to_dict(), 'Đặt chỗ thành công', 201)
+
+# ── POST /api/nqt-dat-lich-pt ────────────────────────────────────────────────
+@nqt_hv_auth_bp.route('/nqt-dat-lich-pt', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_dat_lich_pt_cua_toi():
+    from backend.app.models.g6_huan_luyen_vien import G6DangKyGoiPT, G6BuoiTapPT
+    from datetime import date
+    nqt_identity = get_jwt_identity()
+    try:
+        nqt_ma = int(nqt_identity.split(':')[1])
+    except Exception:
+        return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
+        
+    nqt_data = request.get_json() or {}
+    nxv_dk_id = nqt_data.get('g6_ma_dang_ky_pt')
+    nxv_ngay_tap = nqt_data.get('g6_ngay_tap') or str(date.today())
+    if not nxv_dk_id:
+        return nqt_loi('Thiếu mã đăng ký PT')
+
+    nxv_dk = G6DangKyGoiPT.query.filter_by(g6_ma_dang_ky_pt=nxv_dk_id, g6_ma_nguoi_dung=nqt_ma).first_or_404()
+
+    if nxv_dk.g6_so_buoi_con_lai <= 0:
+        return nqt_loi('Gói PT đã hết buổi tập')
+    if nxv_dk.g6_ngay_het_han < date.today():
+        return nqt_loi('Gói PT đã hết hạn')
+    if nxv_dk.g6_trang_thai != 'dang_dung':
+        return nqt_loi('Gói PT không còn hoạt động')
+
+    nqt_hv = G6NguoiDung.query.get(nqt_ma)
+
+    nxv_row = G6BuoiTapPT(
+        g6_ma_dang_ky_pt=nxv_dk_id,
+        g6_ma_nguoi_dung=nqt_ma,
+        g6_ma_hlv=nxv_dk.g6_ma_hlv,
+        g6_ma_chi_nhanh=nqt_hv.g6_ma_chi_nhanh,
+        g6_ngay_tap=nxv_ngay_tap,
+        g6_thoi_luong=60,
+        g6_trang_thai='cho_xac_nhan',
+    )
+    db.session.add(nxv_row)
+    db.session.commit()
+    return nqt_ok(nxv_row.g6_to_dict(), 'Đặt lịch PT thành công', 201)

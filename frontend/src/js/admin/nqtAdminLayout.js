@@ -72,24 +72,26 @@ export function nqtInitAdminLayout(activePage) {
         } catch(e) { console.error('Lỗi tải cấu hình:', e); }
 
         function applyConfigToAdminDOM(cfg) {
-            if (cfg['g6_ten_website']) {
+            if (cfg['g6_logo_url']) {
+                const brandContainer = document.getElementById('ic-admin-brand-container');
+                if (brandContainer) {
+                    brandContainer.classList.remove('p-6');
+                    brandContainer.classList.add('px-4', 'py-2');
+                    brandContainer.innerHTML = `<img src="${cfg['g6_logo_url']}" style="width: 100%; height: 100%; max-height: 76px; object-fit: contain;" alt="Logo">`;
+                }
+            } else if (cfg['g6_ten_website']) {
                 const brandEl = document.getElementById('ic-admin-brand');
                 if (brandEl) brandEl.textContent = cfg['g6_ten_website'];
-                
+            }
+            
+            if (cfg['g6_ten_website']) {
                 // Update page title suffix
                 const activeItem = document.querySelector('.nqt-sidebar-item.active');
                 if (activeItem) {
                     document.title = activeItem.querySelector('span').textContent + ' - ' + cfg['g6_ten_website'] + ' Admin';
                 }
             }
-            if (cfg['g6_logo_url']) {
-                const brandIconContainer = document.getElementById('ic-admin-brand-icon');
-                if (brandIconContainer) {
-                    brandIconContainer.innerHTML = `<img src="${cfg['g6_logo_url']}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 6px;" alt="Logo">`;
-                    brandIconContainer.style.background = 'transparent';
-                    brandIconContainer.style.boxShadow = 'none';
-                }
-            }
+            
             if (cfg['g6_favicon_url']) {
                 let link = document.querySelector("link[rel~='icon']");
                 if (!link) {
@@ -831,13 +833,15 @@ export function nqtInitAdminLayout(activePage) {
     // Build full shell HTML
     const shellHTML = `
     <aside class="w-64 bg-[#1C1C1C] border-r border-white/5 flex flex-col fixed left-0 top-0 h-full z-20 shadow-2xl">
-        <div class="p-6 flex items-center space-x-3 border-b border-white/5 relative">
-            <div id="ic-admin-brand-icon" class="w-10 h-10 bg-[#C9A84C] text-[#0A0A0A] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(201,168,76,0.3)] neon-button">
-                <i class="fas fa-dumbbell text-xl"></i>
-            </div>
-            <div class="flex flex-col">
-                <span id="ic-admin-brand" class="text-xl font-header font-black tracking-widest text-[#C9A84C] leading-none">IRONCORE</span>
-                <span class="text-[9px] uppercase tracking-[3px] text-white/40 font-header mt-1">Admin Command</span>
+        <div id="ic-admin-brand-container" class="p-6 h-24 flex items-center justify-center border-b border-white/5 relative">
+            <div id="ic-admin-brand-fallback" class="flex items-center space-x-3 w-full">
+                <div id="ic-admin-brand-icon" class="w-10 h-10 bg-[#C9A84C] text-[#0A0A0A] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(201,168,76,0.3)] neon-button flex-shrink-0">
+                    <i class="fas fa-dumbbell text-xl"></i>
+                </div>
+                <div class="flex flex-col overflow-hidden">
+                    <span id="ic-admin-brand" class="text-xl font-header font-black tracking-widest text-[#C9A84C] leading-none truncate">IRONCORE</span>
+                    <span class="text-[9px] uppercase tracking-[3px] text-white/40 font-header mt-1 truncate">Admin Command</span>
+                </div>
             </div>
         </div>
         <nav class="flex-1 py-6 space-y-1 overflow-y-auto">${navHtml}</nav>
@@ -948,9 +952,18 @@ export function nqtInitAdminLayout(activePage) {
         try {
             const cfg = JSON.parse(cStr);
             if (cfg['g6_ten_website']) siteName = cfg['g6_ten_website'];
-            // Also apply brand name to sidebar immediately
-            const brandEl = document.getElementById('ic-admin-brand');
-            if (brandEl) brandEl.textContent = siteName;
+            
+            if (cfg['g6_logo_url']) {
+                const brandContainer = document.getElementById('ic-admin-brand-container');
+                if (brandContainer) {
+                    brandContainer.classList.remove('p-6');
+                    brandContainer.classList.add('px-4', 'py-2');
+                    brandContainer.innerHTML = `<img src="${cfg['g6_logo_url']}" style="width: 100%; height: 100%; max-height: 76px; object-fit: contain;" alt="Logo">`;
+                }
+            } else if (cfg['g6_ten_website']) {
+                const brandEl = document.getElementById('ic-admin-brand');
+                if (brandEl) brandEl.textContent = siteName;
+            }
             
             if (cfg['g6_favicon_url']) {
                 let link = document.querySelector("link[rel~='icon']");
@@ -1084,6 +1097,8 @@ export function nqtInitAdminLayout(activePage) {
             const method = (options.method || 'GET').toUpperCase();
             if (!options.headers) options.headers = {};
             options.headers['Accept'] = 'application/json';
+            const adminToken = localStorage.getItem('nqt_admin_token');
+            if (adminToken) options.headers['Authorization'] = 'Bearer ' + adminToken;
             options.credentials = 'include';
             
             if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {

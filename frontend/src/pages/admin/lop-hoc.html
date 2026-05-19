@@ -319,7 +319,7 @@ function nqtRenderRow(r) {
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_gio_ket_thuc||'—'}</td>
         <td class="px-4 py-3 text-center text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_so_cho_da_dat||0}/${r.g6_suc_chua||'—'}</td>
         <td class="px-4 py-3 text-right">${actions(r.nxv_ma_lich||r.g6_ma_lich, 'nxv-lich-lop-hoc')}</td></tr>`;
-    const trangThaiDat = {'cho_xac_nhan':'Chờ xác nhận','da_xac_nhan':'Đã xác nhận','vang_mat':'Vắng','hoan_thanh':'Hoàn thành','huy':'Đã huỷ'};
+    const trangThaiDat = {'dat_cho':'Đặt chỗ','cho_xac_nhan':'Chờ xác nhận','da_xac_nhan':'Đã xác nhận','da_den':'Đã đến','vang_mat':'Vắng mặt','hoan_thanh':'Hoàn thành','da_huy':'Đã huỷ','huy':'Đã huỷ'};
     return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
         <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hoi_vien||r.g6_ma_hoi_vien||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_lop||r.nxv_ma_lich||'—'}</td>

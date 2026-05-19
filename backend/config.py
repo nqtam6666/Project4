@@ -42,7 +42,7 @@ class NqtCauHinhFlask:
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'backend/static/uploads')
     
     # JWT Cookie Settings
-    JWT_TOKEN_LOCATION = ['cookies', 'headers']
+    JWT_TOKEN_LOCATION = ['headers', 'cookies']
     JWT_COOKIE_SECURE = False  # Đổi thành True khi chạy HTTPS
     JWT_ACCESS_COOKIE_PATH = '/'
     JWT_REFRESH_COOKIE_PATH = '/api/nqt-lam-moi-token'

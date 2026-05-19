@@ -68,6 +68,7 @@ class G6DangKyGoiTap(db.Model):
             'g6_ma_dang_ky': self.g6_ma_dang_ky,
             'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_ma_goi_tap': self.g6_ma_goi_tap,
+            'g6_ten_goi_tap': self.g6_goi_tap.g6_ten_goi if self.g6_goi_tap else None,
             'g6_ngay_bat_dau': str(self.g6_ngay_bat_dau),
             'g6_ngay_het_han': str(self.g6_ngay_het_han),
             'g6_gia_thuc_te': float(self.g6_gia_thuc_te),

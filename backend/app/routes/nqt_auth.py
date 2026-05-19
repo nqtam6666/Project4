@@ -116,6 +116,7 @@ def nqt_dang_nhap():
     
     nqt_response = make_response(nqt_ok({
         'g6_nguoi_dung': nqt_user.g6_to_dict(),
+        'nqt_access_token': nqt_access_token,
     }, 'Đăng nhập thành công'))
     
     set_access_cookies(nqt_response, nqt_access_token)

@@ -580,6 +580,9 @@
                 const data = await res.json();
 
                 if (data.nqt_thanh_cong) {
+                    if (data.nqt_du_lieu && data.nqt_du_lieu.nqt_access_token) {
+                        localStorage.setItem('nqt_admin_token', data.nqt_du_lieu.nqt_access_token);
+                    }
                     nqtShowToast('Đăng nhập thành công! Đang chuyển hướng...', 'success');
                     btn.innerHTML = '<i class="fas fa-check" style="margin-right:8px"></i>Thành công';
                     btn.style.background = 'linear-gradient(135deg, #16a34a, #22c55e)';

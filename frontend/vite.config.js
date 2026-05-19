@@ -25,7 +25,9 @@ function nqtAdminRewrite() {
           const urlBase = req.url.split('?')[0];
           const query = req.url.split('?')[1] ? '?' + req.url.split('?')[1] : '';
           
-          if (urlBase === '/login' || urlBase === '/login/') {
+          if (urlBase === '/pt' || urlBase === '/pt/') {
+            req.url = '/src/pages/pt/dashboard.html' + query;
+          } else if (urlBase === '/login' || urlBase === '/login/') {
             req.url = '/src/pages/member/login.html' + query;
           } else if (urlBase === '/home' || urlBase === '/home/') {
             req.url = '/src/pages/member/dashboard.html' + query;
@@ -47,6 +49,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        ptDashboard: resolve(__dirname, 'src/pages/pt/dashboard.html'),
         memberLogin: resolve(__dirname, 'src/pages/member/login.html'),
         memberDashboard: resolve(__dirname, 'src/pages/member/dashboard.html'),
         memberHoSo: resolve(__dirname, 'src/pages/member/ho_so.html'),

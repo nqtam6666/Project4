@@ -167,6 +167,7 @@ def nqt_tao_khuyen_mai_mua_kem():
 @nqt_khuyen_mai_bp.route('/nqt-khuyen-mai-mua-kem/<int:nqt_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
 def nqt_cap_nhat_khuyen_mai_mua_kem(nqt_id):
+    from datetime import datetime
     nqt_row = G6KhuyenMaiMuaKem.query.get_or_404(nqt_id)
     nqt_data = request.get_json() or {}
     def nqt_parse_date(s):
