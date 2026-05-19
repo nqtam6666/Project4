@@ -53,7 +53,10 @@ class G6LichLopHoc(db.Model):
         return {
             'g6_ma_lich_lop': self.g6_ma_lich_lop,
             'g6_ma_lop_hoc': self.g6_ma_lop_hoc,
+            'g6_ten_lop': self.g6_lop_hoc.g6_ten_lop if self.g6_lop_hoc else None,
+            'g6_loai_lop': self.g6_lop_hoc.g6_loai_lop if self.g6_lop_hoc else None,
             'g6_ma_hlv': self.g6_ma_hlv,
+            'g6_ten_hlv': self.g6_hlv.g6_nhan_vien.g6_ho_ten if self.g6_hlv and self.g6_hlv.g6_nhan_vien else None,
             'g6_thu_trong_tuan': self.g6_thu_trong_tuan,
             'g6_gio_bat_dau': str(self.g6_gio_bat_dau) if self.g6_gio_bat_dau else None,
             'g6_thoi_luong': self.g6_thoi_luong,
@@ -78,14 +81,34 @@ class G6DatChoLopHoc(db.Model):
     g6_ly_do_huy = db.Column(db.String(255))
 
     g6_lich_lop = db.relationship('G6LichLopHoc', back_populates='g6_dat_cho')
+    g6_nguoi_dung = db.relationship('G6NguoiDung')
 
     def g6_to_dict(self):
+        # Safe extraction of related data
+        ten_hoi_vien = None
+        ten_lop = None
+        
+        try:
+            if self.g6_nguoi_dung:
+                ten_hoi_vien = self.g6_nguoi_dung.g6_ho_ten
+        except Exception:
+            pass
+
+        try:
+            if self.g6_lich_lop and self.g6_lich_lop.g6_lop_hoc:
+                ten_lop = self.g6_lich_lop.g6_lop_hoc.g6_ten_lop
+        except Exception:
+            pass
+
         return {
             'g6_ma_dat_cho': self.g6_ma_dat_cho,
             'g6_ma_lich_lop': self.g6_ma_lich_lop,
-            'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
+            'g6_ten_lop': ten_lop,
+            'g6_ma_hoi_vien': self.g6_ma_nguoi_dung,  # Map to match frontend expectation
+            'g6_ten_hoi_vien': ten_hoi_vien,
             'g6_ngay_tap': str(self.g6_ngay_tap) if self.g6_ngay_tap else None,
             'g6_trang_thai': self.g6_trang_thai,
+            'g6_ngay_tao': self.g6_thoi_gian_dat.isoformat() if self.g6_thoi_gian_dat else None, # Map to match frontend
             'g6_thoi_gian_dat': self.g6_thoi_gian_dat.isoformat() if self.g6_thoi_gian_dat else None,
             'g6_thoi_gian_huy': self.g6_thoi_gian_huy.isoformat() if self.g6_thoi_gian_huy else None,
             'g6_ly_do_huy': self.g6_ly_do_huy,

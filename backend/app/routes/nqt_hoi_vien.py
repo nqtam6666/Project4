@@ -126,6 +126,7 @@ def nqt_xoa_hoi_vien(nqt_id):
 
 @nqt_hoi_vien_bp.route('/nqt-goi-tap', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_xem_goi_tap')
 def nqt_lay_goi_tap():
     nqt_trang_thai = request.args.get('g6_trang_thai', 'hoat_dong')
     nqt_q = G6GoiTap.query
@@ -287,6 +288,7 @@ def nqt_them_chi_so(nqt_id):
 
 @nqt_hoi_vien_bp.route('/nqt-thong-ke-dashboard', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('XEM_BAO_CAO')
 def nqt_thong_ke_dashboard():
     nqt_hom_nay = date.today()
     nqt_dau_thang = nqt_hom_nay.replace(day=1)
@@ -344,6 +346,7 @@ def nqt_thong_ke_dashboard():
 
 @nqt_hoi_vien_bp.route('/nqt-thong-ke-bieu-do', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('XEM_BAO_CAO')
 def nqt_thong_ke_bieu_do():
     nqt_so_ngay = request.args.get('g6_so_ngay', 7, type=int)
     nqt_so_ngay = min(max(nqt_so_ngay, 7), 90)

@@ -514,6 +514,7 @@
                 <li><a href="#hero">Trang chủ</a></li>
                 <li><a href="#services">Dịch vụ</a></li>
                 <li><a href="#pricing">Gói tập</a></li>
+                <li><a href="#products">Sản phẩm</a></li>
                 <li><a href="#testimonials">Hội viên</a></li>
                 <li><a href="#footer">Liên hệ</a></li>
             </ul>
@@ -564,29 +565,11 @@
                 <h2>Dịch vụ đặc quyền</h2>
                 <div class="divider"></div>
             </div>
-            <div class="services-grid">
-                <!-- Data from G6DichVuPhu -->
-                <div class="service-card reveal" data-ma-dich-vu="SAUNA">
-                    <img src="C:\Users\NoPainNoGain\.gemini\antigravity\brain\5b22403f-e300-4855-8774-aacb72cd3a88\ironcore_sauna_1778213029207.png" alt="Sauna">
-                    <div class="service-info">
-                        <h3>SAUNA & RECOVERY</h3>
-                        <p>Phục hồi cơ bắp đỉnh cao sau mỗi buổi tập.</p>
-                    </div>
-                </div>
-                <!-- Data from G6LopHoc -->
-                <div class="service-card reveal" data-ma-lop="BOXING">
-                    <img src="C:\Users\NoPainNoGain\.gemini\antigravity\brain\5b22403f-e300-4855-8774-aacb72cd3a88\ironcore_boxing_1778213046689.png" alt="Boxing">
-                    <div class="service-info">
-                        <h3>BOXING & MMA</h3>
-                        <p>Đánh thức bản năng chiến binh trong bạn.</p>
-                    </div>
-                </div>
-                <div class="service-card reveal" data-ma-lop="YOGA">
-                    <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2040&auto=format&fit=crop" alt="Yoga">
-                    <div class="service-info">
-                        <h3>ELITE YOGA</h3>
-                        <p>Cân bằng thân - tâm - trí giữa không gian sang trọng.</p>
-                    </div>
+            <div id="service-list" class="services-grid">
+                <!-- Services will be injected here -->
+                <div class="text-center w-full py-10" id="service-loading">
+                    <i class="fas fa-circle-notch fa-spin text-3xl text-gold"></i>
+                    <p class="mt-4 text-muted">Đang tải dịch vụ...</p>
                 </div>
             </div>
         </div>
@@ -638,6 +621,26 @@
                     </ul>
                     <a href="/dang-ky?goi=ELITE" class="cta-btn" style="width: 100%;">CHỌN ELITE</a>
                 </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Products Section -->
+    <section id="products">
+        <div class="container">
+            <div class="section-title reveal">
+                <h2>Thực phẩm & Phụ kiện</h2>
+                <div class="divider"></div>
+            </div>
+            <div id="product-list" class="services-grid">
+                <!-- Products will be injected here -->
+                <div class="text-center w-full py-10" id="product-loading">
+                    <i class="fas fa-circle-notch fa-spin text-3xl text-gold"></i>
+                    <p class="mt-4 text-muted">Đang tải sản phẩm...</p>
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <a href="/cua-hang" class="cta-btn">XEM TẤT CẢ CỬA HÀNG</a>
             </div>
         </div>
     </section>
@@ -842,9 +845,133 @@
                     if (cfg['g6_mau_phu']) {
                         document.documentElement.style.setProperty('--gold-bright', cfg['g6_mau_phu']);
                     }
+                    if (cfg['g6_slogan']) {
+                        const slogan = document.querySelector('[data-g6-cauhinh="slogan"]');
+                        if (slogan) slogan.innerText = cfg['g6_slogan'];
+                    }
                 }
             } catch(e) {}
         }
+        // Dynamic Product Loader
+        async function loadProducts() {
+            try {
+                const res = await fetch('/api/nxv-san-pham?g6_gioi_han=3');
+                const data = await res.json();
+                const container = document.getElementById('product-list');
+                const loading = document.getElementById('product-loading');
+                
+                if (data && data.nqt_thanh_cong && data.nqt_du_lieu.g6_danh_sach.length > 0) {
+                    if (loading) loading.remove();
+                    
+                    container.innerHTML = data.nqt_du_lieu.g6_danh_sach.map(p => `
+                        <div class="service-card reveal active">
+                            <img src="${p.g6_hinh_anh_chinh || 'https://images.unsplash.com/photo-1593095191849-bc5040689814?q=80&w=2070&auto=format&fit=crop'}" alt="${p.g6_ten_san_pham}">
+                            <div class="service-info">
+                                <p class="text-gold bebas" style="font-size: 0.9rem; letter-spacing: 1px;">${p.g6_ten_danh_muc || 'Thực phẩm'}</p>
+                                <h3 style="font-size: 1.5rem; margin: 5px 0;">${p.g6_ten_san_pham}</h3>
+                                <div class="flex justify-between items-center mt-4">
+                                    <span class="bebas text-xl" style="color: var(--text-main)">${Number(p.g6_gia_ban).toLocaleString('vi-VN')}₫</span>
+                                    <a href="/san-pham/${p.g6_slug}" class="text-gold" style="text-decoration: none; font-size: 0.9rem;">CHI TIẾT <i class="fas fa-chevron-right ml-1"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    if (loading) loading.innerHTML = '<p class="text-muted">Chưa có sản phẩm nào.</p>';
+                }
+            } catch (e) {
+                console.error("Error loading products:", e);
+            }
+        }
+        
+        // Dynamic Stats Loader
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/nqt-public/stats');
+                const data = await res.json();
+                if (data && data.nqt_thanh_cong) {
+                    const stats = data.nqt_du_lieu;
+                    const membersEl = document.querySelector('[data-g6-hoivien="total"]');
+                    const trainersEl = document.querySelector('[data-g6-huanluyenvien="total"]');
+                    const ratingEl = document.querySelector('[data-nxv-danhgia="avg"]');
+                    
+                    if (membersEl) membersEl.setAttribute('data-target', stats.total_members || 1500);
+                    if (trainersEl) trainersEl.setAttribute('data-target', stats.total_trainers || 45);
+                    if (ratingEl) ratingEl.setAttribute('data-target', stats.avg_rating || 4.9);
+                    
+                    animateCounters();
+                }
+            } catch (e) {}
+        }
+
+        // Dynamic Pricing Loader
+        async function loadPricing() {
+            try {
+                const res = await fetch('/api/nqt-public/goi-tap');
+                const data = await res.json();
+                if (data && data.nqt_thanh_cong && data.nqt_du_lieu.length > 0) {
+                    const container = document.querySelector('.pricing-grid');
+                    container.innerHTML = data.nqt_du_lieu.map(g => `
+                        <div class="pricing-card ${g.g6_la_noi_bat ? 'featured' : ''} reveal active" data-ma-goi-tap="${g.g6_ma_goi_tap}">
+                            <h3>${g.g6_ten_goi_tap}</h3>
+                            <div class="price">${Number(g.g6_gia/1000).toFixed(0)}k<span>/${g.g6_thoi_han_thang} tháng</span></div>
+                            <ul class="pricing-features">
+                                <li><i class="fas fa-check"></i> Tập luyện không giới hạn</li>
+                                <li><i class="fas fa-check"></i> ${g.g6_co_sauna ? 'Dịch vụ Sauna & Pool' : 'Không bao gồm Sauna'}</li>
+                                <li><i class="fas fa-check"></i> ${g.g6_co_pt ? 'Huấn luyện viên cá nhân' : 'Không bao gồm PT'}</li>
+                                <li><i class="fas fa-check"></i> ${g.g6_mo_ta || 'Quyền lợi hội viên'}</li>
+                            </ul>
+                            <a href="/dang-ky?goi=${g.g6_ma_goi_tap}" class="cta-btn" style="width: 100%;">ĐĂNG KÝ NGAY</a>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {}
+        }
+
+        // Dynamic Branch Loader
+        async function loadBranches() {
+            try {
+                const res = await fetch('/api/nqt-public/branches');
+                const data = await res.json();
+                if (data && data.nqt_thanh_cong && data.nqt_du_lieu.length > 0) {
+                    const ul = document.querySelector('.footer-links ul');
+                    if (ul) {
+                        ul.innerHTML = data.nqt_du_lieu.map(b => `
+                            <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> ${b.g6_ten_chi_nhanh}</li>
+                        `).join('');
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // Dynamic Services Loader
+        async function loadServices() {
+            try {
+                const res = await fetch('/api/nqt-public/services');
+                const data = await res.json();
+                const container = document.getElementById('service-list');
+                const loading = document.getElementById('service-loading');
+                
+                if (data && data.nqt_thanh_cong && data.nqt_du_lieu.length > 0) {
+                    if (loading) loading.remove();
+                    container.innerHTML = data.nqt_du_lieu.map(s => `
+                        <div class="service-card reveal active">
+                            <img src="${s.g6_hinh_anh || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop'}" alt="${s.g6_ten_dich_vu}">
+                            <div class="service-info">
+                                <h3>${s.g6_ten_dich_vu}</h3>
+                                <p>${s.g6_mo_ta || 'Trải nghiệm dịch vụ đẳng cấp tại Ironcore.'}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {}
+        }
+
+        loadProducts();
+        loadServices();
+        loadStats();
+        loadPricing();
+        loadBranches();
         loadSiteConfig();
     </script>
 </body>

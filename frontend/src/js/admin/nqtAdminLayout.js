@@ -72,24 +72,26 @@ export function nqtInitAdminLayout(activePage) {
         } catch(e) { console.error('Lỗi tải cấu hình:', e); }
 
         function applyConfigToAdminDOM(cfg) {
-            if (cfg['g6_ten_website']) {
+            if (cfg['g6_logo_url']) {
+                const brandContainer = document.getElementById('ic-admin-brand-container');
+                if (brandContainer) {
+                    brandContainer.classList.remove('p-6');
+                    brandContainer.classList.add('px-4', 'py-2');
+                    brandContainer.innerHTML = `<img src="${cfg['g6_logo_url']}" style="width: 100%; height: 100%; max-height: 76px; object-fit: contain;" alt="Logo">`;
+                }
+            } else if (cfg['g6_ten_website']) {
                 const brandEl = document.getElementById('ic-admin-brand');
                 if (brandEl) brandEl.textContent = cfg['g6_ten_website'];
-                
+            }
+            
+            if (cfg['g6_ten_website']) {
                 // Update page title suffix
                 const activeItem = document.querySelector('.nqt-sidebar-item.active');
                 if (activeItem) {
                     document.title = activeItem.querySelector('span').textContent + ' - ' + cfg['g6_ten_website'] + ' Admin';
                 }
             }
-            if (cfg['g6_logo_url']) {
-                const brandIconContainer = document.getElementById('ic-admin-brand-icon');
-                if (brandIconContainer) {
-                    brandIconContainer.innerHTML = `<img src="${cfg['g6_logo_url']}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 6px;" alt="Logo">`;
-                    brandIconContainer.style.background = 'transparent';
-                    brandIconContainer.style.boxShadow = 'none';
-                }
-            }
+            
             if (cfg['g6_favicon_url']) {
                 let link = document.querySelector("link[rel~='icon']");
                 if (!link) {
@@ -733,49 +735,91 @@ export function nqtInitAdminLayout(activePage) {
         }
 
         /* ===== SMOOTH DARK MODE TRANSITION ===== */
-        *, *::before, *::after {
-            transition-property: background-color, border-color, color, box-shadow;
-            transition-duration: 0.2s;
-            transition-timing-function: ease;
+        html {
+            overflow-y: scroll; /* Keep scrollbar gutter consistent */
         }
-        /* Exclude animations and transforms from the blanket transition */
-        button, a, input, select, textarea, tr, .nqt-sidebar-item, .nqt-modal-panel, .nqt-modal-backdrop {
-            transition-property: all;
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .bg-white, .dark\:bg-\[#1C1C1C\], .dark\:bg-\[#262626\], .bg-surface-container {
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        button, a, .nqt-sidebar-item {
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
     `;
     document.head.appendChild(style);
 
     // Build sidebar nav HTML
     const navItems = [
-        { page: 'dashboard', title: 'Tổng quan', icon: 'fa-chart-line', group: null },
+        { page: 'dashboard', title: 'Tổng quan', icon: 'fa-chart-line', perms: ['XEM_BAO_CAO', 'G6PT', 'G6QuanLy'] },
         { group: 'Quản lý' },
-        { page: 'hoi-vien', title: 'Hội viên', icon: 'fa-users' },
-        { page: 'khach-hang', title: 'Khách hàng', icon: 'fa-user-tag' },
-        { page: 'goi-tap', title: 'Gói tập', icon: 'fa-box' },
-        { page: 'huan-luyen-vien', title: 'Huấn luyện viên', icon: 'fa-person-running' },
-        { page: 'lop-hoc', title: 'Lớp học', icon: 'fa-calendar-check' },
+        { page: 'hoi-vien', title: 'Hội viên', icon: 'fa-users', perms: ['QL_HOI_VIEN', 'G6PT', 'G6QuanLy'] },
+        { page: 'khach-hang', title: 'Khách hàng', icon: 'fa-user-tag', perms: ['QL_HOI_VIEN', 'G6QuanLy'] },
+        { page: 'goi-tap', title: 'Gói tập', icon: 'fa-box', perms: ['QL_HOI_VIEN', 'G6QuanLy'] },
+        { page: 'huan-luyen-vien', title: 'Huấn luyện viên', icon: 'fa-person-running', perms: ['QL_NHAN_VIEN', 'G6QuanLy'] },
+        { page: 'lop-hoc', title: 'Lớp học', icon: 'fa-calendar-check', perms: ['QL_HOI_VIEN', 'G6PT', 'G6QuanLy'] },
         { group: 'Kinh doanh' },
-        { page: 'don-hang', title: 'Đơn hàng', icon: 'fa-shopping-bag' },
-        { page: 'thanh-toan', title: 'Thanh toán', icon: 'fa-credit-card' },
-        { page: 'san-pham', title: 'Sản phẩm', icon: 'fa-tag' },
-        { page: 'khuyen-mai', title: 'Khuyến mãi', icon: 'fa-percent' },
-        { page: 'su-kien', title: 'Sự kiện', icon: 'fa-bolt' },
+        { page: 'don-hang', title: 'Đơn hàng', icon: 'fa-shopping-bag', perms: ['QL_KHO', 'G6QuanLy'] },
+        { page: 'thanh-toan', title: 'Thanh toán', icon: 'fa-credit-card', perms: ['QL_KHO', 'G6QuanLy'] },
+        { page: 'san-pham', title: 'Sản phẩm', icon: 'fa-tag', perms: ['QL_KHO', 'G6QuanLy'] },
+        { page: 'khuyen-mai', title: 'Khuyến mãi', icon: 'fa-percent', perms: ['QL_HE_THONG', 'G6QuanLy'] },
+        { page: 'su-kien', title: 'Sự kiện', icon: 'fa-bolt', perms: ['QL_HE_THONG', 'G6QuanLy'] },
         { group: 'Vận hành' },
-        { page: 'chi-nhanh', title: 'Chi nhánh', icon: 'fa-store' },
-        { page: 'nhan-vien', title: 'Nhân viên', icon: 'fa-id-badge' },
-        { page: 'bao-tri', title: 'Bảo trì thiết bị', icon: 'fa-wrench' },
-        { page: 'van-chuyen', title: 'Vận chuyển', icon: 'fa-truck' },
-        { page: 'blog', title: 'Blog', icon: 'fa-newspaper' },
+        { page: 'chi-nhanh', title: 'Chi nhánh', icon: 'fa-store', perms: ['QL_HE_THONG', 'G6QuanLy'] },
+        { page: 'nhan-vien', title: 'Nhân viên', icon: 'fa-id-badge', perms: ['QL_NHAN_VIEN', 'G6QuanLy'] },
+        { page: 'bao-tri', title: 'Bảo trì thiết bị', icon: 'fa-wrench', perms: ['QL_HE_THONG', 'G6QuanLy'] },
+        { page: 'van-chuyen', title: 'Vận chuyển', icon: 'fa-truck', perms: ['QL_KHO', 'G6QuanLy'] },
+        { page: 'blog', title: 'Blog', icon: 'fa-newspaper', perms: ['QL_HE_THONG', 'G6QuanLy'] },
         { group: 'Hệ thống' },
-        { page: 'bao-cao', title: 'Báo cáo', icon: 'fa-chart-bar' },
-        { page: 'quan-tri', title: 'Quản trị', icon: 'fa-shield' },
-        { page: 'phan-quyen', title: 'Phân quyền', icon: 'fa-user-shield' },
-        { page: 'cau-hinh', title: 'Cấu hình', icon: 'fa-cog' },
+        { page: 'bao-cao', title: 'Báo cáo', icon: 'fa-chart-bar', perms: ['XEM_BAO_CAO', 'G6QuanLy'] },
+        { page: 'quan-tri', title: 'Quản trị', icon: 'fa-shield', perms: ['G6QuanTri'] },
+        { page: 'phan-quyen', title: 'Phân quyền', icon: 'fa-user-shield', perms: ['G6QuanTri'] },
+        { page: 'cau-hinh', title: 'Cấu hình', icon: 'fa-cog', perms: ['G6QuanTri'] },
     ];
+
+    // Auth & Permission Filter
+    let userRoles = [];
+    let userPerms = [];
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userRoles = payload.g6_vai_tro || [];
+        userPerms = payload.g6_quyen || [];
+    } catch(e) {}
+
+    const isAdmin = userRoles.includes('G6QuanTri');
+    
+    // Filter items based on permission
+    const filteredNav = navItems.filter(item => {
+        if (isAdmin) return true;
+        if (item.group) return true; // Keep groups for now, we'll prune empty groups later
+        if (!item.perms) return true;
+        return item.perms.some(p => userPerms.includes(p) || userRoles.includes(p));
+    });
+
+    // Prune groups that have no items
+    const finalNav = [];
+    for (let i = 0; i < filteredNav.length; i++) {
+        const item = filteredNav[i];
+        if (item.group) {
+            // Check if there are any non-group items before the next group
+            let hasItems = false;
+            for (let j = i + 1; j < filteredNav.length; j++) {
+                if (filteredNav[j].group) break;
+                hasItems = true;
+                break;
+            }
+            if (hasItems) finalNav.push(item);
+        } else {
+            finalNav.push(item);
+        }
+    }
 
     const linkCls = `nqt-sidebar-item nqt-nav-link flex items-center space-x-2.5 px-4 py-2.5 rounded-lg text-sm text-on-surface-variant font-medium transition-colors hover:bg-surface-bright hover:text-on-surface [&.active]:bg-[rgba(var(--primary-rgb,206,59,59),0.15)] dark:[&.active]:bg-[rgba(var(--primary-rgb,206,59,59),0.25)] [&.active]:text-on-surface [&.active]:font-bold`;
 
-    const navHtml = navItems.map(item => {
+    const navHtml = finalNav.map(item => {
         if (item.group) {
             return `<div class="pt-5 pb-2 px-4 text-[11px] font-bold text-outline uppercase tracking-wider">${item.group}</div>`;
         }
@@ -788,14 +832,16 @@ export function nqtInitAdminLayout(activePage) {
 
     // Build full shell HTML
     const shellHTML = `
-    <aside class="w-64 bg-[#1C1C1C] border-r border-white/5 flex flex-col fixed h-full z-20 shadow-2xl">
-        <div class="p-6 flex items-center space-x-3 border-b border-white/5 relative">
-            <div id="ic-admin-brand-icon" class="w-10 h-10 bg-[#C9A84C] text-[#0A0A0A] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(201,168,76,0.3)] neon-button">
-                <i class="fas fa-dumbbell text-xl"></i>
-            </div>
-            <div class="flex flex-col">
-                <span id="ic-admin-brand" class="text-xl font-header font-black tracking-widest text-[#C9A84C] leading-none">IRONCORE</span>
-                <span class="text-[9px] uppercase tracking-[3px] text-white/40 font-header mt-1">Admin Command</span>
+    <aside class="w-64 bg-[#1C1C1C] border-r border-white/5 flex flex-col fixed left-0 top-0 h-full z-20 shadow-2xl">
+        <div id="ic-admin-brand-container" class="p-6 h-24 flex items-center justify-center border-b border-white/5 relative">
+            <div id="ic-admin-brand-fallback" class="flex items-center space-x-3 w-full">
+                <div id="ic-admin-brand-icon" class="w-10 h-10 bg-[#C9A84C] text-[#0A0A0A] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(201,168,76,0.3)] neon-button flex-shrink-0">
+                    <i class="fas fa-dumbbell text-xl"></i>
+                </div>
+                <div class="flex flex-col overflow-hidden">
+                    <span id="ic-admin-brand" class="text-xl font-header font-black tracking-widest text-[#C9A84C] leading-none truncate">IRONCORE</span>
+                    <span class="text-[9px] uppercase tracking-[3px] text-white/40 font-header mt-1 truncate">Admin Command</span>
+                </div>
             </div>
         </div>
         <nav class="flex-1 py-6 space-y-1 overflow-y-auto">${navHtml}</nav>
@@ -807,14 +853,14 @@ export function nqtInitAdminLayout(activePage) {
         </div>
     </aside>
 
-    <main class="flex-1 ml-64 min-h-screen flex flex-col">
+    <main class="flex-1 pl-64 min-h-screen flex flex-col relative w-full">
         <header class="h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
             <div class="flex items-center space-x-4">
                 <h1 id="nqt-page-title" class="text-base font-bold text-on-surface">Admin</h1>
             </div>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center gap-2">
                 <button onclick="nqtAbrirComandos()" title="Tìm kiếm nhanh (Ctrl+K)"
-                    class="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium text-on-surface-variant border border-outline-variant hover:border-outline hover:text-on-surface bg-surface-bright transition-colors mr-3">
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-on-surface-variant border border-outline-variant hover:border-outline hover:text-on-surface bg-surface-bright transition-colors">
                     <i class="fas fa-search"></i>
                     <span>Tìm kiếm...</span>
                     <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 bg-background rounded text-[10px] font-mono border border-outline-variant">⌘K</kbd>
@@ -822,7 +868,9 @@ export function nqtInitAdminLayout(activePage) {
                 <div class="relative">
                     <button id="nqtNotifBtn" onclick="nqtToggleNotif()"
                         class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-bright hover:text-on-surface transition-colors relative">
-                        <i class="fas fa-bell text-base"></i>
+                        <span class="w-6 h-6 flex items-center justify-center">
+                            <i class="fas fa-bell text-base"></i>
+                        </span>
                         <span id="nqtNotifBadge" class="hidden absolute top-1 right-1 w-4 h-4 bg-error text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-surface-container-lowest"></span>
                     </button>
                     <div id="nqtNotifPanel" class="hidden absolute right-0 top-12 w-80 bg-surface-container border border-outline-variant rounded-xl shadow-xl z-50 overflow-hidden">
@@ -841,12 +889,14 @@ export function nqtInitAdminLayout(activePage) {
                     </div>
                 </div>
                 <button id="nqtDarkModeBtn" onclick="nqtToggleDarkMode()"
-                    class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-bright hover:text-on-surface transition-colors"
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-bright hover:text-on-surface transition-colors flex-shrink-0"
                     title="Chuyển đổi Dark/Light mode">
-                    <i id="nqtDarkModeIcon" class="fas fa-moon text-base"></i>
+                    <span class="w-6 h-6 flex items-center justify-center">
+                        <i id="nqtDarkModeIcon" class="fas fa-moon text-base"></i>
+                    </span>
                 </button>
-                <div class="w-px h-6 bg-outline-variant mx-2"></div>
-                <div class="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity">
+                <div class="w-px h-6 bg-outline-variant mx-1"></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="text-right hidden sm:block">
                         <div id="nqt-user-name" class="text-sm font-bold text-on-surface">...</div>
                         <div id="nqt-user-role" class="text-xs text-on-surface-variant">Admin</div>
@@ -902,9 +952,18 @@ export function nqtInitAdminLayout(activePage) {
         try {
             const cfg = JSON.parse(cStr);
             if (cfg['g6_ten_website']) siteName = cfg['g6_ten_website'];
-            // Also apply brand name to sidebar immediately
-            const brandEl = document.getElementById('ic-admin-brand');
-            if (brandEl) brandEl.textContent = siteName;
+            
+            if (cfg['g6_logo_url']) {
+                const brandContainer = document.getElementById('ic-admin-brand-container');
+                if (brandContainer) {
+                    brandContainer.classList.remove('p-6');
+                    brandContainer.classList.add('px-4', 'py-2');
+                    brandContainer.innerHTML = `<img src="${cfg['g6_logo_url']}" style="width: 100%; height: 100%; max-height: 76px; object-fit: contain;" alt="Logo">`;
+                }
+            } else if (cfg['g6_ten_website']) {
+                const brandEl = document.getElementById('ic-admin-brand');
+                if (brandEl) brandEl.textContent = siteName;
+            }
             
             if (cfg['g6_favicon_url']) {
                 let link = document.querySelector("link[rel~='icon']");
@@ -991,6 +1050,9 @@ export function nqtInitAdminLayout(activePage) {
         const isDark = html.classList.toggle('dark');
         localStorage.setItem('nqt_dark_mode', isDark);
         if (icon) icon.className = isDark ? 'fas fa-sun text-base' : 'fas fa-moon text-base';
+        
+        // Notify pages about theme change so they can re-render charts without re-fetching
+        window.dispatchEvent(new CustomEvent('nqt-theme-changed', { detail: { isDark } }));
     };
     (function() {
         const isDark = localStorage.getItem('nqt_dark_mode') !== 'false'; // Default to dark
@@ -1029,37 +1091,55 @@ export function nqtInitAdminLayout(activePage) {
         setTimeout(() => { el.style.transform = 'translateX(40px)'; el.style.opacity = '0'; setTimeout(() => el.remove(), 350); }, 3000);
     };
 
-    // API wrapper
+    // API wrapper with Auto-Toast
     window.nqtApi = {
         async fetch(url, options = {}) {
-            const token = localStorage.getItem('nqt_admin_token');
+            const method = (options.method || 'GET').toUpperCase();
             if (!options.headers) options.headers = {};
-            if (token) options.headers['Authorization'] = `Bearer ${token}`;
             options.headers['Accept'] = 'application/json';
+            const adminToken = localStorage.getItem('nqt_admin_token');
+            if (adminToken) options.headers['Authorization'] = 'Bearer ' + adminToken;
+            options.credentials = 'include';
+            
             if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
                 options.headers['Content-Type'] = 'application/json';
                 options.body = JSON.stringify(options.body);
-            } else if (options.method && options.method !== 'GET' && !options.body) {
-                // DELETE/POST without body — send empty JSON so Flask doesn't 415
+            } else if (method !== 'GET' && !options.body) {
                 options.headers['Content-Type'] = 'application/json';
                 options.body = '{}';
             }
+
             try {
                 const response = await fetch(url, options);
+                
                 if (response.status === 401) {
                     localStorage.removeItem('nqt_admin_token');
                     window.location.href = '/admin/login';
                     return null;
                 }
+
                 const ct = response.headers.get('content-type') || '';
                 if (!ct.includes('application/json')) {
-                    console.warn('API returned non-JSON:', url, response.status);
                     return { nqt_thanh_cong: false, nqt_thong_diep: 'Phản hồi không hợp lệ' };
                 }
+
                 const data = await response.json();
+
+                // Auto-Toast for non-GET success
+                if (data.nqt_thanh_cong && method !== 'GET') {
+                    let msg = data.nqt_thong_diep || 'Thao tác thành công';
+                    if (method === 'POST') msg = data.nqt_thong_diep || 'Thêm mới thành công';
+                    if (method === 'PUT') msg = data.nqt_thong_diep || 'Cập nhật thành công';
+                    if (method === 'DELETE') msg = data.nqt_thong_diep || 'Xóa thành công';
+                    nqtToast(msg, 'success');
+                } else if (!data.nqt_thanh_cong && method !== 'GET') {
+                    nqtToast(data.nqt_thong_diep || 'Có lỗi xảy ra', 'error');
+                }
+
                 return data;
             } catch (error) {
                 console.error('API Error:', error);
+                if (method !== 'GET') nqtToast('Lỗi kết nối máy chủ', 'error');
                 return { nqt_thanh_cong: false, nqt_thong_diep: 'Lỗi kết nối máy chủ' };
             }
         }
@@ -1220,19 +1300,25 @@ export function nqtInitAdminLayout(activePage) {
     }, 60000);
 
     // Command palette
-    const nqtTrangLenh = [
-        { label:'Tổng quan', sub:'Dashboard', icon:'fa-chart-line', url:'/admin/dashboard' },
-        { label:'Hội viên', sub:'Quản lý', icon:'fa-users', url:'/admin/hoi-vien' },
-        { label:'Khách hàng', sub:'Quản lý', icon:'fa-user-tag', url:'/admin/khach-hang' },
-        { label:'Gói tập', sub:'Quản lý', icon:'fa-box', url:'/admin/goi-tap' },
-        { label:'Đơn hàng', sub:'Kinh doanh', icon:'fa-shopping-bag', url:'/admin/don-hang' },
-        { label:'Thanh toán', sub:'Kinh doanh', icon:'fa-credit-card', url:'/admin/thanh-toan' },
-        { label:'Chi nhánh', sub:'Vận hành', icon:'fa-store', url:'/admin/chi-nhanh' },
-        { label:'Nhân viên', sub:'Vận hành', icon:'fa-id-badge', url:'/admin/nhan-vien' },
-        { label:'Cấu hình', sub:'Hệ thống', icon:'fa-cog', url:'/admin/cau-hinh' },
-        { label:'Phân quyền', sub:'Hệ thống', icon:'fa-user-shield', url:'/admin/phan-quyen' },
+    const rawTrangLenh = [
+        { label:'Tổng quan', sub:'Dashboard', icon:'fa-chart-line', url:'/admin/dashboard', perms: ['XEM_BAO_CAO', 'G6PT', 'G6QuanLy'] },
+        { label:'Hội viên', sub:'Quản lý', icon:'fa-users', url:'/admin/hoi-vien', perms: ['QL_HOI_VIEN', 'G6PT', 'G6QuanLy'] },
+        { label:'Khách hàng', sub:'Quản lý', icon:'fa-user-tag', url:'/admin/khach-hang', perms: ['QL_HOI_VIEN', 'G6QuanLy'] },
+        { label:'Gói tập', sub:'Quản lý', icon:'fa-box', url:'/admin/goi-tap', perms: ['QL_HOI_VIEN', 'G6QuanLy'] },
+        { label:'Đơn hàng', sub:'Kinh doanh', icon:'fa-shopping-bag', url:'/admin/don-hang', perms: ['QL_KHO', 'G6QuanLy'] },
+        { label:'Thanh toán', sub:'Kinh doanh', icon:'fa-credit-card', url:'/admin/thanh-toan', perms: ['QL_KHO', 'G6QuanLy'] },
+        { label:'Chi nhánh', sub:'Vận hành', icon:'fa-store', url:'/admin/chi-nhanh', perms: ['QL_HE_THONG', 'G6QuanLy'] },
+        { label:'Nhân viên', sub:'Vận hành', icon:'fa-id-badge', url:'/admin/nhan-vien', perms: ['QL_NHAN_VIEN', 'G6QuanLy'] },
+        { label:'Cấu hình', sub:'Hệ thống', icon:'fa-cog', url:'/admin/cau-hinh', perms: ['G6QuanTri'] },
+        { label:'Phân quyền', sub:'Hệ thống', icon:'fa-user-shield', url:'/admin/phan-quyen', perms: ['G6QuanTri'] },
         { label:'Đăng xuất', sub:'Tài khoản', icon:'fa-sign-out-alt', action:'nqtLogout()' },
     ];
+
+    const nqtTrangLenh = rawTrangLenh.filter(item => {
+        if (isAdmin) return true;
+        if (!item.perms) return true;
+        return item.perms.some(p => userPerms.includes(p) || userRoles.includes(p));
+    });
     let nqtCmdActive = 0, nqtCmdFiltered = [...nqtTrangLenh];
     window.nqtAbrirComandos = function() {
         nqtCmdFiltered = [...nqtTrangLenh]; nqtCmdActive = 0;
@@ -1285,7 +1371,14 @@ export function nqtInitAdminLayout(activePage) {
         const roleEl = document.getElementById('nqt-user-role');
         const avatarEl = document.getElementById('nqt-user-avatar');
         if(nameEl) nameEl.textContent = hoTen;
-        const roleMap = {'G6QuanTri':'Quản trị viên','G6QuanLy':'Quản lý','G6HuanLuyenVien':'HLV','G6LeTan':'Lễ tân'};
+        const roleMap = {
+            'G6QuanTri': 'Quản trị viên',
+            'G6QuanLy': 'Quản lý',
+            'G6PT': 'Huấn luyện viên',
+            'G6HuanLuyenVien': 'Huấn luyện viên',
+            'G6NhanVien': 'Nhân viên',
+            'G6LeTan': 'Lễ tân'
+        };
         if(roleEl) roleEl.textContent = roleMap[payload.g6_vai_tro?.[0]] || 'Thành viên';
         if(avatarEl) avatarEl.innerHTML = nqtTaoAvatar(hoTen, 32);
     } catch(e) {}
@@ -1295,4 +1388,85 @@ export function nqtInitAdminLayout(activePage) {
     setTimeout(() => { if(localStorage.getItem('nqt_admin_token')) nqtTaiThongBao(); }, 1500);
 
 
+    // Toast System
+    window.nqtShowToast = function(message, type = 'success') {
+        const container = document.getElementById('nqt-toast-container') || nqtCreateToastContainer();
+        const toast = document.createElement('div');
+        
+        // Style based on type
+        const typeConfig = {
+            success: { icon: 'fa-check-circle', color: '#C9A84C', bg: 'rgba(201,168,76,0.1)' },
+            error: { icon: 'fa-exclamation-circle', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+            info: { icon: 'fa-info-circle', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' }
+        };
+        const config = typeConfig[type] || typeConfig.success;
+
+        toast.className = 'nqt-toast-item nqt-toast-enter';
+        toast.innerHTML = `
+            <div class="flex items-center space-x-3 px-5 py-4 bg-[#141720]/90 backdrop-blur-xl border border-white/5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] min-w-[300px]">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background: ${config.bg}; color: ${config.color}">
+                    <i class="fas ${config.icon} text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-[#F5F5F0]">${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" class="text-white/20 hover:text-white/50 transition-colors">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+            <div class="nqt-toast-progress" style="background: ${config.color}"></div>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto remove
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    };
+
+    function nqtCreateToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'nqt-toast-container';
+        container.style.cssText = 'position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none;';
+        document.body.appendChild(container);
+        
+        // Add required CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            .nqt-toast-item { 
+                pointer-events: auto; 
+                position: relative; 
+                overflow: hidden; 
+                border-radius: 16px;
+                transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            .nqt-toast-enter { animation: nqtToastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+            @keyframes nqtToastSlideIn {
+                from { opacity: 0; transform: translateX(30px) scale(0.9); }
+                to { opacity: 1; transform: translateX(0) scale(1); }
+            }
+            .nqt-toast-progress {
+                position: absolute;
+                bottom: 0; left: 0; height: 2px;
+                width: 100%;
+                animation: nqtToastProgress 4s linear forwards;
+            }
+            @keyframes nqtToastProgress {
+                from { width: 100%; }
+                to { width: 0%; }
+            }
+        `;
+        document.head.appendChild(style);
+        return container;
+    }
+
+    // Export logut globally
+    window.nqtLogout = function() {
+        localStorage.removeItem('nqt_admin_token');
+        nqtShowToast('Đang đăng xuất...', 'info');
+        setTimeout(() => window.location.href = '/admin/login', 500);
+    };
 }

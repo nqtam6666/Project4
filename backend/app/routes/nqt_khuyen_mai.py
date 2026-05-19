@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, request
+from flask import Blueprint, request
 from backend.app import db
 from backend.app.models.g6_khuyen_mai import G6MaGiamGia, G6KhuyenMaiMuaKem, G6Banner
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
@@ -142,6 +142,11 @@ def nqt_tao_khuyen_mai_mua_kem():
     nqt_ngay_bat_dau = nqt_data.get('g6_ngay_bat_dau')
     if not nqt_ten or not nqt_sp_chinh or not nqt_ngay_bat_dau:
         return nqt_loi('Thiếu tên, sản phẩm chính hoặc ngày bắt đầu')
+    def nqt_parse_date(s):
+        if not s: return None
+        try: return datetime.fromisoformat(s.replace('Z', '+00:00'))
+        except: return None
+
     nqt_row = G6KhuyenMaiMuaKem(
         g6_ten=nqt_ten,
         g6_ma_san_pham_chinh=nqt_sp_chinh,
@@ -149,9 +154,11 @@ def nqt_tao_khuyen_mai_mua_kem():
         g6_ma_san_pham_tang=nqt_data.get('g6_ma_san_pham_tang'),
         g6_so_luong_tang=nqt_data.get('g6_so_luong_tang', 1),
         g6_phan_tram_giam=nqt_data.get('g6_phan_tram_giam', 0),
-        g6_ngay_bat_dau=nqt_ngay_bat_dau,
-        g6_ngay_ket_thuc=nqt_data.get('g6_ngay_ket_thuc'),
+        g6_ngay_bat_dau=nqt_parse_date(nqt_ngay_bat_dau),
+        g6_ngay_ket_thuc=nqt_parse_date(nqt_data.get('g6_ngay_ket_thuc')),
     )
+    if not nqt_row.g6_ngay_bat_dau:
+        return nqt_loi('Ngày bắt đầu không hợp lệ')
     db.session.add(nqt_row)
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict(), 'Tạo khuyến mãi mua kèm thành công', 201)
@@ -160,14 +167,26 @@ def nqt_tao_khuyen_mai_mua_kem():
 @nqt_khuyen_mai_bp.route('/nqt-khuyen-mai-mua-kem/<int:nqt_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
 def nqt_cap_nhat_khuyen_mai_mua_kem(nqt_id):
+    from datetime import datetime
     nqt_row = G6KhuyenMaiMuaKem.query.get_or_404(nqt_id)
     nqt_data = request.get_json() or {}
+    def nqt_parse_date(s):
+        if not s: return None
+        try: return datetime.fromisoformat(s.replace('Z', '+00:00'))
+        except: return None
+
     for nqt_f in [
         'g6_ten', 'g6_so_luong_mua', 'g6_ma_san_pham_tang',
-        'g6_so_luong_tang', 'g6_phan_tram_giam', 'g6_ngay_ket_thuc', 'g6_la_hoat_dong',
+        'g6_so_luong_tang', 'g6_phan_tram_giam', 'g6_la_hoat_dong',
     ]:
         if nqt_f in nqt_data:
             setattr(nqt_row, nqt_f, nqt_data[nqt_f])
+    
+    if 'g6_ngay_bat_dau' in nqt_data:
+        nqt_row.g6_ngay_bat_dau = nqt_parse_date(nqt_data['g6_ngay_bat_dau'])
+    if 'g6_ngay_ket_thuc' in nqt_data:
+        nqt_row.g6_ngay_ket_thuc = nqt_parse_date(nqt_data['g6_ngay_ket_thuc'])
+
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict(), 'Cập nhật khuyến mãi thành công')
 

@@ -99,7 +99,11 @@ class G6DangKyGoiPT(db.Model):
             'g6_ma_dang_ky_pt': self.g6_ma_dang_ky_pt,
             'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
             'g6_ma_goi_pt': self.g6_ma_goi_pt,
+            'g6_ten_goi': self.g6_goi_pt.g6_ten_goi if self.g6_goi_pt else None,
             'g6_ma_hlv': self.g6_ma_hlv,
+            'g6_ten_hlv': self.g6_goi_pt.g6_hlv.g6_nhan_vien.g6_ho_ten if self.g6_goi_pt and self.g6_goi_pt.g6_hlv and self.g6_goi_pt.g6_hlv.g6_nhan_vien else None,
+            'g6_chuyen_mon': self.g6_goi_pt.g6_hlv.g6_chuyen_mon if self.g6_goi_pt and self.g6_goi_pt.g6_hlv else None,
+            'g6_hinh_anh': self.g6_goi_pt.g6_hlv.g6_hinh_anh if self.g6_goi_pt and self.g6_goi_pt.g6_hlv else None,
             'g6_ngay_mua': str(self.g6_ngay_mua),
             'g6_ngay_het_han': str(self.g6_ngay_het_han),
             'g6_so_buoi_con_lai': self.g6_so_buoi_con_lai,
@@ -128,11 +132,22 @@ class G6BuoiTapPT(db.Model):
     g6_dang_ky_pt = db.relationship('G6DangKyGoiPT', back_populates='g6_buoi_tap')
 
     def g6_to_dict(self):
+        ten_hoi_vien = None
+        ten_hlv = None
+        try:
+            if self.g6_dang_ky_pt:
+                ten_hoi_vien = self.g6_dang_ky_pt.g6_nguoi_dung.g6_ho_ten if getattr(self.g6_dang_ky_pt, 'g6_nguoi_dung', None) else None
+                ten_hlv = self.g6_dang_ky_pt.g6_hlv.g6_nhan_vien.g6_ho_ten if getattr(self.g6_dang_ky_pt, 'g6_hlv', None) and getattr(self.g6_dang_ky_pt.g6_hlv, 'g6_nhan_vien', None) else None
+        except Exception:
+            pass
+
         return {
             'g6_ma_buoi_tap': self.g6_ma_buoi_tap,
             'g6_ma_dang_ky_pt': self.g6_ma_dang_ky_pt,
             'g6_ma_nguoi_dung': self.g6_ma_nguoi_dung,
+            'g6_ten_hoi_vien': ten_hoi_vien,
             'g6_ma_hlv': self.g6_ma_hlv,
+            'g6_ten_hlv': ten_hlv,
             'g6_ma_chi_nhanh': self.g6_ma_chi_nhanh,
             'g6_ngay_tap': self.g6_ngay_tap.isoformat() if self.g6_ngay_tap else None,
             'g6_thoi_luong': self.g6_thoi_luong,

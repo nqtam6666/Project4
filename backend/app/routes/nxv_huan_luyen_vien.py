@@ -5,7 +5,7 @@ from backend.app.models.g6_huan_luyen_vien import (
     G6HuanLuyenVien, G6GoiPT, G6DangKyGoiPT, G6BuoiTapPT
 )
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
 
 nxv_huan_luyen_vien_bp = Blueprint('nxv_huan_luyen_vien', __name__, url_prefix='/api')
 
@@ -16,6 +16,7 @@ nxv_huan_luyen_vien_bp = Blueprint('nxv_huan_luyen_vien', __name__, url_prefix='
 
 @nxv_huan_luyen_vien_bp.route('/nxv-hlv', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_xem_nhan_vien')
 def nxv_lay_tat_ca_hlv():
     nxv_chi_nhanh = request.args.get('g6_ma_chi_nhanh', type=int)
     nxv_hien_thi_web = request.args.get('g6_la_hien_thi_web', type=int)
@@ -32,6 +33,7 @@ def nxv_lay_tat_ca_hlv():
 
 @nxv_huan_luyen_vien_bp.route('/nxv-hlv/<int:nxv_id>', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_xem_nhan_vien')
 def nxv_lay_hlv(nxv_id):
     nxv_row = G6HuanLuyenVien.query.get_or_404(nxv_id)
     return nqt_ok(nxv_row.g6_to_dict())
@@ -39,6 +41,7 @@ def nxv_lay_hlv(nxv_id):
 
 @nxv_huan_luyen_vien_bp.route('/nxv-hlv', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_tao_nhan_vien')
 def nxv_tao_hlv():
     nxv_data = request.get_json() or {}
     nxv_ma_nv = nxv_data.get('g6_ma_nhan_vien')
@@ -83,6 +86,7 @@ def nxv_tao_hlv():
 
 @nxv_huan_luyen_vien_bp.route('/nxv-hlv/<int:nxv_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_sua_nhan_vien')
 def nxv_cap_nhat_hlv(nxv_id):
     nxv_row = G6HuanLuyenVien.query.get_or_404(nxv_id)
     nxv_data = request.get_json() or {}
@@ -106,6 +110,7 @@ def nxv_cap_nhat_hlv(nxv_id):
 
 @nxv_huan_luyen_vien_bp.route('/nxv-hlv/<int:nxv_id>', methods=['DELETE'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('g6_xoa_nhan_vien')
 def nxv_xoa_hlv(nxv_id):
     nxv_row = G6HuanLuyenVien.query.get_or_404(nxv_id)
     nxv_row.g6_la_hien_thi_web = False
@@ -136,6 +141,7 @@ def nxv_lay_chi_tiet_goi_pt(nxv_id):
 
 @nxv_huan_luyen_vien_bp.route('/nxv-goi-pt', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_HOI_VIEN')
 def nxv_tao_goi_pt():
     nxv_data = request.get_json() or {}
     nxv_hlv_id = nxv_data.get('g6_ma_hlv')
@@ -220,6 +226,7 @@ def nxv_lay_chi_tiet_dang_ky_pt(nxv_id):
 
 @nxv_huan_luyen_vien_bp.route('/nxv-dang-ky-pt', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_HOI_VIEN')
 def nxv_tao_dang_ky_pt():
     nxv_data = request.get_json() or {}
     nxv_hv_id = nxv_data.get('g6_ma_hoi_vien')
@@ -396,3 +403,51 @@ def nxv_huy_buoi_tap(nxv_id):
     db.session.commit()
     return nqt_ok(None, 'Đã huỷ buổi tập PT')
 
+
+from flask_jwt_extended import get_jwt_identity
+from backend.app.models.g6_nhan_vien import G6NhanVien
+
+@nxv_huan_luyen_vien_bp.route('/nxv-hlv/me', methods=['GET'])
+@nqt_yeu_cau_dang_nhap
+def nxv_lay_hlv_me():
+    # Lấy thông tin user hiện tại
+    user_id = int(get_jwt_identity())
+    
+    # Tìm NhanVien map với user
+    nv = G6NhanVien.query.filter_by(g6_ma_nguoi_dung=user_id).first()
+    if not nv:
+        return nqt_loi('Bạn không phải là nhân viên', 403)
+        
+    # Tìm HuanLuyenVien map với NhanVien
+    hlv = G6HuanLuyenVien.query.filter_by(g6_ma_nhan_vien=nv.g6_ma_nhan_vien).first()
+    if not hlv:
+        return nqt_loi('Bạn không phải là huấn luyện viên', 403)
+        
+    return nqt_ok(hlv.g6_to_dict())
+
+@nxv_huan_luyen_vien_bp.route('/nxv-hlv/me/avatar', methods=['PUT'])
+@nqt_yeu_cau_dang_nhap
+def nxv_cap_nhat_hlv_me_avatar():
+    user_id = int(get_jwt_identity())
+    
+    nv = G6NhanVien.query.filter_by(g6_ma_nguoi_dung=user_id).first()
+    if not nv:
+        return nqt_loi('Bạn không phải là nhân viên', 403)
+        
+    hlv = G6HuanLuyenVien.query.filter_by(g6_ma_nhan_vien=nv.g6_ma_nhan_vien).first()
+    if not hlv:
+        return nqt_loi('Bạn không phải là huấn luyện viên', 403)
+        
+    data = request.get_json() or {}
+    hinh_anh = data.get('g6_hinh_anh')
+    if not hinh_anh:
+        return nqt_loi('Vui lòng cung cấp link hình ảnh')
+        
+    hlv.g6_hinh_anh = hinh_anh
+    # Đồng bộ avatar với G6NhanVien và G6NguoiDung nếu cần
+    nv.g6_hinh_anh = hinh_anh
+    if nv.g6_nguoi_dung:
+        nv.g6_nguoi_dung.g6_anh_dai_dien = hinh_anh
+        
+    db.session.commit()
+    return nqt_ok(hlv.g6_to_dict(), 'Cập nhật ảnh đại diện thành công')

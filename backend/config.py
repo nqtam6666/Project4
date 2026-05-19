@@ -40,6 +40,17 @@ class NqtCauHinhFlask:
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
     MAX_CONTENT_LENGTH = int(os.getenv('MAX_CONTENT_LENGTH', 10 * 1024 * 1024))
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'backend/static/uploads')
+    
+    # JWT Cookie Settings
+    JWT_TOKEN_LOCATION = ['headers', 'cookies']
+    JWT_COOKIE_SECURE = False  # Đổi thành True khi chạy HTTPS
+    JWT_ACCESS_COOKIE_PATH = '/'
+    JWT_REFRESH_COOKIE_PATH = '/api/nqt-lam-moi-token'
+    JWT_COOKIE_CSRF_PROTECT = False # Tạm thời tắt để dev dễ hơn, production nên bật
+    JWT_ACCESS_COOKIE_NAME = 'nqt_access_token'
+    JWT_REFRESH_COOKIE_NAME = 'nqt_refresh_token'
+    JWT_SESSION_COOKIE = False
+    JWT_COOKIE_SAMESITE = 'Lax'
 
 
 class NqtCauHinhDevelopment(NqtCauHinhFlask):

@@ -5,7 +5,7 @@ from backend.app.models.g6_don_hang import (
     G6GioHang, G6ChiTietGioHang, G6DonHang, G6ChiTietDonHang, G6LichSuDonHang,
 )
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_ghi_nhat_ky
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_ghi_nhat_ky, nqt_yeu_cau_quyen
 
 nqt_don_hang_bp = Blueprint('g6_don_hang', __name__, url_prefix='/api')
 
@@ -83,6 +83,7 @@ def nqt_xoa_khoi_gio(nqt_ct_id):
 
 @nqt_don_hang_bp.route('/nqt-don-hang', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_KHO')
 def nqt_lay_tat_ca_don_hang():
     nqt_trang = request.args.get('g6_trang', 1, type=int)
     nqt_gioi_han = request.args.get('g6_gioi_han', 20, type=int)
@@ -166,6 +167,7 @@ def nqt_tao_don_hang():
 
 @nqt_don_hang_bp.route('/nqt-don-hang/<int:nqt_id>/nqt-cap-nhat-trang-thai', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_KHO')
 @nqt_ghi_nhat_ky('Cập nhật trạng thái đơn hàng', 'G6DonHang')
 def nqt_cap_nhat_trang_thai(nqt_id):
     nqt_don = G6DonHang.query.get_or_404(nqt_id)

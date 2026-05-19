@@ -7,13 +7,14 @@ from backend.app.models.g6_khach_hang import (
     G6DiemKhachHang, G6GiaoDichDiem,
 )
 from backend.app.utils.g6_phan_hoi import nqt_ok, nqt_loi
-from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap
+from backend.app.utils.g6_xac_thuc import nqt_yeu_cau_dang_nhap, nqt_yeu_cau_quyen
 
 nqt_khach_hang_bp = Blueprint('g6_khach_hang', __name__, url_prefix='/api')
 
 
 @nqt_khach_hang_bp.route('/nqt-khach-hang', methods=['GET'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_HOI_VIEN')
 def nqt_lay_tat_ca_khach_hang():
     nqt_trang = request.args.get('g6_trang', 1, type=int)
     nqt_gioi_han = request.args.get('g6_gioi_han', 20, type=int)
@@ -46,6 +47,7 @@ def nqt_lay_khach_hang(nqt_id):
 
 @nqt_khach_hang_bp.route('/nqt-khach-hang/<int:nqt_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_HOI_VIEN')
 def nqt_cap_nhat_khach_hang(nqt_id):
     nqt_row = G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_id, g6_la_khach_hang=True).first_or_404()
     nqt_data = request.get_json() or {}
@@ -67,6 +69,7 @@ def nqt_cap_nhat_khach_hang(nqt_id):
 
 @nqt_khach_hang_bp.route('/nqt-khach-hang/<int:nqt_id>', methods=['DELETE'])
 @nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_HOI_VIEN')
 def nqt_xoa_khach_hang(nqt_id):
     nqt_row = G6NguoiDung.query.filter_by(g6_ma_nguoi_dung=nqt_id, g6_la_khach_hang=True).first_or_404()
     # Xóa điểm liên quan

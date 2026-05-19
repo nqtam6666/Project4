@@ -30,6 +30,7 @@ const AuthPage = () => {
         const res = await fetch('/api/nqt-hoi-vien/dang-nhap', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // Cho phép nhận Cookie từ Server
           body: JSON.stringify({
             nqt_so_dien_thoai: loginData.phone,
             nqt_mat_khau: loginData.password
@@ -38,8 +39,12 @@ const AuthPage = () => {
         const data = await res.json();
         setLoading(false);
         if (data.nqt_thanh_cong) {
-          localStorage.setItem('nqt_access_token', data.nqt_du_lieu.nqt_access_token);
-          localStorage.setItem('nqt_refresh_token', data.nqt_du_lieu.nqt_refresh_token);
+          if (data.nqt_du_lieu && data.nqt_du_lieu.nqt_access_token) {
+            localStorage.setItem('nqt_token', data.nqt_du_lieu.nqt_access_token);
+            if (data.nqt_du_lieu.nqt_refresh_token) {
+              localStorage.setItem('nqt_refresh_token', data.nqt_du_lieu.nqt_refresh_token);
+            }
+          }
           showToast('success', 'Đăng nhập thành công! Đang chuyển hướng...');
           setTimeout(() => window.location.href = '/home', 1000);
         } else {
@@ -49,6 +54,7 @@ const AuthPage = () => {
         const res = await fetch('/api/nqt-hoi-vien/dang-ky', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             nqt_ho_ten: regData.name,
             nqt_so_dien_thoai: regData.phone,
@@ -59,6 +65,12 @@ const AuthPage = () => {
         const data = await res.json();
         setLoading(false);
         if (data.nqt_thanh_cong) {
+          if (data.nqt_du_lieu && data.nqt_du_lieu.nqt_access_token) {
+            localStorage.setItem('nqt_token', data.nqt_du_lieu.nqt_access_token);
+            if (data.nqt_du_lieu.nqt_refresh_token) {
+              localStorage.setItem('nqt_refresh_token', data.nqt_du_lieu.nqt_refresh_token);
+            }
+          }
           showToast('success', 'Tạo tài khoản thành công! Hãy đăng nhập.');
           setActiveTab('login');
         } else {
