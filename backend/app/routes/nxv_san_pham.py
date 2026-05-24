@@ -17,7 +17,6 @@ nxv_san_pham_bp = Blueprint('nxv_san_pham', __name__, url_prefix='/api')
 # ============================================================
 
 @nxv_san_pham_bp.route('/nxv-danh-muc', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_danh_muc():
     nxv_chi = request.args.get('g6_ma_danh_muc_cha', type=int)
     nxv_q = G6DanhMucSanPham.query.filter_by(g6_la_hoat_dong=True)
@@ -27,7 +26,6 @@ def nxv_lay_danh_muc():
 
 
 @nxv_san_pham_bp.route('/nxv-danh-muc/<int:nxv_id>', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_chi_tiet_dm(nxv_id):
     return nqt_ok(G6DanhMucSanPham.query.get_or_404(nxv_id).g6_to_dict())
 
@@ -85,7 +83,6 @@ def nxv_xoa_dm(nxv_id):
 # ============================================================
 
 @nxv_san_pham_bp.route('/nxv-muc-tieu', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_muc_tieu():
     return nqt_ok([m.g6_to_dict() for m in G6MucTieuSucKhoe.query.all()])
 
@@ -135,7 +132,6 @@ def nxv_xoa_muc_tieu(nxv_id):
 # ============================================================
 
 @nxv_san_pham_bp.route('/nxv-thuong-hieu', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_thuong_hieu():
     nxv_q = G6ThuongHieu.query.filter_by(g6_la_hoat_dong=True)
     nxv_noi_bat = request.args.get('g6_la_noi_bat', type=int)
@@ -145,7 +141,6 @@ def nxv_lay_thuong_hieu():
 
 
 @nxv_san_pham_bp.route('/nxv-thuong-hieu/<int:nxv_id>', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_chi_tiet_th(nxv_id):
     return nqt_ok(G6ThuongHieu.query.get_or_404(nxv_id).g6_to_dict())
 
@@ -204,7 +199,6 @@ def nxv_xoa_th(nxv_id):
 # ============================================================
 
 @nxv_san_pham_bp.route('/nxv-san-pham', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_san_pham():
     nxv_trang = request.args.get('g6_trang', 1, type=int)
     nxv_gioi_han = request.args.get('g6_gioi_han', 20, type=int)
@@ -235,7 +229,6 @@ def nxv_lay_san_pham():
 
 
 @nxv_san_pham_bp.route('/nxv-san-pham/<int:nxv_id>', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_chi_tiet_sp(nxv_id):
     nxv_row = G6SanPham.query.get_or_404(nxv_id)
     nxv_row.g6_luot_xem += 1
@@ -356,7 +349,6 @@ def nxv_xoa_sp(nxv_id):
 # ============================================================
 
 @nxv_san_pham_bp.route('/nxv-san-pham/<int:nxv_sp_id>/bien-the', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_bien_the(nxv_sp_id):
     G6SanPham.query.get_or_404(nxv_sp_id)
     nxv_list = G6BienTheSanPham.query.filter_by(g6_ma_san_pham=nxv_sp_id, g6_la_hoat_dong=True).all()
@@ -423,7 +415,6 @@ def nxv_xoa_bien_the(nxv_id):
 # ============================================================
 
 @nxv_san_pham_bp.route('/nxv-san-pham/<int:nxv_sp_id>/hinh-anh', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_hinh_anh(nxv_sp_id):
     G6SanPham.query.get_or_404(nxv_sp_id)
     nxv_list = G6HinhAnhSanPham.query.filter_by(g6_ma_san_pham=nxv_sp_id).order_by(G6HinhAnhSanPham.g6_thu_tu).all()
@@ -439,13 +430,17 @@ def nxv_them_hinh_anh(nxv_sp_id):
     if not nxv_duong_dan:
         return nqt_loi('Thiếu đường dẫn hình ảnh')
 
+    la_anh_chinh = nxv_data.get('g6_la_anh_chinh', False)
+    if la_anh_chinh:
+        G6HinhAnhSanPham.query.filter_by(g6_ma_san_pham=nxv_sp_id).update({G6HinhAnhSanPham.g6_la_anh_chinh: False})
+
     nxv_row = G6HinhAnhSanPham(
         g6_ma_san_pham=nxv_sp_id,
         g6_ma_bien_the=nxv_data.get('g6_ma_bien_the'),
         g6_duong_dan=nxv_duong_dan,
         g6_alt_text=nxv_data.get('g6_alt_text'),
         g6_thu_tu=nxv_data.get('g6_thu_tu', 0),
-        g6_la_anh_chinh=nxv_data.get('g6_la_anh_chinh', False),
+        g6_la_anh_chinh=la_anh_chinh,
     )
     db.session.add(nxv_row)
     db.session.commit()
@@ -466,7 +461,6 @@ def nxv_xoa_hinh_anh(nxv_id):
 # ============================================================
 
 @nxv_san_pham_bp.route('/nxv-bien-the/<int:nxv_bt_id>/dinh-duong', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_dinh_duong(nxv_bt_id):
     G6BienTheSanPham.query.get_or_404(nxv_bt_id)
     nxv_row = G6ThanhPhanDinhDuong.query.filter_by(g6_ma_bien_the=nxv_bt_id).first()
@@ -514,7 +508,6 @@ def nxv_luu_dinh_duong(nxv_bt_id):
 # ============================================================
 
 @nxv_san_pham_bp.route('/nxv-san-pham/<int:nxv_sp_id>/chung-nhan', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nxv_lay_chung_nhan(nxv_sp_id):
     G6SanPham.query.get_or_404(nxv_sp_id)
     nxv_list = G6ChungNhanSanPham.query.filter_by(g6_ma_san_pham=nxv_sp_id).all()

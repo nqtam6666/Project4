@@ -523,3 +523,132 @@ def nqt_dat_lich_pt_cua_toi():
     db.session.add(nxv_row)
     db.session.commit()
     return nqt_ok(nxv_row.g6_to_dict(), 'Đặt lịch PT thành công', 201)
+
+
+# ── POST /api/nqt-chatbot ───────────────────────────────────────────────────
+@nqt_hv_auth_bp.route('/nqt-chatbot', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_chatbot_assistant():
+    from backend.app.models.g6_hoi_vien import G6GoiTap, G6DangKyGoiTap
+    from backend.app.models.g6_huan_luyen_vien import G6HuanLuyenVien, G6DangKyGoiPT
+    from backend.app.models.g6_san_pham import G6SanPham
+    from backend.app.models.g6_nguoi_dung import G6NguoiDung
+    from datetime import date
+    
+    nqt_identity = get_jwt_identity()
+    try:
+        nqt_ma = int(nqt_identity.split(':')[1])
+    except Exception:
+        return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
+        
+    nqt_data = request.get_json() or {}
+    message = nqt_data.get('message', '').strip()
+    if not message:
+        return nqt_loi('Vui lòng gửi câu hỏi')
+        
+    user = G6NguoiDung.query.get(nqt_ma)
+    user_name = user.g6_ho_ten if user else "Hội viên"
+    user_first_name = user_name.split()[-1] if user_name else "bạn"
+    
+    lower_msg = message.lower()
+    
+    response_text = ""
+    action = None
+    
+    # 1. Gói tập của tôi / Gói đang sử dụng
+    if any(k in lower_msg for k in ["gói của tôi", "goi cua toi", "gói đang dùng", "gói đang sử dụng", "gói của em", "lịch tập của tôi", "lịch sử tập"]):
+        active_taps = G6DangKyGoiTap.query.filter_by(g6_ma_nguoi_dung=nqt_ma).filter(G6DangKyGoiTap.g6_ngay_het_han >= date.today()).all()
+        active_pts = G6DangKyGoiPT.query.filter_by(g6_ma_nguoi_dung=nqt_ma).filter(G6DangKyGoiPT.g6_ngay_het_han >= date.today()).all()
+        
+        parts = [f"Dạ {user_first_name}, đây là thông tin gói dịch vụ hiện tại của bạn:"]
+        
+        if active_taps:
+            parts.append("\n**Gói thành viên:**")
+            for tap in active_taps:
+                parts.append(f"- Gói: {tap.g6_goi_tap.g6_ten_goi if tap.g6_goi_tap else 'Gói Tập'} (Hạn dùng: {tap.g6_ngay_het_han.strftime('%d/%m/%Y')})")
+        else:
+            parts.append("\n- Bạn chưa đăng ký gói tập thành viên nào đang hoạt động.")
+            
+        if active_pts:
+            parts.append("\n**Gói Huấn luyện viên PT:**")
+            for pt in active_pts:
+                parts.append(f"- HLV: {pt.g6_goi_pt.g6_hlv.g6_nhan_vien.g6_ho_ten if pt.g6_goi_pt and pt.g6_goi_pt.g6_hlv else 'PT'} (Còn lại: {pt.g6_so_buoi_con_lai} buổi, Hạn dùng: {pt.g6_ngay_het_han.strftime('%d/%m/%Y')})")
+        else:
+            parts.append("\n- Bạn chưa đăng ký gói tập với Huấn luyện viên PT.")
+            
+        response_text = "\n".join(parts)
+        
+    # 2. Xem các gói tập (Mua gói tập)
+    elif any(k in lower_msg for k in ["gói tập", "goi tap", "mua gói", "gói gym"]):
+        goi_taps = G6GoiTap.query.filter_by(g6_la_hoat_dong=True).all()
+        parts = [f"Hiện tại G6 Gym đang cung cấp các gói tập thành viên cao cấp sau:"]
+        for g in goi_taps:
+            gia_ban = g.g6_gia_khuyen_mai or g.g6_gia
+            parts.append(f"- **{g.g6_ten_goi}**: {int(gia_ban):,} VNĐ / {g.g6_so_ngay} ngày. ({g.g6_mo_ta or ''})")
+        
+        response_text = "\n".join(parts)
+        action = {
+            "label": "Xem các Gói Tập 🛒",
+            "type": "tab",
+            "target": "goi-tap"
+        }
+        
+    # 3. Tìm huấn luyện viên
+    elif any(k in lower_msg for k in ["huấn luyện viên", "huan luyen vien", "pt", "hlv", "thuê pt"]):
+        hlvs = G6HuanLuyenVien.query.filter_by(g6_la_hien_thi_web=True).limit(5).all()
+        parts = [f"Dạ {user_first_name}, đây là danh sách các Huấn luyện viên cá nhân (PT) nổi bật tại chi nhánh:"]
+        for h in hlvs:
+            chuyen_mon = h.g6_chuyen_mon or "Tăng cơ, giảm mỡ"
+            if isinstance(chuyen_mon, str) and (chuyen_mon.startswith('[') or chuyen_mon.startswith('{')):
+                import json
+                try:
+                    cm_list = json.loads(chuyen_mon)
+                    chuyen_mon = ", ".join(cm_list) if isinstance(cm_list, list) else chuyen_mon
+                except:
+                    pass
+            parts.append(f"- **HLV {h.g6_nhan_vien.g6_ho_ten if h.g6_nhan_vien else 'PT'}**: {h.g6_so_nam_kinh_nghiem} năm kinh nghiệm. Chuyên môn: {chuyen_mon}.")
+            
+        response_text = "\n".join(parts)
+        action = {
+            "label": "Gặp Huấn Luyện Viên 📅",
+            "type": "tab",
+            "target": "pt"
+        }
+        
+    # 4. Tìm sản phẩm / thực phẩm bổ sung
+    elif any(k in lower_msg for k in ["sản phẩm", "san pham", "cửa hàng", "cua hang", "mua đồ", "whey", "bcaa", "creatine", "nước uống", "dinh dưỡng", "calo", "protein", "ăn gì"]):
+        sp = G6SanPham.query.filter_by(g6_la_hoat_dong=True).limit(5).all()
+        parts = [f"Danh sách sản phẩm bổ sung thể hình & phụ kiện đang bán chạy tại G6 Shop:"]
+        for s in sp:
+            gia_sp = s.g6_to_dict().get('g6_gia_ban') or s.g6_gia if hasattr(s, 'g6_gia') else 0
+            parts.append(f"- **{s.g6_ten_san_pham}**: {int(gia_sp):,} VNĐ.")
+            
+        response_text = "\n".join(parts)
+        action = {
+            "label": "Ghé Cửa Hàng 🍏",
+            "type": "tab",
+            "target": "shop"
+        }
+        
+    # 5. Chào hỏi
+    elif any(k in lower_msg for k in ["chào", "hello", "hi"]):
+        response_text = f"Xin chào {user_name}! Tôi là Trợ lý ảo AI của G6 Gym. Hôm nay tôi có thể giúp gì cho bạn? Bạn có thể hỏi tôi về: Gói tập, Đặt lịch PT, Cửa hàng hoặc Lịch tập của bạn."
+        
+    # 6. Giờ mở cửa / địa chỉ
+    elif any(k in lower_msg for k in ["giờ mở cửa", "gio mo cua", "mấy giờ"]):
+        mo_cua = NqtDichVuCauHinh.g6_lay("g6_gio_mo_cua", nqt_mac_dinh="05:00")
+        dong_cua = NqtDichVuCauHinh.g6_lay("g6_gio_dong_cua", nqt_mac_dinh="23:00")
+        response_text = f"G6 Gym Luxury Center mở cửa hoạt động từ **{mo_cua} - {dong_cua}** tất cả các ngày trong tuần (kể cả ngày nghỉ, lễ). Rất hân hạnh được đón tiếp bạn!"
+    elif any(k in lower_msg for k in ["địa chỉ", "dia chi", "ở đâu"]):
+        dia_chi = NqtDichVuCauHinh.g6_lay("g6_dia_chi_tru_so", nqt_mac_dinh="Xã Đại Thanh, Hà Nội")
+        hotline = NqtDichVuCauHinh.g6_lay("g6_so_dien_thoai_hotline", nqt_mac_dinh="096 1138 440")
+        response_text = f"G6 Gym Luxury Center tọa lạc tại {dia_chi}. Hotline hỗ trợ: {hotline}."
+        
+    # 7. Fallback
+    else:
+        response_text = f"Cảm ơn câu hỏi của bạn. Câu hỏi của bạn đã được chuyển đến bộ phận hỗ trợ khách hàng của G6 Gym. Chúng tôi sẽ liên hệ lại qua SĐT {user.g6_so_dien_thoai if user else ''} trong giây lát! Bạn cũng có thể thử hỏi tôi các câu hỏi như: 'gói của tôi', 'gói tập', 'danh sách pt', hoặc 'sản phẩm shop'."
+        
+    return nqt_ok({
+        "text": response_text,
+        "action": action
+    })

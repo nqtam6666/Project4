@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title id="ic-page-title">IRONCORE GYM | Forge Your Legacy</title>
+    <title id="ic-page-title">Hệ thống phòng tập cao cấp</title>
     
     <!-- Material Symbols, Fonts & Font Awesome -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
@@ -16,6 +16,8 @@
     <style>
         :root {
             --bg-dark: #0A0A0A;
+            --gold-2: #F2D27A;
+            --ring-glow: rgba(242, 210, 122, 0.25);
             --bg-page: #0A0A0A;
             --bg-surface: #1C1C1C;
             --gold: #C9A84C;
@@ -91,11 +93,41 @@
         :root[data-theme="light"] nav.scrolled #theme-toggle { color: var(--text-main) !important; }
         
         
-        .hero-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; filter: brightness(0.4) contrast(1.1); }
-        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(0deg, var(--bg-dark) 0%, transparent 50%, rgba(0,0,0,0.4) 100%); z-index: -1; }
+        .hero-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; filter: brightness(0.35) contrast(1.15) saturate(1.05); transform: scale(1.03); }
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background:
+              radial-gradient(circle at 50% 30%, rgba(201,168,76,0.18), transparent 55%),
+              linear-gradient(0deg, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.25) 45%, rgba(0,0,0,0.65) 100%);
+            z-index: -1;
+        }
+
+        /* subtle noise for depth */
+        .hero-noise {
+            position: absolute; inset: 0; z-index: -1; pointer-events: none;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Cfilter id=%22n%22 x=%220%22 y=%220%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22 opacity=%220.08%22/%3E%3C/svg%3E');
+            background-size: 240px 240px;
+            mix-blend-mode: overlay;
+        }
 
         .cta-btn { display: inline-flex; align-items: center; justify-content: center; padding: 18px 45px; background: var(--gold); color: #000; text-decoration: none; font-family: var(--font-header); font-size: 1.2rem; transition: all 0.3s var(--transition); border: 1px solid var(--gold); cursor: pointer; text-align: center; }
-        .cta-btn:hover { background: transparent; color: var(--gold); box-shadow: 0 0 20px var(--gold-glow); }
+        .cta-btn:hover { background: transparent; color: var(--gold); box-shadow: 0 0 24px var(--gold-glow), 0 0 60px var(--ring-glow); }
+
+        /* Extra premium glow for hero CTA */
+        .magnetic-btn {
+            position: relative;
+        }
+        .magnetic-btn::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 50% 50%, rgba(242,210,122,0.35), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+        .magnetic-btn:hover::after { opacity: 1; }
 
         .pricing-card.featured { border: 2px solid var(--gold); transform: scale(1.05); box-shadow: 0 0 40px rgba(201, 168, 76, 0.15); }
         :root[data-theme="light"] .pricing-card { box-shadow: 0 15px 45px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.1); }
@@ -107,9 +139,54 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* Drag Scroll Container */
-        .drag-scroll-container { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; cursor: grab; display: flex; gap: 24px; padding-bottom: 20px; }
+        .drag-scroll-container { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; cursor: grab; display: flex; gap: 24px; padding-bottom: 20px; scroll-behavior: smooth; }
         .drag-scroll-container::-webkit-scrollbar { display: none; }
         .drag-scroll-container:active { cursor: grabbing; }
+
+        /* Service/price cards glow */
+        #servicesGrid .reveal.active,
+        #servicesGrid .service-card:hover,
+        #goiTapList .pricing-card:hover {
+            box-shadow: 0 18px 70px rgba(201,168,76,0.12), 0 0 0 1px rgba(201,168,76,0.18);
+        }
+
+        /* Improve section spacing */
+        section#services { position: relative; }
+        section#pricing { background-image: radial-gradient(circle at 20% 0%, rgba(201,168,76,0.08), transparent 55%), radial-gradient(circle at 80% 0%, rgba(201,168,76,0.06), transparent 55%); }
+
+        /* Premium testimonial container */
+        #testimonialsList {
+            padding: 0 8px;
+        }
+        .testimonial-item.active {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(201,168,76,0.22);
+            border-radius: 18px;
+            padding: 34px 22px;
+            box-shadow: 0 0 0 1px rgba(201,168,76,0.10), 0 18px 70px rgba(0,0,0,0.35);
+        }
+
+        /* Generic premium card for API-rendered blocks */
+        .service-card,
+        .pricing-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+        .service-card::after,
+        .pricing-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 10%, rgba(201,168,76,0.18), transparent 45%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+        }
+        .service-card:hover::after,
+        .pricing-card:hover::after {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -139,8 +216,9 @@
             <source src="https://assets.mixkit.co/videos/preview/mixkit-man-training-at-the-gym-background-4813-large.mp4" type="video/mp4">
         </video>
         <div class="hero-overlay"></div>
+        <div class="hero-noise"></div>
         <div class="container mx-auto px-6 z-10">
-            <h1 class="text-[4rem] md:text-[7rem] leading-[0.9] mb-5 reveal active">FORGE YOUR<br><span class="text-gold">LEGACY</span></h1>
+            <h1 class="text-[4rem] md:text-[7rem] leading-[0.9] mb-5 reveal active">KIẾN TẠO<br><span class="text-gold">DI SẢN</span></h1>
             <p class="text-xl italic text-gold mb-10 reveal active" data-config="slogan">Đỉnh cao Fitness phong cách Industrial-Luxury</p>
             <a href="#pricing" class="cta-btn magnetic-btn reveal active">BẮT ĐẦU NGAY <i class="fas fa-arrow-right ml-3"></i></a>
         </div>
@@ -168,6 +246,7 @@
 
     <!-- Services Grid -->
     <section id="services" class="py-24 bg-dark">
+
         <div class="container mx-auto px-6">
             <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
                 <div>
@@ -180,7 +259,8 @@
                 </div>
             </div>
             
-            <div id="services-container" class="drag-scroll-container">
+            <div id="servicesGrid" class="drag-scroll-container">
+
                 <!-- Dịch vụ từ G6DichVuPhu -->
                 <div class="min-w-[300px] md:min-w-[400px] bg-surface p-10 border border-[color:var(--glass-border)] relative overflow-hidden group reveal">
                     <div class="absolute top-0 right-0 p-6 text-gold/20 text-6xl font-header group-hover:text-gold/40 transition-all">01</div>
@@ -212,30 +292,54 @@
                 <p class="text-muted reveal">Đầu tư vào chính bản thân là khoản đầu tư thông minh nhất.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto" id="pricing-grid">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto" id="goiTapList">
+
                 <!-- Gói tập động sẽ được render từ API G6GoiTap -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Trainers Section -->
+    <section id="hlv" class="py-24 bg-surface/30">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl mb-4 reveal">HLV <span class="text-gold">CHUYÊN NGHIỆP</span></h2>
+                <p class="text-muted reveal">Đội ngũ huấn luyện viên giàu kinh nghiệm và tận tâm với từng học viên.</p>
+            </div>
+
+            <div id="hlvList" class="drag-scroll-container">
+                <!-- trainers sẽ được render từ API /api/nqt-public/huan-luyen-vien -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Branches Section -->
+    <section id="branches" class="py-24 bg-dark overflow-hidden">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-5xl mb-16 reveal">HỆ THỐNG <span class="text-gold">CHI NHÁNH</span></h2>
+            <div class="max-w-3xl mx-auto">
+                <ul id="branchesList" class="list-none space-y-4 text-left">
+                    <!-- branches sẽ được render từ API /api/nqt-public/branches -->
+                </ul>
             </div>
         </div>
     </section>
 
     <!-- Testimonials Section -->
     <section class="py-24 bg-dark overflow-hidden">
+
         <div class="container mx-auto px-6 text-center">
             <h2 class="text-5xl mb-16 reveal">CẢM NHẬN <span class="text-gold">HỘI VIÊN</span></h2>
             <div class="max-w-3xl mx-auto">
-                <div id="testimonials-container">
-                    <div class="testimonial-item active">
-                        <p class="text-3xl italic mb-8 font-body">"Không gian tập luyện ở đây thực sự đẳng cấp, thiết kế Industrial khiến tôi cảm thấy tràn đầy năng lượng mỗi khi bước vào."</p>
-                        <h4 class="text-gold text-lg tracking-widest">- HOÀNG NAM, DOANH NHÂN</h4>
-                    </div>
-                    <div class="testimonial-item">
-                        <p class="text-3xl italic mb-8 font-body">"Dịch vụ Sauna và hồ bơi là điều tôi thích nhất. Sau giờ làm việc mệt mỏi, đây là nơi tuyệt vời nhất để phục hồi."</p>
-                        <h4 class="text-gold text-lg tracking-widest">- MINH ANH, MODEL</h4>
-                    </div>
+                <div id="testimonialsList" class="relative">
+                    <!-- testimonials sẽ render từ API */ -->
                 </div>
                 <div class="flex justify-center gap-3 mt-16">
-                    <button class="h-1.5 w-10 bg-gold dot-btn active transition-all duration-300" onclick="showTestimonial(0)"></button>
-                    <button class="h-1.5 w-6 bg-[color:var(--glass-bg)] hover:bg-gold/30 dot-btn transition-all duration-300" onclick="showTestimonial(1)"></button>
+                    <button class="h-1.5 w-10 bg-gold dot-btn active transition-all duration-300" type="button" data-testimonial-index="0" aria-hidden="true"></button>
+                    <button class="h-1.5 w-6 bg-[color:var(--glass-bg)] hover:bg-gold/30 dot-btn transition-all duration-300" type="button" data-testimonial-index="1" aria-hidden="true"></button>
+
+
+
                 </div>
             </div>
         </div>
@@ -290,8 +394,10 @@
     </footer>
 
     <!-- Scripts -->
+    <script type="module" src="/src/js/landing.js"></script>
     <script>
         // Theme Toggle Logic — Synced with Admin System
+
         const themeToggleBtn = document.getElementById('theme-toggle');
         const htmlElement = document.getElementById('icHtmlRoot');
         const themeIcon = themeToggleBtn?.querySelector('i');
@@ -348,64 +454,9 @@
             });
         });
 
-        // Testimonial Slider
-        let currentTestimonial = 0;
-        const testimonials = document.querySelectorAll('.testimonial-item');
-        const dots = document.querySelectorAll('.dot-btn');
+        // landing.js sẽ render pricing/services/testimonials.
+        // Phần logic testimonial cũ đã được loại bỏ để tránh xung đột.
 
-        function showTestimonial(index) {
-            testimonials.forEach(t => t.classList.remove('active'));
-            dots.forEach(d => {
-                d.classList.remove('active');
-                d.classList.remove('bg-gold');
-                d.classList.add('bg-[color:var(--glass-bg)]');
-                d.classList.replace('w-10', 'w-6');
-            });
-            
-            testimonials[index].classList.add('active');
-            dots[index].classList.add('active');
-            dots[index].classList.remove('bg-[color:var(--glass-bg)]');
-            dots[index].classList.add('bg-gold');
-            dots[index].classList.replace('w-6', 'w-10');
-            currentTestimonial = index;
-        }
-
-        // Auto slide testimonials
-        setInterval(() => {
-            currentTestimonial = (currentTestimonial + 1) % testimonials.length;
-            showTestimonial(currentTestimonial);
-        }, 5000);
-
-        // Fetch pricing data from API
-        async function fetchPricing() {
-            try {
-                // Giả lập API call cho demo, thực tế sẽ fetch từ backend
-                const data = [
-                    { g6_ten_goi: 'BASIC', g6_gia: 500000, g6_mo_ta: 'Tập luyện không giới hạn, đầy đủ thiết bị, tủ đồ cá nhân.', g6_la_noi_bat: false },
-                    { g6_ten_goi: 'PRO', g6_gia: 1200000, g6_mo_ta: 'Tất cả đặc quyền Basic + Xông hơi Sauna, tặng 1 buổi PT.', g6_la_noi_bat: true },
-                    { g6_ten_goi: 'ELITE', g6_gia: 3500000, g6_mo_ta: 'Đặc quyền Pro + Bể bơi vô cực, khăn tập riêng, PT hàng tuần.', g6_la_noi_bat: false }
-                ];
-                
-                const grid = document.getElementById('pricing-grid');
-                grid.innerHTML = data.map(pkg => `
-                    <div class="pricing-card bg-surface p-12 border border-[color:var(--glass-border)] relative flex flex-col items-center reveal ${pkg.g6_la_noi_bat ? 'featured' : ''}">
-                        <h3 class="text-2xl mb-6 font-header tracking-[4px]">${pkg.g6_ten_goi}</h3>
-                        <div class="text-5xl font-header text-gold mb-8">${(pkg.g6_gia/1000).toLocaleString()}K<span class="text-xs text-muted">/THÁNG</span></div>
-                        <p class="text-muted text-center text-sm leading-relaxed mb-10 min-h-[60px]">${pkg.g6_mo_ta}</p>
-                        <ul class="list-none space-y-4 text-xs tracking-widest text-main mb-12 w-full">
-                            <li class="flex items-center gap-3"><i class="fas fa-check text-gold"></i> ĐẦY ĐỦ THIẾT BỊ</li>
-                            <li class="flex items-center gap-3"><i class="fas fa-check text-gold"></i> GIỮ XE MIỄN PHÍ</li>
-                            ${pkg.g6_la_noi_bat ? '<li class="flex items-center gap-3"><i class="fas fa-check text-gold"></i> XÔNG HƠI SAUNA</li>' : ''}
-                        </ul>
-                        <a href="/login" class="cta-btn !px-10 !py-4 !text-sm w-full">CHỌN GÓI NÀY</a>
-                    </div>
-                `).join('');
-            } catch (err) {
-                console.error("Lỗi tải dữ liệu gói tập:", err);
-            }
-        }
-
-        fetchPricing();
     </script>
 </body>
 </html>

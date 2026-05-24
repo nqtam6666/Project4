@@ -21,7 +21,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{
 <div class="pt-[72px]">
   <div class="max-w-screen-lg mx-auto px-6 py-12">
     <div class="flex items-center gap-3 mb-8">
-      <a href="/src/pages/shop/gio-hang.html" class="text-text-muted hover:text-neon-lime transition-colors">
+      <a href="/home?tab=cart" class="text-text-muted hover:text-neon-lime transition-colors">
         <span class="material-symbols-outlined">arrow_back</span>
       </a>
       <h1 class="text-2xl font-black text-white">Thanh Toán</h1>
@@ -126,7 +126,7 @@ import { nqtRenderPublicNav, nqtFormatPrice, nqtGetCart, nqtSaveCart } from '/sr
 nqtRenderPublicNav('shop');
 
 const cart = nqtGetCart();
-if (!cart.length) { window.location.href = '/src/pages/shop/gio-hang.html'; }
+if (!cart.length) { window.location.href = '/home?tab=cart'; }
 
 const subtotal = cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
 document.getElementById('nqtOrderTotal').textContent = nqtFormatPrice(subtotal);
@@ -173,8 +173,71 @@ window.nqtPlaceOrder = async function() {
       })
     });
     if (r.ok) {
+      const resData = await r.json();
+      const orderId = resData.nqt_du_lieu?.g6_ma_don_hang;
       nqtSaveCart([]);
-      document.getElementById('nqtSuccessOverlay').classList.remove('hidden');
+      
+      if (method === 'chuyen_khoan') {
+        document.getElementById('nqtSuccessOverlay').innerHTML = `
+          <div class="bg-bg-card border border-border-neon rounded-2xl max-w-md w-full p-8 text-center relative">
+            <h2 class="text-xl font-black text-white mb-1 uppercase tracking-wide">Thanh toán chuyển khoản</h2>
+            <p class="text-xs text-text-secondary mb-5">Vui lòng quét QR bên dưới hoặc chuyển khoản đúng nội dung để được duyệt tự động.</p>
+            
+            <div class="bg-white p-3 rounded-2xl border border-border-subtle mb-5 flex items-center justify-center">
+              <img src="https://img.vietqr.io/image/MB-188806789-compact2.png?amount=${subtotal}&addInfo=DH${orderId}&accountName=NGUYEN%20QUANG%20TAM" class="w-56 h-56 object-contain" alt="VietQR MBBank" />
+            </div>
+
+            <div class="bg-bg-elevated border border-border-subtle rounded-xl p-4 text-left text-xs space-y-2 mb-5">
+              <div class="flex justify-between"><span class="text-text-muted">Ngân hàng:</span><span class="font-bold text-white">MB BANK</span></div>
+              <div class="flex justify-between"><span class="text-text-muted">Số tài khoản:</span><span class="font-bold text-white">188806789</span></div>
+              <div class="flex justify-between"><span class="text-text-muted">Chủ tài khoản:</span><span class="font-bold text-white">NGUYEN QUANG TAM</span></div>
+              <div class="flex justify-between border-t border-border-subtle pt-2"><span class="text-text-muted">Số tiền:</span><span class="font-bold font-mono text-neon-lime text-sm">${nqtFormatPrice(subtotal)}</span></div>
+              <div class="flex justify-between"><span class="text-text-muted">Nội dung CK:</span><span class="font-mono font-bold bg-neon-lime/10 text-neon-lime px-2 py-0.5 rounded text-sm select-all">DH${orderId}</span></div>
+            </div>
+
+            <div class="flex items-center justify-center gap-2 mb-5 text-text-secondary text-xs">
+              <span class="w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
+              <span>Đang chờ kiểm tra thanh toán tự động...</span>
+            </div>
+
+            <div class="flex gap-3">
+              <a href="/src/pages/shop.html" class="flex-1 text-center border border-border-subtle text-text-secondary hover:text-white py-3 rounded-xl font-caps text-xs uppercase tracking-wide transition-colors">Mua tiếp</a>
+            </div>
+          </div>
+        `;
+        document.getElementById('nqtSuccessOverlay').classList.remove('hidden');
+
+        const intervalId = setInterval(async () => {
+          try {
+            const token = localStorage.getItem('nqt_token');
+            const pollRes = await fetch(`/api/nqt-don-hang/${orderId}`, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
+            if (pollRes.ok) {
+              const pollData = await pollRes.json();
+              const status = pollData.nqt_du_lieu?.g6_trang_thai;
+              if (status === 'dang_xu_ly' || status === 'da_giao' || status === 'dang_giao') {
+                clearInterval(intervalId);
+                document.getElementById('nqtSuccessOverlay').innerHTML = `
+                  <div class="bg-bg-card border border-border-neon rounded-2xl max-w-md w-full p-10 text-center">
+                    <div class="w-16 h-16 bg-neon-lime rounded-full flex items-center justify-center mx-auto mb-5 animate-bounce">
+                      <span class="material-symbols-outlined text-bg-main text-3xl">check</span>
+                    </div>
+                    <h2 class="text-2xl font-black text-white mb-2">Thanh toán thành công!</h2>
+                    <p class="text-text-secondary mb-6">Hệ thống đã khớp giao dịch chuyển khoản cho đơn hàng #<strong>${orderId}</strong>.</p>
+                    <a href="/src/pages/shop/don-hang.html" class="block w-full text-center bg-neon-lime text-bg-main py-3 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors mb-3">Xem đơn hàng</a>
+                    <a href="/src/pages/shop.html" class="block w-full text-center text-text-muted text-sm hover:text-text-secondary transition-colors">Tiếp tục mua sắm</a>
+                  </div>
+                `;
+              }
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }, 3000);
+      } else {
+        document.getElementById('nqtSuccessOverlay').classList.remove('hidden');
+      }
     } else {
       const j = await r.json();
       alert(j.nqt_thong_diep || 'Đặt hàng thất bại.');

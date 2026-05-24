@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from flask import Blueprint, request
 from sqlalchemy import func, cast, Date
 from backend.app import db
@@ -234,16 +234,39 @@ def nqt_checkin_qr():
     ).filter(G6DangKyGoiTap.g6_ngay_het_han >= date.today()).first()
     if not nqt_dang_ky:
         return nqt_loi('Hội viên không có gói tập đang hoạt động', nqt_ma_trang=403)
-    nqt_dd = G6DiemDanh(
-        g6_ma_dang_ky=nqt_dang_ky.g6_ma_dang_ky,
+
+    # Check if there is an active check-in (check-out is None)
+    nqt_active_dd = G6DiemDanh.query.filter_by(
         g6_ma_nguoi_dung=nqt_hv.g6_ma_nguoi_dung,
-        g6_ma_chi_nhanh=nqt_chi_nhanh,
-        g6_phuong_thuc='qr',
-    )
-    db.session.add(nqt_dd)
-    db.session.commit()
-    return nqt_ok({'g6_diem_danh': nqt_dd.g6_to_dict(), 'g6_hoi_vien': nqt_hv.g6_to_dict()},
-                  f'Chào mừng {nqt_hv.g6_ho_ten}!')
+        g6_thoi_gian_ra=None
+    ).order_by(G6DiemDanh.g6_thoi_gian_vao.desc()).first()
+
+    if nqt_active_dd:
+        # Check-out
+        nqt_active_dd.g6_thoi_gian_ra = datetime.utcnow()
+        db.session.commit()
+        return nqt_ok({
+            'g6_diem_danh': nqt_active_dd.g6_to_dict(),
+            'g6_hoi_vien': nqt_hv.g6_to_dict(),
+            'g6_goi_tap': nqt_dang_ky.g6_to_dict(),
+            'is_checkout': True
+        }, f'Tạm biệt {nqt_hv.g6_ho_ten}, hẹn gặp lại!')
+    else:
+        # Check-in
+        nqt_dd = G6DiemDanh(
+            g6_ma_dang_ky=nqt_dang_ky.g6_ma_dang_ky,
+            g6_ma_nguoi_dung=nqt_hv.g6_ma_nguoi_dung,
+            g6_ma_chi_nhanh=nqt_chi_nhanh,
+            g6_phuong_thuc='qr',
+        )
+        db.session.add(nqt_dd)
+        db.session.commit()
+        return nqt_ok({
+            'g6_diem_danh': nqt_dd.g6_to_dict(),
+            'g6_hoi_vien': nqt_hv.g6_to_dict(),
+            'g6_goi_tap': nqt_dang_ky.g6_to_dict(),
+            'is_checkout': False
+        }, f'Chào mừng {nqt_hv.g6_ho_ten}!')
 
 
 # ---- CHỈ SỐ CƠ THỂ ----

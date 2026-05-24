@@ -1271,7 +1271,6 @@
 
                             if (typeof nqtToast === 'function') {
                                 nqtToast(res.nqt_thong_diep || (isCheckout ? "Hẹn gặp lại!" : "Chào mừng!"), "success");
-                            }
                         } else {
                             const errorMsg = (res && res.nqt_noi_dung) || "Lỗi check-in hội viên";
                             resultBox.innerHTML = `

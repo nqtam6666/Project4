@@ -169,11 +169,69 @@
     </div>
 </div>
 
+
+<!-- Modal Thêm/Sửa Gói PT -->
+<div id="nqtModalGoiPT" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)nqtDongModal('nqtModalGoiPT')">
+    <div class="bg-white dark:bg-[#262626] rounded-lg w-full max-w-lg border border-[#e5e5e5] dark:border-[#404040]">
+        <div class="px-6 py-4 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
+            <h3 id="nqtModalTitleGoiPT" class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">Thêm Gói PT</h3>
+            <button onclick="nqtDongModal('nqtModalGoiPT')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="nqtFormGoiPT" onsubmit="nqtLuuGoiPT(event)" class="p-6 space-y-4">
+            <input type="hidden" id="nqtGoiPTId">
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Huấn Luyện Viên *</label>
+                <select id="nqtMaHLV" required class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                    <option value="">-- Chọn HLV --</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Tên Gói *</label>
+                <input type="text" id="nqtTenGoi" required placeholder="Gói Tập 1 Kèm 1 - 10 Buổi"
+                    class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Số buổi *</label>
+                    <input type="number" id="nqtSoBuoi" required min="1" placeholder="10"
+                        class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Thời lượng (phút)</label>
+                    <input type="number" id="nqtThoiLuong" placeholder="60"
+                        class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Giá (VNĐ) *</label>
+                    <input type="number" id="nqtGiaGoi" required min="0" placeholder="5000000"
+                        class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Khuyến mãi (VNĐ)</label>
+                    <input type="number" id="nqtKhuyenMai" min="0" placeholder="4500000"
+                        class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Thời hạn sử dụng (Ngày)</label>
+                <input type="number" id="nqtHieuLuc" placeholder="90"
+                    class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="nqtDongModal('nqtModalGoiPT')" class="px-4 py-2 text-sm text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors">Huỷ</button>
+                <button type="submit" id="nqtBtnLuuGoiPT" class="px-4 py-2 text-sm bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5] transition-colors">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script type="module">
 import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
 nqtInitAdminLayout('huan-luyen-vien');
 
-let nqtTabHienTai = 'hlv';
+let nqtTabHienTai = new URLSearchParams(window.location.search).get('tab') || 'hlv';
 let nqtTrang = 1;
 let nqtTimKiemTimer = null;
 let nqtDaChon = [];
@@ -275,6 +333,10 @@ function nqtRenderHead() {
 }
 
 function nqtChuyenTab(tab) {
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('tab', tab);
+    window.history.replaceState({ path: newUrl.href }, '', newUrl.href);
+
     nqtTabHienTai = tab;
     nqtTrang = 1;
     nqtBoChonTatCa();
@@ -296,7 +358,13 @@ function nqtChuyenTab(tab) {
     
     const btnThem = document.getElementById('nqtBtnThem');
     if (btnThem) {
-        btnThem.style.display = tab === 'hlv' ? 'inline-flex' : 'none';
+        if (tab === 'hlv' || tab === 'goipt') {
+            btnThem.style.display = 'inline-flex';
+            btnThem.innerHTML = tab === 'hlv' ? '<i class="fas fa-plus"></i>Thêm HLV' : '<i class="fas fa-plus"></i>Thêm Gói PT';
+            btnThem.onclick = tab === 'hlv' ? () => nqtMoModal('nqtModalThemHLV') : () => nqtChuanBiThemGoiPT();
+        } else {
+            btnThem.style.display = 'none';
+        }
     }
     
     nqtRenderHead();
@@ -357,7 +425,8 @@ function nqtRenderRow(r) {
         <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${fmt(r.g6_gia)}</td>
         <td class="px-4 py-3 text-center text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_hieu_luc_ngay||'—'}</td>
         <td class="px-4 py-3 text-center">${badge(r.g6_la_hoat_dong)}</td>
-        <td class="px-4 py-3 text-right"><button onclick="nqtXoaGoiPT(${r.nxv_ma_goi||r.g6_ma_goi_pt})" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
+        <td class="px-4 py-3 text-right"><button onclick="nqtSuaGoiPT(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="text-xs px-2 py-1 rounded border border-[#e5e5e5] dark:border-[#404040] hover:bg-[#f5f5f5] dark:hover:bg-[#333] text-[#666] dark:text-[#888] mr-1">Sửa</button>
+        <button onclick="nqtXoaGoiPT(${r.nxv_ma_goi||r.g6_ma_goi_pt})" class="text-xs px-2 py-1 rounded border border-[#fecaca] dark:border-[#7f1d1d] text-[#dc2626] hover:bg-[#fef2f2] dark:hover:bg-[#7f1d1d]/20">Xoá</button></td></tr>`;
     if (t === 'dangky') return `<tr class="hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
         <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hoi_vien||r.g6_ma_nguoi_dung||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_hlv||r.g6_ma_hlv||'—'}</td>
@@ -457,6 +526,66 @@ async function nqtXoa(id, api) {
 }
 
 // expose for inline onclick handlers
+
+async function nqtLoadHLVSelect() {
+    const data = await nqtApi.fetch('/api/nxv-hlv?g6_gioi_han=100');
+    if (data?.nqt_thanh_cong) {
+        const sel = document.getElementById('nqtMaHLV');
+        const list = Array.isArray(data.nqt_du_lieu) ? data.nqt_du_lieu : (data.nqt_du_lieu.g6_danh_sach || data.nqt_du_lieu.nxv_danh_sach || []);
+        if (sel) sel.innerHTML = '<option value="">-- Chọn HLV --</option>' + list.map(h => `<option value="${h.nxv_ma_hlv||h.g6_ma_hlv}">${h.g6_ho_ten} (${h.g6_chuyen_mon || 'PT'})</option>`).join('');
+    }
+}
+
+window.nqtChuanBiThemGoiPT = function() {
+    document.getElementById('nqtModalTitleGoiPT').textContent = 'Thêm Gói PT';
+    document.getElementById('nqtFormGoiPT').reset();
+    document.getElementById('nqtGoiPTId').value = '';
+    nqtLoadHLVSelect();
+    nqtMoModal('nqtModalGoiPT');
+}
+
+window.nqtSuaGoiPT = function(r) {
+    document.getElementById('nqtModalTitleGoiPT').textContent = 'Cập nhật Gói PT';
+    document.getElementById('nqtGoiPTId').value = r.nxv_ma_goi || r.g6_ma_goi_pt || '';
+    nqtLoadHLVSelect().then(() => {
+        document.getElementById('nqtMaHLV').value = r.g6_ma_hlv || '';
+    });
+    document.getElementById('nqtTenGoi').value = r.g6_ten_goi || '';
+    document.getElementById('nqtSoBuoi').value = r.g6_so_buoi || '';
+    document.getElementById('nqtThoiLuong').value = r.g6_thoi_luong_buoi || '';
+    document.getElementById('nqtGiaGoi').value = r.g6_gia || '';
+    document.getElementById('nqtKhuyenMai').value = r.g6_gia_khuyen_mai || '';
+    document.getElementById('nqtHieuLuc').value = r.g6_hieu_luc_ngay || '';
+    nqtMoModal('nqtModalGoiPT');
+}
+
+window.nqtLuuGoiPT = async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('nqtGoiPTId').value;
+    const btn = document.getElementById('nqtBtnLuuGoiPT');
+    const nqtRestore = nqtBtnLoading(btn, 'Đang lưu...');
+    const payload = {
+        g6_ma_hlv: parseInt(document.getElementById('nqtMaHLV').value),
+        g6_ten_goi: document.getElementById('nqtTenGoi').value.trim(),
+        g6_so_buoi: parseInt(document.getElementById('nqtSoBuoi').value) || 0,
+        g6_thoi_luong_buoi: parseInt(document.getElementById('nqtThoiLuong').value) || 0,
+        g6_gia: parseFloat(document.getElementById('nqtGiaGoi').value) || 0,
+        g6_gia_khuyen_mai: parseFloat(document.getElementById('nqtKhuyenMai').value) || null,
+        g6_hieu_luc_ngay: parseInt(document.getElementById('nqtHieuLuc').value) || 0,
+    };
+    const res = await nqtApi.fetch(id ? `/api/nxv-goi-pt/${id}` : '/api/nxv-goi-pt', {
+        method: id ? 'PUT' : 'POST', body: payload
+    });
+    nqtRestore();
+    if (res?.nqt_thanh_cong) {
+        nqtToast(id ? 'Cập nhật thành công' : 'Thêm gói PT thành công');
+        nqtDongModal('nqtModalGoiPT');
+        nqtTaiDuLieu();
+    } else {
+        nqtToast(res?.nqt_thong_diep || 'Có lỗi xảy ra', 'error');
+    }
+}
+
 window.nqtChuyenTab = nqtChuyenTab;
 window.nqtTaiDuLieu = nqtTaiDuLieu;
 window.nqtXuLyTimKiem = nqtXuLyTimKiem;
@@ -467,8 +596,7 @@ window.nqtXoaGoiPT = nqtXoaGoiPT;
 window.nqtXoa = nqtXoa;
 
 nqtLoadBranches();
-nqtRenderHead();
-nqtTaiDuLieu();
+nqtChuyenTab(nqtTabHienTai);
 </script>
 </body>
 </html>

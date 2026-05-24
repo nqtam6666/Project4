@@ -258,7 +258,7 @@
 import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
 nqtInitAdminLayout('khuyen-mai');
 
-let nqtTabHienTai = 'ma';
+let nqtTabHienTai = new URLSearchParams(window.location.search).get('tab') || 'ma';
 let nqtDaChon = [];
 let nqtBulkActionType = null;
 
@@ -349,6 +349,10 @@ window.nqtXacNhanBulkAction = async function() {
 }
 
 function nqtChuyenTab(tab) {
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('tab', tab);
+    window.history.replaceState({ path: newUrl.href }, '', newUrl.href);
+
     nqtTabHienTai = tab;
     nqtBoChonTatCa();
     document.querySelectorAll('[id^=nqtTab]').forEach(b => b.className = 'px-4 py-2 text-sm font-medium border-b-2 border-transparent text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] -mb-px');
@@ -522,8 +526,7 @@ window.nqtLuuMuaKem = nqtLuuMuaKem;
 window.nqtXoa = nqtXoa;
 
 nqtLoadSP();
-nqtRenderHead();
-nqtTaiDuLieu();
+nqtChuyenTab(nqtTabHienTai);
 </script>
 </body>
 </html>

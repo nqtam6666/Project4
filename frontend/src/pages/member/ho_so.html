@@ -301,8 +301,13 @@ tailwind.config = {
 
   // ── Auth guard ─────────────────────────────────────────────────────────
   if (!localStorage.getItem('nqt_token')) {
-    window.location.href = '/src/pages/member/login.html';
+    window.location.href = '/login';
   }
+  window.addEventListener('pageshow', () => {
+    if (!localStorage.getItem('nqt_token')) {
+      window.location.replace('/login');
+    }
+  });
 
   // ── Mobile menu ──────────────────────────────────────────────────────
   const mm = document.getElementById('nqtMobileMenu');

@@ -166,6 +166,17 @@
                 <textarea id="nqtMoTaSP" rows="2" placeholder="Mô tả sản phẩm..."
                     class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]"></textarea>
             </div>
+            <div>
+                <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Hình ảnh sản phẩm</label>
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="document.getElementById('nqtFileSP').click()" class="inline-flex items-center justify-center gap-2 px-3 py-2 border border-[#e5e5e5] dark:border-[#404040] rounded-md text-xs font-medium text-[#191919] dark:text-[#fafafa] bg-white dark:bg-[#1a1a1a] hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors">
+                        <i class="fas fa-upload"></i>Tải ảnh lên
+                    </button>
+                    <input type="file" id="nqtFileSP" accept="image/*" class="hidden" onchange="nqtUploadAnhSP(this)">
+                    <input type="hidden" id="nqtHinhAnhUrl">
+                </div>
+                <div id="nqtHinhAnhPreview" class="mt-2 flex items-center gap-2"></div>
+            </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" onclick="nqtDongModal('nqtModalThemSP')" class="px-4 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333]">Huỷ</button>
                 <button type="submit" id="nqtBtnLuuSP" class="px-4 py-2 text-sm bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5]">Lưu</button>
@@ -238,11 +249,12 @@
 import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
 nqtInitAdminLayout('san-pham');
 
-let nqtTabHienTai = 'sanpham';
+let nqtTabHienTai = new URLSearchParams(window.location.search).get('tab') || 'sanpham';
 let nqtTrang = 1;
 let nqtTimKiemTimer = null;
 let nqtDaChon = [];
 let nqtBulkActionType = null;
+let nqtAnhDaThayDoi = false;
 
 window.nqtToggleRow = function(id, e) {
     if (e.target.closest('button') || e.target.closest('a')) return;
@@ -330,6 +342,10 @@ const nqtTabCfg = {
 };
 
 function nqtChuyenTab(tab) {
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('tab', tab);
+    window.history.replaceState({ path: newUrl.href }, '', newUrl.href);
+
     nqtTabHienTai = tab;
     nqtTrang = 1;
     nqtBoChonTatCa();
@@ -344,7 +360,14 @@ function nqtChuyenTab(tab) {
     if (btnThem) {
         if (tab === 'sanpham') {
             btnThem.innerHTML = '<i class="fas fa-plus"></i>Thêm sản phẩm';
-            btnThem.onclick = () => nqtMoModal('nqtModalThemSP');
+            btnThem.onclick = () => {
+                document.getElementById('nqtFormSP').reset();
+                document.getElementById('nqtSPId').value = '';
+                document.getElementById('nqtHinhAnhUrl').value = '';
+                document.getElementById('nqtHinhAnhPreview').innerHTML = '';
+                nqtAnhDaThayDoi = false;
+                nqtMoModal('nqtModalThemSP');
+            };
             btnThem.style.display = 'inline-flex';
         } else if (tab === 'danhmuc') {
             btnThem.innerHTML = '<i class="fas fa-plus"></i>Thêm danh mục';
@@ -408,8 +431,15 @@ function nqtRenderRow(r) {
     const t = nqtTabHienTai;
     if (t === 'sanpham') {
         const isChecked = nqtDaChon.includes(r.nxv_ma_san_pham||r.g6_ma_san_pham);
+        const img = r.g6_hinh_anh ? `<img src="${r.g6_hinh_anh}" class="w-10 h-10 object-cover rounded border border-[#e5e5e5] dark:border-[#404040]">` : `<div class="w-10 h-10 bg-gray-50 dark:bg-[#1a1a1a] rounded border border-[#e5e5e5] dark:border-[#404040] flex items-center justify-center text-gray-400"><i class="fas fa-image text-xs"></i></div>`;
         return `<tr data-row-id="${r.nxv_ma_san_pham||r.g6_ma_san_pham}" class="cursor-pointer transition-colors ${isChecked ? 'nqt-row-selected' : 'hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]'}" onclick="nqtToggleRow(${r.nxv_ma_san_pham||r.g6_ma_san_pham}, event)">
-        <td class="px-4 py-3"><p class="font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_san_pham||r.g6_ten||'—'}</p><p class="text-xs text-[#666] dark:text-[#888] font-mono">${r.g6_sku||''}</p></td>
+        <td class="px-4 py-3 flex items-center space-x-3">
+            ${img}
+            <div>
+                <p class="font-medium text-sm text-[#191919] dark:text-[#fafafa]">${r.g6_ten_san_pham||r.g6_ten||'—'}</p>
+                <p class="text-xs text-[#666] dark:text-[#888] font-mono">${r.g6_sku||''}</p>
+            </div>
+        </td>
         <td class="px-4 py-3 text-sm text-[#191919] dark:text-[#fafafa] font-mono">${fmt(r.g6_gia_ban)}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_danh_muc||r.nxv_ma_danh_muc||'—'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ten_thuong_hieu||r.nxv_ma_thuong_hieu||'—'}</td>
@@ -451,6 +481,7 @@ function nqtHienThiPagination(tong) {
 function nqtXuLyTimKiem() { clearTimeout(nqtTimKiemTimer); nqtTimKiemTimer = setTimeout(()=>{nqtTrang=1;nqtTaiDuLieu();},400); }
 
 function nqtSuaSP(r) {
+    nqtAnhDaThayDoi = false;
     document.getElementById('nqtSPId').value = r.nxv_ma_san_pham||r.g6_ma_san_pham||'';
     document.getElementById('nqtTenSP').value = r.g6_ten_san_pham||r.g6_ten||'';
     document.getElementById('nqtDanhMuc').value = r.g6_ma_danh_muc||'';
@@ -458,6 +489,17 @@ function nqtSuaSP(r) {
     document.getElementById('nqtGiaBan').value = r.g6_gia_ban||'';
     document.getElementById('nqtGiaGoc').value = r.g6_gia_goc||'';
     document.getElementById('nqtMoTaSP').value = r.g6_mo_ta_ngan||r.g6_mo_ta||'';
+    
+    const preview = document.getElementById('nqtHinhAnhPreview');
+    const hiddenUrl = document.getElementById('nqtHinhAnhUrl');
+    if (r.g6_hinh_anh) {
+        hiddenUrl.value = r.g6_hinh_anh;
+        preview.innerHTML = `<img src="${r.g6_hinh_anh}" class="h-20 w-20 object-cover rounded border border-[#e5e5e5] dark:border-[#404040]">`;
+    } else {
+        hiddenUrl.value = '';
+        preview.innerHTML = '';
+    }
+    
     nqtMoModal('nqtModalThemSP');
 }
 
@@ -476,9 +518,56 @@ async function nqtLuuSP(e) {
         g6_slug: nqtToSlug(document.getElementById('nqtTenSP').value.trim())
     };
     const res = await nqtApi.fetch(id?`/api/nxv-san-pham/${id}`:'/api/nxv-san-pham',{method:id?'PUT':'POST',body:payload});
+    if (res?.nqt_thanh_cong) {
+        const sp_id = id || res.nqt_du_lieu.g6_ma_san_pham;
+        const hinhAnhUrl = document.getElementById('nqtHinhAnhUrl').value;
+        if (hinhAnhUrl && nqtAnhDaThayDoi) {
+            await nqtApi.fetch(`/api/nxv-san-pham/${sp_id}/hinh-anh`, {
+                method: 'POST',
+                body: {
+                    g6_duong_dan: hinhAnhUrl,
+                    g6_la_anh_chinh: true
+                }
+            });
+        }
+        nqtToast('Lưu thành công');
+        nqtDongModal('nqtModalThemSP');
+        e.target.reset();
+        document.getElementById('nqtSPId').value = '';
+        document.getElementById('nqtHinhAnhUrl').value = '';
+        document.getElementById('nqtHinhAnhPreview').innerHTML = '';
+        nqtTaiDuLieu();
+    } else {
+        nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+    }
     nqtRestore();
-    if (res?.nqt_thanh_cong) { nqtToast('Lưu thành công'); nqtDongModal('nqtModalThemSP'); e.target.reset(); document.getElementById('nqtSPId').value=''; nqtTaiDuLieu(); }
-    else nqtToast(res?.nqt_thong_diep||'Lỗi','error');
+}
+
+window.nqtUploadAnhSP = async function(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const preview = document.getElementById('nqtHinhAnhPreview');
+    preview.innerHTML = `<span class="text-xs text-[#666] dark:text-[#888]"><i class="fas fa-circle-notch fa-spin mr-1"></i>Đang tải ảnh...</span>`;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await nqtApi.fetch('/api/nqt-upload', {
+        method: 'POST',
+        body: formData
+    });
+
+    if (res && res.nqt_thanh_cong) {
+        const url = res.nqt_du_lieu.g6_url;
+        document.getElementById('nqtHinhAnhUrl').value = url;
+        preview.innerHTML = `<img src="${url}" class="h-20 w-20 object-cover rounded border border-[#e5e5e5] dark:border-[#404040]">`;
+        nqtAnhDaThayDoi = true;
+        nqtToast('Đã tải ảnh lên thành công', 'success');
+    } else {
+        preview.innerHTML = `<span class="text-xs text-[#dc2626]">Lỗi upload</span>`;
+        nqtToast(res?.nqt_thong_diep || 'Không thể upload ảnh', 'error');
+    }
 }
 
 async function nqtXoa(id,api) {
@@ -558,10 +647,10 @@ window.nqtSuaDM = nqtSuaDM;
 window.nqtLuuDM = nqtLuuDM;
 window.nqtSuaTH = nqtSuaTH;
 window.nqtLuuTH = nqtLuuTH;
+window.nqtUploadAnhSP = nqtUploadAnhSP;
 
 nqtLoadDMTH();
-nqtRenderHead();
-nqtTaiDuLieu();
+nqtChuyenTab(nqtTabHienTai);
 </script>
 </body>
 </html>

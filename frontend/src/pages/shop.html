@@ -126,7 +126,7 @@ function nqtRenderShop(products) {
   }
   grid.innerHTML = products.map(p => {
     const bien_the = p.g6_bien_the?.[0] || {};
-    const price = bien_the.g6_gia || p._gia || 0;
+    const price = bien_the.g6_gia || p.g6_gia_ban || p._gia || 0;
     return `
     <div class="bg-bg-card border border-border-subtle rounded-2xl overflow-hidden hover:border-border-neon transition-all group cursor-pointer" onclick="location.href='/src/pages/shop-chi-tiet.html?id=${p.g6_ma_san_pham}'">
       <div class="aspect-square bg-bg-elevated flex items-center justify-center relative">
@@ -150,8 +150,8 @@ function nqtRenderShop(products) {
   try {
     const r = await fetch('/api/nxv-san-pham');
     const j = await r.json();
-    nqtAllProducts = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (Array.isArray(j) ? j : []);
-    nqtAllProducts.forEach(p => { p._gia = p.g6_bien_the?.[0]?.g6_gia || 0; });
+    nqtAllProducts = Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : (j.nqt_du_lieu && Array.isArray(j.nqt_du_lieu.g6_danh_sach) ? j.nqt_du_lieu.g6_danh_sach : (Array.isArray(j) ? j : []));
+    nqtAllProducts.forEach(p => { p._gia = p.g6_bien_the?.[0]?.g6_gia || p.g6_gia_ban || 0; });
     document.getElementById('nqtTotalProducts').textContent = nqtAllProducts.length;
 
     // Category buttons

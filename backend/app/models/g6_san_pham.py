@@ -138,6 +138,11 @@ class G6SanPham(db.Model):
         if not bt_mac_dinh and self.g6_bien_the:
             bt_mac_dinh = self.g6_bien_the[0]
             
+        anh_chinh = next((h for h in self.g6_hinh_anh if h.g6_la_anh_chinh), None)
+        if not anh_chinh and self.g6_hinh_anh:
+            anh_chinh = self.g6_hinh_anh[0]
+        hinh_anh_url = anh_chinh.g6_duong_dan if anh_chinh else (bt_mac_dinh.g6_hinh_anh if bt_mac_dinh else None)
+
         return {
             'g6_ma_san_pham': self.g6_ma_san_pham,
             'g6_ma_danh_muc': self.g6_ma_danh_muc,
@@ -159,6 +164,7 @@ class G6SanPham(db.Model):
             'g6_sku': bt_mac_dinh.g6_sku if bt_mac_dinh else None,
             'g6_ten_danh_muc': self.g6_danh_muc.g6_ten_danh_muc if self.g6_danh_muc else None,
             'g6_ten_thuong_hieu': self.g6_thuong_hieu.g6_ten_thuong_hieu if self.g6_thuong_hieu else None,
+            'g6_hinh_anh': hinh_anh_url,
         }
 
 

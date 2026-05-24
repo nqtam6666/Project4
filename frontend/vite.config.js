@@ -21,16 +21,25 @@ function nqtAdminRewrite() {
         } else if (req.url === '/admin' || req.url === '/admin/') {
           req.url = '/src/pages/admin/dashboard.html';
         } else {
-          // Member routes
+          // Member / Home1 / Public routes
           const urlBase = req.url.split('?')[0];
           const query = req.url.split('?')[1] ? '?' + req.url.split('?')[1] : '';
           
-          if (urlBase === '/pt' || urlBase === '/pt/') {
+          const matchHome1 = req.url.match(/^\/home1\/([^/?#]+)(\/)?(\?.*)?$/);
+          if (matchHome1) {
+            const page = matchHome1[1];
+            const publicPages = ['goi-tap', 'huan-luyen-vien', 'lop-hoc', 'shop', 'blog', 'su-kien', 'blog-chi-tiet', 'shop-chi-tiet'];
+            if (publicPages.includes(page)) {
+              req.url = `/src/pages/${page}.html${matchHome1[3] || ''}`;
+            }
+          } else if (urlBase === '/pt' || urlBase === '/pt/') {
             req.url = '/src/pages/pt/dashboard.html' + query;
           } else if (urlBase === '/login' || urlBase === '/login/') {
             req.url = '/src/pages/member/login.html' + query;
           } else if (urlBase === '/home' || urlBase === '/home/') {
             req.url = '/src/pages/member/dashboard.html' + query;
+          } else if (urlBase === '/home1' || urlBase === '/home1/') {
+            req.url = '/src/pages/goi-tap.html' + query;
           } else if (urlBase === '/register' || urlBase === '/register/') {
             req.url = '/src/pages/member/register.html' + query;
           }

@@ -209,13 +209,46 @@ async function loadConfig() {
     try {
         const res = await nqtFetch('/cau-hinh-ui');
         if (res.nqt_thanh_cong) {
+            let tenWebsite = '';
+            let faviconUrl = '';
+            let logoUrl = '';
             res.nqt_du_lieu.forEach(c => {
                 const els = document.querySelectorAll(`[data-config="${c.g6_khoa.replace('g6_', '')}"]`);
                 els.forEach(el => {
                     if (el.tagName === 'IMG') el.src = c.g6_gia_tri;
                     else el.textContent = c.g6_gia_tri;
                 });
+                if (c.g6_khoa === 'g6_ten_website') tenWebsite = c.g6_gia_tri;
+                if (c.g6_khoa === 'g6_favicon_url') faviconUrl = c.g6_gia_tri;
+                if (c.g6_logo_url) logoUrl = c.g6_gia_tri;
             });
+
+            if (tenWebsite) {
+                document.title = `${tenWebsite} | Hệ thống phòng tập cao cấp`;
+                
+                // Replace hardcoded footer
+                const footerText = document.querySelector('footer p');
+                if (footerText && footerText.textContent.includes('IRONCORE')) {
+                    footerText.textContent = `© 2024 ${tenWebsite.toUpperCase()}. BẢO LƯU MỌI QUYỀN.`;
+                }
+            }
+
+            if (logoUrl) {
+                const brandLink = document.querySelector('[data-config="ten_website"]');
+                if (brandLink) {
+                    brandLink.innerHTML = `<img src="${logoUrl}" alt="${tenWebsite || 'Logo'}" class="h-10 w-auto object-contain">`;
+                }
+            }
+
+            if (faviconUrl) {
+                let link = document.querySelector("link[rel~='icon']");
+                if (!link) {
+                    link = document.createElement('link');
+                    link.rel = 'icon';
+                    document.head.appendChild(link);
+                }
+                link.href = faviconUrl;
+            }
         }
     } catch (e) { console.error('Config error:', e); }
 }

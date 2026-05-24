@@ -119,26 +119,51 @@ export function nqtInitAdminLayout(activePage) {
         /* ===== BODY & LAYOUT ===== */
         body { 
             font-family: 'Inter', sans-serif; 
-            background: #0A0A0A !important;
-            color: #F5F5F0 !important;
+            
         }
         
-        /* ===== SIDEBAR — Industrial Solid ===== */
+        
+        /* Glassmorphism sidebar overrides */
+        .dark aside {
+            background: rgba(9, 11, 15, 0.7) !important;
+            backdrop-filter: blur(24px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        /* Modernized scrollbars for layout sidebar list */
+        aside *::-webkit-scrollbar {
+            width: 4px;
+        }
+        aside *::-webkit-scrollbar-thumb {
+            background: rgba(197, 160, 89, 0.2) !important;
+            border-radius: 2px;
+        }
+        
+        /* Glassmorphism headers */
+        .dark header {
+            background: rgba(9, 11, 15, 0.75) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+        }
+    
+/* ===== SIDEBAR — Industrial Solid ===== */
         aside {
-            background: #1C1C1C !important;
+            background: #090b0e !important;
             border-color: rgba(255, 255, 255, 0.05) !important;
             box-shadow: 10px 0 50px rgba(0,0,0,0.5) !important;
         }
         
         .dark aside {
-            background: #121212 !important;
+            background: #090b0e !important;
         }
 
         aside > div:first-child::after {
             content: '';
             position: absolute;
             bottom: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+            background: linear-gradient(90deg, transparent, #C5A059, transparent);
         }
 
         /* ===== HEADER — Dark Glass ===== */
@@ -146,14 +171,14 @@ export function nqtInitAdminLayout(activePage) {
             background: rgba(10, 10, 10, 0.8) !important;
             backdrop-filter: blur(20px) !important;
             -webkit-backdrop-filter: blur(20px) !important;
-            border-bottom: 1px solid rgba(201, 168, 76, 0.15) !important;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.15) !important;
             box-shadow: 0 4px 30px rgba(0,0,0,0.3) !important;
         }
         header::after {
             content: '';
             position: absolute;
             bottom: -1px; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent 0%, #C9A84C 50%, transparent 100%);
+            background: linear-gradient(90deg, transparent 0%, #C5A059 50%, transparent 100%);
             opacity: 0.3;
         }
 
@@ -162,10 +187,10 @@ export function nqtInitAdminLayout(activePage) {
         a[class*="bg-[#191919]"],
         button[type="submit"],
         .nqt-primary-btn {
-            background: #C9A84C !important;
-            color: #0A0A0A !important;
-            border: 1px solid #C9A84C !important;
-            box-shadow: 0 0 20px rgba(201, 168, 76, 0.2) !important;
+            background: #C5A059 !important;
+            color: #000000 !important;
+            border: 1px solid #C5A059 !important;
+            box-shadow: 0 0 20px rgba(197, 160, 89, 0.2) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             border-radius: 4px !important;
             font-weight: 800 !important;
@@ -177,8 +202,8 @@ export function nqtInitAdminLayout(activePage) {
         a[class*="bg-[#191919]"]:hover,
         button[type="submit"]:hover {
             background: transparent !important;
-            color: #C9A84C !important;
-            box-shadow: 0 0 30px rgba(201, 168, 76, 0.4) !important;
+            color: #C5A059 !important;
+            box-shadow: 0 0 30px rgba(197, 160, 89, 0.4) !important;
             transform: translateY(-1px) !important;
         }
 
@@ -191,30 +216,30 @@ export function nqtInitAdminLayout(activePage) {
             margin: 2px 12px !important;
             border-radius: 4px !important;
             transition: all 0.2s ease !important;
-            color: rgba(255, 255, 255, 0.6) !important; /* Force light text on dark sidebar */
+            color: var(--nqt-sidebar-text) !important;
         }
         .nqt-sidebar-item.active {
-            background: #C9A84C !important;
-            color: #0A0A0A !important;
+            background: #C5A059 !important;
+            color: #000000 !important;
             font-weight: 800 !important;
-            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3) !important;
+            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.3) !important;
         }
         .nqt-sidebar-item:not(.active):hover {
             background: rgba(255, 255, 255, 0.05) !important;
-            color: #C9A84C !important;
+            color: #C5A059 !important;
         }
         .nqt-sidebar-item.active i, .nqt-sidebar-item.active span {
-            color: #0A0A0A !important;
+            color: #000000 !important;
         }
         .nqt-sidebar-item:not(.active) i {
-            color: #C9A84C !important;
+            color: #C5A059 !important;
             opacity: 0.7;
         }
         .nqt-sidebar-item:not(.active) span {
-            color: rgba(255, 255, 255, 0.7) !important;
+            color: var(--nqt-sidebar-text) !important;
         }
         .nqt-sidebar-item:not(.active):hover span {
-            color: #C9A84C !important;
+            color: #C5A059 !important;
         }
 
         :root {
@@ -223,21 +248,21 @@ export function nqtInitAdminLayout(activePage) {
             --nqt-text: #1A1A1A;
             --nqt-text-dim: #666666;
             --nqt-border: rgba(0,0,0,0.08);
-            --nqt-gold: #C9A84C;
-            --nqt-gold-glow: rgba(201, 168, 76, 0.1);
+            --nqt-gold: #C5A059;
+            --nqt-gold-glow: rgba(197, 160, 89, 0.1);
             --nqt-sidebar: #FFFFFF; /* Light sidebar for Light Mode */
             --nqt-sidebar-text: #444444;
             --nqt-sidebar-border: rgba(0,0,0,0.05);
         }
         .dark {
-            --nqt-bg: #0A0A0A;
-            --nqt-surface: #1C1C1C;
+            --nqt-bg: #000000;
+            --nqt-surface: #090b0e;
             --nqt-text: #F5F5F0;
             --nqt-text-dim: rgba(255,255,255,0.5);
             --nqt-border: rgba(255,255,255,0.05);
-            --nqt-gold: #C9A84C;
-            --nqt-gold-glow: rgba(201, 168, 76, 0.2);
-            --nqt-sidebar: #1C1C1C; /* Dark sidebar for Dark Mode */
+            --nqt-gold: #C5A059;
+            --nqt-gold-glow: rgba(197, 160, 89, 0.2);
+            --nqt-sidebar: #090b0e; /* Dark sidebar for Dark Mode */
             --nqt-sidebar-text: rgba(255,255,255,0.6);
             --nqt-sidebar-border: rgba(255,255,255,0.05);
         }
@@ -349,17 +374,17 @@ export function nqtInitAdminLayout(activePage) {
             color: var(--nqt-sidebar-text) !important;
         }
         .nqt-sidebar-item.active {
-            background: #C9A84C !important;
-            color: #0A0A0A !important;
+            background: #C5A059 !important;
+            color: #000000 !important;
             font-weight: 800 !important;
-            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3) !important;
+            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.3) !important;
         }
         .nqt-sidebar-item:not(.active):hover {
             background: rgba(var(--nqt-gold-rgb), 0.1) !important;
             color: var(--nqt-gold) !important;
         }
         .nqt-sidebar-item.active i, .nqt-sidebar-item.active span {
-            color: #0A0A0A !important;
+            color: #000000 !important;
         }
         .nqt-sidebar-item:not(.active) i {
             color: var(--nqt-gold) !important;
@@ -382,21 +407,33 @@ export function nqtInitAdminLayout(activePage) {
 
         /* ===== TABLE ROWS — Gradient Hover ===== */
         /* ===== TABLES — High Contrast Dark ===== */
-        table thead th {
-            background: #121212 !important;
-            color: #C9A84C !important;
+                table thead th {
+            background: #f1f5f9 !important;
+            color: var(--nqt-text) !important;
             font-family: 'Barlow Condensed', sans-serif !important;
             text-transform: uppercase !important;
             letter-spacing: 1px !important;
             font-weight: 700 !important;
-            border-bottom: 2px solid rgba(201, 168, 76, 0.3) !important;
+            border-bottom: 2px solid var(--nqt-border) !important;
         }
         table tbody td {
+            border-bottom: 1px solid var(--nqt-border) !important;
+            color: var(--nqt-text) !important;
+        }
+        table tbody tr:hover {
+            background: rgba(0, 0, 0, 0.015) !important;
+        }
+        .dark table thead th {
+            background: #090b0e !important;
+            color: #C5A059 !important;
+            border-bottom: 2px solid rgba(197, 160, 89, 0.3) !important;
+        }
+        .dark table tbody td {
             border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
             color: #F5F5F0 !important;
         }
-        table tbody tr:hover {
-            background: rgba(201, 168, 76, 0.03) !important;
+        .dark table tbody tr:hover {
+            background: rgba(197, 160, 89, 0.03) !important;
         }
 
         /* ===== TABS — Animated Indicator ===== */
@@ -441,8 +478,8 @@ export function nqtInitAdminLayout(activePage) {
         }
 
         /* ===== MISC ===== */
-        .nqt-row-selected { background-color: rgba(201, 168, 76, 0.12) !important; border-left: 3px solid var(--nqt-gold) !important; }
-        .dark .nqt-row-selected { background-color: rgba(201, 168, 76, 0.25) !important; border-left: 3px solid var(--nqt-gold) !important; }
+        .nqt-row-selected { background-color: rgba(197, 160, 89, 0.12) !important; border-left: 3px solid var(--nqt-gold) !important; }
+        .dark .nqt-row-selected { background-color: rgba(197, 160, 89, 0.25) !important; border-left: 3px solid var(--nqt-gold) !important; }
         tr:not(.nqt-row-selected) { border-left: 3px solid transparent; }
         
         #nqtCmdInput::placeholder { color: #a3a3a3; }
@@ -615,7 +652,7 @@ export function nqtInitAdminLayout(activePage) {
         }
         
         #nqtNotifPanel > div:first-child, #nqtNotifPanel > div:last-child {
-            background-color: rgba(var(--nqt-gold-rgb, 201, 168, 76), 0.03) !important;
+            background-color: rgba(var(--nqt-gold-rgb, 197, 160, 89), 0.03) !important;
             border-color: var(--nqt-border) !important;
         }
 
@@ -682,8 +719,8 @@ export function nqtInitAdminLayout(activePage) {
             letter-spacing: 2px !important;
             font-weight: 800 !important;
             font-size: 1.5rem !important;
-            color: #C9A84C !important;
-            text-shadow: 0 0 10px rgba(201, 168, 76, 0.2);
+            color: #C5A059 !important;
+            text-shadow: 0 0 10px rgba(197, 160, 89, 0.2);
         }
         
         h2, h3, h4 {
@@ -712,14 +749,14 @@ export function nqtInitAdminLayout(activePage) {
         /* ===== SIDEBAR BRAND ICON ===== */
         aside > div:first-child .neon-button {
             border-radius: 8px !important;
-            background: #C9A84C !important;
-            color: #0A0A0A !important;
-            box-shadow: 0 0 15px rgba(201, 168, 76, 0.4) !important;
+            background: #C5A059 !important;
+            color: #000000 !important;
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.4) !important;
             animation: nqtBrandPulse 3s ease-in-out infinite;
         }
         @keyframes nqtBrandPulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(201, 168, 76, 0.4); }
-            50% { box-shadow: 0 0 25px rgba(201, 168, 76, 0.6), 0 0 40px rgba(201, 168, 76, 0.2); }
+            0%, 100% { box-shadow: 0 0 15px rgba(197, 160, 89, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(197, 160, 89, 0.6), 0 0 40px rgba(197, 160, 89, 0.2); }
         }
 
         /* ===== USER AVATAR — Ring Effect ===== */
@@ -743,7 +780,7 @@ export function nqtInitAdminLayout(activePage) {
             padding: 0 !important;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .bg-white, .dark\:bg-\[#1C1C1C\], .dark\:bg-\[#262626\], .bg-surface-container {
+        .bg-white, .dark\:bg-\[#090b0e\], .dark\:bg-\[#262626\], .bg-surface-container {
             transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         button, a, .nqt-sidebar-item {
@@ -832,20 +869,24 @@ export function nqtInitAdminLayout(activePage) {
 
     // Build full shell HTML
     const shellHTML = `
-    <aside class="w-64 bg-[#1C1C1C] border-r border-white/5 flex flex-col fixed left-0 top-0 h-full z-20 shadow-2xl">
-        <div id="ic-admin-brand-container" class="p-6 h-24 flex items-center justify-center border-b border-white/5 relative">
+    <aside class="w-64 bg-[#090b0e] border-r border-white/5 flex flex-col fixed left-0 top-0 h-full z-20 shadow-2xl">
+        <a href="/admin/dashboard" id="ic-admin-brand-container" class="p-6 h-24 flex items-center justify-center border-b border-white/5 relative cursor-pointer hover:opacity-85 transition-opacity">
             <div id="ic-admin-brand-fallback" class="flex items-center space-x-3 w-full">
-                <div id="ic-admin-brand-icon" class="w-10 h-10 bg-[#C9A84C] text-[#0A0A0A] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(201,168,76,0.3)] neon-button flex-shrink-0">
+                <div id="ic-admin-brand-icon" class="w-10 h-10 bg-[#C5A059] text-[#000000] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(197, 160, 89,0.3)] neon-button flex-shrink-0">
                     <i class="fas fa-dumbbell text-xl"></i>
                 </div>
                 <div class="flex flex-col overflow-hidden">
-                    <span id="ic-admin-brand" class="text-xl font-header font-black tracking-widest text-[#C9A84C] leading-none truncate">IRONCORE</span>
+                    <span id="ic-admin-brand" class="text-xl font-header font-black tracking-widest text-[#C5A059] leading-none truncate">G6 GYM</span>
                     <span class="text-[9px] uppercase tracking-[3px] text-white/40 font-header mt-1 truncate">Admin Command</span>
                 </div>
             </div>
-        </div>
+        </a>
         <nav class="flex-1 py-6 space-y-1 overflow-y-auto">${navHtml}</nav>
-        <div class="p-3 border-t border-outline-variant">
+        <div class="p-3 border-t border-outline-variant space-y-1">
+            <a href="/home" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm text-[#C5A059] font-medium hover:bg-[#C5A059]/10 transition-colors">
+                <i class="fas fa-home w-5 text-center text-lg"></i>
+                <span>Về trang chủ</span>
+            </a>
             <button onclick="nqtLogout()" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm text-error font-medium hover:bg-error/10 transition-colors">
                 <i class="fas fa-sign-out-alt w-5 text-center text-lg"></i>
                 <span>Đăng xuất</span>
@@ -947,7 +988,7 @@ export function nqtInitAdminLayout(activePage) {
     
     // Set document title from config or default
     const cStr = localStorage.getItem('ic-site-config');
-    let siteName = 'IRON COMMAND';
+    let siteName = 'G6 GYM';
     if (cStr) {
         try {
             const cfg = JSON.parse(cStr);
@@ -1395,7 +1436,7 @@ export function nqtInitAdminLayout(activePage) {
         
         // Style based on type
         const typeConfig = {
-            success: { icon: 'fa-check-circle', color: '#C9A84C', bg: 'rgba(201,168,76,0.1)' },
+            success: { icon: 'fa-check-circle', color: '#C5A059', bg: 'rgba(197, 160, 89,0.1)' },
             error: { icon: 'fa-exclamation-circle', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
             info: { icon: 'fa-info-circle', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' }
         };

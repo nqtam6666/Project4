@@ -45,12 +45,12 @@ function nqtIsAdminUser() {
 export function nqtRenderPublicNav(activePage = '') {
   const links = [
     { href: '/',                              label: 'Trang chủ',  key: 'home' },
-    { href: '/src/pages/goi-tap.html',        label: 'Gói tập',   key: 'goi-tap' },
-    { href: '/src/pages/huan-luyen-vien.html',label: 'Huấn luyện viên', key: 'hlv' },
-    { href: '/src/pages/lop-hoc.html',        label: 'Lớp học',   key: 'lop-hoc' },
-    { href: '/src/pages/shop.html',           label: 'Shop',      key: 'shop' },
-    { href: '/src/pages/blog.html',           label: 'Blog',      key: 'blog' },
-    { href: '/src/pages/su-kien.html',        label: 'Sự kiện',   key: 'su-kien' },
+    { href: '/home1/goi-tap',                 label: 'Gói tập',   key: 'goi-tap' },
+    { href: '/home1/huan-luyen-vien',         label: 'Huấn luyện viên', key: 'hlv' },
+    { href: '/home1/lop-hoc',                 label: 'Lớp học',   key: 'lop-hoc' },
+    { href: '/home1/shop',                    label: 'Shop',      key: 'shop' },
+    { href: '/home1/blog',                    label: 'Blog',      key: 'blog' },
+    { href: '/home1/su-kien',                 label: 'Sự kiện',   key: 'su-kien' },
   ];
   const user = nqtGetUser();
   const isAdmin = nqtIsAdminUser();
@@ -69,15 +69,15 @@ export function nqtRenderPublicNav(activePage = '') {
     </a>`).join('');
 
   const authBtn = user
-    ? `<a href="/src/pages/member/dashboard.html" class="flex items-center gap-2 text-text-secondary hover:text-neon-lime transition-colors text-sm">
+    ? `<a href="/home" class="flex items-center gap-2 text-text-secondary hover:text-neon-lime transition-colors text-sm">
         <span class="material-symbols-outlined text-base">account_circle</span>
         <span class="hidden sm:inline font-caps text-xs uppercase tracking-wide">${user.nqt_ho_ten || 'Member'}</span>
       </a>`
-    : `<a href="/src/pages/member/login.html" class="bg-neon-lime text-bg-main font-caps text-xs uppercase tracking-wide font-semibold px-5 py-2 rounded hover:bg-neon-dim transition-colors">
+    : `<a href="/login" class="bg-neon-lime text-bg-main font-caps text-xs uppercase tracking-wide font-semibold px-5 py-2 rounded hover:bg-neon-dim transition-colors">
         Đăng nhập
       </a>`;
 
-  const cartIcon = `<a href="/src/pages/shop/gio-hang.html" class="text-text-secondary hover:text-neon-lime transition-colors relative" id="nqtCartIcon">
+  const cartIcon = `<a href="/home?tab=cart" class="text-text-secondary hover:text-neon-lime transition-colors relative" id="nqtCartIcon">
     <span class="material-symbols-outlined text-xl">shopping_cart</span>
     <span id="nqtCartBadge" class="hidden absolute -top-1 -right-1 bg-neon-lime text-bg-main text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center"></span>
   </a>`;
@@ -103,8 +103,8 @@ export function nqtRenderPublicNav(activePage = '') {
         : ''
       }
       ${user
-        ? `<a href="/src/pages/member/dashboard.html" class="block w-full text-center bg-bg-card border border-border-subtle text-text-primary py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold">Dashboard</a>`
-        : `<a href="/src/pages/member/login.html" class="block w-full text-center bg-neon-lime text-bg-main py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Đăng nhập</a>`
+        ? `<a href="/home" class="block w-full text-center bg-bg-card border border-border-subtle text-text-primary py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold">Dashboard</a>`
+        : `<a href="/login" class="block w-full text-center bg-neon-lime text-bg-main py-3 rounded-lg font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors">Đăng nhập</a>`
       }
     </div>
   </div>`;
@@ -151,26 +151,26 @@ export function nqtRenderFooter() {
       <div>
         <div class="font-caps text-xs uppercase tracking-widest text-neon-lime font-semibold mb-4">Dịch vụ</div>
         <ul class="space-y-2 text-sm text-text-secondary">
-          <li><a href="/src/pages/goi-tap.html" class="hover:text-neon-lime transition-colors">Gói tập</a></li>
-          <li><a href="/src/pages/huan-luyen-vien.html" class="hover:text-neon-lime transition-colors">Huấn luyện viên</a></li>
-          <li><a href="/src/pages/lop-hoc.html" class="hover:text-neon-lime transition-colors">Lớp học</a></li>
-          <li><a href="/src/pages/su-kien.html" class="hover:text-neon-lime transition-colors">Sự kiện</a></li>
+          <li><a href="/home1/goi-tap" class="hover:text-neon-lime transition-colors">Gói tập</a></li>
+          <li><a href="/home1/huan-luyen-vien" class="hover:text-neon-lime transition-colors">Huấn luyện viên</a></li>
+          <li><a href="/home1/lop-hoc" class="hover:text-neon-lime transition-colors">Lớp học</a></li>
+          <li><a href="/home1/su-kien" class="hover:text-neon-lime transition-colors">Sự kiện</a></li>
         </ul>
       </div>
       <div>
         <div class="font-caps text-xs uppercase tracking-widest text-neon-lime font-semibold mb-4">Shop</div>
         <ul class="space-y-2 text-sm text-text-secondary">
-          <li><a href="/src/pages/shop.html" class="hover:text-neon-lime transition-colors">Thực phẩm chức năng</a></li>
-          <li><a href="/src/pages/shop/gio-hang.html" class="hover:text-neon-lime transition-colors">Giỏ hàng</a></li>
+          <li><a href="/home1/shop" class="hover:text-neon-lime transition-colors">Thực phẩm chức năng</a></li>
+          <li><a href="/home?tab=cart" class="hover:text-neon-lime transition-colors">Giỏ hàng</a></li>
           <li><a href="/src/pages/shop/don-hang.html" class="hover:text-neon-lime transition-colors">Đơn hàng của tôi</a></li>
         </ul>
       </div>
       <div>
         <div class="font-caps text-xs uppercase tracking-widest text-neon-lime font-semibold mb-4">Tài khoản</div>
         <ul class="space-y-2 text-sm text-text-secondary">
-          <li><a href="/src/pages/member/login.html" class="hover:text-neon-lime transition-colors">Đăng nhập</a></li>
-          <li><a href="/src/pages/member/register.html" class="hover:text-neon-lime transition-colors">Đăng ký</a></li>
-          <li><a href="/src/pages/member/dashboard.html" class="hover:text-neon-lime transition-colors">Dashboard</a></li>
+          <li><a href="/login" class="hover:text-neon-lime transition-colors">Đăng nhập</a></li>
+          <li><a href="/register" class="hover:text-neon-lime transition-colors">Đăng ký</a></li>
+          <li><a href="/home" class="hover:text-neon-lime transition-colors">Dashboard</a></li>
         </ul>
       </div>
     </div>
@@ -315,5 +315,5 @@ window.nqtLogoutAction = function () {
   localStorage.removeItem('nqt_token');
   localStorage.removeItem('nqt_refresh_token');
   localStorage.removeItem('nqt_user');
-  window.location.href = '/src/pages/member/login.html';
+  window.location.href = '/login';
 };

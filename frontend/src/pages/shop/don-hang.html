@@ -153,7 +153,12 @@ function nqtRenderOrders(orders) {
 
 (async () => {
   const token = localStorage.getItem('nqt_token');
-  if (!token) { window.location.href = '/src/pages/member/login.html'; return; }
+  if (!token) { window.location.href = '/login'; return; }
+  window.addEventListener('pageshow', () => {
+    if (!localStorage.getItem('nqt_token')) {
+      window.location.replace('/login');
+    }
+  });
   try {
     const r = await fetch('/api/nqt-don-hang', { headers: { Authorization: `Bearer ${token}` } });
     const j = await r.json();

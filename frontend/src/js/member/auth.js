@@ -1,5 +1,5 @@
 // ── Auth guard: redirect if not logged in ────────────────────────────────────
-export function nqtRequireAuth(redirectTo = '/src/pages/member/login.html') {
+export function nqtRequireAuth(redirectTo = '/login') {
     const token = localStorage.getItem('nqt_token');
     if (!token) {
         window.location.href = redirectTo;
@@ -24,7 +24,7 @@ export function nqtLogout() {
     localStorage.removeItem('nqt_token');
     localStorage.removeItem('nqt_refresh_token');
     localStorage.removeItem('nqt_user');
-    window.location.href = '/src/pages/member/login.html';
+    window.location.href = '/login';
 }
 
 // ── SVG avatar generator ─────────────────────────────────────────────────────

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IRONCORE GYM — Admin Portal</title>
-    <meta name="description" content="Hệ thống quản trị IRONCORE GYM. Đăng nhập để quản lý phòng tập.">
+    <title>Cổng quản trị hệ thống</title>
+    <meta name="description" content="Hệ thống quản trị phòng tập. Đăng nhập để quản lý.">
     <script>document.documentElement.classList.add('dark');</script>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -401,7 +401,7 @@
             <div class="brand-icon" id="nqtBrandIcon">
                 <i class="fas fa-dumbbell"></i>
             </div>
-            <h1 class="brand-title" id="nqtBrandTitle">IRONCORE</h1>
+            <h1 class="brand-title" id="nqtBrandTitle">G6 GYM</h1>
             <p class="brand-subtitle" id="nqtBrandSubtitle">Admin Control Panel</p>
         </div>
 
@@ -462,7 +462,7 @@
 
         <!-- Footer -->
         <div class="login-footer">
-            <p>IRONCORE GYM Management</p>
+            <p id="nqtFooterText">Hệ thống quản lý phòng tập</p>
             <span class="version">G6 v2.0</span>
         </div>
     </div>
@@ -533,6 +533,8 @@
                     if (config.g6_ten_website) {
                         document.getElementById('nqtBrandTitle').textContent = config.g6_ten_website.toUpperCase();
                         document.title = `${config.g6_ten_website} — Admin Portal`;
+                        const footerEl = document.getElementById('nqtFooterText');
+                        if (footerEl) footerEl.textContent = `Hệ thống quản lý ${config.g6_ten_website}`;
                     }
                     if (config.g6_slogan) document.getElementById('nqtBrandSubtitle').textContent = config.g6_slogan;
 
