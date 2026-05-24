@@ -99,6 +99,85 @@ const MemberDashboard = () => {
     return localStorage.getItem("nqt_member_active_tab") || "dashboard";
   });
   const [loading, setLoading] = useState(true);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const savedLang = localStorage.getItem('website_lang') || 'vi';
+  const codeLabel = (savedLang === 'zh-CN' || savedLang === 'zh-TW') ? 'ZH' : savedLang.toUpperCase();
+  const currentLangName = {
+    'vi': 'Tiếng Việt',
+    'en': 'English',
+    'zh-CN': '简体中文',
+    'zh-TW': '繁體中文',
+    'ja': '日本語',
+    'ko': '한국어',
+    'ru': 'Русский',
+    'es': 'Español',
+    'fr': 'Français',
+    'de': 'Deutsch',
+    'hi': 'हिन्दी',
+    'it': 'Italiano',
+    'pt': 'Português',
+    'tr': 'Türkçe',
+    'ar': 'العربية',
+    'th': 'ภาษาไทย',
+    'id': 'Bahasa Indonesia',
+    'nl': 'Nederlands',
+    'pl': 'Polski',
+    'ms': 'Bahasa Melayu',
+    'tl': 'Filipino',
+    'km': 'ភាសាខ្មែរ',
+    'lo': 'ພາສາລາວ',
+    'my': 'မြân ma',
+    'bn': 'বাংলা',
+    'fa': 'فارسی',
+    'uk': 'Українська',
+    'sv': 'Svenska',
+    'no': 'Norsk',
+    'da': 'Dansk',
+    'fi': 'Suomi',
+    'el': 'Ελληνικά',
+    'he': 'עברית',
+    'cs': 'Čeština',
+    'ro': 'Română'
+  }[savedLang] || 'Tiếng Việt';
+
+  const changeLanguage = (langCode) => {
+    function eraseCookie(name) {
+      document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      const host = window.location.hostname;
+      const parts = host.split('.');
+      for (let i = 0; i < parts.length; i++) {
+        const domain = parts.slice(i).join('.');
+        if (domain) {
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain + ';';
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + domain + ';';
+        }
+      }
+    }
+    eraseCookie('googtrans');
+    const cookieValue = langCode === 'vi' ? "/vi/vi" : "/vi/" + langCode;
+    const host = window.location.hostname;
+    const parts = host.split('.');
+    document.cookie = "googtrans=" + cookieValue + "; path=/;";
+    for (let i = 0; i < parts.length; i++) {
+      const domain = parts.slice(i).join('.');
+      if (domain) {
+        document.cookie = "googtrans=" + cookieValue + "; path=/; domain=" + domain + ";";
+        document.cookie = "googtrans=" + cookieValue + "; path=/; domain=." + domain + ";";
+      }
+    }
+    localStorage.setItem('website_lang', langCode);
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (!e.target.closest('.lang-dropdown-popover-react')) {
+        setShowLangMenu(false);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, []);
   const [showQR, setShowQR] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(
@@ -323,6 +402,45 @@ const MemberDashboard = () => {
       link.href =
         "https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap";
       document.head.appendChild(link);
+    }
+
+    if (!window.googleTranslateElementInit) {
+      window.googleTranslateElementInit = function() {
+        new window.google.translate.TranslateElement({pageLanguage: 'vi'}, 'google_translate_element');
+      };
+      if (!document.getElementById('google_translate_element')) {
+        const gDiv = document.createElement('div');
+        gDiv.id = 'google_translate_element';
+        gDiv.style.display = 'none';
+        document.body.appendChild(gDiv);
+      }
+      const script = document.createElement('script');
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      document.head.appendChild(script);
+    }
+
+    if (!document.getElementById("google-translate-overrides")) {
+      const style = document.createElement('style');
+      style.id = "google-translate-overrides";
+      style.innerHTML = `
+        iframe.goog-te-banner-frame,
+        .VIpgJd-ZVi9od-ORHb-OEVmcd,
+        .VIpgJd-ZVi9od-l4eHX-hSRGPd,
+        .VIpgJd-yAWNEb-L7lbkb,
+        iframe.skiptranslate,
+        #goog-gt-tt { display: none !important; }
+        body { top: 0px !important; }
+        html { margin-top: 0px !important; }
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget .goog-te-combo { display: none !important; }
+        .goog-te-balloon-frame { display: none !important; }
+        .goog-tooltip { display: none !important; }
+        .goog-tooltip:hover { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
+      `;
+      document.head.appendChild(style);
     }
 
     const loadSiteConfig = async () => {
@@ -834,7 +952,91 @@ const MemberDashboard = () => {
         </nav>
 
         <div className="p-4 space-y-2 border-t border-gray-50 dark:border-white/5 ">
-          
+          <div className="relative lang-dropdown-popover-react">
+            <button
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-widest bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none dark:bg-white/5 text-gray-500 dark:text-[#A1A1AA] hover:bg-black/10 dark:hover:bg-white/10 hover:text-[#0A0A0A] dark:hover:text-[#F5F5F0] border border-transparent dark:border-white/5 select-none"
+            >
+              <div className="flex items-center space-x-3">
+                <span className="text-[10px] font-bold tracking-wider opacity-60 font-sans">{codeLabel}</span>
+                <span className="font-medium tracking-normal normal-case text-sm text-slate-800 dark:text-[#F5F5F0]">{currentLangName}</span>
+              </div>
+              <svg className="w-3.5 h-3.5 opacity-60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            {showLangMenu && (
+              <div className="absolute left-0 bottom-full mb-2 w-full bg-white dark:bg-[#1C1C1C] border border-gray-100 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col">
+                <div className="p-3 border-b border-gray-50 dark:border-white/5 bg-gray-50 dark:bg-white/[0.04]">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm..."
+                    onChange={(e) => {
+                      const val = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+                      document.querySelectorAll('.lang-popover-item').forEach(item => {
+                        const name = item.getAttribute('data-name').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+                        const code = item.getAttribute('data-code').toLowerCase();
+                        if (name.includes(val) || code.includes(val)) {
+                          item.style.display = '';
+                        } else {
+                          item.style.display = 'none';
+                        }
+                      });
+                    }}
+                    className="w-full px-3 py-1.5 text-xs bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/10 rounded-lg text-slate-800 dark:text-[#F5F5F0] focus:outline-none focus:border-[#C9A84C]"
+                  />
+                </div>
+                <div className="max-h-48 overflow-y-auto py-1 divide-y divide-gray-50 dark:divide-white/5">
+                  {Object.entries({
+                    'vi': { flag: '🇻🇳', name: 'Tiếng Việt' },
+                    'en': { flag: '🇺🇸', name: 'English' },
+                    'zh-CN': { flag: '🇨🇳', name: '简体中文' },
+                    'zh-TW': { flag: '🇹🇼', name: '繁體中文' },
+                    'ja': { flag: '🇯🇵', name: '日本語' },
+                    'ko': { flag: '🇰🇷', name: '한국어' },
+                    'ru': { flag: '🇷🇺', name: 'Русский' },
+                    'es': { flag: '🇪🇸', name: 'Español' },
+                    'fr': { flag: '🇫🇷', name: 'Français' },
+                    'de': { flag: '🇩🇪', name: 'Deutsch' },
+                    'hi': { flag: '🇮🇳', name: 'हिन्दी' },
+                    'it': { flag: '🇮🇹', name: 'Italiano' },
+                    'pt': { flag: '🇵🇹', name: 'Português' },
+                    'tr': { flag: '🇹🇷', name: 'Türkçe' },
+                    'ar': { flag: '🇸🇦', name: 'العربية' },
+                    'th': { flag: '🇹🇭', name: 'ภาษาไทย' },
+                    'id': { flag: '🇮🇩', name: 'Bahasa Indonesia' },
+                    'nl': { flag: '🇳🇱', name: 'Nederlands' },
+                    'pl': { flag: '🇵🇱', name: 'Polski' },
+                    'ms': { flag: '🇲🇾', name: 'Bahasa Melayu' },
+                    'tl': { flag: '🇵🇭', name: 'Filipino' },
+                    'km': { flag: '🇰🇭', name: 'ភាសាខ្មែរ' },
+                    'lo': { flag: '🇱🇦', name: 'ພາສາລາວ' },
+                    'my': { flag: '🇲🇲', name: 'မြန်မာ' },
+                    'bn': { flag: '🇧🇩', name: 'বাংলা' },
+                    'fa': { flag: '🇮🇷', name: 'فارسی' },
+                    'uk': { flag: '🇺🇦', name: 'Українська' },
+                    'sv': { flag: '🇸🇪', name: 'Svenska' },
+                    'no': { flag: '🇳🇴', name: 'Norsk' },
+                    'da': { flag: '🇩🇰', name: 'Dansk' },
+                    'fi': { flag: '🇫🇮', name: 'Suomi' },
+                    'el': { flag: '🇬🇷', name: 'Ελληνικά' },
+                    'he': { flag: '🇮🇱', name: 'עברית' },
+                    'cs': { flag: '🇨🇿', name: 'Čeština' },
+                    'ro': { flag: '🇷🇴', name: 'Română' }
+                  }).map(([code, l]) => (
+                    <button
+                      key={code}
+                      onClick={() => changeLanguage(code)}
+                      data-name={l.name}
+                      data-code={code}
+                      className="lang-popover-item w-full px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-white/[0.04] text-slate-700 dark:text-[#A1A1AA] hover:text-[#C9A84C] flex items-center gap-2.5 transition-colors duration-150"
+                    >
+                      <span className="text-sm">{l.flag}</span>
+                      <span className="text-xs font-semibold">{l.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
@@ -3349,6 +3551,9 @@ const OrdersView = ({ orders, setOrders, isGuest, showToast }) => {
 };
 
 const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+
   const [hoTen, setHoTen] = useState("");
   const [sdt, setSdt] = useState("");
   const [diaChi, setDiaChi] = useState("");
@@ -3378,6 +3583,64 @@ const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
       setMemberGioiTinh(profile.g6_gioi_tinh || "nam");
     }
   }, [profile, isGuest]);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (isGuest) {
+      showToast("error", "Tài khoản khách vãng lai không thể cập nhật ảnh đại diện.");
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      // 1. Upload file ảnh lên server
+      const upRes = await fetch("/api/nqt-upload", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("nqt_token")}`,
+        },
+        body: formData,
+      });
+
+      const upData = await upRes.json();
+      if (!upRes.ok || !upData.nqt_thanh_cong) {
+        showToast("error", upData.nqt_thong_diep || "Lỗi upload ảnh");
+        setUploading(false);
+        return;
+      }
+
+      const imgUrl = upData.nqt_du_lieu.g6_url;
+
+      // 2. Cập nhật link ảnh vào profile hội viên
+      const updateRes = await nqtApi("/api/nqt-hoi-vien/toi", {
+        method: "PUT",
+        body: JSON.stringify({
+          g6_anh_the: imgUrl,
+        }),
+      });
+
+      const updateData = await updateRes.json();
+      if (updateRes.ok && updateData.nqt_thanh_cong) {
+        setProfile(updateData.nqt_du_lieu.nqt_hoi_vien);
+        showToast("success", "Cập nhật ảnh đại diện thành công!");
+      } else {
+        showToast("error", updateData.nqt_thong_diep || "Lỗi cập nhật ảnh đại diện");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("error", "Lỗi kết nối máy chủ");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   const handleSaveGuestInfo = (e) => {
     e.preventDefault();
@@ -3447,17 +3710,37 @@ const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
 
         <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
           {/* Avatar with luxury golden ring */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#C9A84C] to-amber-300 rounded-2xl blur-sm opacity-50 group-hover:opacity-75 transition-opacity"></div>
-            <img
-              src={
-                profile.g6_anh_the ||
-                "https://ui-avatars.com/api/?name=" +
-                  encodeURIComponent(profile.g6_ho_ten || "HV") +
-                  "&background=C9A84C&color=000"
-              }
-              className="w-20 h-20 rounded-2xl object-cover border-2 border-[#C9A84C] relative z-10 shadow-md group-hover:scale-[1.02] transition-transform duration-300"
-              alt="Avatar"
+          <div className="relative group/avatar cursor-pointer animate-fade-in" onClick={() => !uploading && fileInputRef.current && fileInputRef.current.click()}>
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#C9A84C] to-amber-300 rounded-2xl blur-sm opacity-50 group-hover/avatar:opacity-75 transition-opacity"></div>
+            <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-[#C9A84C] z-10 shadow-md">
+              <img
+                src={
+                  profile.g6_anh_the ||
+                  "https://ui-avatars.com/api/?name=" +
+                    encodeURIComponent(profile.g6_ho_ten || "HV") +
+                    "&background=C9A84C&color=000"
+                }
+                className={`w-full h-full object-cover transition-all duration-300 ${uploading ? 'opacity-30' : 'group-hover/avatar:scale-105'}`}
+                alt="Avatar"
+              />
+              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300">
+                {uploading ? (
+                  <i className="fas fa-spinner fa-spin text-white text-lg"></i>
+                ) : (
+                  <>
+                    <i className="fas fa-camera text-white text-base mb-0.5"></i>
+                    <span className="text-[9px] text-white font-bold tracking-wide uppercase">Cập nhật</span>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleAvatarChange}
+              accept="image/*"
+              className="hidden"
             />
           </div>
 

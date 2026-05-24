@@ -204,6 +204,13 @@ Write-Step "2" "Chuyen sang nhanh..."
 $nqtCurrentBranch = git branch --show-current
 
 if ($nqtCurrentBranch -ne $Branch) {
+    # Kiem tra co thay doi chua commit
+    $nqtHasChanges = -not [string]::IsNullOrWhiteSpace((git status --porcelain))
+    if ($nqtHasChanges) {
+        Write-Host "Phat hien thay doi chua commit. Dang tam cat (stash) de chuyen nhanh..." -ForegroundColor Yellow
+        git stash
+    }
+
     $nqtBranchExists = git branch --list $Branch
     $nqtRemoteBranchExists = git branch -r --list "origin/$Branch"
 
@@ -216,8 +223,21 @@ if ($nqtCurrentBranch -ne $Branch) {
     }
 
     if ($LASTEXITCODE -ne 0) {
+        if ($nqtHasChanges) {
+            git checkout $nqtCurrentBranch
+            git stash pop
+        }
         Write-Err "Khong the chuyen sang nhanh!"
         exit 1
+    }
+
+    if ($nqtHasChanges) {
+        Write-Host "Dang khoi phuc (pop) thay doi tu stash..." -ForegroundColor Yellow
+        git stash pop
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "Xung dot xay ra khi ap dung stash! Vui long giai quyet xung dot thu cong."
+            exit 1
+        }
     }
 }
 

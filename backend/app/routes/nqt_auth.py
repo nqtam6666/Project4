@@ -172,7 +172,8 @@ def nqt_lam_moi_token():
 @nqt_auth_bp.route('/nqt-dang-xuat', methods=['POST'])
 def nqt_dang_xuat():
     from flask_jwt_extended import unset_jwt_cookies
-    nqt_response = nqt_ok(None, 'Đăng xuất thành công')
+    from flask import make_response
+    nqt_response = make_response(nqt_ok(None, 'Đăng xuất thành công'))
     unset_jwt_cookies(nqt_response)
     return nqt_response
 

@@ -29,6 +29,7 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{
     <div class="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
       <button onclick="nqtSetTab('')" class="nqt-tab-btn flex-shrink-0 bg-neon-lime text-bg-main px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold transition-all">Tất cả</button>
       <button onclick="nqtSetTab('cho_xac_nhan')" class="nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Chờ xác nhận</button>
+      <button onclick="nqtSetTab('dang_xu_ly')" class="nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Đang xử lý</button>
       <button onclick="nqtSetTab('dang_giao')" class="nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Đang giao</button>
       <button onclick="nqtSetTab('da_giao')" class="nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Đã giao</button>
       <button onclick="nqtSetTab('da_huy')" class="nqt-tab-btn flex-shrink-0 border border-border-subtle text-text-secondary px-4 py-2 rounded-lg font-caps text-xs uppercase tracking-wide font-semibold hover:border-border-neon hover:text-neon-lime transition-all">Đã huỷ</button>
@@ -62,7 +63,7 @@ let nqtActiveTab = '';
 
 const ST = {
   cho_xac_nhan: { l:'Chờ xác nhận', c:'text-warning border-warning/30 bg-warning/10' },
-  dang_xu_ly:   { l:'Đang xử lý',   c:'text-info border-info/30 bg-info/10' },
+  dang_xu_ly:   { l:'Đang xử lý',   c:'text-sky-400 border-sky-400/30 bg-sky-400/10' },
   dang_giao:    { l:'Đang giao',     c:'text-info border-blue-400/30 bg-blue-400/10' },
   da_giao:      { l:'Đã giao',       c:'text-success border-success/30 bg-success/10' },
   da_huy:       { l:'Đã huỷ',        c:'text-error border-error/30 bg-error/10' },

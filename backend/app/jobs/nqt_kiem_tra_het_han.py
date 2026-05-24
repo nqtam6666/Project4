@@ -1,5 +1,6 @@
 from backend.app import db
-from backend.app.models.g6_hoi_vien import G6HoiVien, G6DangKyGoiTap
+from backend.app.models.g6_hoi_vien import G6DangKyGoiTap
+from backend.app.models.g6_nguoi_dung import G6NguoiDung
 from backend.app.models.g6_thong_bao import G6ThongBao
 from backend.app.services.g6_dich_vu_cau_hinh import NqtDichVuCauHinh
 from backend.app.services.nqt_dich_vu_email import NqtDichVuEmail
@@ -39,7 +40,7 @@ def nqt_kiem_tra_goi_tap_het_han(nqt_app):
 
             for nqt_dang_ky in nqt_danh_sach:
                 try:
-                    nqt_hoi_vien = G6HoiVien.query.get(nqt_dang_ky.g6_ma_hoi_vien)
+                    nqt_hoi_vien = G6NguoiDung.query.get(nqt_dang_ky.g6_ma_nguoi_dung)
                     if not nqt_hoi_vien:
                         continue
 
@@ -56,7 +57,7 @@ def nqt_kiem_tra_goi_tap_het_han(nqt_app):
                             f'Hội viên {nqt_hoi_vien.g6_ho_ten} — gói "{nqt_ten_goi}" '
                             f'sẽ hết hạn vào ngày {nqt_dang_ky.g6_ngay_het_han}.'
                         ),
-                        g6_ma_doi_tuong=nqt_hoi_vien.g6_ma_hoi_vien,
+                        g6_ma_doi_tuong=nqt_hoi_vien.g6_ma_nguoi_dung,
                         g6_loai_doi_tuong='hoi_vien',
                         g6_ngay_tao=datetime.utcnow(),
                     )
@@ -107,7 +108,10 @@ def nqt_dong_bo_chuyen_khoan_job(nqt_app):
             if not pending_payments and not pending_orders:
                 return
 
-            url = "https://checkgd.vn/api/v1/bank-transactions?api_key=pk_4920cc53feec92562c37552b8ed5777c33e2d7433342ee65&bank=MB&type=IN&page=1&limit=50"
+            import os
+            domain = os.environ.get('DOMAIN_CHECK', '')
+            api_key = os.environ.get('API_KEY_CHECK', '')
+            url = f"{domain}/api/v1/bank-transactions?api_key={api_key}&bank=MB&type=IN&page=1&limit=50"
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req, timeout=10) as response:
                 res_data = json.loads(response.read().decode('utf-8'))

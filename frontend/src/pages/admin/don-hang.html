@@ -35,10 +35,14 @@
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-5 gap-3">
+    <div class="grid grid-cols-3 lg:grid-cols-6 gap-3">
         <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-3">
             <p class="text-xs text-[#666] dark:text-[#888]">Chờ xác nhận</p>
             <p class="text-xl font-semibold text-[#d97706]" id="nqtSoChoXacNhan">0</p>
+        </div>
+        <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-3">
+            <p class="text-xs text-[#666] dark:text-[#888]">Đang xử lý</p>
+            <p class="text-xl font-semibold text-[#0284c7]" id="nqtSoDangXuLy">0</p>
         </div>
         <div class="bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md p-3">
             <p class="text-xs text-[#666] dark:text-[#888]">Đã xác nhận</p>
@@ -192,6 +196,7 @@ nqtInitAdminLayout('don-hang');
     
     const nqtTrangThaiMap = {
         'cho_xac_nhan': { text: 'Chờ xác nhận', cls: 'bg-[#fef3c7] text-[#92400e]' },
+        'dang_xu_ly': { text: 'Đang xử lý', cls: 'bg-[#e0f2fe] text-[#0369a1]' },
         'da_xac_nhan': { text: 'Đã xác nhận', cls: 'bg-[#dbeafe] text-[#1e40af]' },
         'dang_giao': { text: 'Đang giao', cls: 'bg-[#ede9fe] text-[#5b21b6]' },
         'da_giao': { text: 'Đã giao', cls: 'bg-[#dcfce7] text-[#166534]' },
@@ -249,8 +254,8 @@ nqtInitAdminLayout('don-hang');
     }
 
     async function nqtTaiThongKe() {
-        const arr = ['cho_xac_nhan', 'da_xac_nhan', 'dang_giao', 'da_giao', 'da_huy'];
-        const ids = ['nqtSoChoXacNhan', 'nqtSoDaXacNhan', 'nqtSoDangGiao', 'nqtSoDaGiao', 'nqtSoDaHuy'];
+        const arr = ['cho_xac_nhan', 'dang_xu_ly', 'da_xac_nhan', 'dang_giao', 'da_giao', 'da_huy'];
+        const ids = ['nqtSoChoXacNhan', 'nqtSoDangXuLy', 'nqtSoDaXacNhan', 'nqtSoDangGiao', 'nqtSoDaGiao', 'nqtSoDaHuy'];
         for (let i = 0; i < arr.length; i++) {
             const res = await nqtApi.fetch(`/api/nqt-don-hang?g6_trang_thai=${arr[i]}&g6_gioi_han=1`);
             if (res?.nqt_thanh_cong) document.getElementById(ids[i]).textContent = res.nqt_du_lieu.g6_tong || 0;

@@ -156,7 +156,10 @@ def nqt_check_transactions():
     from backend.app.models.g6_don_hang import G6DonHang, G6LichSuDonHang
     from backend.app.models.g6_thanh_toan import G6ThanhToan
 
-    url = "https://checkgd.vn/api/v1/bank-transactions?api_key=pk_4920cc53feec92562c37552b8ed5777c33e2d7433342ee65&bank=MB&type=IN&page=1&limit=50"
+    import os
+    domain = os.environ.get('DOMAIN_CHECK', '')
+    api_key = os.environ.get('API_KEY_CHECK', '')
+    url = f"{domain}/api/v1/bank-transactions?api_key={api_key}&bank=MB&type=IN&page=1&limit=50"
     try:
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=10) as response:

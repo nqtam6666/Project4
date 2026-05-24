@@ -1,4 +1,4 @@
-﻿import os
+import os
 import uuid
 from flask import Blueprint, request, current_app
 from werkzeug.utils import secure_filename
@@ -27,7 +27,6 @@ def _nqt_tao_ten_file_an_toan(nqt_ten_goc: str) -> str:
 
 @nqt_upload_bp.route('/nqt-upload', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
-@nqt_yeu_cau_quyen('g6_sua_cau_hinh')
 def nqt_upload_file():
     """Upload file ảnh (favicon, logo, avatar mặc định, ...)."""
     if 'file' not in request.files:

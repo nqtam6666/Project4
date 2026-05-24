@@ -11,6 +11,22 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("nqt_theme") !== "light";
+  });
+
+  // Sync dark mode class and storage
+  React.useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("nqt_theme", "dark");
+      localStorage.setItem("nqt_dark_mode", "true");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("nqt_theme", "light");
+      localStorage.setItem("nqt_dark_mode", "false");
+    }
+  }, [isDarkMode]);
 
   // Form states
   const [loginData, setLoginData] = useState({ phone: '0961111101', password: '0961111101' });
@@ -122,8 +138,18 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F0] font-body flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#0A0A0A] text-[#0A0A0A] dark:text-[#F5F5F0] font-body flex items-center justify-center relative overflow-hidden transition-colors duration-300">
       
+      {/* Floating Theme Switcher */}
+      <button 
+        type="button"
+        onClick={() => setIsDarkMode(!isDarkMode)}
+        className="fixed top-6 right-6 w-10 h-10 rounded-full bg-white dark:bg-[#1C1C1C] border border-gray-200 dark:border-white/10 flex items-center justify-center text-[#C9A84C] hover:text-[#E5C76B] transition-all shadow-md z-50 focus:outline-none"
+        title={isDarkMode ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
+      >
+        <i className={`fas ${isDarkMode ? 'fa-sun' : 'fa-moon'} text-lg`}></i>
+      </button>
+
       {/* --- Notifications --- */}
       <AnimatePresence>
         {notification && (
@@ -133,15 +159,15 @@ const AuthPage = () => {
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
             className="fixed top-10 z-[100] flex items-center justify-center w-full px-4 pointer-events-none"
           >
-            <div className={`pointer-events-auto px-8 py-4 bg-[#1C1C1C] border ${notification.type === 'success' ? 'border-[#C9A84C]' : 'border-red-500'} shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center space-x-4 rounded-xl`}>
+            <div className={`pointer-events-auto px-8 py-4 bg-white dark:bg-[#1C1C1C] border ${notification.type === 'success' ? 'border-[#C9A84C]' : 'border-red-500'} shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center space-x-4 rounded-xl`}>
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'success' ? 'bg-[#C9A84C]/10 text-[#C9A84C]' : 'bg-red-500/10 text-red-500'}`}>
                 <i className={`fas ${notification.type === 'success' ? 'fa-check' : 'fa-exclamation-circle'} text-xl`}></i>
               </div>
               <div>
                 <p className="font-header tracking-widest text-lg leading-none uppercase">{notification.type === 'success' ? 'Thành công' : 'Lỗi'}</p>
-                <p className="text-sm text-[#A1A1AA] mt-1">{notification.message}</p>
+                <p className="text-sm text-gray-500 dark:text-[#A1A1AA] mt-1">{notification.message}</p>
               </div>
-              <button onClick={() => setNotification(null)} className="ml-4 text-[#52525B] hover:text-[#F5F5F0]">
+              <button onClick={() => setNotification(null)} className="ml-4 text-gray-400 dark:text-[#52525B] hover:text-black dark:hover:text-[#F5F5F0]">
                 <i className="fas fa-times"></i>
               </button>
             </div>
@@ -150,8 +176,8 @@ const AuthPage = () => {
       </AnimatePresence>
 
       {/* --- Background Decorative Elements --- */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#C9A84C] opacity-5 blur-[120px] rounded-full"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#C9A84C] opacity-5 blur-[120px] rounded-full"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#C9A84C] opacity-[0.03] dark:opacity-5 blur-[120px] rounded-full"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#C9A84C] opacity-[0.03] dark:opacity-5 blur-[120px] rounded-full"></div>
       
       <div className="container mx-auto px-4 z-10 flex flex-col items-center">
         
@@ -164,25 +190,25 @@ const AuthPage = () => {
               <h1 className="font-header text-5xl tracking-[4px] text-[#C9A84C]">{(siteConfig.g6_ten_website || "G6 GYM").toUpperCase()}</h1>
             )}
           </a>
-          <p className="uppercase tracking-[2px] text-xs text-[#A1A1AA] mt-2 font-header">{siteConfig.g6_slogan}</p>
+          <p className="uppercase tracking-[2px] text-xs text-gray-500 dark:text-[#A1A1AA] mt-2 font-header">{siteConfig.g6_slogan}</p>
         </div>
 
         {/* --- Auth Card --- */}
-        <div className="w-full max-w-md bg-[#1C1C1C] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative">
+        <div className="w-full max-w-md bg-white dark:bg-[#1C1C1C] border border-gray-100 dark:border-white/5 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:shadow-2xl relative transition-all duration-300">
           
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent"></div>
 
           {/* Tabs */}
-          <div className="flex border-b border-white/5">
+          <div className="flex border-b border-gray-100 dark:border-white/5">
             <button 
               onClick={() => setActiveTab('login')}
-              className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'login' ? 'text-[#C9A84C] bg-white/[0.02]' : 'text-[#A1A1AA] hover:text-[#F5F5F0]'}`}
+              className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'login' ? 'text-[#C9A84C] bg-gray-50/50 dark:bg-white/[0.02]' : 'text-gray-400 dark:text-[#A1A1AA] hover:text-black dark:hover:text-[#F5F5F0]'}`}
             >
               ĐĂNG NHẬP
             </button>
             <button 
               onClick={() => setActiveTab('register')}
-              className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'register' ? 'text-[#C9A84C] bg-white/[0.02]' : 'text-[#A1A1AA] hover:text-[#F5F5F0]'}`}
+              className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'register' ? 'text-[#C9A84C] bg-gray-50/50 dark:bg-white/[0.02]' : 'text-gray-400 dark:text-[#A1A1AA] hover:text-black dark:hover:text-[#F5F5F0]'}`}
             >
               ĐĂNG KÝ
             </button>
@@ -194,13 +220,13 @@ const AuthPage = () => {
               
               {activeTab === 'register' && (
                 <div className="space-y-1 group">
-                  <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Họ và tên</label>
+                  <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Họ và tên</label>
                   <div className="relative flex items-center">
-                    <span className="absolute left-0 text-[#A1A1AA] w-6 flex justify-center"><i className="far fa-user text-sm"></i></span>
+                    <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="far fa-user text-sm"></i></span>
                     <input 
                       type="text" 
                       placeholder="Nguyễn Văn A"
-                      className="w-full bg-transparent border-b border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg"
+                      className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0]"
                       value={regData.name}
                       onChange={(e) => setRegData({...regData, name: e.target.value})}
                       required
@@ -210,17 +236,17 @@ const AuthPage = () => {
               )}
 
               <div className="space-y-1 group">
-                <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">
+                <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">
                   {activeTab === 'login' ? 'Số điện thoại' : 'Địa chỉ Email'}
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-0 text-[#A1A1AA] w-6 flex justify-center">
+                  <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center">
                     <i className={activeTab === 'login' ? "fas fa-phone-alt text-sm" : "far fa-envelope text-sm"}></i>
                   </span>
                   <input 
                     type={activeTab === 'login' ? "tel" : "email"}
                     placeholder={activeTab === 'login' ? "09xx xxx xxx" : "gym@g6gym.vn"}
-                    className="w-full bg-transparent border-b border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg"
+                    className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0]"
                     value={activeTab === 'login' ? loginData.phone : regData.email}
                     onChange={(e) => activeTab === 'login' ? setLoginData({...loginData, phone: e.target.value}) : setRegData({...regData, email: e.target.value})}
                     required
@@ -230,13 +256,13 @@ const AuthPage = () => {
 
               {activeTab === 'register' && (
                 <div className="space-y-1 group">
-                  <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Số điện thoại</label>
+                  <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Số điện thoại</label>
                   <div className="relative flex items-center">
-                    <span className="absolute left-0 text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-phone-alt text-sm"></i></span>
+                    <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-phone-alt text-sm"></i></span>
                     <input 
                       type="tel" 
                       placeholder="09xx xxx xxx"
-                      className="w-full bg-transparent border-b border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg"
+                      className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0]"
                       value={regData.phone}
                       onChange={(e) => setRegData({...regData, phone: e.target.value})}
                       required
@@ -247,17 +273,17 @@ const AuthPage = () => {
 
               <div className="space-y-1 group">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Mật khẩu</label>
+                  <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Mật khẩu</label>
                   {activeTab === 'login' && (
                     <a href="#" className="text-[10px] uppercase tracking-widest text-[#C9A84C] hover:text-[#E5C76B] transition-colors font-bold">Quên?</a>
                   )}
                 </div>
                 <div className="relative flex items-center">
-                  <span className="absolute left-0 text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-lock text-sm"></i></span>
+                  <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-lock text-sm"></i></span>
                   <input 
                     type={showPassword ? "text" : "password"} 
                     placeholder="••••••••"
-                    className="w-full bg-transparent border-b border-white/10 py-3 px-8 outline-none focus:border-[#C9A84C] transition-all text-lg tracking-widest"
+                    className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 px-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0] tracking-widest"
                     value={activeTab === 'login' ? loginData.password : regData.password}
                     onChange={(e) => activeTab === 'login' ? setLoginData({...loginData, password: e.target.value}) : setRegData({...regData, password: e.target.value})}
                     required
@@ -265,7 +291,7 @@ const AuthPage = () => {
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-0 text-[#A1A1AA] hover:text-[#C9A84C] w-8 h-full flex items-center justify-center"
+                    className="absolute right-0 text-gray-400 dark:text-[#A1A1AA] hover:text-[#C9A84C] w-8 h-full flex items-center justify-center"
                   >
                     <i className={`far ${showPassword ? 'fa-eye-slash' : 'fa-eye'} text-sm`}></i>
                   </button>
@@ -291,8 +317,8 @@ const AuthPage = () => {
             </form>
           </div>
 
-          <div className="p-6 bg-black/20 text-center border-t border-white/5">
-            <p className="text-xs text-[#A1A1AA]">
+          <div className="p-6 bg-gray-50/50 dark:bg-black/20 text-center border-t border-gray-100 dark:border-white/5">
+            <p className="text-xs text-gray-500 dark:text-[#A1A1AA]">
               {activeTab === 'login' ? "Chưa có tài khoản?" : "Đã có tài khoản?"} 
               <button 
                 onClick={() => setActiveTab(activeTab === 'login' ? 'register' : 'login')}
@@ -305,7 +331,7 @@ const AuthPage = () => {
 
         </div>
 
-        <a href="/" className="mt-8 text-[#A1A1AA] hover:text-[#C9A84C] transition-all text-xs uppercase tracking-[2px] flex items-center space-x-2">
+        <a href="/" className="mt-8 text-gray-400 dark:text-[#A1A1AA] hover:text-[#C9A84C] transition-all text-xs uppercase tracking-[2px] flex items-center space-x-2">
           <i className="fas fa-chevron-left text-[10px]"></i>
           <span>Quay lại trang chủ</span>
         </a>
@@ -313,18 +339,25 @@ const AuthPage = () => {
       </div>
 
       <style>{`
-        :root { color-scheme: dark; }
         /* Autofill Styling */
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus,
         input:-internal-autofill-selected {
-          -webkit-text-fill-color: #F5F5F0 !important;
-          -webkit-box-shadow: 0 0 0px 1000px #1C1C1C inset !important;
+          -webkit-text-fill-color: #000000 !important;
+          -webkit-box-shadow: 0 0 0px 1000px #FFFFFF inset !important;
           background-clip: content-box !important;
           transition: background-color 5000s ease-in-out 0s;
         }
-        input::placeholder { color: #71717A; opacity: 1; font-size: 15px; }
+        .dark input:-webkit-autofill,
+        .dark input:-webkit-autofill:hover, 
+        .dark input:-webkit-autofill:focus,
+        .dark input:-internal-autofill-selected {
+          -webkit-text-fill-color: #F5F5F0 !important;
+          -webkit-box-shadow: 0 0 0px 1000px #1C1C1C inset !important;
+        }
+        input::placeholder { color: #A1A1AA; opacity: 1; font-size: 15px; }
+        .dark input::placeholder { color: #71717A; }
       `}</style>
 
     </div>

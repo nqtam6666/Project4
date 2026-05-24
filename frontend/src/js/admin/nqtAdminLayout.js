@@ -867,6 +867,46 @@ export function nqtInitAdminLayout(activePage) {
         </a>`;
     }).join('');
 
+    const savedLang = localStorage.getItem('website_lang') || 'vi';
+    const codeLabel = (savedLang === 'zh-CN' || savedLang === 'zh-TW') ? 'ZH' : savedLang.toUpperCase();
+    const currentLang = {
+        'vi': { flag: '🇻🇳', name: 'Tiếng Việt' },
+        'en': { flag: '🇺🇸', name: 'English' },
+        'zh-CN': { flag: '🇨🇳', name: '简体中文' },
+        'zh-TW': { flag: '🇹🇼', name: '繁體中文' },
+        'ja': { flag: '🇯🇵', name: '日本語' },
+        'ko': { flag: '🇰🇷', name: '한국어' },
+        'ru': { flag: '🇷🇺', name: 'Русский' },
+        'es': { flag: '🇪🇸', name: 'Español' },
+        'fr': { flag: '🇫🇷', name: 'Français' },
+        'de': { flag: '🇩🇪', name: 'Deutsch' },
+        'hi': { flag: '🇮🇳', name: 'हिन्दी' },
+        'it': { flag: '🇮🇹', name: 'Italiano' },
+        'pt': { flag: '🇵🇹', name: 'Português' },
+        'tr': { flag: '🇹🇷', name: 'Türkçe' },
+        'ar': { flag: '🇸🇦', name: 'العربية' },
+        'th': { flag: '🇹🇭', name: 'ภาษาไทย' },
+        'id': { flag: '🇮🇩', name: 'Bahasa Indonesia' },
+        'nl': { flag: '🇳🇱', name: 'Nederlands' },
+        'pl': { flag: '🇵🇱', name: 'Polski' },
+        'ms': { flag: '🇲🇾', name: 'Bahasa Melayu' },
+        'tl': { flag: '🇵🇭', name: 'Filipino' },
+        'km': { flag: '🇰🇭', name: 'ភាសាខ្មែរ' },
+        'lo': { flag: '🇱🇦', name: 'ພາສາລາວ' },
+        'my': { flag: '🇲🇲', name: 'မြန်မာ' },
+        'bn': { flag: '🇧🇩', name: 'বাংলা' },
+        'fa': { flag: '🇮🇷', name: 'فارسی' },
+        'uk': { flag: '🇺🇦', name: 'Українська' },
+        'sv': { flag: '🇸🇪', name: 'Svenska' },
+        'no': { flag: '🇳🇴', name: 'Norsk' },
+        'da': { flag: '🇩🇰', name: 'Dansk' },
+        'fi': { flag: '🇫🇮', name: 'Suomi' },
+        'el': { flag: '🇬🇷', name: 'Ελληνικά' },
+        'he': { flag: '🇮🇱', name: 'עברית' },
+        'cs': { flag: '🇨🇿', name: 'Čeština' },
+        'ro': { flag: '🇷🇴', name: 'Română' }
+    }[savedLang] || { flag: '🇻🇳', name: 'Tiếng Việt' };
+
     // Build full shell HTML
     const shellHTML = `
     <aside class="w-64 bg-[#090b0e] border-r border-white/5 flex flex-col fixed left-0 top-0 h-full z-20 shadow-2xl">
@@ -926,6 +966,62 @@ export function nqtInitAdminLayout(activePage) {
                         </div>
                         <div class="px-5 py-3 border-t border-outline-variant text-center bg-surface-container-high">
                             <button onclick="nqtNavigateTo('/admin/hoi-vien','Hội viên'); nqtDongNotif();" class="text-xs font-medium text-on-surface-variant hover:text-on-surface">Xem tất cả</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="lang-dropdown-popover relative mr-1">
+                    <button onclick="toggleLangPopover(event)" class="flex items-center gap-2.5 px-4 py-2 rounded-full border border-outline-variant bg-surface-bright hover:bg-outline-variant/10 text-on-surface-variant transition-all duration-200 select-none">
+                        <span id="currentLangFlag" class="text-[10px] font-bold tracking-wider opacity-60">${codeLabel}</span>
+                        <span id="currentLangName" class="text-xs font-semibold hidden md:inline-block">${currentLang.name}</span>
+                        <svg class="w-3.5 h-3.5 opacity-60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="langPopoverMenu" class="absolute right-0 mt-2 w-64 bg-surface-container border border-outline-variant rounded-xl shadow-2xl overflow-hidden hidden flex-col z-50">
+                        <div class="p-3 border-b border-outline-variant bg-surface-container-high">
+                            <input type="text" id="langSearchInput" onkeyup="filterLanguages()" class="w-full px-3 py-1.5 text-xs bg-background border border-outline-variant rounded-lg text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:border-primary" placeholder="Tìm kiếm...">
+                        </div>
+                        <div class="max-h-60 overflow-y-auto py-1 divide-y divide-outline-variant">
+                            ${Object.entries({
+                              'vi': { flag: '🇻🇳', name: 'Tiếng Việt' },
+                              'en': { flag: '🇺🇸', name: 'English' },
+                              'zh-CN': { flag: '🇨🇳', name: '简体中文' },
+                              'zh-TW': { flag: '🇹🇼', name: '繁體中文' },
+                              'ja': { flag: '🇯🇵', name: '日本語' },
+                              'ko': { flag: '🇰🇷', name: '한국어' },
+                              'ru': { flag: '🇷🇺', name: 'Русский' },
+                              'es': { flag: '🇪🇸', name: 'Español' },
+                              'fr': { flag: '🇫🇷', name: 'Français' },
+                              'de': { flag: '🇩🇪', name: 'Deutsch' },
+                              'hi': { flag: '🇮🇳', name: 'हिन्दी' },
+                              'it': { flag: '🇮🇹', name: 'Italiano' },
+                              'pt': { flag: '🇵🇹', name: 'Português' },
+                              'tr': { flag: '🇹🇷', name: 'Türkçe' },
+                              'ar': { flag: '🇸🇦', name: 'العربية' },
+                              'th': { flag: '🇹🇭', name: 'ภาษาไทย' },
+                              'id': { flag: '🇮🇩', name: 'Bahasa Indonesia' },
+                              'nl': { flag: '🇳🇱', name: 'Nederlands' },
+                              'pl': { flag: '🇵🇱', name: 'Polski' },
+                              'ms': { flag: '🇲🇾', name: 'Bahasa Melayu' },
+                              'tl': { flag: '🇵🇭', name: 'Filipino' },
+                              'km': { flag: '🇰🇭', name: 'ភាសាខ្មែរ' },
+                              'lo': { flag: '🇱🇦', name: 'ພາສາລາວ' },
+                              'my': { flag: '🇲🇲', name: 'မြန်မာ' },
+                              'bn': { flag: '🇧🇩', name: 'বাংলা' },
+                              'fa': { flag: '🇮🇷', name: 'فارسی' },
+                              'uk': { flag: '🇺🇦', name: 'Українська' },
+                              'sv': { flag: '🇸🇪', name: 'Svenska' },
+                              'no': { flag: '🇳🇴', name: 'Norsk' },
+                              'da': { flag: '🇩🇰', name: 'Dansk' },
+                              'fi': { flag: '🇫🇮', name: 'Suomi' },
+                              'el': { flag: '🇬🇷', name: 'Ελληνικά' },
+                              'he': { flag: '🇮🇱', name: 'עברית' },
+                              'cs': { flag: '🇨🇿', name: 'Čeština' },
+                              'ro': { flag: '🇷🇴', name: 'Română' }
+                            }).map(([code, l]) => `
+                                <button onclick="changeLanguage('${code}')" class="lang-popover-item w-full px-4 py-2.5 text-left hover:bg-surface-container-high hover:text-primary flex items-center gap-2.5 transition-colors duration-150" data-name="${l.name}" data-code="${code}">
+                                    <span class="text-sm">${l.flag}</span>
+                                    <span class="text-xs font-semibold text-on-surface-variant">${l.name}</span>
+                                </button>
+                            `).join('')}
                         </div>
                     </div>
                 </div>
@@ -1502,6 +1598,118 @@ export function nqtInitAdminLayout(activePage) {
         `;
         document.head.appendChild(style);
         return container;
+    }
+
+    // Language popover functions
+    window.toggleLangPopover = function(event) {
+        event.stopPropagation();
+        const popover = document.getElementById('langPopoverMenu');
+        if (!popover) return;
+        popover.classList.toggle('hidden');
+        popover.classList.toggle('flex');
+        
+        if (popover.classList.contains('flex')) {
+            const searchInput = document.getElementById('langSearchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                window.filterLanguages();
+                setTimeout(() => searchInput.focus(), 50);
+            }
+        }
+    };
+
+    window.filterLanguages = function() {
+        const input = document.getElementById('langSearchInput');
+        if (!input) return;
+        const cleanStr = input.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+        const items = document.querySelectorAll('.lang-popover-item');
+        items.forEach(item => {
+            const name = item.getAttribute('data-name').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+            const code = item.getAttribute('data-code').toLowerCase();
+            if (name.includes(cleanStr) || code.includes(cleanStr)) {
+                item.style.setProperty('display', 'flex', 'important');
+            } else {
+                item.style.setProperty('display', 'none', 'important');
+            }
+        });
+    };
+
+    window.changeLanguage = function(langCode) {
+        function eraseCookie(name) {
+            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            const host = window.location.hostname;
+            const parts = host.split('.');
+            for (let i = 0; i < parts.length; i++) {
+                const domain = parts.slice(i).join('.');
+                if (domain) {
+                    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain + ';';
+                    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + domain + ';';
+                }
+            }
+        }
+        eraseCookie('googtrans');
+        const cookieValue = langCode === 'vi' ? "/vi/vi" : "/vi/" + langCode;
+        const host = window.location.hostname;
+        const parts = host.split('.');
+        document.cookie = "googtrans=" + cookieValue + "; path=/;";
+        for (let i = 0; i < parts.length; i++) {
+            const domain = parts.slice(i).join('.');
+            if (domain) {
+                document.cookie = "googtrans=" + cookieValue + "; path=/; domain=" + domain + ";";
+                document.cookie = "googtrans=" + cookieValue + "; path=/; domain=." + domain + ";";
+            }
+        }
+        localStorage.setItem('website_lang', langCode);
+        window.location.reload();
+    };
+
+    // Close language popover on click outside
+    document.addEventListener('click', function(e) {
+        const popover = document.getElementById('langPopoverMenu');
+        if (popover && !e.target.closest('.lang-dropdown-popover')) {
+            popover.classList.add('hidden');
+            popover.classList.remove('flex');
+        }
+    });
+
+    // Inject Google Translate script and style overrides if not exists
+    if (!window.googleTranslateElementInit) {
+        window.googleTranslateElementInit = function() {
+            new google.translate.TranslateElement({pageLanguage: 'vi'}, 'google_translate_element');
+        };
+        if (!document.getElementById('google_translate_element')) {
+            const gDiv = document.createElement('div');
+            gDiv.id = 'google_translate_element';
+            gDiv.style.display = 'none';
+            document.body.appendChild(gDiv);
+        }
+        const script = document.createElement('script');
+        script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        script.async = true;
+        document.head.appendChild(script);
+    }
+    
+    if (!document.getElementById('google-translate-overrides')) {
+        const translateStyle = document.createElement('style');
+        translateStyle.id = 'google-translate-overrides';
+        translateStyle.textContent = `
+            iframe.goog-te-banner-frame,
+            .VIpgJd-ZVi9od-ORHb-OEVmcd,
+            .VIpgJd-ZVi9od-l4eHX-hSRGPd,
+            .VIpgJd-yAWNEb-L7lbkb,
+            iframe.skiptranslate,
+            #goog-gt-tt { display: none !important; }
+            body { top: 0px !important; }
+            html { margin-top: 0px !important; }
+            .goog-logo-link { display: none !important; }
+            .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+            .goog-te-gadget .goog-te-combo { display: none !important; }
+            .goog-te-balloon-frame { display: none !important; }
+            .goog-tooltip { display: none !important; }
+            .goog-tooltip:hover { display: none !important; }
+            .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
+        `;
+        document.head.appendChild(translateStyle);
     }
 
     // Export logut globally

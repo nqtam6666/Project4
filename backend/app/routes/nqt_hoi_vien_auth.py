@@ -198,6 +198,7 @@ def nqt_cap_nhat_profile_hoi_vien():
     nqt_dia_chi = (nqt_data.get('g6_dia_chi') or '').strip() or None
     nqt_ngay_sinh = nqt_data.get('g6_ngay_sinh') or None
     nqt_gioi_tinh = nqt_data.get('g6_gioi_tinh') or None
+    nqt_anh_the = nqt_data.get('g6_anh_the')
 
     if nqt_ho_ten and len(nqt_ho_ten) < 2:
         return nqt_loi('Họ tên phải có ít nhất 2 ký tự', nqt_ma_trang=422)
@@ -209,6 +210,8 @@ def nqt_cap_nhat_profile_hoi_vien():
     nqt_hoi_vien.g6_email = nqt_email
     nqt_hoi_vien.g6_dia_chi = nqt_dia_chi
     nqt_hoi_vien.g6_gioi_tinh = nqt_gioi_tinh
+    if 'g6_anh_the' in nqt_data:
+        nqt_hoi_vien.g6_anh_the = nqt_anh_the
     if nqt_ngay_sinh:
         try:
             from datetime import date
@@ -223,7 +226,8 @@ def nqt_cap_nhat_profile_hoi_vien():
 @nqt_hv_auth_bp.route('/nqt-hoi-vien/dang-xuat', methods=['POST'])
 def nqt_dang_xuat_hoi_vien():
     from flask_jwt_extended import unset_jwt_cookies
-    nqt_response = nqt_ok(None, 'Đăng xuất thành công')
+    from flask import make_response
+    nqt_response = make_response(nqt_ok(None, 'Đăng xuất thành công'))
     unset_jwt_cookies(nqt_response)
     return nqt_response
 
