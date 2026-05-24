@@ -13,8 +13,46 @@ const AuthPage = () => {
   const [notification, setNotification] = useState(null);
 
   // Form states
-  const [loginData, setLoginData] = useState({ phone: '', password: '' });
+  const [loginData, setLoginData] = useState({ phone: '0961111101', password: '0961111101' });
   const [regData, setRegData] = useState({ name: '', phone: '', email: '', password: '', confirmPassword: '' });
+
+  const [siteConfig, setSiteConfig] = useState({
+    g6_ten_website: "G6 GYM",
+    g6_slogan: "Forge Your Legacy",
+    g6_logo_url: "",
+    g6_favicon_url: ""
+  });
+
+  React.useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch('/api/nqt-public/cau-hinh-ui');
+        const data = await res.json();
+        if (data && data.nqt_thanh_cong) {
+          const config = {};
+          data.nqt_du_lieu.forEach(row => {
+            config[row.g6_khoa] = row.g6_gia_tri;
+          });
+          setSiteConfig(prev => ({ ...prev, ...config }));
+          if (config.g6_ten_website) {
+            document.title = `${config.g6_ten_website} | Đăng nhập`;
+          }
+          if (config.g6_favicon_url) {
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) {
+              link = document.createElement('link');
+              link.rel = 'icon';
+              document.head.appendChild(link);
+            }
+            link.href = config.g6_favicon_url;
+          }
+        }
+      } catch (e) {
+        console.error("Config fetch error:", e);
+      }
+    };
+    loadConfig();
+  }, []);
 
   const showToast = (type, message) => {
     setNotification({ type, message });
@@ -100,7 +138,7 @@ const AuthPage = () => {
                 <i className={`fas ${notification.type === 'success' ? 'fa-check' : 'fa-exclamation-circle'} text-xl`}></i>
               </div>
               <div>
-                <p className="font-header tracking-widest text-lg leading-none uppercase">{notification.type === 'success' ? 'Success' : 'Error'}</p>
+                <p className="font-header tracking-widest text-lg leading-none uppercase">{notification.type === 'success' ? 'Thành công' : 'Lỗi'}</p>
                 <p className="text-sm text-[#A1A1AA] mt-1">{notification.message}</p>
               </div>
               <button onClick={() => setNotification(null)} className="ml-4 text-[#52525B] hover:text-[#F5F5F0]">
@@ -119,8 +157,14 @@ const AuthPage = () => {
         
         {/* --- Logo --- */}
         <div className="mb-8 text-center">
-          <h1 className="font-header text-5xl tracking-[4px] text-[#C9A84C]">IRONCORE</h1>
-          <p className="uppercase tracking-[2px] text-xs text-[#A1A1AA] mt-1 font-header">Forge Your Legacy</p>
+          <a href="/home" className="block hover:opacity-85 transition-opacity">
+            {siteConfig.g6_logo_url ? (
+              <img src={siteConfig.g6_logo_url} className="mx-auto max-h-16 object-contain" alt="Logo" />
+            ) : (
+              <h1 className="font-header text-5xl tracking-[4px] text-[#C9A84C]">{(siteConfig.g6_ten_website || "G6 GYM").toUpperCase()}</h1>
+            )}
+          </a>
+          <p className="uppercase tracking-[2px] text-xs text-[#A1A1AA] mt-2 font-header">{siteConfig.g6_slogan}</p>
         </div>
 
         {/* --- Auth Card --- */}
@@ -134,13 +178,13 @@ const AuthPage = () => {
               onClick={() => setActiveTab('login')}
               className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'login' ? 'text-[#C9A84C] bg-white/[0.02]' : 'text-[#A1A1AA] hover:text-[#F5F5F0]'}`}
             >
-              LOGIN
+              ĐĂNG NHẬP
             </button>
             <button 
               onClick={() => setActiveTab('register')}
               className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'register' ? 'text-[#C9A84C] bg-white/[0.02]' : 'text-[#A1A1AA] hover:text-[#F5F5F0]'}`}
             >
-              REGISTER
+              ĐĂNG KÝ
             </button>
           </div>
 
@@ -150,12 +194,12 @@ const AuthPage = () => {
               
               {activeTab === 'register' && (
                 <div className="space-y-1 group">
-                  <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Full Name</label>
+                  <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Họ và tên</label>
                   <div className="relative flex items-center">
                     <span className="absolute left-0 text-[#A1A1AA] w-6 flex justify-center"><i className="far fa-user text-sm"></i></span>
                     <input 
                       type="text" 
-                      placeholder="Nguyen Van A"
+                      placeholder="Nguyễn Văn A"
                       className="w-full bg-transparent border-b border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg"
                       value={regData.name}
                       onChange={(e) => setRegData({...regData, name: e.target.value})}
@@ -167,7 +211,7 @@ const AuthPage = () => {
 
               <div className="space-y-1 group">
                 <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">
-                  {activeTab === 'login' ? 'Số điện thoại' : 'Email Address'}
+                  {activeTab === 'login' ? 'Số điện thoại' : 'Địa chỉ Email'}
                 </label>
                 <div className="relative flex items-center">
                   <span className="absolute left-0 text-[#A1A1AA] w-6 flex justify-center">
@@ -175,7 +219,7 @@ const AuthPage = () => {
                   </span>
                   <input 
                     type={activeTab === 'login' ? "tel" : "email"}
-                    placeholder={activeTab === 'login' ? "09xx xxx xxx" : "gym@ironcore.vn"}
+                    placeholder={activeTab === 'login' ? "09xx xxx xxx" : "gym@g6gym.vn"}
                     className="w-full bg-transparent border-b border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg"
                     value={activeTab === 'login' ? loginData.phone : regData.email}
                     onChange={(e) => activeTab === 'login' ? setLoginData({...loginData, phone: e.target.value}) : setRegData({...regData, email: e.target.value})}
@@ -186,7 +230,7 @@ const AuthPage = () => {
 
               {activeTab === 'register' && (
                 <div className="space-y-1 group">
-                  <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Phone Number</label>
+                  <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Số điện thoại</label>
                   <div className="relative flex items-center">
                     <span className="absolute left-0 text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-phone-alt text-sm"></i></span>
                     <input 
@@ -203,9 +247,9 @@ const AuthPage = () => {
 
               <div className="space-y-1 group">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Password</label>
+                  <label className="text-xs uppercase tracking-widest text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Mật khẩu</label>
                   {activeTab === 'login' && (
-                    <a href="#" className="text-[10px] uppercase tracking-widest text-[#C9A84C] hover:text-[#E5C76B] transition-colors font-bold">Forgot?</a>
+                    <a href="#" className="text-[10px] uppercase tracking-widest text-[#C9A84C] hover:text-[#E5C76B] transition-colors font-bold">Quên?</a>
                   )}
                 </div>
                 <div className="relative flex items-center">
@@ -238,7 +282,7 @@ const AuthPage = () => {
                   <i className="fas fa-spinner fa-spin"></i>
                 ) : (
                   <>
-                    <span className="mt-1">{activeTab === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT'}</span>
+                    <span className="mt-1">{activeTab === 'login' ? 'ĐĂNG NHẬP' : 'TẠO TÀI KHOẢN'}</span>
                     <i className="fas fa-arrow-right text-sm"></i>
                   </>
                 )}
@@ -249,12 +293,12 @@ const AuthPage = () => {
 
           <div className="p-6 bg-black/20 text-center border-t border-white/5">
             <p className="text-xs text-[#A1A1AA]">
-              {activeTab === 'login' ? "Don't have an account?" : "Already have an account?"} 
+              {activeTab === 'login' ? "Chưa có tài khoản?" : "Đã có tài khoản?"} 
               <button 
                 onClick={() => setActiveTab(activeTab === 'login' ? 'register' : 'login')}
                 className="text-[#C9A84C] ml-1 font-bold uppercase tracking-wider hover:underline"
               >
-                {activeTab === 'login' ? "Register Now" : "Sign In"}
+                {activeTab === 'login' ? "Đăng ký ngay" : "Đăng nhập"}
               </button>
             </p>
           </div>
@@ -263,7 +307,7 @@ const AuthPage = () => {
 
         <a href="/" className="mt-8 text-[#A1A1AA] hover:text-[#C9A84C] transition-all text-xs uppercase tracking-[2px] flex items-center space-x-2">
           <i className="fas fa-chevron-left text-[10px]"></i>
-          <span>Back to Landing</span>
+          <span>Quay lại trang chủ</span>
         </a>
 
       </div>

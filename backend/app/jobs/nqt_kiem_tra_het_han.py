@@ -89,6 +89,94 @@ def nqt_kiem_tra_goi_tap_het_han(nqt_app):
             nqt_logger.error(f'[Job] Lỗi nghiêm trọng trong job kiểm tra hết hạn: {nqt_e}')
 
 
+def nqt_dong_bo_chuyen_khoan_job(nqt_app):
+    """
+    Background job: Quét các giao dịch MBBank từ checkgd.vn mỗi 15 giây
+    để tự động xác nhận thanh toán các đơn hàng/thanh toán đang chờ xử lý.
+    """
+    import urllib.request
+    import json
+    with nqt_app.app_context():
+        try:
+            from backend.app.models.g6_don_hang import G6DonHang, G6LichSuDonHang
+            from backend.app.models.g6_thanh_toan import G6ThanhToan
+            
+            pending_payments = G6ThanhToan.query.filter_by(g6_trang_thai='cho_xu_ly').all()
+            pending_orders = G6DonHang.query.filter_by(g6_trang_thai='cho_xac_nhan').all()
+            
+            if not pending_payments and not pending_orders:
+                return
+
+            url = "https://checkgd.vn/api/v1/bank-transactions?api_key=pk_4920cc53feec92562c37552b8ed5777c33e2d7433342ee65&bank=MB&type=IN&page=1&limit=50"
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=10) as response:
+                res_data = json.loads(response.read().decode('utf-8'))
+
+            if not res_data.get('status'):
+                nqt_logger.error(f"[Job Chuyen Khoan] API checkgd.vn báo lỗi: {res_data.get('messages')}")
+                return
+
+            transactions = res_data.get('transactions', [])
+            matched = False
+
+            for trans in transactions:
+                desc = trans.get('description', '')
+                amount = float(trans.get('amount', 0))
+                tx_id = trans.get('transaction_id')
+
+                # 1. Match G6ThanhToan
+                for tt in pending_payments:
+                    if float(tt.g6_so_tien) == amount:
+                        if str(tt.g6_ma_thanh_toan) in desc or f"HD{tt.g6_ma_thanh_toan}" in desc or f"GD{tt.g6_ma_thanh_toan}" in desc:
+                            tt.g6_trang_thai = 'thanh_cong'
+                            tt.g6_ngay_thanh_toan = datetime.utcnow()
+                            tt.g6_ma_giao_dich_cong = tx_id
+                            tt.g6_du_lieu_tra_ve = trans
+                            
+                            from backend.app.routes.nqt_thanh_toan import nqt_xuat_hoa_don
+                            if not tt.g6_hoa_don:
+                                nqt_xuat_hoa_don(tt)
+                            matched = True
+
+                # 2. Match G6DonHang
+                for o in pending_orders:
+                    if float(o.g6_tong_thanh_toan) == amount:
+                        if str(o.g6_ma_don_hang) in desc or f"DH{o.g6_ma_don_hang}" in desc or f"DH-{o.g6_ma_don_hang}" in desc:
+                            o.g6_trang_thai = 'dang_xu_ly'
+                            
+                            ls = G6LichSuDonHang(
+                                g6_ma_don_hang=o.g6_ma_don_hang,
+                                g6_trang_thai_moi='dang_xu_ly',
+                                g6_ghi_chu=f"Xác nhận thanh toán tự động qua MBBank (Job ngầm), mã GD: {tx_id}",
+                            )
+                            db.session.add(ls)
+
+                            new_tt = G6ThanhToan(
+                                g6_ma_nguoi_dung=o.g6_ma_nguoi_dung,
+                                g6_loai_giao_dich='don_hang',
+                                g6_so_tien=amount,
+                                g6_phuong_thuc='bank_transfer',
+                                g6_trang_thai='thanh_cong',
+                                g6_ma_giao_dich_cong=tx_id,
+                                g6_du_lieu_tra_ve=trans,
+                                g6_ngay_thanh_toan=datetime.utcnow(),
+                                g6_ghi_chu=f"Tự động tạo từ đơn hàng #{o.g6_ma_don_hang}",
+                            )
+                            db.session.add(new_tt)
+                            db.session.flush()
+                            
+                            from backend.app.routes.nqt_thanh_toan import nqt_xuat_hoa_don
+                            nqt_xuat_hoa_don(new_tt)
+                            matched = True
+
+            if matched:
+                db.session.commit()
+                nqt_logger.info("[Job Chuyen Khoan] Đã tự động khớp và cập nhật thanh toán/đơn hàng thành công.")
+
+        except Exception as e:
+            nqt_logger.error(f"[Job Chuyen Khoan] Lỗi xử lý đồng bộ: {str(e)}")
+
+
 def nqt_dang_ky_jobs(nqt_scheduler, nqt_app):
     """Đăng ký tất cả background jobs vào APScheduler."""
 
@@ -101,7 +189,17 @@ def nqt_dang_ky_jobs(nqt_scheduler, nqt_app):
         minute=0,
         id='nqt_job_kiem_tra_het_han',
         replace_existing=True,
-        misfire_grace_time=3600,  # bỏ qua nếu trễ hơn 1 giờ
+        misfire_grace_time=3600,
     )
-
     nqt_logger.info('[Scheduler] Đã đăng ký job: nqt_job_kiem_tra_het_han (8:00 hàng ngày)')
+
+    # Job đồng bộ chuyển khoản ngân hàng tự động — chạy mỗi 15 giây
+    nqt_scheduler.add_job(
+        func=nqt_dong_bo_chuyen_khoan_job,
+        args=[nqt_app],
+        trigger='interval',
+        seconds=15,
+        id='nqt_job_dong_bo_chuyen_khoan',
+        replace_existing=True,
+    )
+    nqt_logger.info('[Scheduler] Đã đăng ký job: nqt_job_dong_bo_chuyen_khoan (mỗi 15 giây)')

@@ -260,7 +260,7 @@
       import { nqtInitAdminLayout } from "../../js/admin/nqtAdminLayout.js";
       nqtInitAdminLayout("su-kien");
 
-      let nqtTabHienTai = "sukien";
+      let nqtTabHienTai = new URLSearchParams(window.location.search).get('tab') || 'sukien';
       let nqtDaChon = [];
       let nqtBulkActionType = null;
 
@@ -370,6 +370,10 @@
       };
 
       window.nqtChuyenTab = function (tab) {
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('tab', tab);
+    window.history.replaceState({ path: newUrl.href }, '', newUrl.href);
+
         nqtTabHienTai = tab;
         nqtBoChonTatCa();
         document
@@ -503,8 +507,7 @@
           : nqtToast(res?.nqt_thong_diep || "Lỗi", "error");
       };
 
-      nqtRenderHead();
-      nqtTaiDuLieu();
-    </script>
+      nqtChuyenTab(nqtTabHienTai);
+</script>
   </body>
 </html>

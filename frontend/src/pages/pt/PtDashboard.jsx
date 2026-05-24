@@ -12,12 +12,47 @@ const PtDashboard = () => {
 
   const token = localStorage.getItem('nqt_admin_token');
 
+  const [siteConfig, setSiteConfig] = useState({
+    g6_ten_website: "G6 GYM",
+    g6_logo_url: "",
+    g6_favicon_url: ""
+  });
+
   useEffect(() => {
     if (!token) {
       window.location.href = '/admin/login';
       return;
     }
     fetchProfile();
+
+    const loadSiteConfig = async () => {
+      try {
+        const res = await fetch("/api/nqt-public/cau-hinh-ui");
+        const data = await res.json();
+        if (data && data.nqt_thanh_cong) {
+          const config = {};
+          data.nqt_du_lieu.forEach(row => {
+            config[row.g6_khoa] = row.g6_gia_tri;
+          });
+          setSiteConfig(prev => ({ ...prev, ...config }));
+          if (config.g6_ten_website) {
+            document.title = `${config.g6_ten_website} | Trainer Portal`;
+          }
+          if (config.g6_favicon_url) {
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) {
+              link = document.createElement('link');
+              link.rel = 'icon';
+              document.head.appendChild(link);
+            }
+            link.href = config.g6_favicon_url;
+          }
+        }
+      } catch (e) {
+        console.error("Config fetch error:", e);
+      }
+    };
+    loadSiteConfig();
   }, []);
 
   const fetchProfile = async () => {
@@ -52,7 +87,7 @@ const PtDashboard = () => {
     // 1. Upload file
     setUploading(true);
     const formData = new FormData();
-    formData.append('nqt_file', file);
+    formData.append('file', file);
 
     try {
       const upRes = await fetch('/api/nqt-upload', {
@@ -67,7 +102,7 @@ const PtDashboard = () => {
         return;
       }
       
-      const imgUrl = upData.nqt_du_lieu.nqt_url;
+      const imgUrl = upData.nqt_du_lieu.g6_url;
 
       // 2. Cập nhật avatar
       const updateRes = await fetch('/api/nxv-hlv/me/avatar', {
@@ -149,9 +184,13 @@ const PtDashboard = () => {
             <a href="/admin" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all text-[#C9A84C]">
               <ArrowLeft size={18} />
             </a>
-            <h1 className="text-2xl font-black tracking-[4px] text-[#C9A84C] font-['Cormorant_Garamond'] uppercase">
-              IRONCORE PT
-            </h1>
+            {siteConfig.g6_logo_url ? (
+              <img src={siteConfig.g6_logo_url} className="max-h-12 object-contain" alt="Logo" />
+            ) : (
+              <h1 className="text-2xl font-black tracking-[4px] text-[#C9A84C] font-['Cormorant_Garamond'] uppercase">
+                {siteConfig.g6_ten_website.toUpperCase()} PT
+              </h1>
+            )}
           </div>
           <button onClick={handleLogout} className="flex items-center space-x-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-all text-sm font-bold">
             <LogOut size={16} /> <span className="hidden sm:inline">Đăng xuất</span>
@@ -221,7 +260,7 @@ const PtDashboard = () => {
                   </div>
                   <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
                     <p className="text-[10px] text-[#A1A1AA] uppercase font-bold tracking-widest mb-1">Bằng cấp</p>
-                    <p className="font-bold text-lg">{profile.g6_cap_chung_chi || 'IRONCORE Cert'}</p>
+                    <p className="font-bold text-lg">{profile.g6_cap_chung_chi || `${siteConfig.g6_ten_website || 'G6 GYM'} Cert`}</p>
                   </div>
                   <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
                     <p className="text-[10px] text-[#A1A1AA] uppercase font-bold tracking-widest mb-1">Mức phí</p>

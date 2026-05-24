@@ -60,7 +60,7 @@ window.nqtAddToCart = function(id, name, price, variantId) {
     document.title = `${p.g6_ten_san_pham} — NQT GYM`;
     const btList = p.g6_bien_the || [];
     const defaultBt = btList.find(b => b.g6_la_mac_dinh) || btList[0];
-    const price = defaultBt?.g6_gia || 0;
+    const price = defaultBt?.g6_gia || p.g6_gia_ban || 0;
     const dnld = p.g6_thanh_phan_dinh_duong || {};
     el.innerHTML = `
     <div class="flex items-center gap-2 text-text-muted text-sm mb-8">
@@ -92,7 +92,7 @@ window.nqtAddToCart = function(id, name, price, variantId) {
           <button id="nqtAddBtn" onclick="nqtAddToCart(${id},'${p.g6_ten_san_pham}',${price},${defaultBt?.g6_ma_bien_the || 'null'})" class="flex-1 bg-neon-lime text-bg-main py-4 rounded-xl font-caps text-sm uppercase tracking-wide font-semibold hover:bg-neon-dim transition-colors flex items-center justify-center gap-2">
             <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Thêm vào giỏ hàng
           </button>
-          <a href="/src/pages/shop/gio-hang.html" class="border border-border-neon text-neon-lime px-5 py-4 rounded-xl hover:bg-neon-glow transition-colors flex items-center justify-center">
+          <a href="/home?tab=cart" class="border border-border-neon text-neon-lime px-5 py-4 rounded-xl hover:bg-neon-glow transition-colors flex items-center justify-center">
             <span class="material-symbols-outlined text-xl">shopping_cart</span>
           </a>
         </div>
@@ -121,7 +121,7 @@ window.nqtAddToCart = function(id, name, price, variantId) {
     try {
       const r2 = await fetch('/api/nxv-san-pham');
       const j2 = await r2.json();
-      const all = Array.isArray(j2.nqt_du_lieu) ? j2.nqt_du_lieu : (Array.isArray(j2) ? j2 : []);
+      const all = Array.isArray(j2.nqt_du_lieu) ? j2.nqt_du_lieu : (j2.nqt_du_lieu && Array.isArray(j2.nqt_du_lieu.g6_danh_sach) ? j2.nqt_du_lieu.g6_danh_sach : (Array.isArray(j2) ? j2 : []));
       const related = all.filter(x => x.g6_ma_san_pham !== Number(id)).slice(0, 4);
       document.getElementById('nqtRelatedGrid').innerHTML = related.map(rp => {
         const rpBt = rp.g6_bien_the?.[0] || {};

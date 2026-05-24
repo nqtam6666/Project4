@@ -83,6 +83,7 @@ class G6DonHang(db.Model):
             'g6_tong_thanh_toan': float(self.g6_tong_thanh_toan),
             'g6_trang_thai': self.g6_trang_thai,
             'g6_phuong_thuc_thanh_toan': self.g6_phuong_thuc_thanh_toan,
+            'g6_ghi_chu': self.g6_ghi_chu_khach,
             'g6_ngay_tao': self.g6_ngay_tao.isoformat() if self.g6_ngay_tao else None,
         }
 

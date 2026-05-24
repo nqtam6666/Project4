@@ -51,7 +51,7 @@
 import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
 nqtInitAdminLayout('quan-tri');
 
-let nqtTabHienTai = 'nhatky';
+let nqtTabHienTai = new URLSearchParams(window.location.search).get('tab') || 'nhatky';
 let nqtTrang = 1;
 const nqtTabCfg = {
     nhatky: { api: '/api/nqt-nhat-ky-hoat-dong', cols: ['Người dùng','Hành động','Chi tiết','IP Address','Thời gian'] },
@@ -59,6 +59,10 @@ const nqtTabCfg = {
 };
 
 function nqtChuyenTab(tab) {
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('tab', tab);
+    window.history.replaceState({ path: newUrl.href }, '', newUrl.href);
+
     nqtTabHienTai = tab;
     nqtTrang = 1;
     document.querySelectorAll('[id^=nqtTab]').forEach(b => b.className = 'px-4 py-2 text-sm font-medium border-b-2 border-transparent text-[#666] dark:text-[#888] hover:text-[#191919] dark:hover:text-[#fafafa] -mb-px');
@@ -141,8 +145,7 @@ window.nqtThuHoi = nqtThuHoi;
 window.nqtThuHoiTatCa = nqtThuHoiTatCa;
 window.nqtTaiDuLieu = nqtTaiDuLieu;
 
-nqtRenderHead();
-nqtTaiDuLieu();
+nqtChuyenTab(nqtTabHienTai);
 </script>
 </body>
 </html>

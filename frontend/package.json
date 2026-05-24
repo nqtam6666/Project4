@@ -13,6 +13,7 @@
     "@tailwindcss/forms": "^0.5.11",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.14.0",
+    "qrcode-generator": "^2.0.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "recharts": "^3.8.1"

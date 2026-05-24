@@ -145,6 +145,10 @@
                     <p class="text-[#191919] dark:text-[#fafafa]" id="nqtDiaChiGiao"></p>
                 </div>
             </div>
+            <div class="text-sm border-t border-[#e5e5e5] dark:border-[#404040] pt-3">
+                <p class="text-[#666] dark:text-[#888] font-medium">Ghi chú khách hàng</p>
+                <p class="text-[#191919] dark:text-[#fafafa] italic mt-1" id="nqtGhiChuKhachHang">—</p>
+            </div>
             <div>
                 <p class="text-sm text-[#666] dark:text-[#888] mb-2">Sản phẩm</p>
                 <table class="w-full text-sm">
@@ -328,6 +332,7 @@ nqtInitAdminLayout('don-hang');
         document.getElementById('nqtTenNguoiNhan').textContent = d.g6_ho_ten_nguoi_nhan || 'N/A';
         document.getElementById('nqtSdtNguoiNhan').textContent = d.g6_so_dien_thoai || '';
         document.getElementById('nqtDiaChiGiao').textContent = d.g6_dia_chi_giao_hang || 'N/A';
+        document.getElementById('nqtGhiChuKhachHang').textContent = d.g6_ghi_chu || '(Không có ghi chú)';
         document.getElementById('nqtTienHang').textContent = fmt(d.g6_tong_tien_hang);
         document.getElementById('nqtPhiVC').textContent = fmt(d.g6_phi_van_chuyen);
         document.getElementById('nqtGiamGia').textContent = '-' + fmt(d.g6_so_tien_giam);

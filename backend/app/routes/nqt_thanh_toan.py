@@ -145,3 +145,85 @@ def nqt_xac_nhan_thanh_toan(nqt_id):
         nqt_xuat_hoa_don(nqt_row)
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict(), 'Xác nhận thanh toán thành công')
+
+
+@nqt_thanh_toan_bp.route('/nqt-thanh-toan/nqt-check-transactions', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+@nqt_yeu_cau_quyen('QL_KHO')
+def nqt_check_transactions():
+    import urllib.request
+    import json
+    from backend.app.models.g6_don_hang import G6DonHang, G6LichSuDonHang
+    from backend.app.models.g6_thanh_toan import G6ThanhToan
+
+    url = "https://checkgd.vn/api/v1/bank-transactions?api_key=pk_4920cc53feec92562c37552b8ed5777c33e2d7433342ee65&bank=MB&type=IN&page=1&limit=50"
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=10) as response:
+            res_data = json.loads(response.read().decode('utf-8'))
+    except Exception as e:
+        return nqt_loi(f"Lỗi khi kết nối tới checkgd.vn: {str(e)}")
+
+    if not res_data.get('status'):
+        return nqt_loi(f"API checkgd.vn báo lỗi: {res_data.get('messages')}")
+
+    transactions = res_data.get('transactions', [])
+    matched_orders = []
+    matched_payments = []
+
+    pending_payments = G6ThanhToan.query.filter_by(g6_trang_thai='cho_xu_ly').all()
+    pending_orders = G6DonHang.query.filter_by(g6_trang_thai='cho_xac_nhan').all()
+
+    for trans in transactions:
+        desc = trans.get('description', '')
+        amount = float(trans.get('amount', 0))
+        tx_id = trans.get('transaction_id')
+
+        # 1. Match G6ThanhToan
+        for tt in pending_payments:
+            if float(tt.g6_so_tien) == amount:
+                if str(tt.g6_ma_thanh_toan) in desc or f"HD{tt.g6_ma_thanh_toan}" in desc or f"GD{tt.g6_ma_thanh_toan}" in desc:
+                    tt.g6_trang_thai = 'thanh_cong'
+                    tt.g6_ngay_thanh_toan = datetime.utcnow()
+                    tt.g6_ma_giao_dich_cong = tx_id
+                    tt.g6_du_lieu_tra_ve = trans
+                    if not tt.g6_hoa_don:
+                        nqt_xuat_hoa_don(tt)
+                    matched_payments.append(tt.g6_ma_thanh_toan)
+
+        # 2. Match G6DonHang
+        for o in pending_orders:
+            if float(o.g6_tong_thanh_toan) == amount:
+                if str(o.g6_ma_don_hang) in desc or f"DH{o.g6_ma_don_hang}" in desc or f"DH-{o.g6_ma_don_hang}" in desc:
+                    o.g6_trang_thai = 'dang_xu_ly'
+                    ls = G6LichSuDonHang(
+                        g6_ma_don_hang=o.g6_ma_don_hang,
+                        g6_trang_thai_moi='dang_xu_ly',
+                        g6_ghi_chu=f"Xác nhận thanh toán tự động qua MBBank, mã GD: {tx_id}",
+                    )
+                    db.session.add(ls)
+
+                    new_tt = G6ThanhToan(
+                        g6_ma_nguoi_dung=o.g6_ma_nguoi_dung,
+                        g6_loai_giao_dich='don_hang',
+                        g6_so_tien=amount,
+                        g6_phuong_thuc='bank_transfer',
+                        g6_trang_thai='thanh_cong',
+                        g6_ma_giao_dich_cong=tx_id,
+                        g6_du_lieu_tra_ve=trans,
+                        g6_ngay_thanh_toan=datetime.utcnow(),
+                        g6_ghi_chu=f"Tự động tạo từ đơn hàng #{o.g6_ma_don_hang}",
+                    )
+                    db.session.add(new_tt)
+                    db.session.flush()
+                    nqt_xuat_hoa_don(new_tt)
+                    matched_orders.append(o.g6_ma_don_hang)
+
+    if matched_orders or matched_payments:
+        db.session.commit()
+
+    return nqt_ok({
+        'matched_orders': matched_orders,
+        'matched_payments': matched_payments,
+        'total_scanned': len(transactions)
+    }, "Đã đồng bộ giao dịch ngân hàng thành công")

@@ -31,6 +31,10 @@
         <button onclick="nqtTaiDanhSach()" class="px-3 py-2 bg-white dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333] transition-colors" title="Làm mới">
             <i class="fas fa-sync-alt text-[#666] dark:text-[#888] text-sm"></i>
         </button>
+        <button onclick="nqtCheckTransactionsAuto()" class="px-3 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white border border-transparent rounded-md transition-colors flex items-center space-x-1.5 text-sm" title="Đồng bộ giao dịch MBBank tự động">
+            <i class="fas fa-university"></i>
+            <span>Đồng bộ MBBank</span>
+        </button>
     </div>
 
     <!-- Stats -->
@@ -438,6 +442,24 @@ nqtInitAdminLayout('thanh-toan');
             nqtTaiDanhSach(nqtTrangHienTai);
         } else {
             nqtToast(res?.nqt_thong_diep || 'Lỗi khi xác nhận', 'error');
+        }
+    }
+
+
+    window.nqtCheckTransactionsAuto = async function() {
+        nqtToast('Đang kết nối checkgd.vn và quét giao dịch...', 'info');
+        const res = await nqtApi.fetch('/api/nqt-thanh-toan/nqt-check-transactions', { method: 'POST' });
+        if (res && res.nqt_thanh_cong) {
+            const mo = res.nqt_du_lieu.matched_orders || [];
+            const mp = res.nqt_du_lieu.matched_payments || [];
+            if (mo.length === 0 && mp.length === 0) {
+                nqtToast('Không tìm thấy giao dịch chuyển khoản mới khớp.', 'info');
+            } else {
+                nqtToast(`Đồng bộ thành công! Khớp ${mo.length} đơn hàng, ${mp.length} thanh toán.`, 'success');
+                nqtTaiDanhSach(nqtTrangHienTai);
+            }
+        } else {
+            nqtToast(res?.nqt_thong_diep || 'Lỗi khi đồng bộ giao dịch', 'error');
         }
     }
 

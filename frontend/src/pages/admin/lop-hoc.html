@@ -157,7 +157,7 @@
 import { nqtInitAdminLayout } from '/src/js/admin/nqtAdminLayout.js';
 nqtInitAdminLayout('lop-hoc');
 
-let nqtTabHienTai = 'lophoc';
+let nqtTabHienTai = new URLSearchParams(window.location.search).get('tab') || 'lophoc';
 let nqtTrang = 1;
 let nqtTimKiemTimer = null;
 let nqtDaChon = [];
@@ -253,6 +253,10 @@ const nqtApis = {
 };
 
 function nqtChuyenTab(tab) {
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('tab', tab);
+    window.history.replaceState({ path: newUrl.href }, '', newUrl.href);
+
     nqtTabHienTai = tab;
     nqtTrang = 1;
     nqtBoChonTatCa();
@@ -385,8 +389,7 @@ window.nqtCapNhatDatCho = nqtCapNhatDatCho;
 window.nqtLuuLop = nqtLuuLop;
 
 nqtLoadBranchesLop();
-nqtRenderHead();
-nqtTaiDuLieu();
+nqtChuyenTab(nqtTabHienTai);
 </script>
 </body>
 </html>
