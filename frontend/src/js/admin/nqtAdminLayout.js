@@ -1186,13 +1186,20 @@ export function nqtInitAdminLayout(activePage) {
         const icon = document.getElementById('nqtDarkModeIcon');
         const isDark = html.classList.toggle('dark');
         localStorage.setItem('nqt_dark_mode', isDark);
+        localStorage.setItem('nqt_theme', isDark ? 'dark' : 'light');
         if (icon) icon.className = isDark ? 'fas fa-sun text-base' : 'fas fa-moon text-base';
         
         // Notify pages about theme change so they can re-render charts without re-fetching
         window.dispatchEvent(new CustomEvent('nqt-theme-changed', { detail: { isDark } }));
     };
     (function() {
-        const isDark = localStorage.getItem('nqt_dark_mode') !== 'false'; // Default to dark
+        const savedTheme = localStorage.getItem('nqt_theme');
+        let isDark = true;
+        if (savedTheme) {
+            isDark = savedTheme === 'dark';
+        } else {
+            isDark = localStorage.getItem('nqt_dark_mode') !== 'false';
+        }
         if (isDark) {
             document.documentElement.classList.add('dark');
             const icon = document.getElementById('nqtDarkModeIcon');

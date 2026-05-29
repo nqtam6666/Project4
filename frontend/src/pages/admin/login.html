@@ -6,12 +6,32 @@
     <title>Cổng quản trị hệ thống</title>
     <meta name="description" content="Hệ thống quản trị phòng tập. Đăng nhập để quản lý.">
     <script>
-        const savedTheme = localStorage.getItem('nqt_theme') || 'dark';
+        const savedTheme = localStorage.getItem('nqt_theme') || (localStorage.getItem('nqt_dark_mode') === 'false' ? 'light' : 'dark');
         if (savedTheme === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
+
+        // Apply favicon from cache immediately
+        try {
+            const cachedConfigStr = localStorage.getItem('ic-site-config');
+            if (cachedConfigStr) {
+                const cfg = JSON.parse(cachedConfigStr);
+                if (cfg.g6_favicon_url) {
+                    let link = document.querySelector("link[rel~='icon']");
+                    if (!link) {
+                        link = document.createElement('link');
+                        link.rel = 'icon';
+                        document.head.appendChild(link);
+                    }
+                    link.href = cfg.g6_favicon_url;
+                }
+                if (cfg.g6_ten_website) {
+                    document.title = `${cfg.g6_ten_website} — Admin Portal`;
+                }
+            }
+        } catch (e) {}
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -484,6 +504,16 @@
         <i class="fas fa-sun"></i>
     </button>
 
+    <!-- Floating Language Switcher -->
+    <div style="position: fixed; top: 24px; right: 76px; z-index: 999;">
+        <button type="button" id="nqtLangToggle" class="fixed-theme-toggle" style="position: relative; top: auto; right: auto; z-index: auto;" title="Chọn ngôn ngữ">
+            <i class="fas fa-globe"></i>
+        </button>
+        <div id="nqtLangPopover" class="absolute flex-col" style="position: absolute; right: 0; width: 200px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden; z-index: 1000; padding: 4px 0; margin-top: 8px; display: none;">
+            <!-- filled dynamically -->
+        </div>
+    </div>
+
     <!-- Grid Pattern -->
     <div class="grid-pattern"></div>
 
@@ -575,7 +605,7 @@
             const icon = toggleBtn.querySelector('i');
             
             // Get saved theme or default to dark
-            const savedTheme = localStorage.getItem('nqt_theme') || 'dark';
+            const savedTheme = localStorage.getItem('nqt_theme') || (localStorage.getItem('nqt_dark_mode') === 'false' ? 'light' : 'dark');
             
             if (savedTheme === 'dark') {
                 root.classList.add('dark');
@@ -597,11 +627,13 @@
             if (isDark) {
                 root.classList.remove('dark');
                 localStorage.setItem('nqt_theme', 'light');
+                localStorage.setItem('nqt_dark_mode', 'false');
                 icon.className = 'fas fa-moon';
                 toggleBtn.title = 'Chuyển sang chế độ tối';
             } else {
                 root.classList.add('dark');
                 localStorage.setItem('nqt_theme', 'dark');
+                localStorage.setItem('nqt_dark_mode', 'true');
                 icon.className = 'fas fa-sun';
                 toggleBtn.title = 'Chuyển sang chế độ sáng';
             }
@@ -747,6 +779,148 @@
                 btn.style.background = '';
             }
         });
+
+        // === Translation System ===
+        const NQT_LANGUAGES = {
+            'vi': { flag: '🇻🇳', name: 'Tiếng Việt' },
+            'en': { flag: '🇺🇸', name: 'English' },
+            'zh-CN': { flag: '🇨🇳', name: '简体中文' },
+            'zh-TW': { flag: '🇹🇼', name: '繁體中文' },
+            'ja': { flag: '🇯🇵', name: '日本語' },
+            'ko': { flag: '🇰🇷', name: '한국어' }
+        };
+
+        const popover = document.getElementById('nqtLangPopover');
+        const langToggle = document.getElementById('nqtLangToggle');
+
+        // Render languages in the dropdown
+        popover.innerHTML = Object.entries(NQT_LANGUAGES).map(([code, l]) => `
+            <button type="button" class="lang-item" onclick="nqtChangeLanguage('${code}')" style="width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 13px; transition: background 0.2s;">
+                <span style="font-size: 16px;">${l.flag}</span>
+                <span style="font-weight: 500;">${l.name}</span>
+            </button>
+        `).join('');
+
+        // Hover styling for lang-item
+        const styleTag = document.createElement('style');
+        styleTag.textContent = `
+            .lang-item:hover {
+                background: var(--gold-dim) !important;
+                color: var(--gold) !important;
+            }
+        `;
+        document.head.appendChild(styleTag);
+
+        langToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = popover.style.display === 'none' || !popover.style.display;
+            popover.style.display = isHidden ? 'flex' : 'none';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#nqtLangPopover') && e.target !== langToggle && !langToggle.contains(e.target)) {
+                popover.style.display = 'none';
+            }
+        });
+
+        window.nqtChangeLanguage = function(langCode) {
+            function eraseCookie(name) {
+                document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                const host = window.location.hostname;
+                const parts = host.split('.');
+                for (let i = 0; i < parts.length; i++) {
+                    const domain = parts.slice(i).join('.');
+                    if (domain) {
+                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain + ';';
+                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + domain + ';';
+                    }
+                }
+            }
+            eraseCookie('googtrans');
+            const cookieValue = langCode === 'vi' ? "/vi/vi" : "/vi/" + langCode;
+            const host = window.location.hostname;
+            const parts = host.split('.');
+            document.cookie = "googtrans=" + cookieValue + "; path=/;";
+            for (let i = 0; i < parts.length; i++) {
+                const domain = parts.slice(i).join('.');
+                if (domain) {
+                    document.cookie = "googtrans=" + cookieValue + "; path=/; domain=" + domain + ";";
+                    document.cookie = "googtrans=" + cookieValue + "; path=/; domain=." + domain + ";";
+                }
+            }
+            localStorage.setItem('website_lang', langCode);
+            window.location.reload();
+        };
+
+        // Inject Google Translate script if not exists
+        if (!window.googleTranslateElementInit) {
+            window.googleTranslateElementInit = function() {
+                new google.translate.TranslateElement({pageLanguage: 'vi'}, 'google_translate_element');
+            };
+            const gDiv = document.createElement('div');
+            gDiv.id = 'google_translate_element';
+            gDiv.style.display = 'none';
+            document.body.appendChild(gDiv);
+
+            const translateStyle = document.createElement('style');
+            translateStyle.textContent = `
+                iframe.goog-te-banner-frame,
+                .VIpgJd-ZVi9od-ORHb-OEVmcd,
+                .VIpgJd-ZVi9od-l4eHX-hSRGPd,
+                .VIpgJd-yAWNEb-L7lbkb,
+                iframe.skiptranslate,
+                #goog-gt-tt { display: none !important; }
+                body { top: 0px !important; }
+                html { margin-top: 0px !important; }
+            `;
+            document.head.appendChild(translateStyle);
+
+            const script = document.createElement('script');
+            script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            script.async = true;
+            document.head.appendChild(script);
+        }
+
+        // === Load and Apply Dynamic UI Configurations (Favicon, Logo, Title) ===
+        (async function() {
+            try {
+                const res = await fetch('/api/nqt-public/cau-hinh-ui');
+                const data = await res.json();
+                if (data && data.nqt_thanh_cong) {
+                    const cfg = {};
+                    data.nqt_du_lieu.forEach(row => {
+                        cfg[row.g6_khoa] = row.g6_gia_tri;
+                    });
+                    localStorage.setItem('ic-site-config', JSON.stringify(cfg));
+                    
+                    // Apply Favicon
+                    if (cfg.g6_favicon_url) {
+                        let link = document.querySelector("link[rel~='icon']");
+                        if (!link) {
+                            link = document.createElement('link');
+                            link.rel = 'icon';
+                            document.head.appendChild(link);
+                        }
+                        link.href = cfg.g6_favicon_url;
+                    }
+                    // Apply Title & Brand Text
+                    if (cfg.g6_ten_website) {
+                        document.title = `${cfg.g6_ten_website} — Admin Portal`;
+                        const titleEl = document.getElementById('nqtBrandTitle');
+                        if (titleEl) titleEl.textContent = cfg.g6_ten_website.toUpperCase();
+                    }
+                    // Apply Logo
+                    if (cfg.g6_logo_url) {
+                        const iconContainer = document.getElementById('nqtBrandIcon');
+                        if (iconContainer) {
+                            iconContainer.innerHTML = `<img src="${cfg.g6_logo_url}" style="width: 100%; height: 100%; object-fit: contain;" alt="Logo">`;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Lỗi tải cấu hình:", e);
+            }
+        })();
     </script>
 </body>
 </html>
