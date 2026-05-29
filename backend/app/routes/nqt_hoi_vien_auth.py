@@ -103,15 +103,22 @@ def nqt_dang_ky_hoi_vien():
 @nqt_hv_auth_bp.route('/nqt-hoi-vien/dang-nhap', methods=['POST'])
 def nqt_dang_nhap_hoi_vien():
     nqt_data = request.get_json() or {}
-    nqt_sdt = (nqt_data.get('nqt_so_dien_thoai') or nqt_data.get('g6_so_dien_thoai') or '').strip()
+    nqt_identifier = (nqt_data.get('nqt_so_dien_thoai') or nqt_data.get('g6_so_dien_thoai') or '').strip()
     nqt_mat_khau = nqt_data.get('nqt_mat_khau') or nqt_data.get('g6_mat_khau') or ''
 
-    if not nqt_sdt or not nqt_mat_khau:
-        return nqt_loi('Thiếu số điện thoại hoặc mật khẩu')
+    if not nqt_identifier or not nqt_mat_khau:
+        return nqt_loi('Thiếu thông tin đăng nhập hoặc mật khẩu')
 
-    nqt_hoi_vien = G6NguoiDung.query.filter_by(g6_so_dien_thoai=nqt_sdt, g6_la_hoi_vien=True).first()
+    # Tìm hội viên qua Số điện thoại, Email hoặc Tên đăng nhập
+    nqt_hoi_vien = G6NguoiDung.query.filter(
+        (G6NguoiDung.g6_so_dien_thoai == nqt_identifier) | 
+        (db.func.lower(G6NguoiDung.g6_email) == nqt_identifier.lower()) | 
+        (db.func.lower(G6NguoiDung.g6_ten_dang_nhap) == nqt_identifier.lower()),
+        G6NguoiDung.g6_la_hoi_vien == True
+    ).first()
+
     if not nqt_hoi_vien:
-        return nqt_loi('Số điện thoại hoặc mật khẩu không đúng', nqt_ma_trang=401)
+        return nqt_loi('Thông tin đăng nhập hoặc mật khẩu không đúng', nqt_ma_trang=401)
 
     # Kiểm tra khóa
     if nqt_hoi_vien.g6_khoa_den and nqt_hoi_vien.g6_khoa_den > datetime.utcnow():
@@ -127,7 +134,7 @@ def nqt_dang_nhap_hoi_vien():
         if nqt_hoi_vien.g6_lan_dang_nhap_sai >= nqt_so_lan_sai:
             nqt_hoi_vien.nqt_khoa_tai_khoan()
         db.session.commit()
-        return nqt_loi('Số điện thoại hoặc mật khẩu không đúng', nqt_ma_trang=401)
+        return nqt_loi('Thông tin đăng nhập hoặc mật khẩu không đúng', nqt_ma_trang=401)
 
     # Reset
     nqt_hoi_vien.g6_lan_dang_nhap_sai = 0
@@ -149,6 +156,99 @@ def nqt_dang_nhap_hoi_vien():
     set_refresh_cookies(nqt_response, nqt_tokens['nqt_refresh_token'])
     
     return nqt_response
+
+
+@nqt_hv_auth_bp.route('/nqt-hoi-vien/google-login', methods=['POST'])
+def nqt_dang_nhap_google():
+    import urllib.request
+    import json
+    import os
+    import random
+    import string
+    
+    nqt_data = request.get_json() or {}
+    nqt_token = nqt_data.get('nqt_google_token') or nqt_data.get('credential')
+    
+    if not nqt_token:
+        return nqt_loi('Thiếu Google Token')
+        
+    try:
+        # Gọi API của Google để verify token
+        nqt_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={nqt_token}"
+        nqt_req = urllib.request.Request(nqt_url, headers={'User-Agent': 'Mozilla/5.0'})
+        
+        with urllib.request.urlopen(nqt_req, timeout=10) as nqt_response:
+            nqt_res_data = json.loads(nqt_response.read().decode('utf-8'))
+            
+        if 'error_description' in nqt_res_data or 'sub' not in nqt_res_data:
+            return nqt_loi('Token Google không hợp lệ hoặc đã hết hạn', nqt_ma_trang=400)
+            
+        nqt_google_id = nqt_res_data.get('sub')
+        nqt_email = nqt_res_data.get('email')
+        nqt_name = nqt_res_data.get('name')
+        nqt_picture = nqt_res_data.get('picture')
+        
+        # Kiểm tra aud có khớp với GOOGLE_CLIENT_ID không
+        nqt_client_id = os.environ.get('GOOGLE_CLIENT_ID')
+        if nqt_client_id and nqt_res_data.get('aud') != nqt_client_id:
+            # Nếu chạy local và client ID khớp với placeholder, bỏ qua check aud để tiện test
+            if nqt_client_id != 'your-google-client-id-here.apps.googleusercontent.com':
+                return nqt_loi('Ứng dụng Client ID không khớp', nqt_ma_trang=400)
+            
+        # Tìm người dùng trong database
+        nqt_user = G6NguoiDung.query.filter(
+            (G6NguoiDung.g6_google_id == nqt_google_id) |
+            ((G6NguoiDung.g6_email == nqt_email) & (G6NguoiDung.g6_email.isnot(None)))
+        ).first()
+        
+        if nqt_user:
+            # Nếu tìm thấy nhưng chưa gán google_id, gán luôn
+            if not nqt_user.g6_google_id:
+                nqt_user.g6_google_id = nqt_google_id
+            # Cập nhật avatar nếu có
+            if nqt_picture and not nqt_user.g6_anh_dai_dien:
+                nqt_user.g6_anh_dai_dien = nqt_picture
+            db.session.commit()
+        else:
+            # Tạo người dùng mới (Hội viên mới)
+            nqt_user = G6NguoiDung(
+                g6_ho_ten=nqt_name,
+                g6_email=nqt_email,
+                g6_google_id=nqt_google_id,
+                g6_anh_dai_dien=nqt_picture,
+                g6_la_hoi_vien=True,
+                g6_la_hoat_dong=True,
+                g6_ngay_dang_ky=datetime.utcnow().date(),
+                g6_ma_qr=str(uuid.uuid4())[:12].upper(),
+                g6_so_dien_thoai=f"00{str(uuid.uuid4().fields[0])[:8]}"
+            )
+            # Đặt mật khẩu ngẫu nhiên
+            nqt_rand_pw = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+            nqt_user.nqt_dat_mat_khau(nqt_rand_pw)
+            
+            db.session.add(nqt_user)
+            db.session.commit()
+            
+        # Tạo JWT tokens
+        from flask import make_response
+        from flask_jwt_extended import set_access_cookies, set_refresh_cookies
+        
+        nqt_tokens = _nqt_tao_jwt(nqt_user.g6_ma_nguoi_dung, nqt_user.g6_ho_ten)
+        
+        nqt_response = make_response(nqt_ok({
+            'nqt_hoi_vien': nqt_user.g6_to_dict(),
+            'nqt_access_token': nqt_tokens['nqt_access_token'],
+            'nqt_refresh_token': nqt_tokens['nqt_refresh_token']
+        }, 'Đăng nhập Google thành công'))
+        
+        set_access_cookies(nqt_response, nqt_tokens['nqt_access_token'])
+        set_refresh_cookies(nqt_response, nqt_tokens['nqt_refresh_token'])
+        
+        return nqt_response
+        
+    except Exception as e:
+        db.session.rollback()
+        return nqt_loi(f'Lỗi đăng nhập bằng Google: {str(e)}', nqt_ma_trang=500)
 
 
 # ── GET /api/nqt-hoi-vien/toi ────────────────────────────────────────────────
@@ -314,41 +414,109 @@ def nqt_lay_chi_so_cua_toi():
 @nqt_hv_auth_bp.route('/nqt-hoi-vien/quen-mat-khau', methods=['POST'])
 def nqt_quen_mat_khau():
     import random
-    import string
+    from backend.app.utils.nqt_email import nqt_gui_email
+
     nqt_data = request.get_json() or {}
+    nqt_email = (nqt_data.get('g6_email') or '').strip()
     nqt_sdt = (nqt_data.get('g6_so_dien_thoai') or '').strip()
-    nqt_hoi_vien = G6NguoiDung.query.filter_by(g6_so_dien_thoai=nqt_sdt, g6_la_hoi_vien=True).first()
+
+    if not nqt_email and not nqt_sdt:
+        return nqt_loi('Vui lòng cung cấp địa chỉ Email hoặc Số điện thoại', nqt_ma_trang=400)
+
+    nqt_hoi_vien = None
+    if nqt_email:
+        nqt_hoi_vien = G6NguoiDung.query.filter(db.func.lower(G6NguoiDung.g6_email) == nqt_email.lower(), G6NguoiDung.g6_la_hoi_vien == True).first()
+    elif nqt_sdt:
+        nqt_hoi_vien = G6NguoiDung.query.filter(G6NguoiDung.g6_so_dien_thoai == nqt_sdt, G6NguoiDung.g6_la_hoi_vien == True).first()
+
     if not nqt_hoi_vien:
-        return nqt_loi('Không tìm thấy số điện thoại đã đăng ký', nqt_ma_trang=404)
-    nqt_token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-    nqt_hoi_vien.g6_reset_token = nqt_token
-    nqt_hoi_vien.g6_reset_token_het_han = datetime.utcnow() + timedelta(hours=1)
-    db.session.commit()
-    return nqt_ok(
-        None,
-        f'Mã đặt lại: {nqt_token} (hết hạn sau 1 giờ). Liên hệ nhân viên để xác nhận.'
-    )
+        return nqt_loi('Không tìm thấy tài khoản đã đăng ký', nqt_ma_trang=404)
+
+    nqt_email_gui = nqt_hoi_vien.g6_email or nqt_email
+    if not nqt_email_gui:
+        return nqt_loi('Tài khoản này chưa đăng ký địa chỉ Email để khôi phục mật khẩu. Vui lòng liên hệ quầy lễ tân.', nqt_ma_trang=400)
+
+    try:
+        # Tạo OTP ngẫu nhiên gồm 6 chữ số
+        nqt_otp = f"{random.randint(100000, 999999)}"
+        nqt_hoi_vien.g6_reset_token = nqt_otp
+        nqt_hoi_vien.g6_reset_token_het_han = datetime.utcnow() + timedelta(minutes=10)
+        db.session.commit()
+
+        # Gửi email qua SMTP
+        nqt_tieu_de = "🔑 Mã khôi phục mật khẩu - G6 Gym Portal"
+        nqt_html_noi_dung = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f8fafc; padding: 20px;">
+            <div style="max-width: 550px; margin: 0 auto; background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="color: #C9A84C; margin: 0;">G6 Gym Portal</h2>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px;">Khôi phục mật khẩu</p>
+                </div>
+                <hr style="border: none; border-top: 1px solid #f1f5f9; margin-bottom: 25px;">
+                <p>Xin chào <strong>{nqt_hoi_vien.g6_ho_ten}</strong>,</p>
+                <p>Chúng tôi đã nhận được yêu cầu khôi phục mật khẩu cho tài khoản của bạn. Vui lòng sử dụng mã xác minh dưới đây để thiết lập mật khẩu mới (Mã có hiệu lực trong vòng <strong>10 phút</strong>):</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; padding: 12px 30px; background-color: #f8fafc; border-radius: 12px; color: #1e293b; border: 1px solid #cbd5e1; display: inline-block;">{nqt_otp}</span>
+                </div>
+                <p style="font-size: 13px; color: #64748b; text-align: center; margin-top: 25px;">Nếu bạn không thực hiện yêu cầu này, bạn có thể bỏ qua email này một cách an toàn.</p>
+                <hr style="border: none; border-top: 1px solid #f1f5f9; margin-top: 30px; margin-bottom: 20px;">
+                <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0;">&copy; 2026 G6 Gym Luxury Center. All rights reserved.</p>
+            </div>
+        </body>
+        </html>
+        """
+        nqt_gui_email(nqt_email_gui, nqt_tieu_de, nqt_html_noi_dung)
+        return nqt_ok(None, 'Mã xác nhận khôi phục mật khẩu đã được gửi đến email của bạn')
+
+    except Exception as e:
+        db.session.rollback()
+        return nqt_loi(f'Lỗi khi gửi email khôi phục: {str(e)}', nqt_ma_trang=500)
 
 
 # ── POST /api/nqt-hoi-vien/dat-lai-mat-khau ──────────────────────────────────
 @nqt_hv_auth_bp.route('/nqt-hoi-vien/dat-lai-mat-khau', methods=['POST'])
 def nqt_dat_lai_mat_khau():
     nqt_data = request.get_json() or {}
-    nqt_token = (nqt_data.get('g6_token') or '').strip().upper()
+    nqt_email = (nqt_data.get('g6_email') or '').strip()
+    nqt_sdt = (nqt_data.get('g6_so_dien_thoai') or '').strip()
+    nqt_otp = (nqt_data.get('g6_reset_token') or nqt_data.get('g6_token') or '').strip()
     nqt_mk_moi = nqt_data.get('g6_mat_khau_moi') or ''
+
+    if not nqt_otp or not nqt_mk_moi:
+        return nqt_loi('Vui lòng cung cấp mã xác nhận và mật khẩu mới', nqt_ma_trang=400)
+
     if len(nqt_mk_moi) < 6:
-        return nqt_loi('Mật khẩu phải có ít nhất 6 ký tự', nqt_ma_trang=422)
-    nqt_hoi_vien = G6NguoiDung.query.filter_by(g6_reset_token=nqt_token, g6_la_hoi_vien=True).first()
+        return nqt_loi('Mật khẩu mới phải có ít nhất 6 ký tự', nqt_ma_trang=422)
+
+    nqt_hoi_vien = None
+    if nqt_email:
+        nqt_hoi_vien = G6NguoiDung.query.filter(db.func.lower(G6NguoiDung.g6_email) == nqt_email.lower(), G6NguoiDung.g6_la_hoi_vien == True).first()
+    elif nqt_sdt:
+        nqt_hoi_vien = G6NguoiDung.query.filter(G6NguoiDung.g6_so_dien_thoai == nqt_sdt, G6NguoiDung.g6_la_hoi_vien == True).first()
+    else:
+        nqt_hoi_vien = G6NguoiDung.query.filter(G6NguoiDung.g6_reset_token == nqt_otp, G6NguoiDung.g6_la_hoi_vien == True).first()
+
     if not nqt_hoi_vien:
-        return nqt_loi('Mã đặt lại không hợp lệ', nqt_ma_trang=400)
+        return nqt_loi('Không tìm thấy tài khoản phù hợp', nqt_ma_trang=404)
+
+    if not nqt_hoi_vien.g6_reset_token or nqt_hoi_vien.g6_reset_token != nqt_otp:
+        return nqt_loi('Mã xác nhận không chính xác', nqt_ma_trang=400)
+
     if nqt_hoi_vien.g6_reset_token_het_han and nqt_hoi_vien.g6_reset_token_het_han < datetime.utcnow():
-        return nqt_loi('Mã đặt lại đã hết hạn', nqt_ma_trang=400)
-    nqt_hoi_vien.nqt_dat_mat_khau(nqt_mk_moi)
-    nqt_hoi_vien.g6_reset_token_het_han = None
-    nqt_hoi_vien.g6_lan_dang_nhap_sai = 0
-    nqt_hoi_vien.g6_khoa_den = None
-    db.session.commit()
-    return nqt_ok(None, 'Đặt lại mật khẩu thành công')
+        return nqt_loi('Mã xác nhận đã hết hạn', nqt_ma_trang=400)
+
+    try:
+        nqt_hoi_vien.nqt_dat_mat_khau(nqt_mk_moi)
+        nqt_hoi_vien.g6_reset_token = None
+        nqt_hoi_vien.g6_reset_token_het_han = None
+        nqt_hoi_vien.g6_lan_dang_nhap_sai = 0
+        nqt_hoi_vien.g6_khoa_den = None
+        db.session.commit()
+        return nqt_ok(None, 'Đặt lại mật khẩu thành công')
+    except Exception as e:
+        db.session.rollback()
+        return nqt_loi(f'Lỗi khi cập nhật mật khẩu: {str(e)}', nqt_ma_trang=500)
 
 # ── POST /api/nqt-mua-goi-tap ────────────────────────────────────────────────
 @nqt_hv_auth_bp.route('/nqt-mua-goi-tap', methods=['POST'])
@@ -656,3 +824,4 @@ def nqt_chatbot_assistant():
         "text": response_text,
         "action": action
     })
+

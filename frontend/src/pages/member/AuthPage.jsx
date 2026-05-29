@@ -6,6 +6,15 @@ import { motion, AnimatePresence } from 'framer-motion';
  * Style: Dark Industrial-Luxury
  */
 
+const NQT_LANGUAGES = {
+  'vi': { flag: '🇻🇳', name: 'Tiếng Việt' },
+  'en': { flag: '🇺🇸', name: 'English' },
+  'zh-CN': { flag: '🇨🇳', name: '简体中文' },
+  'zh-TW': { flag: '🇹🇼', name: '繁體中文' },
+  'ja': { flag: '🇯🇵', name: '日本語' },
+  'ko': { flag: '🇰🇷', name: '한국어' }
+};
+
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState('login');
   const [loading, setLoading] = useState(false);
@@ -14,6 +23,123 @@ const AuthPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("nqt_theme") !== "light";
   });
+  const [googleReady, setGoogleReady] = useState(false);
+  const [loginData, setLoginData] = useState({ phone: '0961111101', password: '0961111101' });
+  const [regData, setRegData] = useState({ name: '', phone: '', email: '', password: '', confirmPassword: '' });
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
+  const [siteConfig, setSiteConfig] = useState({
+    g6_ten_website: "G6 GYM",
+    g6_slogan: "Forge Your Legacy",
+    g6_logo_url: "",
+    g6_favicon_url: ""
+  });
+
+  const showToast = (type, message) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  // Load Google GIS client script dynamically
+  React.useEffect(() => {
+    const scriptId = "google-gis-client";
+    let script = document.getElementById(scriptId);
+    
+    const checkGoogleAndSetReady = () => {
+      if (window.google) {
+        setGoogleReady(true);
+      } else {
+        const interval = setInterval(() => {
+          if (window.google) {
+            setGoogleReady(true);
+            clearInterval(interval);
+          }
+        }, 100);
+        return interval;
+      }
+    };
+
+    let intervalId;
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        intervalId = checkGoogleAndSetReady();
+      };
+      document.body.appendChild(script);
+    } else {
+      intervalId = checkGoogleAndSetReady();
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, []);
+
+  const handleGoogleLogin = async (response) => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/nqt-hoi-vien/google-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          credential: response.credential
+        })
+      });
+      const data = await res.json();
+      setLoading(false);
+      if (data.nqt_thanh_cong) {
+        if (data.nqt_du_lieu && data.nqt_du_lieu.nqt_access_token) {
+          localStorage.setItem('nqt_token', data.nqt_du_lieu.nqt_access_token);
+          if (data.nqt_du_lieu.nqt_refresh_token) {
+            localStorage.setItem('nqt_refresh_token', data.nqt_du_lieu.nqt_refresh_token);
+          }
+        }
+        showToast('success', 'Đăng nhập Google thành công! Đang chuyển hướng...');
+        setTimeout(() => window.location.href = '/home', 1000);
+      } else {
+        showToast('error', data.nqt_thong_diep || 'Đăng nhập Google thất bại');
+      }
+    } catch (e) {
+      setLoading(false);
+      showToast('error', 'Lỗi kết nối máy chủ');
+    }
+  };
+
+  // Render Google button when config and GIS are ready
+  React.useEffect(() => {
+    if (siteConfig.g6_google_client_id && googleReady && window.google) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: siteConfig.g6_google_client_id,
+          callback: handleGoogleLogin
+        });
+        
+        const buttonDiv = document.getElementById("googleSignInButton");
+        if (buttonDiv) {
+          window.google.accounts.id.renderButton(
+            buttonDiv,
+            { 
+              theme: isDarkMode ? "filled_black" : "outline", 
+              size: "large", 
+              width: 350,
+              text: "signin_with",
+              shape: "square"
+            }
+          );
+        }
+      } catch (e) {
+        console.error("Google accounts initialize/render error:", e);
+      }
+    }
+  }, [siteConfig.g6_google_client_id, googleReady, isDarkMode, activeTab]);
 
   // Sync dark mode class and storage
   React.useEffect(() => {
@@ -27,17 +153,6 @@ const AuthPage = () => {
       localStorage.setItem("nqt_dark_mode", "false");
     }
   }, [isDarkMode]);
-
-  // Form states
-  const [loginData, setLoginData] = useState({ phone: '0961111101', password: '0961111101' });
-  const [regData, setRegData] = useState({ name: '', phone: '', email: '', password: '', confirmPassword: '' });
-
-  const [siteConfig, setSiteConfig] = useState({
-    g6_ten_website: "G6 GYM",
-    g6_slogan: "Forge Your Legacy",
-    g6_logo_url: "",
-    g6_favicon_url: ""
-  });
 
   React.useEffect(() => {
     const loadConfig = async () => {
@@ -70,11 +185,6 @@ const AuthPage = () => {
     loadConfig();
   }, []);
 
-  const showToast = (type, message) => {
-    setNotification({ type, message });
-    setTimeout(() => setNotification(null), 4000);
-  };
-
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -104,7 +214,7 @@ const AuthPage = () => {
         } else {
           showToast('error', data.nqt_thong_diep || 'Đăng nhập thất bại');
         }
-      } else {
+      } else if (activeTab === 'register') {
         const res = await fetch('/api/nqt-hoi-vien/dang-ky', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -130,11 +240,127 @@ const AuthPage = () => {
         } else {
           showToast('error', data.nqt_thong_diep || 'Đăng ký thất bại');
         }
+      } else if (activeTab === 'forgot') {
+        if (!otpSent) {
+          const res = await fetch('/api/nqt-hoi-vien/quen-mat-khau', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ g6_email: forgotEmail })
+          });
+          const data = await res.json();
+          setLoading(false);
+          if (data.nqt_thanh_cong) {
+            setOtpSent(true);
+            showToast('success', 'Mã OTP đã được gửi về email của bạn.');
+          } else {
+            showToast('error', data.nqt_thong_diep || 'Không gửi được mã OTP');
+          }
+        } else {
+          const res = await fetch('/api/nqt-hoi-vien/dat-lai-mat-khau', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              g6_email: forgotEmail,
+              g6_reset_token: otpCode,
+              g6_mat_khau_moi: newPassword
+            })
+          });
+          const data = await res.json();
+          setLoading(false);
+          if (data.nqt_thanh_cong) {
+            showToast('success', 'Đặt lại mật khẩu thành công! Đang chuyển về trang đăng nhập...');
+            setTimeout(() => {
+              setActiveTab('login');
+              setOtpSent(false);
+              setOtpCode('');
+              setNewPassword('');
+              setForgotEmail('');
+            }, 2000);
+          } else {
+            showToast('error', data.nqt_thong_diep || 'Đặt lại mật khẩu thất bại');
+          }
+        }
       }
     } catch (error) {
       setLoading(false);
       showToast('error', 'Lỗi kết nối máy chủ');
     }
+  };
+
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const langRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (langRef.current && !langRef.current.contains(e.target)) {
+        setShowLangMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  React.useEffect(() => {
+    if (!window.googleTranslateElementInit) {
+      window.googleTranslateElementInit = function() {
+        new window.google.translate.TranslateElement({pageLanguage: 'vi'}, 'google_translate_element');
+      };
+      if (!document.getElementById('google_translate_element')) {
+        const gDiv = document.createElement('div');
+        gDiv.id = 'google_translate_element';
+        gDiv.style.display = 'none';
+        document.body.appendChild(gDiv);
+      }
+      const script = document.createElement('script');
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      document.head.appendChild(script);
+    }
+    
+    if (!document.getElementById('google-translate-overrides')) {
+      const translateStyle = document.createElement('style');
+      translateStyle.id = 'google-translate-overrides';
+      translateStyle.textContent = `
+        iframe.goog-te-banner-frame,
+        .VIpgJd-ZVi9od-ORHb-OEVmcd,
+        .VIpgJd-ZVi9od-l4eHX-hSRGPd,
+        .VIpgJd-yAWNEb-L7lbkb,
+        iframe.skiptranslate,
+        #goog-gt-tt { display: none !important; }
+        body { top: 0px !important; }
+        html { margin-top: 0px !important; }
+      `;
+      document.head.appendChild(translateStyle);
+    }
+  }, []);
+
+  const changeLanguage = (langCode) => {
+    const eraseCookie = (name) => {
+      document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      const host = window.location.hostname;
+      const parts = host.split('.');
+      for (let i = 0; i < parts.length; i++) {
+        const domain = parts.slice(i).join('.');
+        if (domain) {
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain + ';';
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + domain + ';';
+        }
+      }
+    };
+    eraseCookie('googtrans');
+    const cookieValue = langCode === 'vi' ? "/vi/vi" : "/vi/" + langCode;
+    const host = window.location.hostname;
+    const parts = host.split('.');
+    document.cookie = "googtrans=" + cookieValue + "; path=/;";
+    for (let i = 0; i < parts.length; i++) {
+      const domain = parts.slice(i).join('.');
+      if (domain) {
+        document.cookie = "googtrans=" + cookieValue + "; path=/; domain=" + domain + ";";
+        document.cookie = "googtrans=" + cookieValue + "; path=/; domain=." + domain + ";";
+      }
+    }
+    localStorage.setItem('website_lang', langCode);
+    window.location.reload();
   };
 
   return (
@@ -149,6 +375,33 @@ const AuthPage = () => {
       >
         <i className={`fas ${isDarkMode ? 'fa-sun' : 'fa-moon'} text-lg`}></i>
       </button>
+
+      {/* Floating Language Switcher */}
+      <div ref={langRef} className="fixed top-6 right-20 z-50">
+        <button 
+          type="button"
+          onClick={() => setShowLangMenu(!showLangMenu)}
+          className="w-10 h-10 rounded-full bg-white dark:bg-[#1C1C1C] border border-gray-200 dark:border-white/10 flex items-center justify-center text-[#C9A84C] hover:text-[#E5C76B] transition-all shadow-md focus:outline-none"
+          title="Chọn ngôn ngữ"
+        >
+          <i className="fas fa-globe text-lg"></i>
+        </button>
+        {showLangMenu && (
+          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1C1C1C] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 flex flex-col z-50">
+            {Object.entries(NQT_LANGUAGES).map(([code, l]) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => changeLanguage(code)}
+                className="w-full px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-white/[0.02] hover:text-[#C9A84C] flex items-center space-x-3 transition-colors text-sm text-[#0A0A0A] dark:text-[#F5F5F0]"
+              >
+                <span className="text-base">{l.flag}</span>
+                <span className="font-medium">{l.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* --- Notifications --- */}
       <AnimatePresence>
@@ -199,20 +452,28 @@ const AuthPage = () => {
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent"></div>
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-100 dark:border-white/5">
-            <button 
-              onClick={() => setActiveTab('login')}
-              className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'login' ? 'text-[#C9A84C] bg-gray-50/50 dark:bg-white/[0.02]' : 'text-gray-400 dark:text-[#A1A1AA] hover:text-black dark:hover:text-[#F5F5F0]'}`}
-            >
-              ĐĂNG NHẬP
-            </button>
-            <button 
-              onClick={() => setActiveTab('register')}
-              className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'register' ? 'text-[#C9A84C] bg-gray-50/50 dark:bg-white/[0.02]' : 'text-gray-400 dark:text-[#A1A1AA] hover:text-black dark:hover:text-[#F5F5F0]'}`}
-            >
-              ĐĂNG KÝ
-            </button>
-          </div>
+          {activeTab !== 'forgot' ? (
+            <div className="flex border-b border-gray-100 dark:border-white/5">
+              <button 
+                onClick={() => setActiveTab('login')}
+                className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'login' ? 'text-[#C9A84C] bg-gray-50/50 dark:bg-white/[0.02]' : 'text-gray-400 dark:text-[#A1A1AA] hover:text-black dark:hover:text-[#F5F5F0]'}`}
+              >
+                ĐĂNG NHẬP
+              </button>
+              <button 
+                onClick={() => setActiveTab('register')}
+                className={`flex-1 py-5 font-header text-lg tracking-widest transition-all ${activeTab === 'register' ? 'text-[#C9A84C] bg-gray-50/50 dark:bg-white/[0.02]' : 'text-gray-400 dark:text-[#A1A1AA] hover:text-black dark:hover:text-[#F5F5F0]'}`}
+              >
+                ĐĂNG KÝ
+              </button>
+            </div>
+          ) : (
+            <div className="flex border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] justify-center py-5">
+              <span className="font-header text-lg tracking-widest text-[#C9A84C]">
+                {otpSent ? "ĐẶT LẠI MẬT KHẨU" : "QUÊN MẬT KHẨU"}
+              </span>
+            </div>
+          )}
 
           {/* Form Content */}
           <div className="p-8 md:p-10">
@@ -235,68 +496,140 @@ const AuthPage = () => {
                 </div>
               )}
 
-              <div className="space-y-1 group">
-                <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">
-                  {activeTab === 'login' ? 'Số điện thoại' : 'Địa chỉ Email'}
-                </label>
-                <div className="relative flex items-center">
-                  <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center">
-                    <i className={activeTab === 'login' ? "fas fa-phone-alt text-sm" : "far fa-envelope text-sm"}></i>
-                  </span>
-                  <input 
-                    type={activeTab === 'login' ? "tel" : "email"}
-                    placeholder={activeTab === 'login' ? "09xx xxx xxx" : "gym@g6gym.vn"}
-                    className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0]"
-                    value={activeTab === 'login' ? loginData.phone : regData.email}
-                    onChange={(e) => activeTab === 'login' ? setLoginData({...loginData, phone: e.target.value}) : setRegData({...regData, email: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-
-              {activeTab === 'register' && (
-                <div className="space-y-1 group">
-                  <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Số điện thoại</label>
-                  <div className="relative flex items-center">
-                    <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-phone-alt text-sm"></i></span>
-                    <input 
-                      type="tel" 
-                      placeholder="09xx xxx xxx"
-                      className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0]"
-                      value={regData.phone}
-                      onChange={(e) => setRegData({...regData, phone: e.target.value})}
-                      required
-                    />
+              {activeTab !== 'forgot' ? (
+                <>
+                  <div className="space-y-1 group">
+                    <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">
+                      {activeTab === 'login' ? 'Tài khoản, Email hoặc SĐT' : 'Địa chỉ Email'}
+                    </label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center">
+                        <i className={activeTab === 'login' ? "far fa-user text-sm" : "far fa-envelope text-sm"}></i>
+                      </span>
+                      <input 
+                        type={activeTab === 'login' ? "text" : "email"}
+                        placeholder={activeTab === 'login' ? "Tên đăng nhập, Email hoặc SĐT" : "gym@g6gym.vn"}
+                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0]"
+                        value={activeTab === 'login' ? loginData.phone : regData.email}
+                        onChange={(e) => activeTab === 'login' ? setLoginData({...loginData, phone: e.target.value}) : setRegData({...regData, email: e.target.value})}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
 
-              <div className="space-y-1 group">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Mật khẩu</label>
-                  {activeTab === 'login' && (
-                    <a href="#" className="text-[10px] uppercase tracking-widest text-[#C9A84C] hover:text-[#E5C76B] transition-colors font-bold">Quên?</a>
+                  {activeTab === 'register' && (
+                    <div className="space-y-1 group">
+                      <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Số điện thoại</label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-phone-alt text-sm"></i></span>
+                        <input 
+                          type="tel" 
+                          placeholder="09xx xxx xxx"
+                          className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0]"
+                          value={regData.phone}
+                          onChange={(e) => setRegData({...regData, phone: e.target.value})}
+                          required
+                        />
+                      </div>
+                    </div>
                   )}
-                </div>
-                <div className="relative flex items-center">
-                  <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-lock text-sm"></i></span>
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••"
-                    className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 px-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0] tracking-widest"
-                    value={activeTab === 'login' ? loginData.password : regData.password}
-                    onChange={(e) => activeTab === 'login' ? setLoginData({...loginData, password: e.target.value}) : setRegData({...regData, password: e.target.value})}
-                    required
-                  />
-                  <button 
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-0 text-gray-400 dark:text-[#A1A1AA] hover:text-[#C9A84C] w-8 h-full flex items-center justify-center"
-                  >
-                    <i className={`far ${showPassword ? 'fa-eye-slash' : 'fa-eye'} text-sm`}></i>
-                  </button>
-                </div>
-              </div>
+
+                  <div className="space-y-1 group">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Mật khẩu</label>
+                      {activeTab === 'login' && (
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setActiveTab('forgot');
+                            setOtpSent(false);
+                          }}
+                          className="text-[10px] uppercase tracking-widest text-[#C9A84C] hover:text-[#E5C76B] transition-colors font-bold focus:outline-none"
+                        >
+                          Quên?
+                        </button>
+                      )}
+                    </div>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-lock text-sm"></i></span>
+                      <input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="••••••••"
+                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 px-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0] tracking-widest"
+                        value={activeTab === 'login' ? loginData.password : regData.password}
+                        onChange={(e) => activeTab === 'login' ? setLoginData({...loginData, password: e.target.value}) : setRegData({...regData, password: e.target.value})}
+                        required
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-0 text-gray-400 dark:text-[#A1A1AA] hover:text-[#C9A84C] w-8 h-full flex items-center justify-center"
+                      >
+                        <i className={`far ${showPassword ? 'fa-eye-slash' : 'fa-eye'} text-sm`}></i>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-1 group">
+                    <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Địa chỉ Email</label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="far fa-envelope text-sm"></i></span>
+                      <input 
+                        type="email" 
+                        placeholder="gym@g6gym.vn"
+                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0]"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        required
+                        disabled={otpSent}
+                      />
+                    </div>
+                  </div>
+
+                  {otpSent && (
+                    <>
+                      <div className="space-y-1 group">
+                        <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Mã xác nhận OTP</label>
+                        <div className="relative flex items-center">
+                          <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-key text-sm"></i></span>
+                          <input 
+                            type="text" 
+                            placeholder="Nhập mã OTP gồm 6 số"
+                            className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0] tracking-widest font-bold"
+                            value={otpCode}
+                            onChange={(e) => setOtpCode(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1 group">
+                        <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Mật khẩu mới</label>
+                        <div className="relative flex items-center">
+                          <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-lock text-sm"></i></span>
+                          <input 
+                            type={showPassword ? "text" : "password"} 
+                            placeholder="Tối thiểu 6 ký tự"
+                            className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 px-8 outline-none focus:border-[#C9A84C] transition-all text-lg text-black dark:text-[#F5F5F0] tracking-widest"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            required
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-0 text-gray-400 dark:text-[#A1A1AA] hover:text-[#C9A84C] w-8 h-full flex items-center justify-center"
+                          >
+                            <i className={`far ${showPassword ? 'fa-eye-slash' : 'fa-eye'} text-sm`}></i>
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
 
               {/* Submit Button */}
               <button 
@@ -308,20 +641,46 @@ const AuthPage = () => {
                   <i className="fas fa-spinner fa-spin"></i>
                 ) : (
                   <>
-                    <span className="mt-1">{activeTab === 'login' ? 'ĐĂNG NHẬP' : 'TẠO TÀI KHOẢN'}</span>
+                    <span className="mt-1">
+                      {activeTab === 'login' ? 'ĐĂNG NHẬP' : activeTab === 'register' ? 'TẠO TÀI KHOẢN' : otpSent ? 'XÁC NHẬN ĐỔI MẬT KHẨU' : 'GỬI MÃ OTP'}
+                    </span>
                     <i className="fas fa-arrow-right text-sm"></i>
                   </>
                 )}
               </button>
+
+              {activeTab !== 'forgot' && siteConfig.g6_google_client_id && (
+                <>
+                  <div className="relative flex py-2 items-center">
+                    <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
+                    <span className="flex-shrink mx-4 text-gray-400 text-[10px] font-header tracking-wider uppercase">Hoặc</span>
+                    <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
+                  </div>
+
+                  <div className="flex justify-center w-full">
+                    <div id="googleSignInButton" className="flex justify-center w-full min-h-[40px]"></div>
+                  </div>
+                </>
+              )}
 
             </form>
           </div>
 
           <div className="p-6 bg-gray-50/50 dark:bg-black/20 text-center border-t border-gray-100 dark:border-white/5">
             <p className="text-xs text-gray-500 dark:text-[#A1A1AA]">
-              {activeTab === 'login' ? "Chưa có tài khoản?" : "Đã có tài khoản?"} 
+              {activeTab === 'login' ? "Chưa có tài khoản?" : activeTab === 'register' ? "Đã có tài khoản?" : "Đã nhớ mật khẩu?"} 
               <button 
-                onClick={() => setActiveTab(activeTab === 'login' ? 'register' : 'login')}
+                onClick={() => {
+                  if (activeTab === 'forgot') {
+                    setActiveTab('login');
+                    setOtpSent(false);
+                    setOtpCode('');
+                    setNewPassword('');
+                    setForgotEmail('');
+                  } else {
+                    setActiveTab(activeTab === 'login' ? 'register' : 'login');
+                  }
+                }}
                 className="text-[#C9A84C] ml-1 font-bold uppercase tracking-wider hover:underline"
               >
                 {activeTab === 'login' ? "Đăng ký ngay" : "Đăng nhập"}

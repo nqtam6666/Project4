@@ -11,13 +11,24 @@ from backend.app.models.g6_cau_hinh import G6CauHinh
 
 nqt_public_bp = Blueprint('nqt_public', __name__)
 
+import os
+
 @nqt_public_bp.route('/api/nqt-public/cau-hinh-ui', methods=['GET'])
 def nqt_public_cau_hinh_ui():
     nqt_khoa_cho_phep = ['g6_mau_chu_dao', 'g6_mau_phu', 'g6_ten_website', 'g6_logo_url', 'g6_slogan', 'g6_favicon_url']
     nqt_ds = G6CauHinh.query.filter(G6CauHinh.g6_khoa.in_(nqt_khoa_cho_phep)).all()
+    nqt_du_lieu = [c.g6_to_dict() for c in nqt_ds]
+    
+    nqt_google_id = os.environ.get('GOOGLE_CLIENT_ID', '')
+    if nqt_google_id:
+        nqt_du_lieu.append({
+            'g6_khoa': 'g6_google_client_id',
+            'g6_gia_tri': nqt_google_id
+        })
+        
     return jsonify({
         'nqt_thanh_cong': True,
-        'nqt_du_lieu': [c.g6_to_dict() for c in nqt_ds]
+        'nqt_du_lieu': nqt_du_lieu
     })
 
 

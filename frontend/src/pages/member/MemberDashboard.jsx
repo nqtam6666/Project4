@@ -3971,9 +3971,9 @@ const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
                       onChange={(e) => setMemberGioiTinh(e.target.value)}
                       className="w-full bg-[#FAFAFA] dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] text-[#0A0A0A] dark:text-[#F5F5F0] appearance-none transition-all duration-300 focus:ring-1 focus:ring-[#C9A84C]/25"
                     >
-                      <option value="nam">Nam</option>
-                      <option value="nu">Nữ</option>
-                      <option value="khac">Khác</option>
+                      <option value="nam" className="text-slate-900 dark:text-slate-900 bg-white dark:bg-white">Nam</option>
+                      <option value="nu" className="text-slate-900 dark:text-slate-900 bg-white dark:bg-white">Nữ</option>
+                      <option value="khac" className="text-slate-900 dark:text-slate-900 bg-white dark:bg-white">Khác</option>
                     </select>
                     <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
                       <ChevronRight size={16} className="rotate-90" />
