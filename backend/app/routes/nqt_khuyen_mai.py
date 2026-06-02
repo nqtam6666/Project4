@@ -8,7 +8,6 @@ nqt_khuyen_mai_bp = Blueprint('g6_khuyen_mai', __name__, url_prefix='/api')
 
 
 @nqt_khuyen_mai_bp.route('/nqt-ma-giam-gia', methods=['GET'])
-@nqt_yeu_cau_dang_nhap
 def nqt_lay_ma_giam_gia():
     nqt_list = G6MaGiamGia.query.order_by(G6MaGiamGia.g6_ngay_tao.desc()).all()
     return nqt_ok([m.g6_to_dict() for m in nqt_list])
@@ -49,15 +48,23 @@ def nqt_kiem_tra_ma_giam_gia():
 @nqt_khuyen_mai_bp.route('/nqt-ma-giam-gia', methods=['POST'])
 @nqt_yeu_cau_dang_nhap
 def nqt_tao_ma_giam_gia():
+    from datetime import datetime
     nqt_data = request.get_json() or {}
+    
+    nqt_ngay_bd_str = nqt_data.get('g6_ngay_bat_dau')
+    nqt_ngay_bd = datetime.strptime(nqt_ngay_bd_str, '%Y-%m-%d') if nqt_ngay_bd_str else datetime.utcnow()
+    
+    nqt_ngay_kt_str = nqt_data.get('g6_ngay_ket_thuc')
+    nqt_ngay_kt = datetime.strptime(nqt_ngay_kt_str, '%Y-%m-%d') if nqt_ngay_kt_str else None
+
     nqt_row = G6MaGiamGia(
         g6_ma=nqt_data.get('g6_ma', '').upper(),
         g6_loai=nqt_data.get('g6_loai', 'phan_tram'),
         g6_gia_tri=nqt_data.get('g6_gia_tri', 0),
         g6_don_hang_toi_thieu=nqt_data.get('g6_don_hang_toi_thieu', 0),
         g6_so_luong_tong=nqt_data.get('g6_so_luong_tong'),
-        g6_ngay_bat_dau=nqt_data.get('g6_ngay_bat_dau'),
-        g6_ngay_ket_thuc=nqt_data.get('g6_ngay_ket_thuc'),
+        g6_ngay_bat_dau=nqt_ngay_bd,
+        g6_ngay_ket_thuc=nqt_ngay_kt,
     )
     db.session.add(nqt_row)
     db.session.commit()
@@ -92,14 +99,28 @@ def nqt_tao_banner():
 @nqt_khuyen_mai_bp.route('/nqt-ma-giam-gia/<int:nqt_id>', methods=['PUT'])
 @nqt_yeu_cau_dang_nhap
 def nqt_cap_nhat_ma_giam_gia(nqt_id):
+    from datetime import datetime
     nqt_row = G6MaGiamGia.query.get_or_404(nqt_id)
     nqt_data = request.get_json() or {}
+    
     for nqt_f in [
-        'g6_gia_tri', 'g6_gia_tri_toi_da', 'g6_don_hang_toi_thieu',
-        'g6_so_luong_tong', 'g6_ngay_bat_dau', 'g6_ngay_ket_thuc', 'g6_la_hoat_dong',
+        'g6_ma', 'g6_loai', 'g6_gia_tri', 'g6_gia_tri_toi_da', 'g6_don_hang_toi_thieu',
+        'g6_so_luong_tong', 'g6_la_hoat_dong',
     ]:
         if nqt_f in nqt_data:
-            setattr(nqt_row, nqt_f, nqt_data[nqt_f])
+            if nqt_f == 'g6_ma':
+                setattr(nqt_row, nqt_f, nqt_data[nqt_f].upper())
+            else:
+                setattr(nqt_row, nqt_f, nqt_data[nqt_f])
+                
+    if 'g6_ngay_bat_dau' in nqt_data:
+        nqt_ngay_bd_str = nqt_data['g6_ngay_bat_dau']
+        nqt_row.g6_ngay_bat_dau = datetime.strptime(nqt_ngay_bd_str, '%Y-%m-%d') if nqt_ngay_bd_str else datetime.utcnow()
+        
+    if 'g6_ngay_ket_thuc' in nqt_data:
+        nqt_ngay_kt_str = nqt_data['g6_ngay_ket_thuc']
+        nqt_row.g6_ngay_ket_thuc = datetime.strptime(nqt_ngay_kt_str, '%Y-%m-%d') if nqt_ngay_kt_str else None
+        
     db.session.commit()
     return nqt_ok(nqt_row.g6_to_dict(), 'Cập nhật mã giảm giá thành công')
 

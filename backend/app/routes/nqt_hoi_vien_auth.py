@@ -1,11 +1,16 @@
 import uuid
 import re
 import bcrypt
+import pyotp
+import qrcode
+import io
+import base64
 from datetime import datetime, timedelta
 from flask import Blueprint, request
 from flask_jwt_extended import (
     create_access_token, create_refresh_token,
-    get_jwt_identity, get_jwt, verify_jwt_in_request
+    get_jwt_identity, get_jwt, verify_jwt_in_request,
+    decode_token
 )
 from backend.app import db
 from backend.app.models.g6_nguoi_dung import G6NguoiDung
@@ -140,6 +145,17 @@ def nqt_dang_nhap_hoi_vien():
     nqt_hoi_vien.g6_lan_dang_nhap_sai = 0
     nqt_hoi_vien.g6_khoa_den = None
     db.session.commit()
+
+    # 2FA Check
+    if nqt_hoi_vien.g6_la_xac_thuc_otp:
+        nqt_2fa_token = create_access_token(
+            identity=f"2fa:{nqt_hoi_vien.g6_ma_nguoi_dung}",
+            expires_delta=timedelta(minutes=5)
+        )
+        return nqt_ok({
+            'g6_la_xac_thuc_otp': True,
+            'nqt_2fa_token': nqt_2fa_token
+        }, 'Yêu cầu mã 2FA')
 
     from flask import make_response
     from flask_jwt_extended import set_access_cookies, set_refresh_cookies
@@ -824,4 +840,125 @@ def nqt_chatbot_assistant():
         "text": response_text,
         "action": action
     })
+
+
+# ── 2FA APIs ──────────────────────────────────────────────────────────────────
+
+@nqt_hv_auth_bp.route('/nqt-hoi-vien/2fa/setup', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_2fa_setup():
+    nqt_identity = get_jwt_identity()
+    nqt_user_id = int(nqt_identity.split(':')[1])
+    nqt_user = G6NguoiDung.query.get(nqt_user_id)
+    if not nqt_user:
+        return nqt_loi('Không tìm thấy người dùng', nqt_ma_trang=404)
+        
+    nqt_secret = pyotp.random_base32()
+    nqt_user.g6_totp_secret = nqt_secret
+    db.session.commit()
+    
+    nqt_email_or_phone = nqt_user.g6_email or nqt_user.g6_so_dien_thoai
+    nqt_uri = pyotp.totp.TOTP(nqt_secret).provisioning_uri(
+        name=nqt_email_or_phone,
+        issuer_name="G6 Gym Luxury"
+    )
+    
+    qr = qrcode.QRCode(version=1, box_size=8, border=4)
+    qr.add_data(nqt_uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+    qr_data_uri = f"data:image/png;base64,{qr_base64}"
+    
+    return nqt_ok({
+        'g6_totp_secret': nqt_secret,
+        'g6_qr_code_uri': qr_data_uri
+    }, 'Khởi tạo 2FA thành công. Hãy quét mã QR.')
+
+@nqt_hv_auth_bp.route('/nqt-hoi-vien/2fa/verify', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_2fa_verify():
+    nqt_identity = get_jwt_identity()
+    nqt_user_id = int(nqt_identity.split(':')[1])
+    nqt_user = G6NguoiDung.query.get(nqt_user_id)
+    if not nqt_user:
+        return nqt_loi('Không tìm thấy người dùng', nqt_ma_trang=404)
+        
+    nqt_data = request.get_json() or {}
+    nqt_code = (nqt_data.get('g6_code') or '').strip()
+    
+    if not nqt_code or not nqt_user.g6_totp_secret:
+        return nqt_loi('Mã xác minh không hợp lệ hoặc chưa thiết lập 2FA')
+        
+    totp = pyotp.TOTP(nqt_user.g6_totp_secret)
+    if totp.verify(nqt_code):
+        nqt_user.g6_la_xac_thuc_otp = True
+        db.session.commit()
+        return nqt_ok(nqt_user.g6_to_dict(), 'Kích hoạt bảo mật 2 lớp thành công!')
+    else:
+        return nqt_loi('Mã OTP không chính xác hoặc đã hết hạn', nqt_ma_trang=400)
+
+@nqt_hv_auth_bp.route('/nqt-hoi-vien/2fa/disable', methods=['POST'])
+@nqt_yeu_cau_dang_nhap
+def nqt_2fa_disable():
+    nqt_identity = get_jwt_identity()
+    nqt_user_id = int(nqt_identity.split(':')[1])
+    nqt_user = G6NguoiDung.query.get(nqt_user_id)
+    if not nqt_user:
+        return nqt_loi('Không tìm thấy người dùng', nqt_ma_trang=404)
+        
+    nqt_data = request.get_json() or {}
+    nqt_password = nqt_data.get('g6_password') or ''
+    
+    if not nqt_user.nqt_kiem_tra_mat_khau(nqt_password):
+        return nqt_loi('Mật khẩu không chính xác', nqt_ma_trang=400)
+        
+    nqt_user.g6_la_xac_thuc_otp = False
+    nqt_user.g6_totp_secret = None
+    db.session.commit()
+    return nqt_ok(nqt_user.g6_to_dict(), 'Đã tắt bảo mật 2 lớp thành công.')
+
+@nqt_hv_auth_bp.route('/nqt-hoi-vien/2fa/login-verify', methods=['POST'])
+def nqt_2fa_login_verify():
+    nqt_data = request.get_json() or {}
+    nqt_2fa_token = nqt_data.get('nqt_2fa_token') or ''
+    nqt_code = (nqt_data.get('g6_code') or '').strip()
+    
+    if not nqt_2fa_token or not nqt_code:
+        return nqt_loi('Thiếu token tạm thời hoặc mã OTP', nqt_ma_trang=400)
+        
+    try:
+        nqt_decoded = decode_token(nqt_2fa_token)
+        nqt_identity = nqt_decoded['sub']
+        if not nqt_identity.startswith("2fa:"):
+            raise ValueError()
+        nqt_user_id = int(nqt_identity.split(":")[1])
+    except Exception:
+        return nqt_loi('Token 2FA không hợp lệ hoặc đã hết hạn', nqt_ma_trang=401)
+        
+    nqt_user = G6NguoiDung.query.get(nqt_user_id)
+    if not nqt_user or not nqt_user.g6_totp_secret:
+        return nqt_loi('Yêu cầu xác thực không hợp lệ', nqt_ma_trang=400)
+        
+    totp = pyotp.TOTP(nqt_user.g6_totp_secret)
+    if totp.verify(nqt_code):
+        from flask import make_response
+        from flask_jwt_extended import set_access_cookies, set_refresh_cookies
+        
+        nqt_tokens = _nqt_tao_jwt(nqt_user.g6_ma_nguoi_dung, nqt_user.g6_ho_ten)
+        
+        nqt_response = make_response(nqt_ok({
+            'nqt_hoi_vien': nqt_user.g6_to_dict(),
+            'nqt_access_token': nqt_tokens['nqt_access_token'],
+            'nqt_refresh_token': nqt_tokens['nqt_refresh_token']
+        }, 'Đăng nhập thành công'))
+        
+        set_access_cookies(nqt_response, nqt_tokens['nqt_access_token'])
+        set_refresh_cookies(nqt_response, nqt_tokens['nqt_refresh_token'])
+        
+        return nqt_response
+    else:
+        return nqt_loi('Mã OTP không chính xác hoặc đã hết hạn', nqt_ma_trang=400)
 

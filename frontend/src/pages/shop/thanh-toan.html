@@ -49,12 +49,13 @@ tailwind.config={darkMode:"class",theme:{extend:{colors:{
               <input id="nqtEmail" type="email" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Địa chỉ chi tiết</label>
-              <input id="nqtDiaChi" type="text" placeholder="Số nhà, tên đường, phường/xã..." class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary placeholder:text-text-muted focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Số nhà, tên đường</label>
+              <input id="nqtDiaChi" type="text" placeholder="Số nhà, ngõ, tên đường..." class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary placeholder:text-text-muted focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
             </div>
-            <div>
-              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Tỉnh / Thành phố</label>
-              <input id="nqtTinh" type="text" class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+            <div class="sm:col-span-2 relative">
+              <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Tìm kiếm Phường / Xã, Tỉnh / Thành phố</label>
+              <input id="nqtAddressSearch" type="text" autocomplete="off" placeholder="Nhập để tìm kiếm nhanh (ví dụ: Bến Thành)..." class="w-full bg-bg-elevated border border-border-subtle rounded-xl px-4 py-2.5 text-text-primary placeholder:text-text-muted focus:border-border-neon focus:outline-none focus:ring-1 focus:ring-neon-lime/30 transition-colors"/>
+              <div id="nqtSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-bg-card border border-border-subtle rounded-xl max-h-60 overflow-y-auto z-50 shadow-2xl divide-y divide-border-subtle/50"></div>
             </div>
             <div>
               <label class="block text-text-muted text-xs font-caps uppercase tracking-wide mb-1.5">Ghi chú</label>
@@ -144,12 +145,87 @@ try {
   if (user.nqt_so_dien_thoai) document.getElementById('nqtSdt').value = user.nqt_so_dien_thoai;
 } catch {}
 
+// Provinces Database Integration
+let nqtProvincesData = [];
+let nqtFlatWards = [];
+const nqtSearchInput = document.getElementById('nqtAddressSearch');
+const nqtSuggestionsContainer = document.getElementById('nqtSuggestions');
+
+function nqtRemoveAccents(str) {
+  return str.normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .replace(/Đ/g, "D")
+            .toLowerCase();
+}
+
+async function nqtLoadProvinces() {
+  try {
+    const res = await fetch('https://raw.githubusercontent.com/thanglequoc/vietnamese-provinces-database/master/json/full_json_generated_data_vn_units.json');
+    if (!res.ok) throw new Error();
+    const provincesData = await res.json();
+    
+    nqtFlatWards = [];
+    provincesData.forEach(p => {
+      if (p.Wards) {
+        p.Wards.forEach(w => {
+          nqtFlatWards.push({
+            label: `${w.FullName}, ${p.FullName}`,
+            searchKey: nqtRemoveAccents(`${w.FullName} ${p.FullName}`)
+          });
+        });
+      }
+    });
+  } catch (err) {
+    console.warn("Failed to load provinces database");
+  }
+}
+
+nqtSearchInput.addEventListener('input', function() {
+  const query = nqtRemoveAccents(this.value.trim());
+  if (query.length < 2) {
+    nqtSuggestionsContainer.classList.add('hidden');
+    return;
+  }
+  
+  const matches = nqtFlatWards.filter(item => item.searchKey.includes(query)).slice(0, 10);
+  
+  if (matches.length === 0) {
+    nqtSuggestionsContainer.classList.add('hidden');
+    return;
+  }
+  
+  nqtSuggestionsContainer.innerHTML = matches.map(item => `
+    <div class="px-4 py-2.5 hover:bg-neon-lime/10 hover:text-neon-lime cursor-pointer transition-colors text-sm text-text-secondary" onclick="nqtSelectSuggestion('${item.label.replace(/'/g, "\\'")}')">
+      ${item.label}
+    </div>
+  `).join('');
+  nqtSuggestionsContainer.classList.remove('hidden');
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target !== nqtSearchInput && e.target !== nqtSuggestionsContainer) {
+    nqtSuggestionsContainer.classList.add('hidden');
+  }
+});
+
+window.nqtSelectSuggestion = function(label) {
+  nqtSearchInput.value = label;
+  nqtSuggestionsContainer.classList.add('hidden');
+};
+
+nqtLoadProvinces();
+
 window.nqtPlaceOrder = async function() {
   const hoTen = document.getElementById('nqtHoTen').value.trim();
   const sdt   = document.getElementById('nqtSdt').value.trim();
   const addr  = document.getElementById('nqtDiaChi').value.trim();
-  const tinh  = document.getElementById('nqtTinh').value.trim();
-  if (!hoTen || !addr) { alert('Vui lòng điền đầy đủ họ tên và địa chỉ.'); return; }
+  const searchVal = document.getElementById('nqtAddressSearch').value.trim();
+
+  if (!hoTen || !addr || !searchVal) { 
+    alert('Vui lòng điền đầy đủ họ tên và địa chỉ giao nhận.'); 
+    return; 
+  }
   const method = document.querySelector('[name=nqtPayMethod]:checked')?.value || 'tien_mat';
 
   const btn = document.getElementById('nqtPlaceOrderBtn');
@@ -163,7 +239,7 @@ window.nqtPlaceOrder = async function() {
       body: JSON.stringify({
         g6_ho_ten_nguoi_nhan: hoTen,
         g6_so_dien_thoai_nguoi_nhan: sdt,
-        g6_dia_chi_giao_hang: `${addr}, ${tinh}`.trim().replace(/,\s*$/, ''),
+        g6_dia_chi_giao_hang: `${addr}, ${searchVal}`.trim().replace(/^[,\s]+|[,\s]+$/g, '').replace(/,\s*,/g, ','),
         g6_phuong_thuc_thanh_toan: method,
         g6_ghi_chu: document.getElementById('nqtGhiChu').value,
         g6_chi_tiet: cart.map(i => ({ g6_ma_bien_the: i.variantId || i.id, g6_so_luong: i.qty||1, g6_don_gia: i.price||0, g6_ten_san_pham: i.name })),

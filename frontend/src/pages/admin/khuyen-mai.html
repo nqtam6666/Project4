@@ -85,11 +85,11 @@
         </div>
     </div>
 
-    <!-- Modal Thêm Mã -->
+    <!-- Modal Thêm/Sửa Mã -->
     <div id="nqtModalThemMa" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)nqtDongModal('nqtModalThemMa')">
         <div class="bg-white dark:bg-[#262626] rounded-lg w-full max-w-lg border border-[#e5e5e5] dark:border-[#404040]">
             <div class="px-6 py-4 border-b border-[#e5e5e5] dark:border-[#404040] flex items-center justify-between">
-                <h3 class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">Thêm mã giảm giá</h3>
+                <h3 class="text-sm font-semibold text-[#191919] dark:text-[#fafafa]">Cập nhật mã giảm giá</h3>
                 <button onclick="nqtDongModal('nqtModalThemMa')" class="text-[#666] hover:text-[#191919] dark:hover:text-[#fafafa]"><i class="fas fa-times"></i></button>
             </div>
             <form id="nqtFormMa" onsubmit="nqtLuuMa(event)" class="p-6 space-y-4">
@@ -115,9 +115,19 @@
                             class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
                     </div>
                     <div>
+                        <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Đơn hàng tối thiểu (VNĐ)</label>
+                        <input type="number" id="nqtDonHangToiThieu" min="0" placeholder="0"
+                            class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
                         <label class="block text-xs font-medium text-[#666] dark:text-[#888] mb-1">Số lần dùng tối đa</label>
                         <input type="number" id="nqtSoLanToiDa" min="1" placeholder="100"
                             class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
+                    </div>
+                    <div>
+                        <!-- Spacer -->
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
@@ -132,6 +142,9 @@
                             class="w-full px-3 py-2 text-sm bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#404040] rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#191919] dark:focus-visible:ring-[#fafafa] text-[#191919] dark:text-[#fafafa]">
                     </div>
                 </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="nqtDongModal('nqtModalThemMa')" class="px-4 py-2 text-sm border border-[#e5e5e5] dark:border-[#404040] text-[#666] dark:text-[#888] rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#333]">Huỷ</button>
+                    <button type="submit" id="nqtBtnLuuMa" class="px-4 py-2 text-sm bg-[#191919] dark:bg-[#fafafa] text-white dark:text-[#191919] rounded-md hover:bg-[#404040] dark:hover:bg-[#e5e5e5]">Lưu</button>
                 </div>
             </form>
         </div>
@@ -415,7 +428,7 @@ function nqtRenderRow(r) {
         <td class="px-4 py-3 text-sm font-semibold text-[#191919] dark:text-[#fafafa]">${r.g6_loai_giam==='phan_tram'?r.g6_gia_tri_giam+'%':Number(r.g6_gia_tri_giam||0).toLocaleString('vi-VN')+'đ'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_so_lan_da_dung||0} / ${r.g6_so_lan_su_dung_toi_da||'∞'}</td>
         <td class="px-4 py-3 text-sm text-[#666] dark:text-[#888]">${r.g6_ngay_ket_thuc?.slice(0,10)||'Không giới hạn'}</td>
-        <td class="px-4 py-3 text-right">${del(rowId,'nqt-ma-giam-gia')}</td></tr>`;
+        <td class="px-4 py-3 text-right"><button onclick="nqtSuaMa(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="text-xs px-2 py-1 rounded border border-[#e5e5e5] dark:border-[#404040] hover:bg-[#f5f5f5] dark:hover:bg-[#333] text-[#666] dark:text-[#888] mr-1">Sửa</button>${del(rowId,'nqt-ma-giam-gia')}</td></tr>`;
     if (t === 'banner') return `<tr data-row-id="${rowId}" class="${rowCls}" onclick="nqtToggleRow(${rowId}, event)">
         <td class="px-4 py-3 font-medium text-sm text-[#191919] dark:text-[#fafafa]">
             <div class="flex items-center gap-2"><img src="${r.g6_hinh_anh}" onerror="this.src='https://placehold.co/100x50'" class="w-10 h-10 object-cover rounded shadow-sm border border-[#e5e5e5] dark:border-[#404040]">
@@ -432,12 +445,32 @@ function nqtRenderRow(r) {
         <td class="px-4 py-3 text-right"><button onclick="nqtSuaMuaKem(${JSON.stringify(r).replace(/"/g,'&quot;')})" class="text-xs px-2 py-1 rounded border border-[#e5e5e5] dark:border-[#404040] hover:bg-[#f5f5f5] dark:hover:bg-[#333] text-[#666] dark:text-[#888] mr-1">Sửa</button>${del(rowId,'nqt-khuyen-mai-mua-kem')}</td></tr>`;
 }
 
+function nqtSuaMa(r) {
+    document.getElementById('nqtMaId').value = r.g6_ma_id || '';
+    document.getElementById('nqtCode').value = r.g6_ma_code || '';
+    document.getElementById('nqtLoaiGiam').value = r.g6_loai_giam || 'phan_tram';
+    document.getElementById('nqtGiaTriGiam').value = r.g6_gia_tri_giam || 0;
+    document.getElementById('nqtDonHangToiThieu').value = r.g6_don_hang_toi_thieu || 0;
+    document.getElementById('nqtSoLanToiDa').value = r.g6_so_lan_su_dung_toi_da || '';
+    document.getElementById('nqtNgayBD').value = r.g6_ngay_bat_dau ? r.g6_ngay_bat_dau.slice(0,10) : '';
+    document.getElementById('nqtNgayKT').value = r.g6_ngay_ket_thuc ? r.g6_ngay_ket_thuc.slice(0,10) : '';
+    nqtMoModal('nqtModalThemMa');
+}
+
 async function nqtLuuMa(e) {
     e.preventDefault();
     const id = document.getElementById('nqtMaId').value;
     const btn = document.getElementById('nqtBtnLuuMa');
     const nqtRestore = nqtBtnLoading(btn,'Đang lưu...');
-    const payload = { g6_ma: document.getElementById('nqtCode').value.trim().toUpperCase(), g6_loai: document.getElementById('nqtLoaiGiam').value, g6_gia_tri: parseFloat(document.getElementById('nqtGiaTriGiam').value)||0, g6_so_luong_tong: parseInt(document.getElementById('nqtSoLanToiDa').value)||null, g6_ngay_bat_dau: document.getElementById('nqtNgayBD').value||null, g6_ngay_ket_thuc: document.getElementById('nqtNgayKT').value||null };
+    const payload = { 
+        g6_ma: document.getElementById('nqtCode').value.trim().toUpperCase(), 
+        g6_loai: document.getElementById('nqtLoaiGiam').value, 
+        g6_gia_tri: parseFloat(document.getElementById('nqtGiaTriGiam').value)||0,
+        g6_don_hang_toi_thieu: parseFloat(document.getElementById('nqtDonHangToiThieu').value)||0,
+        g6_so_luong_tong: parseInt(document.getElementById('nqtSoLanToiDa').value)||null, 
+        g6_ngay_bat_dau: document.getElementById('nqtNgayBD').value||null, 
+        g6_ngay_ket_thuc: document.getElementById('nqtNgayKT').value||null 
+    };
     const res = await nqtApi.fetch(id?`/api/nqt-ma-giam-gia/${id}`:'/api/nqt-ma-giam-gia',{method:id?'PUT':'POST',body:payload});
     nqtRestore();
     if (res?.nqt_thanh_cong) { nqtToast('Lưu thành công'); nqtDongModal('nqtModalThemMa'); e.target.reset(); nqtTaiDuLieu(); }
@@ -519,6 +552,7 @@ async function nqtLoadSP() {
 
 window.nqtChuyenTab = nqtChuyenTab;
 window.nqtLuuMa = nqtLuuMa;
+window.nqtSuaMa = nqtSuaMa;
 window.nqtSuaBanner = nqtSuaBanner;
 window.nqtLuuBanner = nqtLuuBanner;
 window.nqtSuaMuaKem = nqtSuaMuaKem;

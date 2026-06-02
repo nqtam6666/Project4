@@ -30,6 +30,9 @@ const AuthPage = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [twoFactorPending, setTwoFactorPending] = useState(false);
+  const [twoFactorToken, setTwoFactorToken] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
 
   const [siteConfig, setSiteConfig] = useState({
     g6_ten_website: "G6 GYM",
@@ -37,6 +40,12 @@ const AuthPage = () => {
     g6_logo_url: "",
     g6_favicon_url: ""
   });
+
+  React.useEffect(() => {
+    if (localStorage.getItem('nqt_token')) {
+      window.location.replace('/home');
+    }
+  }, []);
 
   const showToast = (type, message) => {
     setNotification({ type, message });
@@ -113,33 +122,30 @@ const AuthPage = () => {
     }
   };
 
-  // Render Google button when config and GIS are ready
-  React.useEffect(() => {
-    if (siteConfig.g6_google_client_id && googleReady && window.google) {
+  // Render Google button when config and GIS are ready using a callback ref
+  const googleButtonRef = React.useCallback((node) => {
+    if (node && siteConfig.g6_google_client_id && googleReady && window.google) {
       try {
         window.google.accounts.id.initialize({
           client_id: siteConfig.g6_google_client_id,
           callback: handleGoogleLogin
         });
         
-        const buttonDiv = document.getElementById("googleSignInButton");
-        if (buttonDiv) {
-          window.google.accounts.id.renderButton(
-            buttonDiv,
-            { 
-              theme: isDarkMode ? "filled_black" : "outline", 
-              size: "large", 
-              width: 350,
-              text: "signin_with",
-              shape: "square"
-            }
-          );
-        }
+        window.google.accounts.id.renderButton(
+          node,
+          { 
+            theme: isDarkMode ? "filled_black" : "outline", 
+            size: "large", 
+            width: 350,
+            text: "signin_with",
+            shape: "square"
+          }
+        );
       } catch (e) {
         console.error("Google accounts initialize/render error:", e);
       }
     }
-  }, [siteConfig.g6_google_client_id, googleReady, isDarkMode, activeTab]);
+  }, [siteConfig.g6_google_client_id, googleReady, isDarkMode]);
 
   // Sync dark mode class and storage
   React.useEffect(() => {
@@ -191,6 +197,32 @@ const AuthPage = () => {
     
     try {
       if (activeTab === 'login') {
+        if (twoFactorPending) {
+          const res = await fetch('/api/nqt-hoi-vien/2fa/login-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nqt_2fa_token: twoFactorToken,
+              g6_code: twoFactorCode
+            })
+          });
+          const data = await res.json();
+          setLoading(false);
+          if (data.nqt_thanh_cong) {
+            if (data.nqt_du_lieu && data.nqt_du_lieu.nqt_access_token) {
+              localStorage.setItem('nqt_token', data.nqt_du_lieu.nqt_access_token);
+              if (data.nqt_du_lieu.nqt_refresh_token) {
+                localStorage.setItem('nqt_refresh_token', data.nqt_du_lieu.nqt_refresh_token);
+              }
+            }
+            showToast('success', 'Xác thực 2FA thành công! Đang chuyển hướng...');
+            setTimeout(() => window.location.href = '/home', 1000);
+          } else {
+            showToast('error', data.nqt_thong_diep || 'Mã xác thực 2FA không chính xác');
+          }
+          return;
+        }
+
         const res = await fetch('/api/nqt-hoi-vien/dang-nhap', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -203,6 +235,12 @@ const AuthPage = () => {
         const data = await res.json();
         setLoading(false);
         if (data.nqt_thanh_cong) {
+          if (data.nqt_du_lieu && data.nqt_du_lieu.g6_la_xac_thuc_otp) {
+            setTwoFactorPending(true);
+            setTwoFactorToken(data.nqt_du_lieu.nqt_2fa_token);
+            showToast('info', 'Tài khoản đã được bảo mật 2 lớp. Vui lòng nhập mã OTP để tiếp tục.');
+            return;
+          }
           if (data.nqt_du_lieu && data.nqt_du_lieu.nqt_access_token) {
             localStorage.setItem('nqt_token', data.nqt_du_lieu.nqt_access_token);
             if (data.nqt_du_lieu.nqt_refresh_token) {
@@ -452,7 +490,13 @@ const AuthPage = () => {
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent"></div>
 
           {/* Tabs */}
-          {activeTab !== 'forgot' ? (
+          {twoFactorPending ? (
+            <div className="flex border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] justify-center py-5">
+              <span className="font-header text-lg tracking-widest text-[#C9A84C]">
+                XÁC THỰC BẢO MẬT 2 LỚP
+              </span>
+            </div>
+          ) : activeTab !== 'forgot' ? (
             <div className="flex border-b border-gray-100 dark:border-white/5">
               <button 
                 onClick={() => setActiveTab('login')}
@@ -496,7 +540,47 @@ const AuthPage = () => {
                 </div>
               )}
 
-              {activeTab !== 'forgot' ? (
+              {activeTab === 'login' && twoFactorPending ? (
+                <div className="space-y-5">
+                  <div className="text-center mb-4">
+                    <div className="w-16 h-16 bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] rounded-full flex items-center justify-center mx-auto mb-3 shadow-[0_0_15px_rgba(201,168,76,0.1)]">
+                      <i className="fas fa-shield-alt text-2xl"></i>
+                    </div>
+                    <h3 className="font-header text-xl tracking-[1px] text-[#0A0A0A] dark:text-[#F5F5F0] uppercase">Mã Xác Thực 2FA</h3>
+                    <p className="text-xs text-gray-500 dark:text-[#A1A1AA] mt-1">Vui lòng nhập mã 6 số từ ứng dụng Google Authenticator trên điện thoại của bạn.</p>
+                  </div>
+                  <div className="space-y-1 group">
+                    <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">Mã bảo mật</label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-0 text-gray-400 dark:text-[#A1A1AA] w-6 flex justify-center"><i className="fas fa-key text-sm"></i></span>
+                      <input 
+                        type="text" 
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength="6"
+                        placeholder="000000"
+                        className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 py-3 pl-8 outline-none focus:border-[#C9A84C] transition-all text-2xl tracking-[8px] text-center font-bold text-black dark:text-[#F5F5F0]"
+                        value={twoFactorCode}
+                        onChange={(e) => setTwoFactorCode(e.target.value.replace(/[^0-9]/g, ''))}
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+                  <div className="text-center pt-2">
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setTwoFactorPending(false);
+                        setTwoFactorCode('');
+                      }}
+                      className="text-xs uppercase tracking-widest text-[#C9A84C] hover:text-[#E5C76B] transition-colors font-bold focus:outline-none"
+                    >
+                      <i className="fas fa-arrow-left mr-1.5"></i> Quay lại đăng nhập
+                    </button>
+                  </div>
+                </div>
+              ) : activeTab !== 'forgot' ? (
                 <>
                   <div className="space-y-1 group">
                     <label className="text-xs uppercase tracking-widest text-gray-400 dark:text-[#A1A1AA] font-header group-focus-within:text-[#C9A84C] transition-colors">
@@ -642,14 +726,14 @@ const AuthPage = () => {
                 ) : (
                   <>
                     <span className="mt-1">
-                      {activeTab === 'login' ? 'ĐĂNG NHẬP' : activeTab === 'register' ? 'TẠO TÀI KHOẢN' : otpSent ? 'XÁC NHẬN ĐỔI MẬT KHẨU' : 'GỬI MÃ OTP'}
+                      {activeTab === 'login' ? (twoFactorPending ? 'XÁC THỰC 2FA' : 'ĐĂNG NHẬP') : activeTab === 'register' ? 'TẠO TÀI KHOẢN' : otpSent ? 'XÁC NHẬN ĐỔI MẬT KHẨU' : 'GỬI MÃ OTP'}
                     </span>
                     <i className="fas fa-arrow-right text-sm"></i>
                   </>
                 )}
               </button>
 
-              {activeTab !== 'forgot' && siteConfig.g6_google_client_id && (
+              {activeTab !== 'forgot' && !twoFactorPending && siteConfig.g6_google_client_id && (
                 <>
                   <div className="relative flex py-2 items-center">
                     <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
@@ -657,36 +741,36 @@ const AuthPage = () => {
                     <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
                   </div>
 
-                  <div className="flex justify-center w-full">
-                    <div id="googleSignInButton" className="flex justify-center w-full min-h-[40px]"></div>
-                  </div>
+                    <div ref={googleButtonRef} className="flex justify-center w-full min-h-[40px]"></div>
                 </>
               )}
 
             </form>
           </div>
 
-          <div className="p-6 bg-gray-50/50 dark:bg-black/20 text-center border-t border-gray-100 dark:border-white/5">
-            <p className="text-xs text-gray-500 dark:text-[#A1A1AA]">
-              {activeTab === 'login' ? "Chưa có tài khoản?" : activeTab === 'register' ? "Đã có tài khoản?" : "Đã nhớ mật khẩu?"} 
-              <button 
-                onClick={() => {
-                  if (activeTab === 'forgot') {
-                    setActiveTab('login');
-                    setOtpSent(false);
-                    setOtpCode('');
-                    setNewPassword('');
-                    setForgotEmail('');
-                  } else {
-                    setActiveTab(activeTab === 'login' ? 'register' : 'login');
-                  }
-                }}
-                className="text-[#C9A84C] ml-1 font-bold uppercase tracking-wider hover:underline"
-              >
-                {activeTab === 'login' ? "Đăng ký ngay" : "Đăng nhập"}
-              </button>
-            </p>
-          </div>
+          {!twoFactorPending && (
+            <div className="p-6 bg-gray-50/50 dark:bg-black/20 text-center border-t border-gray-100 dark:border-white/5">
+              <p className="text-xs text-gray-500 dark:text-[#A1A1AA]">
+                {activeTab === 'login' ? "Chưa có tài khoản?" : activeTab === 'register' ? "Đã có tài khoản?" : "Đã nhớ mật khẩu?"} 
+                <button 
+                  onClick={() => {
+                    if (activeTab === 'forgot') {
+                      setActiveTab('login');
+                      setOtpSent(false);
+                      setOtpCode('');
+                      setNewPassword('');
+                      setForgotEmail('');
+                    } else {
+                      setActiveTab(activeTab === 'login' ? 'register' : 'login');
+                    }
+                  }}
+                  className="text-[#C9A84C] ml-1 font-bold uppercase tracking-wider hover:underline"
+                >
+                  {activeTab === 'login' ? "Đăng ký ngay" : "Đăng nhập"}
+                </button>
+              </p>
+            </div>
+          )}
 
         </div>
 

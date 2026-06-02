@@ -232,6 +232,7 @@ def nqt_tao_don_hang():
     if not nqt_dia_chi:
         return nqt_loi('Địa chỉ giao hàng là bắt buộc')
 
+    nqt_ma_giam_gia = nqt_data.get('g6_ma_giam_gia')
     nqt_don = G6DonHang(
         g6_ma_nguoi_dung=nqt_ma_nd,
         g6_ho_ten_nguoi_nhan=nqt_ho_ten,
@@ -245,6 +246,13 @@ def nqt_tao_don_hang():
         g6_ghi_chu_khach=nqt_ghi_chu,
         g6_ma_van_chuyen=nqt_data.get('g6_ma_van_chuyen'),
     )
+    if nqt_ma_giam_gia:
+        from backend.app.models.g6_khuyen_mai import G6MaGiamGia
+        nqt_coupon = G6MaGiamGia.query.get(nqt_ma_giam_gia)
+        if nqt_coupon:
+            nqt_don.g6_ma_giam_gia = nqt_coupon.g6_ma_ma_giam_gia
+            nqt_coupon.g6_so_luong_da_dung = (nqt_coupon.g6_so_luong_da_dung or 0) + 1
+
     db.session.add(nqt_don)
     db.session.flush()
 
