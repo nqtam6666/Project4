@@ -174,9 +174,27 @@ const MemberDashboard = () => {
       if (!e.target.closest('.lang-dropdown-popover-react')) {
         setShowLangMenu(false);
       }
+      if (!e.target.closest('.notification-dropdown-container')) {
+        setShowNotifications(false);
+      }
     };
+    
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setShowSearchModal(prev => !prev);
+      }
+      if (e.key === 'Escape') {
+        setShowSearchModal(false);
+      }
+    };
+
     document.addEventListener('click', handleOutsideClick);
-    return () => document.removeEventListener('click', handleOutsideClick);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
   const [showQR, setShowQR] = useState(false);
   const [showChat, setShowChat] = useState(false);
@@ -188,6 +206,8 @@ const MemberDashboard = () => {
   const [notificationsData, setNotificationsData] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const unreads = notificationsData.filter((n) => !n.g6_la_da_doc).length;
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const [siteConfig, setSiteConfig] = useState({
     g6_ten_website: "G6 GYM",
@@ -540,6 +560,34 @@ const MemberDashboard = () => {
           }
         } catch (e) {}
 
+        // Fetch products, packages, and trainers for quick search
+        try {
+          const resProds = await fetch("/api/nxv-san-pham");
+          if (resProds.ok) {
+            const j = await resProds.json();
+            const list = j.nqt_du_lieu && Array.isArray(j.nqt_du_lieu.g6_danh_sach) ? j.nqt_du_lieu.g6_danh_sach : (Array.isArray(j.nqt_du_lieu) ? j.nqt_du_lieu : []);
+            setProducts(list);
+          }
+        } catch (e) {}
+
+        try {
+          const resPkgs = await fetch("/api/nqt-public/goi-tap");
+          if (resPkgs.ok) {
+            const j = await resPkgs.json();
+            const list = j.g6_danh_sach || j.nqt_du_lieu || [];
+            setPackages((prev) => ({ ...prev, available: list }));
+          }
+        } catch (e) {}
+
+        try {
+          const resPtAll = await fetch("/api/nqt-public/huan-luyen-vien");
+          if (resPtAll.ok) {
+            const j = await resPtAll.json();
+            const list = j.g6_danh_sach || j.g6_du_lieu || j.nqt_du_lieu || [];
+            setPts((prev) => ({ ...prev, available: list }));
+          }
+        } catch (e) {}
+
         setLoading(false);
       } catch (error) {
         setIsGuest(true);
@@ -772,6 +820,57 @@ const MemberDashboard = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     daysLeft = diffDays > 0 ? `${diffDays} ngày` : "Đã hết hạn";
   }
+
+  // Spotlight Search Logic
+  const getSearchSuggestions = () => {
+    if (!searchQuery.trim()) {
+      return {
+        tabs: [
+          { name: "Trang chủ (Dashboard)", tab: "dashboard", desc: "Xem tổng quan chỉ số và hoạt động của bạn" },
+          { name: "Lịch tập & Lớp học", tab: "classes", desc: "Xem lịch các lớp học và đặt chỗ" },
+          { name: "Cửa hàng SUPPLEMENT", tab: "shop", desc: "Mua sắm Whey Protein, thực phẩm bổ sung" },
+          { name: "Giỏ hàng", tab: "cart", desc: "Xem và thanh toán giỏ hàng hiện tại" },
+          { name: "Đơn hàng đã mua", tab: "orders", desc: "Tra cứu trạng thái và lịch sử đơn hàng" },
+          { name: "Thông tin cá nhân & 2FA", tab: "profile", desc: "Quản lý hồ sơ, bảo mật 2 lớp" },
+        ],
+        products: [],
+        classes: [],
+        packages: []
+      };
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    
+    const allTabs = [
+      { name: "Trang chủ (Dashboard)", tab: "dashboard", desc: "Xem tổng quan chỉ số và hoạt động của bạn" },
+      { name: "Lịch tập & Lớp học", tab: "classes", desc: "Xem lịch các lớp học và đặt chỗ" },
+      { name: "Lịch sử điểm danh", tab: "history", desc: "Nhật ký check-in ra vào phòng tập" },
+      { name: "Gói tập của tôi", tab: "packages", desc: "Thông tin các gói tập thành viên đã mua" },
+      { name: "Huấn luyện viên cá nhân (PT)", tab: "pt", desc: "Thuê huấn luyện viên kèm riêng" },
+      { name: "Cửa hàng SUPPLEMENT", tab: "shop", desc: "Mua sắm Whey Protein, thực phẩm bổ sung" },
+      { name: "Giỏ hàng", tab: "cart", desc: "Xem và thanh toán giỏ hàng hiện tại" },
+      { name: "Đơn hàng đã mua", tab: "orders", desc: "Tra cứu trạng thái và lịch sử đơn hàng" },
+      { name: "Thông tin cá nhân & 2FA", tab: "profile", desc: "Quản lý hồ sơ, bảo mật 2 lớp" },
+    ];
+    const matchedTabs = allTabs.filter(t => t.name.toLowerCase().includes(query));
+    const matchedProducts = products.filter(p => p.g6_ten_san_pham?.toLowerCase().includes(query)).slice(0, 5);
+    const matchedClasses = classes.filter(c => c.g6_ten_lop?.toLowerCase().includes(query)).slice(0, 5);
+    const matchedPackages = (packages.available || []).filter(p => p.g6_ten_goi?.toLowerCase().includes(query)).slice(0, 5);
+
+    return {
+      tabs: matchedTabs,
+      products: matchedProducts,
+      classes: matchedClasses,
+      packages: matchedPackages
+    };
+  };
+
+  const searchResults = getSearchSuggestions();
+  const hasResults = searchQuery.trim() === "" || 
+    searchResults.tabs.length > 0 || 
+    searchResults.products.length > 0 || 
+    searchResults.classes.length > 0 || 
+    searchResults.packages.length > 0;
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#0A0A0A] text-[#0A0A0A] dark:text-[#F5F5F0] font-['Barlow_Condensed'] transition-colors duration-500 flex">
@@ -1195,21 +1294,24 @@ const MemberDashboard = () => {
 
                   <div className="flex space-x-4">
                     <button
-                      onClick={handleFeatureInDev}
+                      onClick={() => setShowSearchModal(true)}
                       className="w-12 h-12 rounded-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-[#C9A84C] hover:text-[#0A0A0A] hover:border-[#C9A84C] transition-all group"
+                      title="Tìm kiếm nhanh (Ctrl + K)"
                     >
                       <Search
                         size={20}
                         className="group-hover:scale-110 transition-transform"
                       />
                     </button>
-                    <div className="relative">
+                    <div className="relative notification-dropdown-container">
                       <button
                         onClick={() => setShowNotifications(!showNotifications)}
                         className="w-12 h-12 rounded-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-[#C9A84C] hover:text-[#0A0A0A] hover:border-[#C9A84C] transition-all group relative z-10"
                       >
                         {unreads > 0 && (
-                          <div className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border border-[#0A0A0A]"></div>
+                          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 animate-pulse border border-[#0F0F0F]">
+                            {unreads}
+                          </span>
                         )}
                         <Bell
                           size={20}
@@ -2848,13 +2950,188 @@ const CartView = ({
   showToast,
   setActiveTab,
 }) => {
+  const [selectedIds, setSelectedIds] = useState(() => cart.map((item) => item.id));
+
+  useEffect(() => {
+    const cartIds = cart.map(item => item.id);
+    setSelectedIds(prev => {
+      const currentValid = prev.filter(id => cartIds.includes(id));
+      const newIds = cartIds.filter(id => !prev.includes(id));
+      return [...currentValid, ...newIds];
+    });
+  }, [cart]);
+
+  const selectedItems = cart.filter(item => selectedIds.includes(item.id));
+  const subtotal = selectedItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   const [hoTen, setHoTen] = useState(profile.g6_ho_ten || "");
   const [sdt, setSdt] = useState(profile.g6_so_dien_thoai || "");
   const [diaChi, setDiaChi] = useState("");
-  const [tinh, setTinh] = useState("");
+  const [addressSearch, setAddressSearch] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [flatWards, setFlatWards] = useState([]);
   const [ghiChu, setGhiChu] = useState("");
+  const [isFallback, setIsFallback] = useState(false);
   const [payMethod, setPayMethod] = useState("tien_mat");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [discountCode, setDiscountCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState(null);
+  const [discountError, setDiscountError] = useState("");
+  const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
+  const [vouchers, setVouchers] = useState([]);
+
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      try {
+        const token = localStorage.getItem("nqt_token");
+        const res = await fetch("/api/nqt-ma-giam-gia", {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          }
+        });
+        const data = await res.json();
+        if (data.nqt_thanh_cong) {
+          setVouchers(data.nqt_du_lieu || []);
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải danh sách mã giảm giá:", err);
+      }
+    };
+    fetchVouchers();
+  }, []);
+
+  const suitableVouchers = vouchers.filter((v) => {
+    if (!v.g6_la_hoat_dong) return false;
+    const now = new Date();
+    if (v.g6_ngay_bat_dau && new Date(v.g6_ngay_bat_dau) > now) return false;
+    if (v.g6_ngay_ket_thuc && new Date(v.g6_ngay_ket_thuc) < now) return false;
+    if (v.g6_so_luong_tong !== null && v.g6_so_luong_da_dung >= v.g6_so_luong_tong) return false;
+    return true;
+  });
+
+  const applySpecificCode = async (code) => {
+    setIsValidatingDiscount(true);
+    setDiscountError("");
+    try {
+      const token = localStorage.getItem("nqt_token");
+      const res = await fetch("/api/nqt-ma-giam-gia/nqt-kiem-tra", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          g6_ma: code,
+          g6_tong_tien: subtotal,
+        }),
+      });
+      const data = await res.json();
+      if (data.nqt_thanh_cong) {
+        setAppliedDiscount({
+          id: data.nqt_du_lieu.g6_ma_ma_giam_gia,
+          code: code.toUpperCase(),
+          amount: data.nqt_du_lieu.g6_so_tien_giam,
+        });
+        showToast("success", "Áp dụng mã giảm giá thành công!");
+      } else {
+        setDiscountError(data.nqt_thong_diep || "Mã giảm giá không hợp lệ.");
+        showToast("error", data.nqt_thong_diep || "Mã giảm giá không hợp lệ.");
+      }
+    } catch (err) {
+      setDiscountError("Lỗi kết nối khi kiểm tra mã giảm giá.");
+      showToast("error", "Lỗi kết nối khi kiểm tra mã giảm giá.");
+    } finally {
+      setIsValidatingDiscount(false);
+    }
+  };
+
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) return;
+    applySpecificCode(discountCode.trim());
+  };
+
+  const handleRemoveDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountCode("");
+    setDiscountError("");
+  };
+
+  useEffect(() => {
+    if (appliedDiscount) {
+      const revalidate = async () => {
+        try {
+          const token = localStorage.getItem("nqt_token");
+          const res = await fetch("/api/nqt-ma-giam-gia/nqt-kiem-tra", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({
+              g6_ma: appliedDiscount.code,
+              g6_tong_tien: subtotal,
+            }),
+          });
+          const data = await res.json();
+          if (data.nqt_thanh_cong) {
+            setAppliedDiscount({
+              id: data.nqt_du_lieu.g6_ma_ma_giam_gia,
+              code: appliedDiscount.code,
+              amount: data.nqt_du_lieu.g6_so_tien_giam,
+            });
+          } else {
+            setAppliedDiscount(null);
+            showToast("warning", `Mã giảm giá đã bị gỡ bỏ: ${data.nqt_thong_diep}`);
+          }
+        } catch (e) {
+          setAppliedDiscount(null);
+        }
+      };
+      revalidate();
+    }
+  }, [subtotal]);
+
+  const removeAccents = (str) => {
+    return str.normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .replace(/đ/g, "d")
+              .replace(/Đ/g, "D")
+              .toLowerCase();
+  };
+
+  useEffect(() => {
+    const loadProvinces = async () => {
+      try {
+        const res = await fetch("https://raw.githubusercontent.com/thanglequoc/vietnamese-provinces-database/master/json/full_json_generated_data_vn_units.json");
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const list = [];
+        data.forEach(p => {
+          if (p.Wards) {
+            p.Wards.forEach(w => {
+              list.push({
+                label: `${w.FullName}, ${p.FullName}`,
+                searchKey: removeAccents(`${w.FullName} ${p.FullName}`)
+              });
+            });
+          }
+        });
+        setFlatWards(list);
+      } catch (err) {
+        setIsFallback(true);
+      }
+    };
+    loadProvinces();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowSuggestions(false);
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (profile.g6_ho_ten && profile.g6_ho_ten !== "Khách vãng lai") {
@@ -2864,7 +3141,11 @@ const CartView = ({
       if (guestInfo.hoTen) setHoTen(guestInfo.hoTen);
       if (guestInfo.sdt) setSdt(guestInfo.sdt);
       if (guestInfo.diaChi) setDiaChi(guestInfo.diaChi);
-      if (guestInfo.tinh) setTinh(guestInfo.tinh);
+      if (guestInfo.addressSearch) {
+        setAddressSearch(guestInfo.addressSearch);
+      } else if (guestInfo.tinh) {
+        setAddressSearch(`${guestInfo.phuong || ""}, ${guestInfo.quan || ""}, ${guestInfo.tinh || ""}`.replace(/^[,\s]+|[,\s]+$/g, '').replace(/,\s*,/g, ','));
+      }
     }
     if (profile.g6_so_dien_thoai) {
       setSdt(profile.g6_so_dien_thoai);
@@ -2883,11 +3164,13 @@ const CartView = ({
     setCart(newCart);
   };
 
-  const subtotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
-
   const handleCheckout = async (e) => {
     e.preventDefault();
-    if (!hoTen.trim() || !sdt.trim() || !diaChi.trim()) {
+    if (selectedItems.length === 0) {
+      showToast("error", "Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
+      return;
+    }
+    if (!hoTen.trim() || !sdt.trim() || !diaChi.trim() || !addressSearch.trim()) {
       showToast("error", "Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ nhận hàng.");
       return;
     }
@@ -2903,10 +3186,10 @@ const CartView = ({
         body: JSON.stringify({
           g6_ho_ten_nguoi_nhan: hoTen,
           g6_so_dien_thoai_nguoi_nhan: sdt,
-          g6_dia_chi_giao_hang: `${diaChi}, ${tinh}`.trim().replace(/,\s*$/, ""),
+          g6_dia_chi_giao_hang: `${diaChi}, ${addressSearch}`.trim().replace(/^[,\s]+|[,\s]+$/g, '').replace(/,\s*,/g, ','),
           g6_phuong_thuc_thanh_toan: payMethod,
           g6_ghi_chu: ghiChu,
-          g6_chi_tiet: cart.map((i) => ({
+          g6_chi_tiet: selectedItems.map((i) => ({
             g6_ma_bien_the: i.variantId || i.id,
             g6_so_luong: i.qty,
             g6_don_gia: i.price,
@@ -2914,7 +3197,9 @@ const CartView = ({
           })),
           g6_tong_tam_tinh: subtotal,
           g6_phi_van_chuyen: 0,
-          g6_tong_thanh_toan: subtotal,
+          g6_so_tien_giam: appliedDiscount ? appliedDiscount.amount : 0,
+          g6_ma_giam_gia: appliedDiscount ? appliedDiscount.id : null,
+          g6_tong_thanh_toan: Math.max(0, subtotal - (appliedDiscount ? appliedDiscount.amount : 0)),
         }),
       });
 
@@ -2927,9 +3212,9 @@ const CartView = ({
           localStorage.setItem("nqt_guest_orders", JSON.stringify(guestOrders));
         }
         if (isGuest) {
-          localStorage.setItem("nqt_guest_info", JSON.stringify({ hoTen, sdt, diaChi, tinh }));
+          localStorage.setItem("nqt_guest_info", JSON.stringify({ hoTen, sdt, diaChi, addressSearch }));
         }
-        setCart([]);
+        setCart(prev => prev.filter(item => !selectedIds.includes(item.id)));
         showToast("success", "Đặt hàng thành công!");
 
         // Redirect directly to the orders tab with the orderId in the URL!
@@ -2968,11 +3253,52 @@ const CartView = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+            <label className="flex items-center gap-3 cursor-pointer text-sm font-bold text-gray-500 dark:text-[#A1A1AA] uppercase tracking-wider select-none">
+              <input
+                type="checkbox"
+                checked={cart.length > 0 && selectedIds.length === cart.length}
+                onChange={() => {
+                  if (selectedIds.length === cart.length) {
+                    setSelectedIds([]);
+                  } else {
+                    setSelectedIds(cart.map(item => item.id));
+                  }
+                }}
+                className="w-5 h-5 rounded border-gray-300 dark:border-white/10 text-[#C9A84C] focus:ring-[#C9A84C] cursor-pointer accent-[#C9A84C]"
+              />
+              Chọn tất cả ({cart.length} sản phẩm)
+            </label>
+            {selectedIds.length > 0 && (
+              <span className="text-[#C9A84C] text-sm font-bold">
+                Đã chọn {selectedIds.length} sản phẩm
+              </span>
+            )}
+          </div>
+
           {cart.map((item, idx) => (
             <div
               key={item.id}
-              className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-5 flex items-center gap-4 hover:border-[#C9A84C]/30 transition-all shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+              className={`bg-white dark:bg-white/5 border rounded-3xl p-5 flex items-center gap-4 hover:border-[#C9A84C]/30 transition-all shadow-[0_8px_30px_rgb(0,0,0,0.04)] ${
+                selectedIds.includes(item.id)
+                  ? "border-[#C9A84C]/50 dark:border-[#C9A84C]/30"
+                  : "border-gray-100 dark:border-white/10"
+              }`}
             >
+              <div className="flex items-center justify-center flex-shrink-0">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(item.id)}
+                  onChange={() => {
+                    setSelectedIds(prev =>
+                      prev.includes(item.id)
+                        ? prev.filter(id => id !== item.id)
+                        : [...prev, item.id]
+                    );
+                  }}
+                  className="w-5 h-5 rounded border-gray-300 dark:border-white/10 text-[#C9A84C] focus:ring-[#C9A84C] cursor-pointer accent-[#C9A84C]"
+                />
+              </div>
               <div className="w-16 h-16 bg-[#FAFAFA] dark:bg-white/5 rounded-2xl flex items-center justify-center flex-shrink-0 relative overflow-hidden">
                 <Activity className="text-gray-400" />
                 {item.image && (
@@ -3053,29 +3379,59 @@ const CartView = ({
 
               <div>
                 <label className="block text-gray-500 dark:text-[#A1A1AA] text-[10px] font-bold uppercase tracking-wider mb-1.5">
-                  Địa chỉ giao hàng
+                  Số nhà, tên đường
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Số nhà, tên đường..."
+                  placeholder="Số nhà, ngõ, tên đường..."
                   value={diaChi}
                   onChange={(e) => setDiaChi(e.target.value)}
                   className="w-full bg-[#FAFAFA] dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#0A0A0A] dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#52525B] focus:outline-none focus:border-[#C9A84C]/50 transition-colors"
                 />
               </div>
 
-              <div>
+              <div className="relative">
                 <label className="block text-gray-500 dark:text-[#A1A1AA] text-[10px] font-bold uppercase tracking-wider mb-1.5">
-                  Tỉnh / Thành phố
+                  Tìm kiếm Phường / Xã, Tỉnh / Thành phố
                 </label>
                 <input
                   type="text"
                   required
-                  value={tinh}
-                  onChange={(e) => setTinh(e.target.value)}
-                  className="w-full bg-[#FAFAFA] dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#0A0A0A] dark:text-white focus:outline-none focus:border-[#C9A84C]/50 transition-colors"
+                  placeholder="Nhập để tìm kiếm nhanh (ví dụ: Bến Thành)..."
+                  value={addressSearch}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => {
+                    setAddressSearch(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={(e) => {
+                    e.stopPropagation();
+                    setShowSuggestions(true);
+                  }}
+                  className="w-full bg-[#FAFAFA] dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#0A0A0A] dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#52525B] focus:outline-none focus:border-[#C9A84C]/50 transition-colors"
                 />
+                {showSuggestions && addressSearch.trim().length >= 2 && (() => {
+                  const query = removeAccents(addressSearch.trim());
+                  const matches = flatWards.filter(item => item.searchKey.includes(query)).slice(0, 10);
+                  if (matches.length === 0) return null;
+                  return (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-[#121212] border border-gray-100 dark:border-white/10 rounded-xl max-h-60 overflow-y-auto z-50 shadow-2xl divide-y divide-gray-100 dark:divide-white/5">
+                      {matches.map((item, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            setAddressSearch(item.label);
+                            setShowSuggestions(false);
+                          }}
+                          className="px-4 py-2.5 hover:bg-[#C9A84C]/10 hover:text-[#C9A84C] cursor-pointer transition-colors text-sm text-gray-700 dark:text-gray-300"
+                        >
+                          {item.label}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
 
               <div>
@@ -3137,17 +3493,156 @@ const CartView = ({
                 </div>
               )}
 
-              <div className="border-t border-gray-100 dark:border-white/10 pt-4 mt-6">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="font-bold text-[#0A0A0A] dark:text-[#F5F5F0]">Tổng cộng:</span>
-                  <span className="text-[#C9A84C] font-black text-xl font-mono">
+              {/* Discount Code Input Section */}
+              <div className="border-t border-gray-100 dark:border-white/10 pt-4 mt-4">
+                <label className="block text-gray-500 dark:text-[#A1A1AA] text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                  Mã giảm giá
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Nhập mã (ví dụ: SALE20)..."
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value)}
+                    disabled={appliedDiscount !== null || isValidatingDiscount}
+                    className="flex-1 bg-[#FAFAFA] dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-2 text-sm text-[#0A0A0A] dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#52525B] focus:outline-none focus:border-[#C9A84C]/50 transition-colors uppercase"
+                  />
+                  {appliedDiscount ? (
+                    <button
+                      type="button"
+                      onClick={handleRemoveDiscount}
+                      className="px-4 py-2 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-500/25 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
+                    >
+                      Hủy
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleApplyDiscount}
+                      disabled={!discountCode.trim() || isValidatingDiscount}
+                      className="px-4 py-2 bg-[#C9A84C]/10 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] border border-[#C9A84C]/35 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
+                    >
+                      {isValidatingDiscount ? "..." : "Áp dụng"}
+                    </button>
+                  )}
+                </div>
+                {discountError && (
+                  <p className="text-red-500 text-xs mt-1.5 font-semibold">
+                    {discountError}
+                  </p>
+                )}
+                {appliedDiscount && (
+                  <p className="text-green-500 text-xs mt-1.5 font-semibold flex items-center">
+                    <span className="bg-green-500/10 text-green-500 px-2 py-0.5 rounded mr-1">
+                      {appliedDiscount.code}
+                    </span>
+                    Đã áp dụng giảm giá.
+                  </p>
+                )}
+
+                {/* Vouchers List */}
+                {suitableVouchers.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <span className="block text-[10px] font-bold text-gray-500 dark:text-[#A1A1AA] uppercase tracking-wider">
+                      Mã giảm giá khả dụng:
+                    </span>
+                    <div className="max-h-[160px] overflow-y-auto pr-1 space-y-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-white/10">
+                      {suitableVouchers.map((v) => {
+                        const isEligible = subtotal >= v.g6_don_hang_toi_thieu;
+                        const isCurrentlyApplied = appliedDiscount && appliedDiscount.code === v.g6_ma;
+                        return (
+                          <div
+                            key={v.g6_ma_ma_giam_gia}
+                            className={`p-3 rounded-2xl border text-xs transition-all flex justify-between items-center ${
+                              isCurrentlyApplied
+                                ? "bg-[#C9A84C]/10 border-[#C9A84C] text-[#C9A84C]"
+                                : isEligible
+                                ? "bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-[#0A0A0A] dark:text-[#F5F5F0] hover:border-[#C9A84C]/30"
+                                : "bg-gray-100/50 dark:bg-white/5 opacity-60 border-dashed border-gray-200 dark:border-white/5 text-gray-400"
+                            }`}
+                          >
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className={`font-mono font-bold uppercase px-1.5 py-0.5 rounded text-[10px] ${
+                                  isCurrentlyApplied
+                                    ? "bg-[#C9A84C] text-[#0A0A0A]"
+                                    : "bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300"
+                                }`}>
+                                  {v.g6_ma}
+                                </span>
+                                <span className="font-bold">
+                                  {v.g6_loai === "phan_tram"
+                                    ? `Giảm ${v.g6_gia_tri}%`
+                                    : `Giảm ${v.g6_gia_tri.toLocaleString("vi-VN")}₫`}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-gray-400">
+                                {v.g6_don_hang_toi_thieu > 0
+                                  ? `Đơn tối thiểu: ${v.g6_don_hang_toi_thieu.toLocaleString("vi-VN")}₫`
+                                  : "Không yêu cầu tối thiểu"}
+                              </div>
+                              {!isEligible && (
+                                <div className="text-[9px] text-rose-500 font-bold">
+                                  Cần mua thêm {(v.g6_don_hang_toi_thieu - subtotal).toLocaleString("vi-VN")}₫ để sử dụng
+                                </div>
+                              )}
+                            </div>
+                            {isEligible && (
+                              isCurrentlyApplied ? (
+                                <button
+                                  type="button"
+                                  onClick={handleRemoveDiscount}
+                                  className="px-2.5 py-1 bg-[#C9A84C] text-[#0A0A0A] hover:bg-black hover:text-[#C9A84C] rounded-lg text-[10px] font-bold uppercase transition-colors"
+                                >
+                                  Gỡ
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={appliedDiscount !== null || isValidatingDiscount}
+                                  onClick={() => {
+                                    setDiscountCode(v.g6_ma);
+                                    applySpecificCode(v.g6_ma);
+                                  }}
+                                  className="px-2.5 py-1 bg-[#C9A84C]/10 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] border border-[#C9A84C]/20 rounded-lg text-[10px] font-bold uppercase transition-colors disabled:opacity-50"
+                                >
+                                  Áp dụng
+                                </button>
+                              )
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-white/10 pt-4 mt-6 space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500 dark:text-[#A1A1AA]">Tạm tính:</span>
+                  <span className="text-[#0A0A0A] dark:text-[#F5F5F0] font-mono font-bold">
                     {subtotal.toLocaleString("vi-VN")}₫
+                  </span>
+                </div>
+                {appliedDiscount && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-500 dark:text-[#A1A1AA]">Giảm giá:</span>
+                    <span className="text-green-500 font-mono font-bold">
+                      -{appliedDiscount.amount.toLocaleString("vi-VN")}₫
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-white/5">
+                  <span className="font-bold text-[#0A0A0A] dark:text-[#F5F5F0] text-base">Tổng cộng:</span>
+                  <span className="text-[#C9A84C] font-black text-xl font-mono">
+                    {Math.max(0, subtotal - (appliedDiscount ? appliedDiscount.amount : 0)).toLocaleString("vi-VN")}₫
                   </span>
                 </div>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 bg-[#C9A84C] text-[#0A0A0A] hover:bg-black hover:text-[#C9A84C] border border-[#C9A84C] rounded-2xl font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(201,168,76,0.3)] disabled:opacity-50 text-xs"
+                  className="w-full py-4 bg-[#C9A84C] text-[#0A0A0A] hover:bg-black hover:text-[#C9A84C] border border-[#C9A84C] rounded-2xl font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(201,168,76,0.3)] disabled:opacity-50 text-xs mt-4"
                 >
                   {isSubmitting ? "Đang xử lý..." : "Đặt hàng"}
                 </button>
@@ -3402,6 +3897,14 @@ const OrdersView = ({ orders, setOrders, isGuest, showToast }) => {
               </div>
 
               <div className="border-t border-gray-100 dark:border-white/10 pt-4 space-y-2 text-sm">
+                {selectedOrder.g6_so_tien_giam > 0 && (
+                  <div className="flex justify-between text-gray-500 dark:text-[#A1A1AA] font-semibold">
+                    <span>Giảm giá</span>
+                    <span className="font-mono text-green-500">
+                      -{selectedOrder.g6_so_tien_giam.toLocaleString("vi-VN")}₫
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-500 dark:text-[#A1A1AA] font-semibold">
                   <span>Phí giao hàng</span>
                   <span className="font-mono">0₫</span>
@@ -3557,7 +4060,53 @@ const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
   const [hoTen, setHoTen] = useState("");
   const [sdt, setSdt] = useState("");
   const [diaChi, setDiaChi] = useState("");
-  const [tinh, setTinh] = useState("");
+  const [addressSearch, setAddressSearch] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [flatWards, setFlatWards] = useState([]);
+  const [isFallback, setIsFallback] = useState(false);
+
+  const removeAccents = (str) => {
+    return str.normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .replace(/đ/g, "d")
+              .replace(/Đ/g, "D")
+              .toLowerCase();
+  };
+
+  useEffect(() => {
+    const loadProvinces = async () => {
+      try {
+        const res = await fetch("https://raw.githubusercontent.com/thanglequoc/vietnamese-provinces-database/master/json/full_json_generated_data_vn_units.json");
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const list = [];
+        data.forEach(p => {
+          if (p.Wards) {
+            p.Wards.forEach(w => {
+              list.push({
+                label: `${w.FullName}, ${p.FullName}`,
+                searchKey: removeAccents(`${w.FullName} ${p.FullName}`)
+              });
+            });
+          }
+        });
+        setFlatWards(list);
+      } catch (err) {
+        setIsFallback(true);
+      }
+    };
+    loadProvinces();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowSuggestions(false);
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   const [memberHoTen, setMemberHoTen] = useState(profile.g6_ho_ten || "");
   const [memberEmail, setMemberEmail] = useState(profile.g6_email || "");
@@ -3568,13 +4117,115 @@ const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
   const [passwordCu, setPasswordCu] = useState("");
   const [passwordMoi, setPasswordMoi] = useState("");
 
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [show2FADisable, setShow2FADisable] = useState(false);
+  const [qrCodeUri, setQrCodeUri] = useState("");
+  const [totpSecret, setTotpSecret] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [disablePassword, setDisablePassword] = useState("");
+  const [twoFactorErr, setTwoFactorErr] = useState("");
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+
+  const reloadProfile = async () => {
+    try {
+      const res = await nqtApi("/api/nqt-hoi-vien/toi");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.nqt_thanh_cong) {
+          setProfile(data.nqt_du_lieu.nqt_hoi_vien || {});
+        }
+      }
+    } catch (e) {
+      console.error("Error reloading profile:", e);
+    }
+  };
+
+  const handleToggle2FA = async () => {
+    if (profile.g6_la_xac_thuc_otp) {
+      setDisablePassword("");
+      setTwoFactorErr("");
+      setShow2FADisable(true);
+    } else {
+      setTwoFactorLoading(true);
+      try {
+        const res = await nqtApi("/api/nqt-hoi-vien/2fa/setup", { method: "POST" });
+        const data = await res.json();
+        if (data.nqt_thanh_cong) {
+          setQrCodeUri(data.nqt_du_lieu.g6_qr_code_uri);
+          setTotpSecret(data.nqt_du_lieu.g6_totp_secret);
+          setVerificationCode("");
+          setTwoFactorErr("");
+          setShow2FASetup(true);
+        } else {
+          showToast("error", data.nqt_thong_diep || "Không thể khởi tạo 2FA");
+        }
+      } catch (err) {
+        showToast("error", "Lỗi kết nối máy chủ");
+      } finally {
+        setTwoFactorLoading(false);
+      }
+    }
+  };
+
+  const handleVerify2FA = async (e) => {
+    e.preventDefault();
+    setTwoFactorErr("");
+    setTwoFactorLoading(true);
+    try {
+      const res = await nqtApi("/api/nqt-hoi-vien/2fa/verify", {
+        method: "POST",
+        body: JSON.stringify({ g6_code: verificationCode.trim() })
+      });
+      const data = await res.json();
+      if (data.nqt_thanh_cong) {
+        setShow2FASetup(false);
+        showToast("success", "Đã kích hoạt bảo mật 2 lớp thành công!");
+        await reloadProfile();
+      } else {
+        setTwoFactorErr(data.nqt_thong_diep || "Mã xác thực không chính xác");
+      }
+    } catch (err) {
+      setTwoFactorErr("Lỗi kết nối máy chủ");
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const handleDisable2FA = async (e) => {
+    e.preventDefault();
+    setTwoFactorErr("");
+    setTwoFactorLoading(true);
+    try {
+      const res = await nqtApi("/api/nqt-hoi-vien/2fa/disable", {
+        method: "POST",
+        body: JSON.stringify({ g6_password: disablePassword })
+      });
+      const data = await res.json();
+      if (data.nqt_thanh_cong) {
+        setShow2FADisable(false);
+        showToast("success", "Đã tắt bảo mật 2 lớp thành công.");
+        await reloadProfile();
+      } else {
+        setTwoFactorErr(data.nqt_thong_diep || "Mật khẩu xác nhận không chính xác");
+      }
+    } catch (err) {
+      setTwoFactorErr("Lỗi kết nối máy chủ");
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isGuest) {
       const guestInfo = JSON.parse(localStorage.getItem("nqt_guest_info") || "{}");
       setHoTen(guestInfo.hoTen || "");
       setSdt(guestInfo.sdt || "");
       setDiaChi(guestInfo.diaChi || "");
-      setTinh(guestInfo.tinh || "");
+      if (guestInfo.addressSearch) {
+        setAddressSearch(guestInfo.addressSearch);
+      } else if (guestInfo.tinh) {
+        setAddressSearch(`${guestInfo.phuong || ""}, ${guestInfo.quan || ""}, ${guestInfo.tinh || ""}`.replace(/^[,\s]+|[,\s]+$/g, '').replace(/,\s*,/g, ','));
+      }
     } else {
       setMemberHoTen(profile.g6_ho_ten || "");
       setMemberEmail(profile.g6_email || "");
@@ -3644,7 +4295,7 @@ const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
 
   const handleSaveGuestInfo = (e) => {
     e.preventDefault();
-    localStorage.setItem("nqt_guest_info", JSON.stringify({ hoTen, sdt, diaChi, tinh }));
+    localStorage.setItem("nqt_guest_info", JSON.stringify({ hoTen, sdt, diaChi, addressSearch }));
     showToast("success", "Đã cập nhật thông tin mua hàng!");
   };
 
@@ -3848,7 +4499,7 @@ const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 ml-1">
-                    Địa chỉ chi tiết
+                    Số nhà, tên đường
                   </label>
                   <div className="relative">
                     <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -3857,25 +4508,54 @@ const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
                       required
                       value={diaChi}
                       onChange={(e) => setDiaChi(e.target.value)}
-                      placeholder="Số 123 Đường ABC"
+                      placeholder="Số nhà, ngõ, tên đường..."
                       className="w-full bg-[#FAFAFA] dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] text-[#0A0A0A] dark:text-[#F5F5F0]"
                     />
                   </div>
                 </div>
-                <div>
+                <div className="relative">
                   <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5 ml-1">
-                    Tỉnh / Thành phố
+                    Tìm kiếm Phường / Xã, Tỉnh / Thành phố
                   </label>
                   <div className="relative">
                     <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                       type="text"
                       required
-                      value={tinh}
-                      onChange={(e) => setTinh(e.target.value)}
-                      placeholder="Hà Nội"
+                      placeholder="Nhập để tìm kiếm nhanh (ví dụ: Bến Thành)..."
+                      value={addressSearch}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        setAddressSearch(e.target.value);
+                        setShowSuggestions(true);
+                      }}
+                      onFocus={(e) => {
+                        e.stopPropagation();
+                        setShowSuggestions(true);
+                      }}
                       className="w-full bg-[#FAFAFA] dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] text-[#0A0A0A] dark:text-[#F5F5F0]"
                     />
+                    {showSuggestions && addressSearch.trim().length >= 2 && (() => {
+                      const query = removeAccents(addressSearch.trim());
+                      const matches = flatWards.filter(item => item.searchKey.includes(query)).slice(0, 10);
+                      if (matches.length === 0) return null;
+                      return (
+                        <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/5 rounded-xl max-h-60 overflow-y-auto z-50 shadow-2xl divide-y divide-gray-100 dark:divide-white/5">
+                          {matches.map((item, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => {
+                                setAddressSearch(item.label);
+                                setShowSuggestions(false);
+                              }}
+                              className="px-4 py-2.5 hover:bg-[#C9A84C]/10 hover:text-[#C9A84C] cursor-pointer transition-colors text-sm text-gray-700 dark:text-gray-300"
+                            >
+                              {item.label}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -3993,60 +4673,223 @@ const ProfileView = ({ profile, isGuest, showToast, setProfile }) => {
             </form>
           </div>
 
-          {/* Change Password Form */}
-          <div className="md:col-span-1 bg-gradient-to-br from-white to-gray-50/50 dark:from-[#121212]/30 dark:to-[#0A0A0A]/30 border border-gray-200/50 dark:border-white/5 rounded-3xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.01)] flex flex-col justify-between">
-            <div>
-              <h4 className="font-bold text-lg mb-6 uppercase tracking-wider text-[#C9A84C] flex items-center gap-2">
-                <Key size={18} />
-                Đổi mật khẩu
+          {/* Right sidebar containing Password & 2FA */}
+          <div className="md:col-span-1 flex flex-col gap-8">
+            {/* Change Password Form */}
+            <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-[#121212]/30 dark:to-[#0A0A0A]/30 border border-gray-200/50 dark:border-white/5 rounded-3xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+              <div>
+                <h4 className="font-bold text-lg mb-6 uppercase tracking-wider text-[#C9A84C] flex items-center gap-2">
+                  <Key size={18} />
+                  Đổi mật khẩu
+                </h4>
+                <form onSubmit={handleChangePassword} className="space-y-5">
+                  <div>
+                    <label className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider block mb-1.5 ml-1">
+                      Mật khẩu hiện tại
+                    </label>
+                    <div className="relative">
+                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="password"
+                        required
+                        value={passwordCu}
+                        onChange={(e) => setPasswordCu(e.target.value)}
+                        className="w-full bg-[#FAFAFA] dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] text-[#0A0A0A] dark:text-[#F5F5F0] transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider block mb-1.5 ml-1">
+                      Mật khẩu mới
+                    </label>
+                    <div className="relative">
+                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="password"
+                        required
+                        value={passwordMoi}
+                        onChange={(e) => setPasswordMoi(e.target.value)}
+                        className="w-full bg-[#FAFAFA] dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] text-[#0A0A0A] dark:text-[#F5F5F0] transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-[#C9A84C]/5 hover:bg-[#C9A84C] hover:text-[#0A0A0A] text-[#C9A84C] border border-[#C9A84C]/30 hover:border-[#C9A84C] py-3.5 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all duration-300 shadow-sm active:scale-95 mt-4 cursor-pointer"
+                  >
+                    Xác nhận đổi
+                  </button>
+                </form>
+              </div>
+              
+              {/* Lock/Security illustration badge */}
+              <div className="mt-8 pt-6 border-t border-gray-200/50 dark:border-white/5 flex items-center gap-3 text-gray-400">
+                <ShieldCheck size={28} className="text-[#C9A84C]/40 flex-shrink-0" />
+                <p className="text-[10px] leading-relaxed">
+                  Mật khẩu của bạn được mã hóa an toàn 2 đầu. Tránh tiết lộ mật khẩu cho người khác để bảo vệ tài khoản.
+                </p>
+              </div>
+            </div>
+
+            {/* 2-Factor Authentication (2FA) */}
+            <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-[#121212]/30 dark:to-[#0A0A0A]/30 border border-gray-200/50 dark:border-white/5 rounded-3xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+              <div>
+                <h4 className="font-bold text-lg mb-4 uppercase tracking-wider text-[#C9A84C] flex items-center gap-2">
+                  <Shield size={18} />
+                  Bảo mật 2 lớp (2FA)
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-[#A1A1AA] mb-6 leading-relaxed">
+                  Sử dụng ứng dụng Google Authenticator để quét mã QR và xác minh bảo mật khi đăng nhập.
+                </p>
+                
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#1C1C1C] border border-gray-100 dark:border-white/5 rounded-2xl mb-6">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Trạng thái:</span>
+                  {profile.g6_la_xac_thuc_otp ? (
+                    <span className="px-3 py-1 bg-[#C9A84C]/10 border border-[#C9A84C]/40 text-[#C9A84C] text-[10px] font-bold tracking-widest rounded-full uppercase">
+                      Đã bật
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 bg-gray-200/50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-500 dark:text-[#A1A1AA] text-[10px] font-bold tracking-widest rounded-full uppercase">
+                      Chưa bật
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <button
+                onClick={handleToggle2FA}
+                disabled={twoFactorLoading}
+                className={`w-full py-3.5 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all duration-300 shadow-sm active:scale-95 cursor-pointer border ${
+                  profile.g6_la_xac_thuc_otp
+                    ? "bg-red-500/10 border-red-500/20 hover:bg-red-500 hover:text-white hover:border-red-500 text-red-500"
+                    : "bg-[#C9A84C]/5 border-[#C9A84C]/30 hover:bg-[#C9A84C] hover:text-[#0A0A0A] hover:border-[#C9A84C] text-[#C9A84C]"
+                }`}
+              >
+                {profile.g6_la_xac_thuc_otp ? "Tắt 2FA" : "Kích hoạt"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2FA Setup Modal */}
+      {show2FASetup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#121212] border border-[#C9A84C]/30 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+              <h4 className="font-bold text-base uppercase tracking-widest text-[#F5F5F0]">
+                Kích hoạt bảo mật 2 lớp
               </h4>
-              <form onSubmit={handleChangePassword} className="space-y-5">
-                <div>
-                  <label className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider block mb-1.5 ml-1">
-                    Mật khẩu hiện tại
-                  </label>
-                  <div className="relative">
-                    <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="password"
-                      required
-                      value={passwordCu}
-                      onChange={(e) => setPasswordCu(e.target.value)}
-                      className="w-full bg-[#FAFAFA] dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] text-[#0A0A0A] dark:text-[#F5F5F0] transition-all duration-300"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider block mb-1.5 ml-1">
-                    Mật khẩu mới
-                  </label>
-                  <div className="relative">
-                    <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="password"
-                      required
-                      value={passwordMoi}
-                      onChange={(e) => setPasswordMoi(e.target.value)}
-                      className="w-full bg-[#FAFAFA] dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] text-[#0A0A0A] dark:text-[#F5F5F0] transition-all duration-300"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-[#C9A84C]/5 hover:bg-[#C9A84C] hover:text-[#0A0A0A] text-[#C9A84C] border border-[#C9A84C]/30 hover:border-[#C9A84C] py-3.5 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all duration-300 shadow-sm active:scale-95 mt-4 cursor-pointer"
-                >
-                  Xác nhận đổi
-                </button>
-              </form>
+              <button
+                onClick={() => setShow2FASetup(false)}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-[#A1A1AA] hover:text-white transition-all"
+              >
+                ✕
+              </button>
             </div>
             
-            {/* Lock/Security illustration badge */}
-            <div className="mt-8 pt-6 border-t border-gray-200/50 dark:border-white/5 flex items-center gap-3 text-gray-400">
-              <ShieldCheck size={28} className="text-[#C9A84C]/40 flex-shrink-0" />
-              <p className="text-[10px] leading-relaxed">
-                Mật khẩu của bạn được mã hóa an toàn 2 đầu. Tránh tiết lộ mật khẩu cho người khác để bảo vệ tài khoản.
+            <form onSubmit={handleVerify2FA} className="p-6 space-y-6">
+              <p className="text-xs text-gray-300 text-center leading-relaxed">
+                Quét mã QR dưới đây bằng ứng dụng xác thực (Google Authenticator) trên điện thoại của bạn.
               </p>
+              
+              <div className="flex justify-center">
+                <div className="bg-white p-3 rounded-2xl border border-white/10 shadow-md">
+                  <img src={qrCodeUri} alt="QR Code" className="w-44 h-44" />
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-[10px] text-gray-300 bg-black/40 border border-white/5 rounded-xl py-2.5 px-3 select-all cursor-pointer font-mono tracking-wider break-all">
+                  Khóa thủ công: <span className="text-[#E5C76B] font-bold font-mono tracking-wider">{totpSecret}</span>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="block text-[10px] text-[#C9A84C] font-bold uppercase tracking-wider text-center">
+                  Nhập mã xác thực 6 số
+                </label>
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  placeholder="000000"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ""))}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-center font-bold font-mono tracking-[8px] text-xl text-white focus:outline-none focus:border-[#C9A84C]/50 transition-colors"
+                />
+              </div>
+
+              {twoFactorErr && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs px-4 py-3 rounded-xl text-center font-semibold">
+                  {twoFactorErr}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={twoFactorLoading}
+                className="w-full py-4 bg-[#C9A84C] text-[#0A0A0A] hover:bg-[#E5C76B] rounded-xl font-bold uppercase tracking-widest text-xs transition-all disabled:opacity-50"
+              >
+                {twoFactorLoading ? "Đang xác thực..." : "Xác thực & Kích hoạt"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2FA Disable Modal */}
+      {show2FADisable && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#121212] border border-[#C9A84C]/30 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+              <h4 className="font-bold text-base uppercase tracking-widest text-[#F5F5F0]">
+                Tắt bảo mật 2 lớp
+              </h4>
+              <button
+                onClick={() => setShow2FADisable(false)}
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-[#A1A1AA] hover:text-white transition-all"
+              >
+                ✕
+              </button>
             </div>
+            
+            <form onSubmit={handleDisable2FA} className="p-6 space-y-6">
+              <p className="text-xs text-gray-300 text-center leading-relaxed">
+                Để tắt tính năng bảo mật 2 lớp, vui lòng xác nhận bằng cách nhập mật khẩu tài khoản của bạn.
+              </p>
+              
+              <div className="space-y-2">
+                <label className="block text-[10px] text-[#C9A84C] font-bold uppercase tracking-wider mb-1.5 ml-1">
+                  Mật khẩu tài khoản
+                </label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={disablePassword}
+                    onChange={(e) => setDisablePassword(e.target.value)}
+                    className="w-full bg-[#1A1A1A] border border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-[#C9A84C] text-white transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              {twoFactorErr && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs px-4 py-3 rounded-xl text-center font-semibold">
+                  {twoFactorErr}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={twoFactorLoading}
+                className="w-full py-4 bg-red-500 text-white hover:bg-red-600 rounded-xl font-bold uppercase tracking-widest text-xs transition-all disabled:opacity-50"
+              >
+                {twoFactorLoading ? "Đang tắt..." : "Xác nhận tắt 2FA"}
+              </button>
+            </form>
           </div>
         </div>
       )}
@@ -4313,6 +5156,224 @@ const GuestDashboardView = ({ products, packages, pts, classes, setActiveTab, se
           </div>
         )}
       </div>
+
+      {/* --- Spotlight Search Modal --- */}
+      <AnimatePresence>
+        {showSearchModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] bg-black/70 backdrop-blur-md flex items-start justify-center pt-[15vh] px-4"
+            onClick={() => setShowSearchModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: -20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: -20 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="bg-[#0D0D0D]/90 border border-white/10 rounded-2xl w-full max-w-2xl max-h-[65vh] overflow-hidden flex flex-col shadow-[0_0_50px_rgba(201,168,76,0.25)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Input header */}
+              <div className="p-5 border-b border-white/10 flex items-center relative">
+                <Search className="text-[#C9A84C] w-5 h-5 absolute left-6 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Tìm sản phẩm, lớp học, tính năng... (Ctrl + K)"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-10 text-white placeholder-gray-400 focus:outline-none focus:border-[#C9A84C] text-sm transition-all"
+                  autoFocus
+                />
+                <button
+                  onClick={() => setShowSearchModal(false)}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs border border-white/20 rounded px-1.5 py-0.5"
+                >
+                  ESC
+                </button>
+              </div>
+
+              {/* Suggestions list */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                {/* 1. Tabs Suggestions */}
+                {searchResults.tabs.length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-widest text-[#C9A84C] font-black mb-2 px-2">
+                      Tính năng & Điều hướng
+                    </h4>
+                    <div className="space-y-1">
+                      {searchResults.tabs.map((item) => (
+                        <div
+                          key={item.tab}
+                          onClick={() => {
+                            setActiveTab(item.tab);
+                            setShowSearchModal(false);
+                            setSearchQuery("");
+                          }}
+                          className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 cursor-pointer border border-transparent hover:border-white/5 transition-all group"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-lg bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
+                              <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-white group-hover:text-[#C9A84C] transition-colors">
+                                {item.name}
+                              </p>
+                              <p className="text-xs text-gray-400">{item.desc}</p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
+                            Chuyển tab
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Products Suggestions */}
+                {searchResults.products.length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-widest text-[#C9A84C] font-black mb-2 px-2">
+                      Sản phẩm supplementation store
+                    </h4>
+                    <div className="space-y-1">
+                      {searchResults.products.map((item) => (
+                        <div
+                          key={item.g6_ma_san_pham}
+                          onClick={() => {
+                            setSelectedProduct(item);
+                            setActiveTab("shop");
+                            setShowSearchModal(false);
+                            setSearchQuery("");
+                          }}
+                          className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 cursor-pointer border border-transparent hover:border-white/5 transition-all group"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 overflow-hidden flex items-center justify-center border border-white/10">
+                              {item.g6_hinh_anh ? (
+                                <img src={item.g6_hinh_anh} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <ShoppingBag size={16} className="text-gray-400" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-white group-hover:text-[#C9A84C] transition-colors">
+                                {item.g6_ten_san_pham}
+                              </p>
+                              <p className="text-xs text-[#C9A84C] font-mono font-bold">
+                                {(item.g6_gia_ban || 0).toLocaleString("vi-VN")}₫
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] bg-[#C9A84C]/20 text-[#C9A84C] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-[#C9A84C]/30">
+                            Xem sản phẩm
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Classes Suggestions */}
+                {searchResults.classes.length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-widest text-[#C9A84C] font-black mb-2 px-2">
+                      Lớp học đang mở
+                    </h4>
+                    <div className="space-y-1">
+                      {searchResults.classes.map((item) => (
+                        <div
+                          key={item.g6_ma_lop || item.g6_ten_lop}
+                          onClick={() => {
+                            setActiveTab("classes");
+                            setShowSearchModal(false);
+                            setSearchQuery("");
+                          }}
+                          className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 cursor-pointer border border-transparent hover:border-white/5 transition-all group"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-lg bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
+                              <Calendar size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-white group-hover:text-[#C9A84C] transition-colors">
+                                {item.g6_ten_lop}
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                {item.g6_mo_ta || "Lớp tập luyện chuyên nghiệp"}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
+                            Xem lịch học
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Packages Suggestions */}
+                {searchResults.packages.length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] uppercase tracking-widest text-[#C9A84C] font-black mb-2 px-2">
+                      Gói tập thành viên
+                    </h4>
+                    <div className="space-y-1">
+                      {searchResults.packages.map((item) => (
+                        <div
+                          key={item.g6_ma_goi_tap}
+                          onClick={() => {
+                            setActiveTab("packages");
+                            setShowSearchModal(false);
+                            setSearchQuery("");
+                          }}
+                          className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 cursor-pointer border border-transparent hover:border-white/5 transition-all group"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-lg bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
+                              <Zap size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-white group-hover:text-[#C9A84C] transition-colors">
+                                {item.g6_ten_goi}
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                {item.g6_so_ngay} ngày | {(item.g6_gia || 0).toLocaleString("vi-VN")}₫
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] bg-[#C9A84C]/20 text-[#C9A84C] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-[#C9A84C]/30">
+                            Xem gói tập
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* No Results Fallback */}
+                {!hasResults && (
+                  <div className="py-12 text-center">
+                    <p className="text-sm text-gray-500 italic">
+                      Không tìm thấy kết quả nào khớp với "{searchQuery}"
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Spotlight footer */}
+              <div className="p-3 bg-white/5 border-t border-white/10 flex justify-between items-center text-[10px] text-gray-400 px-5">
+                <span>Mở nhanh bằng phím tắt Ctrl + K</span>
+                <span className="text-gray-500">Ấn ESC để đóng</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

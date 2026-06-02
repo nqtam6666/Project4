@@ -100,6 +100,7 @@ class G6NguoiDung(db.Model):
     # ── Khách hàng chuyên dụng (từ G6KhachHang) ──────────────────────────
     g6_google_id = db.Column(db.String(100))
     g6_la_xac_thuc_otp = db.Column(db.Boolean, nullable=False, default=False)
+    g6_totp_secret = db.Column(db.String(32), nullable=True)
 
     # ── Bảo mật / Lockout ─────────────────────────────────────────────────
     g6_la_hoat_dong = db.Column(db.Boolean, nullable=False, default=True)
@@ -188,6 +189,7 @@ class G6NguoiDung(db.Model):
             'g6_la_hoat_dong': self.g6_la_hoat_dong,
             'g6_la_hoi_vien': self.g6_la_hoi_vien,
             'g6_la_khach_hang': self.g6_la_khach_hang,
+            'g6_la_xac_thuc_otp': self.g6_la_xac_thuc_otp,
             'g6_ngay_tao': self.g6_ngay_tao.isoformat() if self.g6_ngay_tao else None,
             'g6_vai_tro': [ndvt.g6_vai_tro.g6_ten_vai_tro for ndvt in self.g6_vai_tro],
         }

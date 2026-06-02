@@ -157,6 +157,7 @@ CREATE TABLE G6NguoiDung (
     g6_la_hoat_dong    BIT             NOT NULL DEFAULT 1,
     g6_lan_dang_nhap_sai INT           NOT NULL DEFAULT 0,
     g6_khoa_den        DATETIME2       NULL,
+    g6_totp_secret     NVARCHAR(32)    NULL,
     g6_ngay_tao        DATETIME2       NOT NULL DEFAULT GETDATE(),
     g6_ngay_cap_nhat   DATETIME2       NOT NULL DEFAULT GETDATE(),
     CONSTRAINT PK_G6NguoiDung PRIMARY KEY (g6_ma_nguoi_dung),
