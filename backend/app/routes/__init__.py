@@ -19,6 +19,7 @@ def nqt_dang_ky_routes(app):
     from backend.app.routes.nqt_public import nqt_public_bp
     from backend.app.routes.nqt_hoi_vien_auth import nqt_hv_auth_bp
     from backend.app.routes.nqt_phan_quyen import nqt_phan_quyen_bp
+    from backend.app.routes.nqt_api_docs import nqt_api_docs_bp
     # nxv routes
     from backend.app.routes.nxv_huan_luyen_vien import nxv_huan_luyen_vien_bp
     from backend.app.routes.nxv_lop_hoc import nxv_lop_hoc_bp
@@ -49,6 +50,7 @@ def nqt_dang_ky_routes(app):
     app.register_blueprint(nqt_public_bp)
     app.register_blueprint(nqt_hv_auth_bp)
     app.register_blueprint(nqt_phan_quyen_bp)
+    app.register_blueprint(nqt_api_docs_bp)
     # nxv blueprints
     app.register_blueprint(nxv_huan_luyen_vien_bp)
     app.register_blueprint(nxv_lop_hoc_bp)

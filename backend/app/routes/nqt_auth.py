@@ -182,7 +182,11 @@ def nqt_dang_xuat():
 @nqt_yeu_cau_dang_nhap
 def nqt_lay_thong_tin_toi():
     nqt_identity = get_jwt_identity()
-    nqt_user = G6NguoiDung.query.get(int(nqt_identity))
+    try:
+        nqt_user_id = int(nqt_identity.split(':')[-1])
+    except (ValueError, AttributeError):
+        return nqt_loi('Token không hợp lệ', nqt_ma_trang=401)
+    nqt_user = G6NguoiDung.query.get(nqt_user_id)
     if not nqt_user:
         return nqt_loi('Không tìm thấy tài khoản', nqt_ma_trang=404)
     return nqt_ok(nqt_user.g6_to_dict())
