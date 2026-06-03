@@ -102,8 +102,18 @@ def export_database():
                                 vals.append("1" if val else "0")
                             else:
                                 vals.append(str(val))
+                        elif types[col_name] in ('datetime', 'datetime2', 'smalldatetime'):
+                            formatted_dt = val.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3] if hasattr(val, 'strftime') else str(val)
+                            vals.append(f"N'{formatted_dt}'")
+                        elif types[col_name] == 'date':
+                            formatted_d = val.strftime('%Y-%m-%d') if hasattr(val, 'strftime') else str(val)
+                            vals.append(f"N'{formatted_d}'")
+                        elif types[col_name] == 'time':
+                            # Truncate fractional seconds for time fields to prevent string format mismatch
+                            formatted_t = val.strftime('%H:%M:%S') if hasattr(val, 'strftime') else str(val)
+                            vals.append(f"N'{formatted_t}'")
                         else:
-                            # String/DateTime/Time - escape quotes and prefix with N
+                            # String / other types - escape quotes and prefix with N
                             escaped = str(val).replace("'", "''")
                             vals.append(f"N'{escaped}'")
                     

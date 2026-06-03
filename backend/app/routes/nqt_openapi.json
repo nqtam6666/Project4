@@ -1,0 +1,1547 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "G6 Gym Management System API",
+    "version": "1.0.0",
+    "description": "Tài liệu API đầy đủ cho Hệ thống Quản lý Phòng Gym G6 (Fitness SaaS - B2B). \n\n### Tiền tố bắt buộc: `nqt` / `g6` / `nxv` \nCác API đều có cấu trúc phản hồi chuẩn:\n```json\n{\n  \"nqt_thanh_cong\": true,\n  \"nqt_du_lieu\": {},\n  \"nqt_thong_diep\": \"Thành công\",\n  \"nqt_loi\": []\n}\n```",
+    "contact": {
+      "name": "Nguyễn Quang Tâm",
+      "email": "nguyenquangtam6666@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "API Gateway (Vite Proxy)"
+    },
+    {
+      "url": "http://localhost:5000/api",
+      "description": "Flask Backend trực tiếp"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Điền Access Token nhận được sau khi đăng nhập."
+      }
+    },
+    "schemas": {
+      "StandardResponse": {
+        "type": "object",
+        "properties": {
+          "nqt_thanh_cong": {
+            "type": "boolean",
+            "example": true
+          },
+          "nqt_du_lieu": {
+            "type": "object",
+            "nullable": true
+          },
+          "nqt_thong_diep": {
+            "type": "string",
+            "example": "Thao tác thành công"
+          },
+          "nqt_loi": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": []
+          }
+        }
+      },
+      "NguoiDung": {
+        "type": "object",
+        "properties": {
+          "g6_ma_nguoi_dung": {
+            "type": "integer",
+            "example": 1
+          },
+          "g6_ho_ten": {
+            "type": "string",
+            "example": "Nguyễn Thị Hoa"
+          },
+          "g6_so_dien_thoai": {
+            "type": "string",
+            "example": "0987654321"
+          },
+          "g6_email": {
+            "type": "string",
+            "example": "hoa.nguyen@gmail.com"
+          },
+          "g6_anh_dai_dien": {
+            "type": "string",
+            "nullable": true
+          },
+          "g6_la_hoi_vien": {
+            "type": "boolean",
+            "example": true
+          },
+          "g6_la_hoat_dong": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "SanPham": {
+        "type": "object",
+        "properties": {
+          "nxv_ma_san_pham": {
+            "type": "integer",
+            "example": 101
+          },
+          "nxv_ten_san_pham": {
+            "type": "string",
+            "example": "Whey Protein Isolate"
+          },
+          "nxv_mo_ta": {
+            "type": "string",
+            "example": "Whey tinh khiết hấp thụ nhanh"
+          },
+          "nxv_gia": {
+            "type": "number",
+            "example": 1250000
+          },
+          "nxv_hinh_anh": {
+            "type": "string",
+            "example": "/uploads/products/whey.jpg"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/nqt-dang-nhap": {
+      "post": {
+        "tags": [
+          "Authentication (Quản trị/Nhân viên)"
+        ],
+        "summary": "Đăng nhập hệ thống quản trị/nhân viên",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "g6_ten_dang_nhap",
+                  "g6_mat_khau"
+                ],
+                "properties": {
+                  "g6_ten_dang_nhap": {
+                    "type": "string",
+                    "example": "admin"
+                  },
+                  "g6_mat_khau": {
+                    "type": "string",
+                    "format": "password",
+                    "example": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-lam-moi-token": {
+      "post": {
+        "tags": [
+          "Authentication (Quản trị/Nhân viên)"
+        ],
+        "summary": "Làm mới Access Token",
+        "description": "Yêu cầu gửi kèm Refresh Token trong Cookies.",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-dang-xuat": {
+      "post": {
+        "tags": [
+          "Authentication (Quản trị/Nhân viên)"
+        ],
+        "summary": "Đăng xuất hệ thống",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-toi": {
+      "get": {
+        "tags": [
+          "Authentication (Quản trị/Nhân viên)"
+        ],
+        "summary": "Lấy thông tin tài khoản nhân viên hiện tại",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-hoi-vien/dang-ky": {
+      "post": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Đăng ký tài khoản hội viên mới",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nqt_ho_ten",
+                  "nqt_so_dien_thoai",
+                  "nqt_mat_khau"
+                ],
+                "properties": {
+                  "nqt_ho_ten": {
+                    "type": "string",
+                    "example": "Nguyễn Văn A"
+                  },
+                  "nqt_so_dien_thoai": {
+                    "type": "string",
+                    "example": "0912345678"
+                  },
+                  "nqt_email": {
+                    "type": "string",
+                    "example": "member.a@gmail.com"
+                  },
+                  "nqt_mat_khau": {
+                    "type": "string",
+                    "example": "123456"
+                  },
+                  "nqt_ma_chi_nhanh": {
+                    "type": "integer",
+                    "default": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-hoi-vien/dang-nhap": {
+      "post": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Đăng nhập hội viên",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nqt_so_dien_thoai",
+                  "nqt_mat_khau"
+                ],
+                "properties": {
+                  "nqt_so_dien_thoai": {
+                    "type": "string",
+                    "example": "0912345678"
+                  },
+                  "nqt_mat_khau": {
+                    "type": "string",
+                    "example": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-hoi-vien/google-login": {
+      "post": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Đăng nhập bằng Google",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "credential"
+                ],
+                "properties": {
+                  "credential": {
+                    "type": "string",
+                    "description": "Google ID Token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-hoi-vien/toi": {
+      "get": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Lấy hồ sơ cá nhân hội viên",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Cập nhật hồ sơ cá nhân hội viên",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "g6_ho_ten": {
+                    "type": "string",
+                    "example": "Nguyễn Văn A"
+                  },
+                  "g6_email": {
+                    "type": "string",
+                    "example": "a.nguyen@gmail.com"
+                  },
+                  "g6_dia_chi": {
+                    "type": "string",
+                    "example": "123 Cầu Giấy, Hà Nội"
+                  },
+                  "g6_ngay_sinh": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "1998-05-15"
+                  },
+                  "g6_gioi_tinh": {
+                    "type": "string",
+                    "example": "Nam"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-hoi-vien/toi/nqt-chi-so": {
+      "get": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Lấy lịch sử chỉ số cơ thể",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "g6_gioi_han",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-hoi-vien/diem-danh": {
+      "get": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Xem lịch sử điểm danh của tôi",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-dang-ky-goi-tap": {
+      "get": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Lịch sử đăng ký gói tập của tôi",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-mua-goi-tap": {
+      "post": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Đăng ký mua gói tập thành viên",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "g6_ma_goi_tap"
+                ],
+                "properties": {
+                  "g6_ma_goi_tap": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-mua-goi-pt": {
+      "post": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Đăng ký mua gói PT",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "g6_ma_hlv": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "g6_ma_goi_pt": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-dat-cho-lop": {
+      "post": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Đặt chỗ tham gia lớp học nhóm",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "g6_ma_lop_hoc": {
+                    "type": "integer",
+                    "example": 3
+                  },
+                  "g6_ma_lich_lop": {
+                    "type": "integer",
+                    "example": 5
+                  },
+                  "g6_ngay_tap": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2026-06-03"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-chatbot": {
+      "post": {
+        "tags": [
+          "Hội viên (Portal)"
+        ],
+        "summary": "Trò chuyện với Chatbot hỗ trợ G6 Gym",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "message"
+                ],
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Giá gói tập gym 1 tháng là bao nhiêu?"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-hoi-vien": {
+      "get": {
+        "tags": [
+          "Hội viên (Admin/Staff)"
+        ],
+        "summary": "Lấy danh sách tất cả hội viên (Có phân trang & bộ lọc)",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "g6_trang",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "g6_gioi_han",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "g6_tim_kiem",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "g6_ma_chi_nhanh",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "g6_trang_thai",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Hội viên (Admin/Staff)"
+        ],
+        "summary": "Tạo mới tài khoản hội viên",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "g6_ho_ten",
+                  "g6_so_dien_thoai",
+                  "g6_ma_chi_nhanh"
+                ],
+                "properties": {
+                  "g6_ho_ten": {
+                    "type": "string",
+                    "example": "Trần Văn B"
+                  },
+                  "g6_so_dien_thoai": {
+                    "type": "string",
+                    "example": "0988776655"
+                  },
+                  "g6_ma_chi_nhanh": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-hoi-vien/{nqt_id}": {
+      "get": {
+        "tags": [
+          "Hội viên (Admin/Staff)"
+        ],
+        "summary": "Lấy chi tiết một hội viên",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nqt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Hội viên (Admin/Staff)"
+        ],
+        "summary": "Cập nhật tài khoản hội viên",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nqt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Hội viên (Admin/Staff)"
+        ],
+        "summary": "Xóa hội viên",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nqt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nxv-danh-muc": {
+      "get": {
+        "tags": [
+          "Shop & Sản phẩm"
+        ],
+        "summary": "Danh sách danh mục sản phẩm",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Shop & Sản phẩm"
+        ],
+        "summary": "Tạo danh mục mới (Admin)",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nxv_ten_danh_muc"
+                ],
+                "properties": {
+                  "nxv_ten_danh_muc": {
+                    "type": "string",
+                    "example": "Thực phẩm bổ sung"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nxv-san-pham": {
+      "get": {
+        "tags": [
+          "Shop & Sản phẩm"
+        ],
+        "summary": "Lấy danh sách sản phẩm cửa hàng",
+        "description": "",
+        "parameters": [
+          {
+            "name": "nxv_danh_muc_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "nxv_tim_kiem",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Shop & Sản phẩm"
+        ],
+        "summary": "Tạo sản phẩm mới (Admin)",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nxv-san-pham/{nxv_id}": {
+      "get": {
+        "tags": [
+          "Shop & Sản phẩm"
+        ],
+        "summary": "Chi tiết sản phẩm",
+        "description": "",
+        "parameters": [
+          {
+            "name": "nxv_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Shop & Sản phẩm"
+        ],
+        "summary": "Cập nhật sản phẩm",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nxv_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Shop & Sản phẩm"
+        ],
+        "summary": "Xóa sản phẩm",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nxv_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-don-hang": {
+      "get": {
+        "tags": [
+          "Shop & Đơn hàng"
+        ],
+        "summary": "Lấy lịch sử đơn hàng của tôi",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Shop & Đơn hàng"
+        ],
+        "summary": "Tạo đơn mua hàng mới",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nxv_chi_tiet"
+                ],
+                "properties": {
+                  "nxv_ma_khuyen_mai": {
+                    "type": "string",
+                    "example": "G6NEWYEAR"
+                  },
+                  "nxv_chi_tiet": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "nxv_ma_bien_the": {
+                          "type": "integer",
+                          "example": 201
+                        },
+                        "nxv_so_luong": {
+                          "type": "integer",
+                          "example": 2
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-ma-giam-gia": {
+      "get": {
+        "tags": [
+          "Khuyến mãi & Banner"
+        ],
+        "summary": "Lấy danh sách mã giảm giá hoạt động",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-ma-giam-gia/nqt-kiem-tra": {
+      "post": {
+        "tags": [
+          "Khuyến mãi & Banner"
+        ],
+        "summary": "Kiểm tra tính hợp lệ của mã giảm giá",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "g6_ma_code",
+                  "g6_tong_tien"
+                ],
+                "properties": {
+                  "g6_ma_code": {
+                    "type": "string",
+                    "example": "G6NEW"
+                  },
+                  "g6_tong_tien": {
+                    "type": "number",
+                    "example": 500000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nxv-huan-luyen-vien": {
+      "get": {
+        "tags": [
+          "Lớp học & HLV (PT)"
+        ],
+        "summary": "Danh sách PT / Huấn luyện viên",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nxv-lop-hoc": {
+      "get": {
+        "tags": [
+          "Lớp học & HLV (PT)"
+        ],
+        "summary": "Danh sách lớp học nhóm",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nxv-su-kien": {
+      "get": {
+        "tags": [
+          "Sự kiện"
+        ],
+        "summary": "Danh sách sự kiện tại trung tâm G6 Gym",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-cau-hinh": {
+      "get": {
+        "tags": [
+          "Cấu hình hệ thống"
+        ],
+        "summary": "Xem toàn bộ cấu hình hệ thống",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Cấu hình hệ thống"
+        ],
+        "summary": "Cập nhật cấu hình hàng loạt",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-cau-hinh/{nqt_khoa}": {
+      "get": {
+        "tags": [
+          "Cấu hình hệ thống"
+        ],
+        "summary": "Lấy cấu hình chi tiết theo khóa",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nqt_khoa",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-thong-ke-dashboard": {
+      "get": {
+        "tags": [
+          "Báo cáo & Thống kê"
+        ],
+        "summary": "Xem số liệu tổng quan Dashboard",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nqt-thong-ke-bieu-do": {
+      "get": {
+        "tags": [
+          "Báo cáo & Thống kê"
+        ],
+        "summary": "Dữ liệu biểu đồ tăng trưởng hội viên",
+        "description": "",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "g6_so_ngay",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 7
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

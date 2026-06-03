@@ -41,11 +41,7 @@ const AuthPage = () => {
     g6_favicon_url: ""
   });
 
-  React.useEffect(() => {
-    if (localStorage.getItem('nqt_token')) {
-      window.location.replace('/home');
-    }
-  }, []);
+
 
   const showToast = (type, message) => {
     setNotification({ type, message });
@@ -58,11 +54,11 @@ const AuthPage = () => {
     let script = document.getElementById(scriptId);
     
     const checkGoogleAndSetReady = () => {
-      if (window.google) {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
         setGoogleReady(true);
       } else {
         const interval = setInterval(() => {
-          if (window.google) {
+          if (window.google && window.google.accounts && window.google.accounts.id) {
             setGoogleReady(true);
             clearInterval(interval);
           }
@@ -124,7 +120,7 @@ const AuthPage = () => {
 
   // Render Google button when config and GIS are ready using a callback ref
   const googleButtonRef = React.useCallback((node) => {
-    if (node && siteConfig.g6_google_client_id && googleReady && window.google) {
+    if (node && siteConfig.g6_google_client_id && googleReady && window.google && window.google.accounts && window.google.accounts.id) {
       try {
         window.google.accounts.id.initialize({
           client_id: siteConfig.g6_google_client_id,
